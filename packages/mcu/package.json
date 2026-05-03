@@ -1,0 +1,15 @@
+{
+  "name": "@tonex/mcu",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "devDependencies": {
+    "@tonex/typescript-config": "workspace:*"
+  },
+  "license": "Apache-2.0"
+}

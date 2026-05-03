@@ -1,0 +1,12 @@
+{
+  "extends": "@tonex/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tonex/core": ["../../packages/core/src/index.ts"],
+      "@tonex/mcu": ["../../packages/mcu/index.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,4 @@
+{
+  "$schema": "https://commitlint.js.org/schemas/latest.json",
+  "extends": ["@commitlint/config-conventional"]
+}

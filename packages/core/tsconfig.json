@@ -1,0 +1,9 @@
+{
+  "extends": "@tonex/typescript-config/library.json",
+  "compilerOptions": {
+    "paths": {
+      "@tonex/mcu": ["../mcu/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}
