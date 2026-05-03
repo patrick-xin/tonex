@@ -12,10 +12,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tonex/mcu": "workspace:*"
+    "@tonex/mcu": "workspace:*",
+    "zustand": "^5.0.12"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@tonex/typescript-config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"

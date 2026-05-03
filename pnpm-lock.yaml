@@ -108,10 +108,19 @@ importers:
       '@tonex/mcu':
         specifier: workspace:*
         version: link:../mcu
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)
     devDependencies:
       '@tonex/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      react:
+        specifier: ^19.0.0
+        version: 19.2.5
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
