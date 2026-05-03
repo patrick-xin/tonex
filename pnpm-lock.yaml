@@ -118,6 +118,9 @@ importers:
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.14
+      jsdom:
+        specifier: ^29.1.1
+        version: 29.1.1
       react:
         specifier: ^19.0.0
         version: 19.2.5

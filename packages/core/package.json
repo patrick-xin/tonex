@@ -21,6 +21,7 @@
   "devDependencies": {
     "@tonex/typescript-config": "workspace:*",
     "@types/react": "^19.0.0",
+    "jsdom": "^29.1.1",
     "react": "^19.0.0",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "catalog:",
