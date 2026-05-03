@@ -1,7 +1,8 @@
 'use client'
 
+import { useHotkey } from '@tanstack/react-hotkeys'
 import { applyDom } from '@tonex/core'
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider, useTheme } from 'next-themes'
 import { useEffect } from 'react'
 
 // why: client-only provider shell. ThemeProvider owns the `dark` class on
@@ -13,7 +14,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeHotkey />
       {children}
     </ThemeProvider>
   )
+}
+
+function ThemeHotkey() {
+  const { resolvedTheme, setTheme } = useTheme()
+
+  useHotkey(
+    'D',
+    () => {
+      setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+    },
+    {
+      ignoreInputs: true,
+      requireReset: false,
+      meta: { name: 'Toggle Theme', description: 'Press D to switch themes' },
+    },
+  )
+
+  return null
 }

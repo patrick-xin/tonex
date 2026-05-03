@@ -19,9 +19,6 @@ export interface DerivedTheme {
   warnings: string[]
 }
 
-// why: MaterialDynamicColors is intentionally namespaced (Google's tslint
-// disable comment in the source). One instance is sufficient — methods are
-// stateless given a scheme.
 const mdc = new MaterialDynamicColors()
 
 // why: deriveTheme is THE spine. Both modes co-derive in one call so a
@@ -29,9 +26,14 @@ const mdc = new MaterialDynamicColors()
 // Source has no top-level `mode` field; mode is owned by next-themes on
 // <html class="dark"> and selected via cascade. See ADR-0017.
 //
-// Slice 1 emits one md token (--color-primary) and one shadcn token
-// (--primary). Both source from MCU's primary role; the proper md→shadcn
-// role mapping (preset-level) lands in slice 6+.
+// Cross-layer mapping rule (slice-2 spike, fixed for now):
+//   shadcn.--primary            ← md.--color-primary-container
+//   shadcn.--primary-foreground ← md.--color-on-primary-container
+// shadcn primary is a brand-accent role; md's primary-container pairs with
+// on-primary-container as the natural "filled surface" tonal pair, which
+// reads closer to shadcn's solid-button conventions than md.primary does.
+// This mapping is the unit-of-verification for the slice 2 visual spike;
+// real role mapping (user-overridable bindings) is slice 6+.
 export function deriveTheme(source: PortableTheme): DerivedTheme {
   const seedHct = Hct.fromInt(argbFromHex(source.seedHex))
   const variant = variants[source.variant]
@@ -39,17 +41,30 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const lightScheme = variant.build(seedHct, false, 0)
   const darkScheme = variant.build(seedHct, true, 0)
 
-  const primaryLight = hexFromArgb(mdc.primary().getArgb(lightScheme))
-  const primaryDark = hexFromArgb(mdc.primary().getArgb(darkScheme))
+  const mdLight: TokenMap = {
+    '--color-primary': hexFromArgb(mdc.primary().getArgb(lightScheme)),
+    '--color-on-primary': hexFromArgb(mdc.onPrimary().getArgb(lightScheme)),
+    '--color-primary-container': hexFromArgb(mdc.primaryContainer().getArgb(lightScheme)),
+    '--color-on-primary-container': hexFromArgb(mdc.onPrimaryContainer().getArgb(lightScheme)),
+  }
+  const mdDark: TokenMap = {
+    '--color-primary': hexFromArgb(mdc.primary().getArgb(darkScheme)),
+    '--color-on-primary': hexFromArgb(mdc.onPrimary().getArgb(darkScheme)),
+    '--color-primary-container': hexFromArgb(mdc.primaryContainer().getArgb(darkScheme)),
+    '--color-on-primary-container': hexFromArgb(mdc.onPrimaryContainer().getArgb(darkScheme)),
+  }
 
   return {
-    md: {
-      light: { '--color-primary': primaryLight },
-      dark: { '--color-primary': primaryDark },
-    },
+    md: { light: mdLight, dark: mdDark },
     shadcn: {
-      light: { '--primary': primaryLight },
-      dark: { '--primary': primaryDark },
+      light: {
+        '--primary': mdLight['--color-primary-container']!,
+        '--primary-foreground': mdLight['--color-on-primary-container']!,
+      },
+      dark: {
+        '--primary': mdDark['--color-primary-container']!,
+        '--primary-foreground': mdDark['--color-on-primary-container']!,
+      },
     },
     warnings: [],
   }

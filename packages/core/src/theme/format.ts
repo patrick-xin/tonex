@@ -16,10 +16,17 @@ function formatBlock(selector: string, tokens: TokenMap): string {
 // `Object.entries` preserves insertion order for string keys; deriveTheme
 // builds tokens in a deterministic order.
 export function formatCss(theme: DerivedTheme): string {
+  return [formatLayer(theme, 'md'), formatLayer(theme, 'shadcn')].join('\n\n')
+}
+
+// why: layer-scoped formatter. The slice-2 verification UI renders md and
+// shadcn export blocks side-by-side; both consume the same DerivedTheme so
+// the visible code mirrors what applyDom writes to the live <style>. If the
+// rendered swatch and this code disagree on a value, that is exactly the
+// drift mode ADR-0017 exists to surface.
+export function formatLayer(theme: DerivedTheme, layer: 'md' | 'shadcn'): string {
   return [
-    formatBlock('.md', theme.md.light),
-    formatBlock('html.dark .md', theme.md.dark),
-    formatBlock('.shadcn', theme.shadcn.light),
-    formatBlock('html.dark .shadcn', theme.shadcn.dark),
+    formatBlock(`.${layer}`, theme[layer].light),
+    formatBlock(`html.dark .${layer}`, theme[layer].dark),
   ].join('\n\n')
 }

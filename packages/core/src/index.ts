@@ -5,7 +5,7 @@ export {
   type ResolvedLayer,
   type TokenMap,
 } from './theme/derive'
-export { formatCss } from './theme/format'
+export { formatCss, formatLayer } from './theme/format'
 export {
   DEFAULT_INPUTS,
   type PortableTheme,

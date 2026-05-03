@@ -1,14 +1,17 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { formatLayer, useResolvedTokens, useSource } from '@tonex/core'
 import { Preview } from '@/features/preview'
 
-// why: slice 1 tracer. Verifies the seam end-to-end — change hex in the
-// input, both the md element (--color-primary on .md) and the shadcn
-// element (--primary on .shadcn) update from one source change.
+// why: slice 2 spike. Verifies (1) Tailwind utilities (bg-primary,
+// text-on-primary, bg-primary-container, text-on-primary-container) resolve
+// against md scope-set --color-* tokens; (2) shadcn primary mapping reads
+// the same hex as md primary-container at the export-text layer; (3) any
+// drift between rendered swatch and printed export is visible side-by-side.
 //
-// Inline styles + a raw color input are deliberate. Real seed-picker UX
-// is a feature for slice 9+; here we want the minimum that proves wiring.
+// Open-item #2 (push 'use client' down) is intentionally deferred — this
+// page stays client-only until the spike confirms the mapping; refactoring
+// the boundary happens in slice 2 proper.
 
 export default function Page() {
   const seedHex = useSource((s) => s.seedHex)
@@ -16,13 +19,13 @@ export default function Page() {
   const hydrated = useSource((s) => s._hydrated)
 
   return (
-    <main style={{ padding: 24, display: 'grid', gap: 24, maxWidth: 720 }}>
+    <main className="grid gap-6 p-6 max-w-[960px]">
       <header>
-        <h1>tonex</h1>
-        <p style={{ opacity: 0.7 }}>slice 1 tracer — md + shadcn from one source</p>
+        <h1 className="text-2xl font-semibold">tonex</h1>
+        <p className="opacity-70 text-sm">slice 2 spike — md primary family + shadcn mapping</p>
       </header>
 
-      <label style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <label className="flex gap-3 items-center">
         <span>seed</span>
         <input
           type="color"
@@ -34,27 +37,51 @@ export default function Page() {
           type="text"
           value={seedHex}
           onChange={(e) => setSeedHex(e.target.value)}
-          style={{ fontFamily: 'monospace', width: 110 }}
+          className="font-mono w-28 px-2 py-1 border rounded"
           aria-label="seed hex"
         />
-        {!hydrated && <span style={{ opacity: 0.5 }}>(hydrating…)</span>}
+        {!hydrated && <span className="opacity-50">(hydrating…)</span>}
       </label>
 
-      <section style={{ display: 'grid', gap: 12 }}>
-        <h2>md element</h2>
-        <div
-          style={{
-            padding: 24,
-            background: 'var(--color-primary)',
-            color: 'white',
-            borderRadius: 8,
-          }}
-        >
-          md element — reads <code>var(--color-primary)</code>
+      <section className="grid grid-cols-2 gap-4">
+        <div className="grid gap-3">
+          <h2 className="text-lg font-medium">md scope</h2>
+          <div className="bg-primary text-on-primary p-6 rounded-lg">
+            <div className="font-medium">primary / on-primary</div>
+            <div className="text-xs opacity-80 mt-1">utilities: bg-primary text-on-primary</div>
+          </div>
+          <div className="bg-primary-container text-on-primary-container p-6 rounded-lg">
+            <div className="font-medium">primary-container / on-primary-container</div>
+            <div className="text-xs opacity-80 mt-1">
+              utilities: bg-primary-container text-on-primary-container
+            </div>
+          </div>
         </div>
+        <Preview />
       </section>
 
-      <Preview />
+      <ExportPanels />
     </main>
+  )
+}
+
+function ExportPanels() {
+  const theme = useResolvedTokens()
+  if (!theme) return null
+  return (
+    <section className="grid grid-cols-2 gap-4">
+      <div className="grid gap-2">
+        <h3 className="text-sm font-medium opacity-70">md export</h3>
+        <pre className="text-xs p-4 rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-x-auto">
+          <code>{formatLayer(theme, 'md')}</code>
+        </pre>
+      </div>
+      <div className="grid gap-2">
+        <h3 className="text-sm font-medium opacity-70">shadcn export</h3>
+        <pre className="text-xs p-4 rounded-lg bg-neutral-100 dark:bg-neutral-900 overflow-x-auto">
+          <code>{formatLayer(theme, 'shadcn')}</code>
+        </pre>
+      </div>
+    </section>
   )
 }
