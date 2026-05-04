@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
-import { DEFAULT_INPUTS } from './schema'
-import { useSource } from './source'
+import { deriveTheme } from './derive'
+import { formatCss } from './format'
+import { DEFAULT_INPUTS, type PortableTheme } from './schema'
+import { selectPortable, useSource } from './source'
 
 const STYLE_ID = 'tonex-tokens'
 
@@ -72,5 +74,57 @@ describe('applyDom (jsdom integration)', () => {
     const after = document.getElementById(STYLE_ID)?.textContent
 
     expect(after).toBe(before)
+  })
+
+  // why: drift-guard at the spine seam — applyDom and the export path
+  // (formatCss(deriveTheme(...))) must produce identical text for ANY source
+  // state, not just DEFAULT_INPUTS. The www-side globals-drift test only
+  // covers DEFAULT_INPUTS; this closes the gap for arbitrary mutations.
+  // Anything that recomputes inside applyDom or formatCss without the other
+  // following will fail one of these cases. ADR-0017.
+  describe('preview === export round-trip', () => {
+    const cases: Array<{ name: string; source: PortableTheme }> = [
+      { name: 'default inputs', source: DEFAULT_INPUTS },
+      { name: 'red seed', source: { ...DEFAULT_INPUTS, seedHex: '#ff0000' } },
+      { name: 'tonalSpot variant', source: { ...DEFAULT_INPUTS, variant: 'tonalSpot' } },
+      {
+        name: 'override applied',
+        source: {
+          ...DEFAULT_INPUTS,
+          md3PrimaryContainerOverride: { light: '#abcdef', dark: '#123456' },
+        },
+      },
+      {
+        name: 'rebound shadcn primary',
+        source: {
+          ...DEFAULT_INPUTS,
+          shadcnRoleBindings: {
+            light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
+            dark: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
+          },
+        },
+      },
+    ]
+
+    for (const { name, source } of cases) {
+      it(`applyDom matches formatCss(deriveTheme(...)) for ${name}`, () => {
+        useSource.setState({ ...source, _hydrated: true })
+        unsubscribe = applyDom()
+        const written = document.getElementById(STYLE_ID)?.textContent ?? ''
+        const expected = formatCss(deriveTheme(source))
+        expect(written).toBe(expected)
+      })
+    }
+
+    it('selectPortable(state) is the same input applyDom feeds derive', () => {
+      // why: the projection helper IS the contract — if selectPortable diverges
+      // from PortableTheme shape, applyDom and useResolvedTokens diverge with
+      // it. This test pins the shape match without coupling to specific keys.
+      useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true, seedHex: '#abc123' })
+      unsubscribe = applyDom()
+      const written = document.getElementById(STYLE_ID)?.textContent ?? ''
+      const projected = selectPortable(useSource.getState())
+      expect(written).toBe(formatCss(deriveTheme(projected)))
+    })
   })
 })
