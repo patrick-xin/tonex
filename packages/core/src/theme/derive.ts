@@ -1,12 +1,6 @@
 import { argbFromHex, Hct, hexFromArgb, MaterialDynamicColors } from '@tonex/mcu'
 import { variants } from '../variants'
 import type { PortableTheme, ShadcnRoleBindings } from './schema'
-// why: two surface-treatment algorithms kept as parallel features. Both
-// consumed by /sink/tint for visual eval; not yet wired into formatCss or
-// applyDom — export path stays pegged to baseline `md` until the ship
-// shape is decided.
-import { applySurfaceDesaturate } from './surfaceDesaturate'
-import { applySurfaceTint } from './surfaceTint'
 
 // TODO(slice 2): emit OKLCH instead of hex. shadcn v4 + Tailwind v4 conventions
 // expect oklch(...) values; hex is the slice-1 placeholder. Migration also
@@ -19,14 +13,16 @@ export interface ResolvedLayer {
   dark: TokenMap
 }
 
+// why: lean spine — `md` and `shadcn` are the two layers the export path
+// emits. Surface-treatment algorithms (applySurfaceTint, applySurfaceDesaturate)
+// are exported from the package and applied at the consumer site (the sink
+// page) on `md[mode]` directly. Keeping experimental treatments out of the
+// derived shape means a subagent reading DerivedTheme sees one model: the
+// two layers that are actually exported. ADR-0017 holds because preview
+// === export both consume `md` and `shadcn`, nothing else.
 export interface DerivedTheme {
   md: ResolvedLayer
   shadcn: ResolvedLayer
-  // why: parallel surface-treatment outputs for /sink/tint preview. Not
-  // consumed by formatCss / applyDom — runtime DOM emits unmodified `md`.
-  // Folding either algorithm into the export path is a follow-up decision.
-  mdTinted: ResolvedLayer
-  mdDesaturated: ResolvedLayer
   warnings: string[]
 }
 
@@ -90,25 +86,11 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
     '--color-on-surface': hexFromArgb(mdc.onSurface().getArgb(darkScheme)),
   }
 
-  // why: build tinted + desaturated surface variants alongside baseline md.
-  // Baseline md/shadcn outputs above are unaffected so applyDom + formatCss
-  // + drift-guard stay valid until ship-shape is decided.
-  const tint = source.surfaceTintLevel
-  const desat = source.surfaceDesaturateLevel
-
   return {
     md: { light: mdLight, dark: mdDark },
     shadcn: {
       light: bindShadcn(mdLight, source.shadcnRoleBindings.light),
       dark: bindShadcn(mdDark, source.shadcnRoleBindings.dark),
-    },
-    mdTinted: {
-      light: applySurfaceTint(mdLight, 'light', tint),
-      dark: applySurfaceTint(mdDark, 'dark', tint),
-    },
-    mdDesaturated: {
-      light: applySurfaceDesaturate(mdLight, desat),
-      dark: applySurfaceDesaturate(mdDark, desat),
     },
     warnings: [],
   }

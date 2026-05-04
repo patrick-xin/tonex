@@ -20,6 +20,8 @@ export {
   STORAGE_KEY,
 } from './theme/schema'
 export { type SourceState, selectPortable, useSource } from './theme/source'
+export { applySurfaceDesaturate } from './theme/surfaceDesaturate'
+export { applySurfaceTint } from './theme/surfaceTint'
 export { useResolvedTokens } from './theme/useResolvedTokens'
 export {
   DEFAULT_VARIANT,

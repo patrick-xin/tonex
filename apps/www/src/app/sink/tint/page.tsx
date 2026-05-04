@@ -1,6 +1,6 @@
 'use client'
 
-import { useResolvedTokens, useSource } from '@tonex/core'
+import { applySurfaceDesaturate, applySurfaceTint, useResolvedTokens, useSource } from '@tonex/core'
 import { useTheme } from 'next-themes'
 import { useState } from 'react'
 
@@ -27,9 +27,16 @@ export default function TintSinkPage() {
   if (!theme || !hydrated) return null
   if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') return null
   const mode = resolvedTheme
-
-  const layer = algo === 'tint' ? theme.mdTinted[mode] : theme.mdDesaturated[mode]
   const baseline = theme.md[mode]
+
+  // why: surface treatments applied at the consumer site. DerivedTheme stays
+  // lean (md, shadcn only); experimental treatments are sink-local until one
+  // graduates into the export path proper (issue #4). Scratch page — fine to
+  // recompute on every render.
+  const layer =
+    algo === 'tint'
+      ? applySurfaceTint(baseline, mode, tintLevel)
+      : applySurfaceDesaturate(baseline, desatLevel)
 
   // why: scope the tinted surface tokens to this page only by setting the
   // CSS custom properties inline on the wrapper. Tailwind v4's bg-surface /
