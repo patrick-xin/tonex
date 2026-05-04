@@ -14,6 +14,7 @@ export {
   type PortableTheme,
   SCHEMA_VERSION,
   type SchemaVersion,
+  SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   STORAGE_KEY,

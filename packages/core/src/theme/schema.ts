@@ -22,8 +22,12 @@ export const MD_TOKEN_NAMES = [
 export type MdTokenName = (typeof MD_TOKEN_NAMES)[number]
 
 // why: shadcn roles tonex currently maps. Slice 7 widens this — for now two
-// roles is enough to verify the binding mechanism end-to-end.
-export type ShadcnRoleName = '--primary' | '--primary-foreground'
+// roles is enough to verify the binding mechanism end-to-end. Listed as a
+// const tuple (sibling to MD_TOKEN_NAMES) so iteration sites read from one
+// canonical source. Adding a role here forces the type to widen and every
+// iterator to surface the new entry.
+export const SHADCN_ROLE_NAMES = ['--primary', '--primary-foreground'] as const
+export type ShadcnRoleName = (typeof SHADCN_ROLE_NAMES)[number]
 
 export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 
