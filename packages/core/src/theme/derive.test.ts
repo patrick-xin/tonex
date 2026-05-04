@@ -63,6 +63,15 @@ describe('deriveTheme', () => {
     expect(red.shadcn.light['--primary']).not.toBe(green.shadcn.light['--primary'])
   })
 
+  it('variant dispatch picks a real strategy by name', () => {
+    // why: two registry entries means `variants[source.variant]` must do real
+    // lookup. cmf vs tonalSpot at the same seed produce different primary
+    // tones — the structural assertion that dispatch is not hardcoded to cmf.
+    const cmf = deriveTheme({ ...DEFAULT_INPUTS, variant: 'cmf' })
+    const tonalSpot = deriveTheme({ ...DEFAULT_INPUTS, variant: 'tonalSpot' })
+    expect(cmf.md.light['--color-primary']).not.toBe(tonalSpot.md.light['--color-primary'])
+  })
+
   it('returns no warnings for valid input', () => {
     expect(deriveTheme(DEFAULT_INPUTS).warnings).toEqual([])
   })
