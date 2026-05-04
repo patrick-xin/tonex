@@ -1,7 +1,6 @@
 import { deriveTheme } from './derive'
 import { formatCss } from './format'
-import { SCHEMA_VERSION } from './schema'
-import { useSource } from './source'
+import { selectPortable, useSource } from './source'
 
 const STYLE_ELEMENT_ID = 'tonex-tokens'
 
@@ -35,15 +34,7 @@ export function applyDom(): () => void {
     // ADR-0015.
     if (!s._hydrated) return
     try {
-      const theme = deriveTheme({
-        version: SCHEMA_VERSION,
-        seedHex: s.seedHex,
-        variant: s.variant,
-        md3PrimaryContainerOverride: s.md3PrimaryContainerOverride,
-        shadcnRoleBindings: s.shadcnRoleBindings,
-        surfaceTintLevel: s.surfaceTintLevel,
-        surfaceDesaturateLevel: s.surfaceDesaturateLevel,
-      })
+      const theme = deriveTheme(selectPortable(s))
       styleEl.textContent = formatCss(theme)
     } catch (err) {
       // why: annotate the failure with applyDom's identity so a stack trace

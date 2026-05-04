@@ -18,7 +18,7 @@ export {
   type ShadcnRoleName,
   STORAGE_KEY,
 } from './theme/schema'
-export { type SourceState, useSource } from './theme/source'
+export { type SourceState, selectPortable, useSource } from './theme/source'
 export { useResolvedTokens } from './theme/useResolvedTokens'
 export {
   DEFAULT_VARIANT,

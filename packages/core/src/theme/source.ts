@@ -23,6 +23,30 @@ interface SourceActions {
 
 export type SourceState = PortableTheme & SourceActions & { _hydrated: boolean }
 
+// why: single projection from SourceState → PortableTheme. Used by:
+//   - partialize (persistence write)
+//   - applyDom (state.getState() → deriveTheme input)
+//   - useResolvedTokens (subscription input via useShallow)
+// Blacklist style: actions + _hydrated are the only non-portable bits, so as
+// PortableTheme grows new fields flow through with no maintenance. Adding a
+// new ACTION requires extending this destructure — TypeScript catches that
+// because the rest type is checked against PortableTheme via the return type.
+export function selectPortable(s: SourceState): PortableTheme {
+  const {
+    _hydrated: _h,
+    setSeedHex: _ss,
+    setVariant: _sv,
+    setMd3PrimaryContainerOverride: _so,
+    setShadcnRoleBinding: _sb,
+    setSurfaceTintLevel: _sst,
+    setSurfaceDesaturateLevel: _ssd,
+    setHydrated: _sh,
+    reset: _r,
+    ...portable
+  } = s
+  return portable
+}
+
 export const useSource = create<SourceState>()(
   persist(
     (set) => ({
@@ -54,21 +78,10 @@ export const useSource = create<SourceState>()(
       // client, real localStorage is wired up and onRehydrateStorage fires
       // after the read completes, flipping _hydrated true.
       storage: typeof window === 'undefined' ? undefined : createJSONStorage(() => localStorage),
-      // why: blacklist actions + _hydrated rather than whitelisting persisted
-      // fields. As PortableTheme grows, new fields persist automatically.
-      // Whitelist drifted in legacy by forgetting to add new fields.
-      partialize: ({
-        _hydrated: _h,
-        setSeedHex: _ss,
-        setVariant: _sv,
-        setMd3PrimaryContainerOverride: _so,
-        setShadcnRoleBinding: _sb,
-        setSurfaceTintLevel: _sst,
-        setSurfaceDesaturateLevel: _ssd,
-        setHydrated: _sh,
-        reset: _r,
-        ...persisted
-      }) => persisted,
+      // why: same blacklist as selectPortable — one source of truth for
+      // "what's portable vs ephemeral." Persistence drift is no longer a
+      // separate maintenance surface.
+      partialize: selectPortable,
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
