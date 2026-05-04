@@ -1,24 +1,17 @@
-// why: features/<name>/index.tsx is the public surface of a feature
-// (rule 2 of the www anti-rot rules). Routes import from here only.
-//
-// The preview pane is where the shadcn sub-scope lives — `<div class="shadcn">`
-// flips the CSS variable resolution from md tokens to shadcn tokens within
-// this subtree. ADR-0013.
-//
-// bg-primary / text-primary-foreground inside .shadcn resolve through the
-// alias declared in globals.css (.shadcn { --color-primary: var(--primary) }).
-// The hex printed on the swatch must match the rendered color — visible drift
-// is the failure mode under verification.
-
 'use client'
 
 import { useResolvedTokens } from '@tonex/core'
-import { useTheme } from 'next-themes'
+import { useActiveMode } from './use-active-mode'
 
-export function Preview() {
+// why: the preview pane is where the shadcn sub-scope lives. <div class="shadcn">
+// flips CSS variable resolution from md tokens to shadcn tokens within this
+// subtree (ADR-0013). bg-primary / text-primary-foreground inside .shadcn
+// resolve through the alias declared in globals.css. The hex printed on the
+// swatch must match the rendered color — visible drift is the failure mode
+// under verification.
+export function ShadcnPreview() {
   const theme = useResolvedTokens()
-  const { resolvedTheme } = useTheme()
-  const mode = resolvedTheme === 'light' || resolvedTheme === 'dark' ? resolvedTheme : null
+  const mode = useActiveMode()
 
   return (
     <div className="grid gap-3">
