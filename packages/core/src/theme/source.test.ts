@@ -18,11 +18,14 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seedHex: '#ff00aa',
   variant: 'tonalSpot',
+  contrastLevel: 0.5,
+  primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
   md3PrimaryContainerOverride: { light: '#aabbcc', dark: '#112233' },
   shadcnRoleBindings: {
     light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
     dark: { '--primary': '--color-surface', '--primary-foreground': '--color-on-surface' },
   },
+  surfaceAlgo: 'tint',
   surfaceTintLevel: 0.42,
   surfaceDesaturateLevel: 0.73,
 }
@@ -42,6 +45,9 @@ describe('useSource persistence round-trip', () => {
     const s = useSource.getState()
     s.setSeedHex(NONDEFAULT_INPUTS.seedHex)
     s.setVariant(NONDEFAULT_INPUTS.variant)
+    s.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
+    s.setPrimaryHexLock('light', NONDEFAULT_INPUTS.primaryHexLock.light)
+    s.setPrimaryHexLock('dark', NONDEFAULT_INPUTS.primaryHexLock.dark)
     s.setMd3PrimaryContainerOverride('light', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.light)
     s.setMd3PrimaryContainerOverride('dark', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.dark)
     for (const mode of ['light', 'dark'] as const) {
@@ -56,6 +62,7 @@ describe('useSource persistence round-trip', () => {
         NONDEFAULT_INPUTS.shadcnRoleBindings[mode]['--primary-foreground'],
       )
     }
+    s.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
     s.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
 

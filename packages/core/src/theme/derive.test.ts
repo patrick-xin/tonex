@@ -193,4 +193,113 @@ describe('deriveTheme', () => {
       expect(shadcn.light['--primary']).toBe('#ff0000')
     })
   })
+
+  describe('primaryHexLock', () => {
+    it('null lock leaves primary family at MCU values', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: null, dark: null },
+      })
+      expect(explicit.md.light['--color-primary']).toBe(baseline.md.light['--color-primary'])
+    })
+
+    it('locked primary equals input hex exactly', () => {
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
+      })
+      expect(md.light['--color-primary']).toBe('#ff5500')
+      expect(md.dark['--color-primary']).toBe('#00ccff')
+    })
+
+    it('lock derives on-primary / primary-container / on-primary-container from locked HCT', () => {
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: '#ff5500', dark: null },
+      })
+      // family members regenerate, so they shouldn't equal MCU baseline for the seed
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      expect(md.light['--color-on-primary']).not.toBe(baseline.md.light['--color-on-primary'])
+      expect(md.light['--color-primary-container']).not.toBe(
+        baseline.md.light['--color-primary-container'],
+      )
+      expect(md.light['--color-on-primary-container']).not.toBe(
+        baseline.md.light['--color-on-primary-container'],
+      )
+      expect(md.light['--color-on-primary']).toMatch(HEX)
+      expect(md.light['--color-primary-container']).toMatch(HEX)
+      expect(md.light['--color-on-primary-container']).toMatch(HEX)
+    })
+
+    it('container override still wins over lock-derived container', () => {
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: '#ff5500', dark: null },
+        md3PrimaryContainerOverride: { light: '#abcdef', dark: null },
+      })
+      expect(md.light['--color-primary-container']).toBe('#abcdef')
+      // primary itself still locked
+      expect(md.light['--color-primary']).toBe('#ff5500')
+    })
+
+    it('lock is mode-keyed — locking light leaves dark MCU-derived', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: '#ff5500', dark: null },
+      })
+      expect(md.dark['--color-primary']).toBe(baseline.md.dark['--color-primary'])
+    })
+  })
+
+  describe('contrastLevel', () => {
+    it('non-zero contrast shifts md tokens away from baseline', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
+      // why: MCU's contrastLevel adjusts tone on dynamic colors; at least
+      // some primary-family tokens should differ. Asserting !== rather than
+      // a specific value because exact tone math is MCU's spec, not ours.
+      expect(high.md.light['--color-primary']).not.toBe(baseline.md.light['--color-primary'])
+    })
+  })
+
+  describe('surfaceAlgo', () => {
+    it("'none' leaves md surface family untouched", () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({ ...DEFAULT_INPUTS, surfaceAlgo: 'none' })
+      expect(explicit.md.light['--color-surface']).toBe(baseline.md.light['--color-surface'])
+    })
+
+    it("'tint' replaces md surface tokens with treated values", () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const tinted = deriveTheme({ ...DEFAULT_INPUTS, surfaceAlgo: 'tint', surfaceTintLevel: 1 })
+      expect(tinted.md.light['--color-surface']).not.toBe(baseline.md.light['--color-surface'])
+      // why: shadcn primary by default binds to primary-container (not surface),
+      // so the treatment should NOT change shadcn primary at default bindings.
+      expect(tinted.shadcn.light['--primary']).toBe(baseline.shadcn.light['--primary'])
+    })
+
+    it('shadcn rebound to a treated surface token reflects treatment', () => {
+      const tinted = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: 1,
+        shadcnRoleBindings: {
+          light: {
+            '--primary': '--color-surface-container',
+            '--primary-foreground': '--color-on-surface',
+          },
+          dark: {
+            '--primary': '--color-surface-container',
+            '--primary-foreground': '--color-on-surface',
+          },
+        },
+      })
+      // why: this is the load-bearing assertion that "treatment runs before
+      // shadcn binds". If treatment were post-bind, shadcn primary would equal
+      // the untreated md surface-container, breaking preview === export.
+      expect(tinted.shadcn.light['--primary']).toBe(tinted.md.light['--color-surface-container'])
+    })
+  })
 })

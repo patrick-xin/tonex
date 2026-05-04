@@ -11,9 +11,11 @@
 // production UI ships, /  diverges from /sink and testbed survives as the
 // dev-only surface.
 
+import { ContrastLevel } from './contrast-level'
 import { ExportPanels } from './export-panels'
 import { MdSwatches } from './md-swatches'
 import { PrimaryContainerOverride } from './primary-container-override'
+import { PrimaryHexLock } from './primary-hex-lock'
 import { SeedInput } from './seed-input'
 import { ShadcnBindings } from './shadcn-bindings'
 import { ShadcnPreview } from './shadcn-preview'
@@ -32,6 +34,8 @@ export function Testbed() {
 
       <SeedInput />
       <VariantPicker />
+      <ContrastLevel />
+      <PrimaryHexLock />
       <PrimaryContainerOverride />
       <ShadcnBindings />
       <SurfaceTint />

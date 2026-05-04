@@ -18,6 +18,8 @@ export {
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   STORAGE_KEY,
+  SURFACE_ALGOS,
+  type SurfaceAlgo,
 } from './theme/schema'
 export { type SourceState, selectPortable, useSource } from './theme/source'
 export { applySurfaceDesaturate } from './theme/surfaceDesaturate'

@@ -104,6 +104,43 @@ describe('applyDom (jsdom integration)', () => {
           },
         },
       },
+      {
+        name: 'tint treatment',
+        source: { ...DEFAULT_INPUTS, surfaceAlgo: 'tint', surfaceTintLevel: 0.5 },
+      },
+      {
+        name: 'desaturate treatment',
+        source: { ...DEFAULT_INPUTS, surfaceAlgo: 'desaturate', surfaceDesaturateLevel: 0.7 },
+      },
+      {
+        name: 'tint + shadcn bound to surface',
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'tint',
+          surfaceTintLevel: 1,
+          shadcnRoleBindings: {
+            light: {
+              '--primary': '--color-surface-container',
+              '--primary-foreground': '--color-on-surface',
+            },
+            dark: {
+              '--primary': '--color-surface-container',
+              '--primary-foreground': '--color-on-surface',
+            },
+          },
+        },
+      },
+      {
+        name: 'contrast level high',
+        source: { ...DEFAULT_INPUTS, contrastLevel: 0.5 },
+      },
+      {
+        name: 'primary hex lock both modes',
+        source: {
+          ...DEFAULT_INPUTS,
+          primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
+        },
+      },
     ]
 
     for (const { name, source } of cases) {

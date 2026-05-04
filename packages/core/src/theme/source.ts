@@ -8,13 +8,17 @@ import {
   SCHEMA_VERSION,
   type ShadcnRoleName,
   STORAGE_KEY,
+  type SurfaceAlgo,
 } from './schema'
 
 interface SourceActions {
   setSeedHex(seedHex: string): void
   setVariant(variant: VariantName): void
+  setContrastLevel(level: number): void
+  setPrimaryHexLock(mode: 'light' | 'dark', hex: string | null): void
   setMd3PrimaryContainerOverride(mode: 'light' | 'dark', hex: string | null): void
   setShadcnRoleBinding(mode: 'light' | 'dark', role: ShadcnRoleName, mdToken: MdTokenName): void
+  setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfaceTintLevel(level: number): void
   setSurfaceDesaturateLevel(level: number): void
   setHydrated(): void
@@ -36,8 +40,11 @@ export function selectPortable(s: SourceState): PortableTheme {
     _hydrated: _h,
     setSeedHex: _ss,
     setVariant: _sv,
+    setContrastLevel: _scl,
+    setPrimaryHexLock: _spl,
     setMd3PrimaryContainerOverride: _so,
     setShadcnRoleBinding: _sb,
+    setSurfaceAlgo: _ssa,
     setSurfaceTintLevel: _sst,
     setSurfaceDesaturateLevel: _ssd,
     setHydrated: _sh,
@@ -54,6 +61,11 @@ export const useSource = create<SourceState>()(
       _hydrated: false,
       setSeedHex: (seedHex) => set({ seedHex }),
       setVariant: (variant) => set({ variant }),
+      setContrastLevel: (contrastLevel) => set({ contrastLevel }),
+      setPrimaryHexLock: (mode, hex) =>
+        set((s) => ({
+          primaryHexLock: { ...s.primaryHexLock, [mode]: hex },
+        })),
       setMd3PrimaryContainerOverride: (mode, hex) =>
         set((s) => ({
           md3PrimaryContainerOverride: { ...s.md3PrimaryContainerOverride, [mode]: hex },
@@ -65,6 +77,7 @@ export const useSource = create<SourceState>()(
             [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
           },
         })),
+      setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
       setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
       setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
       setHydrated: () => set({ _hydrated: true }),

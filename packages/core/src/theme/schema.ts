@@ -39,6 +39,13 @@ export const DEFAULT_SHADCN_ROLE_BINDINGS: ShadcnRoleBindings = {
   '--primary-foreground': '--color-on-primary-container',
 }
 
+// why: which surface treatment (if any) deriveTheme applies post-md-emit.
+// Mutually exclusive — composing tint and desaturate isn't a product feature.
+// Default 'none' keeps the drift-guard baseline (globals.css === formatCss(
+// deriveTheme(DEFAULT_INPUTS))) trivially green.
+export const SURFACE_ALGOS = ['none', 'tint', 'desaturate'] as const
+export type SurfaceAlgo = (typeof SURFACE_ALGOS)[number]
+
 // why: PortableTheme is the portable wire shape — what gets serialized to
 // localStorage, files, or the network. SourceState (in source.ts) is the
 // in-memory shape and equals: PortableTheme − version + _hydrated + actions.
@@ -47,6 +54,17 @@ export interface PortableTheme {
   version: SchemaVersion
   seedHex: string
   variant: VariantName
+  // why: MCU contrastLevel input — fed straight into variant.build(). Range
+  // -1..1 per MCU spec; 0 is the baseline. Drives tone offsets across all
+  // dynamic colors, so changing it shifts every md token in lockstep.
+  contrastLevel: number
+  // why: pin primary to an exact hex; on-primary / primary-container /
+  // on-primary-container auto-derive from a TonalPalette built off the
+  // locked HCT (mode-keyed). This is the "brand color is non-negotiable"
+  // product story — variant + contrastLevel still drive non-primary roles.
+  // Container/on-* tones use M3 baseline (90/10 light, 30/90 dark); contrast-
+  // aware family resolution is later work.
+  primaryHexLock: { light: string | null; dark: string | null }
   // why: minimal single-token override to verify the source→derive→DOM→export
   // loop under mutation pressure with light/dark UX. Mode-keyed per ADR-0017.
   // Slice 6 will generalize this to md3TokenOverrides: Record<TokenName, ModeKeyed>.
@@ -55,11 +73,13 @@ export interface PortableTheme {
   // slice-7 mappings will diverge across modes (e.g. light primary →
   // primary-container, dark primary → primary for contrast). ADR-0017.
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
-  // why: two surface-treatment algorithms kept as parallel features. Both
-  // default to 0 so md/shadcn baseline output matches slice-2 globals.css
-  // exactly — drift-guard stays green. Levels are independent, not exclusive.
+  // why: surface treatment is a post-derive transform applied inside
+  // deriveTheme so applyDom AND formatCss reflect it identically — preview
+  // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
+  // runs; the level for the selected algorithm controls strength.
   // - surfaceTintLevel: 0=neutral zinc → 1=full primary character.
   // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped.
+  surfaceAlgo: SurfaceAlgo
   surfaceTintLevel: number
   surfaceDesaturateLevel: number
 }
@@ -71,11 +91,14 @@ export const DEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seedHex: '#6750a4',
   variant: DEFAULT_VARIANT,
+  contrastLevel: 0,
+  primaryHexLock: { light: null, dark: null },
   md3PrimaryContainerOverride: { light: null, dark: null },
   shadcnRoleBindings: {
     light: DEFAULT_SHADCN_ROLE_BINDINGS,
     dark: DEFAULT_SHADCN_ROLE_BINDINGS,
   },
+  surfaceAlgo: 'none',
   surfaceTintLevel: 0,
   surfaceDesaturateLevel: 0,
 }
