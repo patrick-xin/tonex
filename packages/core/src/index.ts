@@ -8,9 +8,14 @@ export {
 export { formatCss, formatLayer } from './theme/format'
 export {
   DEFAULT_INPUTS,
+  DEFAULT_SHADCN_ROLE_BINDINGS,
+  MD_TOKEN_NAMES,
+  type MdTokenName,
   type PortableTheme,
   SCHEMA_VERSION,
   type SchemaVersion,
+  type ShadcnRoleBindings,
+  type ShadcnRoleName,
   STORAGE_KEY,
 } from './theme/schema'
 export { type SourceState, useSource } from './theme/source'

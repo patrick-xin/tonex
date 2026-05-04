@@ -1,11 +1,20 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
-import { DEFAULT_INPUTS, type PortableTheme, SCHEMA_VERSION, STORAGE_KEY } from './schema'
+import {
+  DEFAULT_INPUTS,
+  type MdTokenName,
+  type PortableTheme,
+  SCHEMA_VERSION,
+  type ShadcnRoleName,
+  STORAGE_KEY,
+} from './schema'
 
 interface SourceActions {
   setSeedHex(seedHex: string): void
   setVariant(variant: VariantName): void
+  setMd3PrimaryContainerOverride(mode: 'light' | 'dark', hex: string | null): void
+  setShadcnRoleBinding(mode: 'light' | 'dark', role: ShadcnRoleName, mdToken: MdTokenName): void
   setHydrated(): void
   reset(): void
 }
@@ -19,6 +28,17 @@ export const useSource = create<SourceState>()(
       _hydrated: false,
       setSeedHex: (seedHex) => set({ seedHex }),
       setVariant: (variant) => set({ variant }),
+      setMd3PrimaryContainerOverride: (mode, hex) =>
+        set((s) => ({
+          md3PrimaryContainerOverride: { ...s.md3PrimaryContainerOverride, [mode]: hex },
+        })),
+      setShadcnRoleBinding: (mode, role, mdToken) =>
+        set((s) => ({
+          shadcnRoleBindings: {
+            ...s.shadcnRoleBindings,
+            [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
+          },
+        })),
       setHydrated: () => set({ _hydrated: true }),
       reset: () => set({ ...DEFAULT_INPUTS }),
     }),
@@ -37,6 +57,8 @@ export const useSource = create<SourceState>()(
         _hydrated: _h,
         setSeedHex: _ss,
         setVariant: _sv,
+        setMd3PrimaryContainerOverride: _so,
+        setShadcnRoleBinding: _sb,
         setHydrated: _sh,
         reset: _r,
         ...persisted

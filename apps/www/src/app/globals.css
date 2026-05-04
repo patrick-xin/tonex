@@ -18,6 +18,10 @@
   --color-primary-container: var(--color-primary-container);
   --color-on-primary-container: var(--color-on-primary-container);
   --color-primary-foreground: var(--color-primary-foreground);
+  --color-surface: var(--color-surface);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-on-surface: var(--color-on-surface);
 }
 
 /* why: shadcn-classic components reference --primary / --primary-foreground
@@ -37,6 +41,10 @@
   --color-on-primary: #eadeff;
   --color-primary-container: #6750a4;
   --color-on-primary-container: #fcf6ff;
+  --color-surface: #fdf7ff;
+  --color-surface-container: #f3eaff;
+  --color-surface-container-high: #ede4fb;
+  --color-on-surface: #352f43;
 }
 
 html.dark .md {
@@ -44,6 +52,10 @@ html.dark .md {
   --color-on-primary: #270762;
   --color-primary-container: #6750a4;
   --color-on-primary-container: #fcf6ff;
+  --color-surface: #0f0d16;
+  --color-surface-container: #1b1726;
+  --color-surface-container-high: #221d2d;
+  --color-on-surface: #ebe1fc;
 }
 
 .shadcn {

@@ -39,6 +39,8 @@ export function applyDom(): () => void {
         version: SCHEMA_VERSION,
         seedHex: s.seedHex,
         variant: s.variant,
+        md3PrimaryContainerOverride: s.md3PrimaryContainerOverride,
+        shadcnRoleBindings: s.shadcnRoleBindings,
       })
       styleEl.textContent = formatCss(theme)
     } catch (err) {
