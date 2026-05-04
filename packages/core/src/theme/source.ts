@@ -15,6 +15,8 @@ interface SourceActions {
   setVariant(variant: VariantName): void
   setMd3PrimaryContainerOverride(mode: 'light' | 'dark', hex: string | null): void
   setShadcnRoleBinding(mode: 'light' | 'dark', role: ShadcnRoleName, mdToken: MdTokenName): void
+  setSurfaceTintLevel(level: number): void
+  setSurfaceDesaturateLevel(level: number): void
   setHydrated(): void
   reset(): void
 }
@@ -39,6 +41,8 @@ export const useSource = create<SourceState>()(
             [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
           },
         })),
+      setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
+      setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
       setHydrated: () => set({ _hydrated: true }),
       reset: () => set({ ...DEFAULT_INPUTS }),
     }),
@@ -59,6 +63,8 @@ export const useSource = create<SourceState>()(
         setVariant: _sv,
         setMd3PrimaryContainerOverride: _so,
         setShadcnRoleBinding: _sb,
+        setSurfaceTintLevel: _sst,
+        setSurfaceDesaturateLevel: _ssd,
         setHydrated: _sh,
         reset: _r,
         ...persisted

@@ -20,6 +20,8 @@ export function useResolvedTokens(): DerivedTheme | null {
   const bindLightFg = useSource((s) => s.shadcnRoleBindings.light['--primary-foreground'])
   const bindDarkPrimary = useSource((s) => s.shadcnRoleBindings.dark['--primary'])
   const bindDarkFg = useSource((s) => s.shadcnRoleBindings.dark['--primary-foreground'])
+  const surfaceTintLevel = useSource((s) => s.surfaceTintLevel)
+  const surfaceDesaturateLevel = useSource((s) => s.surfaceDesaturateLevel)
 
   return useMemo(() => {
     if (!hydrated) return null
@@ -32,6 +34,8 @@ export function useResolvedTokens(): DerivedTheme | null {
         light: { '--primary': bindLightPrimary, '--primary-foreground': bindLightFg },
         dark: { '--primary': bindDarkPrimary, '--primary-foreground': bindDarkFg },
       },
+      surfaceTintLevel,
+      surfaceDesaturateLevel,
     })
   }, [
     hydrated,
@@ -43,5 +47,7 @@ export function useResolvedTokens(): DerivedTheme | null {
     bindLightFg,
     bindDarkPrimary,
     bindDarkFg,
+    surfaceTintLevel,
+    surfaceDesaturateLevel,
   ])
 }

@@ -20,15 +20,13 @@ function useActiveMode(): 'light' | 'dark' | null {
   return resolvedTheme
 }
 
-// why: slice 2 spike. Verifies (1) Tailwind utilities (bg-primary,
-// text-on-primary, bg-primary-container, text-on-primary-container) resolve
-// against md scope-set --color-* tokens; (2) shadcn primary mapping reads
-// the same hex as md primary-container at the export-text layer; (3) any
-// drift between rendered swatch and printed export is visible side-by-side.
+// why: home page is the small-loop testbed. Each section exercises one
+// kind of code path (override, mode-keyed binding, cross-layer mapping,
+// formatted export). Tint controls live on /sink/tint where they can paint
+// the full chrome; surface-only-swatch testing wasn't representative.
 //
-// Open-item #2 (push 'use client' down) is intentionally deferred — this
-// page stays client-only until the spike confirms the mapping; refactoring
-// the boundary happens in slice 2 proper.
+// Open-item #2 (push 'use client' down) is intentionally deferred — page
+// stays client-only until the small loop is feature-complete.
 
 export default function Page() {
   const seedHex = useSource((s) => s.seedHex)
@@ -39,7 +37,9 @@ export default function Page() {
     <main className="grid gap-6 p-6 max-w-[960px]">
       <header>
         <h1 className="text-2xl font-semibold">tonex</h1>
-        <p className="opacity-70 text-sm">slice 2 spike — md primary family + shadcn mapping</p>
+        <p className="opacity-70 text-sm">
+          small-loop testbed — md primary family + shadcn mapping
+        </p>
       </header>
 
       <label className="flex gap-3 items-center">
@@ -65,6 +65,13 @@ export default function Page() {
 
       <MdSwatches />
       <Preview />
+
+      <p className="text-xs opacity-60">
+        surface tint sink:{' '}
+        <a className="underline" href="/sink/tint">
+          /sink/tint
+        </a>
+      </p>
 
       <ExportPanels />
     </main>

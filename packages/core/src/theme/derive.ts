@@ -1,6 +1,12 @@
 import { argbFromHex, Hct, hexFromArgb, MaterialDynamicColors } from '@tonex/mcu'
 import { variants } from '../variants'
 import type { PortableTheme, ShadcnRoleBindings } from './schema'
+// why: two surface-treatment algorithms kept as parallel features. Both
+// consumed by /sink/tint for visual eval; not yet wired into formatCss or
+// applyDom — export path stays pegged to baseline `md` until the ship
+// shape is decided.
+import { applySurfaceDesaturate } from './surfaceDesaturate'
+import { applySurfaceTint } from './surfaceTint'
 
 // TODO(slice 2): emit OKLCH instead of hex. shadcn v4 + Tailwind v4 conventions
 // expect oklch(...) values; hex is the slice-1 placeholder. Migration also
@@ -16,6 +22,11 @@ export interface ResolvedLayer {
 export interface DerivedTheme {
   md: ResolvedLayer
   shadcn: ResolvedLayer
+  // why: parallel surface-treatment outputs for /sink/tint preview. Not
+  // consumed by formatCss / applyDom — runtime DOM emits unmodified `md`.
+  // Folding either algorithm into the export path is a follow-up decision.
+  mdTinted: ResolvedLayer
+  mdDesaturated: ResolvedLayer
   warnings: string[]
 }
 
@@ -25,10 +36,12 @@ const mdc = new MaterialDynamicColors()
 // lookup against md emitted tokens. Mode-keyed because slice 7 will admit
 // cross-mode divergence. ADR-0017.
 function bindShadcn(mdLayer: TokenMap, bindings: ShadcnRoleBindings): TokenMap {
-  return {
-    '--primary': mdLayer[bindings['--primary']]!,
-    '--primary-foreground': mdLayer[bindings['--primary-foreground']]!,
+  const primary = mdLayer[bindings['--primary']]
+  const primaryFg = mdLayer[bindings['--primary-foreground']]
+  if (primary === undefined || primaryFg === undefined) {
+    throw new Error(`[bindShadcn] binding references missing md token: ${JSON.stringify(bindings)}`)
   }
+  return { '--primary': primary, '--primary-foreground': primaryFg }
 }
 
 // why: deriveTheme is THE spine. Both modes co-derive in one call so a
@@ -77,11 +90,25 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
     '--color-on-surface': hexFromArgb(mdc.onSurface().getArgb(darkScheme)),
   }
 
+  // why: build tinted + desaturated surface variants alongside baseline md.
+  // Baseline md/shadcn outputs above are unaffected so applyDom + formatCss
+  // + drift-guard stay valid until ship-shape is decided.
+  const tint = source.surfaceTintLevel
+  const desat = source.surfaceDesaturateLevel
+
   return {
     md: { light: mdLight, dark: mdDark },
     shadcn: {
       light: bindShadcn(mdLight, source.shadcnRoleBindings.light),
       dark: bindShadcn(mdDark, source.shadcnRoleBindings.dark),
+    },
+    mdTinted: {
+      light: applySurfaceTint(mdLight, 'light', tint),
+      dark: applySurfaceTint(mdDark, 'dark', tint),
+    },
+    mdDesaturated: {
+      light: applySurfaceDesaturate(mdLight, desat),
+      dark: applySurfaceDesaturate(mdDark, desat),
     },
     warnings: [],
   }

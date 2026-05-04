@@ -51,6 +51,13 @@ export interface PortableTheme {
   // slice-7 mappings will diverge across modes (e.g. light primary →
   // primary-container, dark primary → primary for contrast). ADR-0017.
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
+  // why: two surface-treatment algorithms kept as parallel features. Both
+  // default to 0 so md/shadcn baseline output matches slice-2 globals.css
+  // exactly — drift-guard stays green. Levels are independent, not exclusive.
+  // - surfaceTintLevel: 0=neutral zinc → 1=full primary character.
+  // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped.
+  surfaceTintLevel: number
+  surfaceDesaturateLevel: number
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -65,4 +72,6 @@ export const DEFAULT_INPUTS: PortableTheme = {
     light: DEFAULT_SHADCN_ROLE_BINDINGS,
     dark: DEFAULT_SHADCN_ROLE_BINDINGS,
   },
+  surfaceTintLevel: 0,
+  surfaceDesaturateLevel: 0,
 }

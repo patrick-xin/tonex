@@ -41,6 +41,8 @@ export function applyDom(): () => void {
         variant: s.variant,
         md3PrimaryContainerOverride: s.md3PrimaryContainerOverride,
         shadcnRoleBindings: s.shadcnRoleBindings,
+        surfaceTintLevel: s.surfaceTintLevel,
+        surfaceDesaturateLevel: s.surfaceDesaturateLevel,
       })
       styleEl.textContent = formatCss(theme)
     } catch (err) {
