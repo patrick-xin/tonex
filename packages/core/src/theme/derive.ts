@@ -2,11 +2,11 @@ import {
   argbFromHex,
   type DynamicScheme,
   Hct,
-  hexFromArgb,
   MaterialDynamicColors,
   TonalPalette,
 } from '@tonex/mcu'
 import { variants } from '../variants'
+import { oklchFromArgb, oklchFromHex } from './oklch'
 import {
   MD_TOKEN_NAMES,
   type MdTokenName,
@@ -17,9 +17,9 @@ import {
 import { applySurfaceDesaturate } from './surfaceDesaturate'
 import { applySurfaceTint } from './surfaceTint'
 
-// TODO(slice 2): emit OKLCH instead of hex. shadcn v4 + Tailwind v4 conventions
-// expect oklch(...) values; hex is the slice-1 placeholder. Migration also
-// requires re-baselining globals.css and the drift-guard.
+// why: emission format is `oklch(L C H)` — shadcn v4 + tailwind v4
+// convention. MCU still operates in argb internally; conversion happens at
+// THIS module's TokenMap boundary so format.ts stays a pure stringifier.
 
 export type TokenMap = Record<string, string>
 
@@ -85,7 +85,7 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
 function buildMdLayer(scheme: DynamicScheme): TokenMap {
   const out: TokenMap = {}
   for (const name of MD_TOKEN_NAMES) {
-    out[name] = hexFromArgb(MD_TOKEN_RESOLVERS[name](scheme))
+    out[name] = oklchFromArgb(MD_TOKEN_RESOLVERS[name](scheme))
   }
   return out
 }
@@ -183,17 +183,21 @@ function applyPrimaryFamily(
   containerOverride: string | null,
 ): TokenMap {
   const out = { ...layer }
+  // why: overrides + locks are STORED as hex (user-facing color pickers emit
+  // hex). Convert at the boundary so the layer stays in canonical oklch.
   if (containerOverride !== null) {
-    out['--color-primary-container'] = containerOverride
+    out['--color-primary-container'] = oklchFromHex(containerOverride)
   }
   if (lockedHex !== null) {
     const palette = TonalPalette.fromHct(Hct.fromInt(argbFromHex(lockedHex)))
     const tones = PRIMARY_FAMILY_TONES[mode]
-    out['--color-primary'] = lockedHex
-    out['--color-on-primary'] = hexFromArgb(palette.tone(tones.onPrimary))
+    out['--color-primary'] = oklchFromHex(lockedHex)
+    out['--color-on-primary'] = oklchFromArgb(palette.tone(tones.onPrimary))
     out['--color-primary-container'] =
-      containerOverride ?? hexFromArgb(palette.tone(tones.container))
-    out['--color-on-primary-container'] = hexFromArgb(palette.tone(tones.onContainer))
+      containerOverride !== null
+        ? oklchFromHex(containerOverride)
+        : oklchFromArgb(palette.tone(tones.container))
+    out['--color-on-primary-container'] = oklchFromArgb(palette.tone(tones.onContainer))
   }
   return out
 }

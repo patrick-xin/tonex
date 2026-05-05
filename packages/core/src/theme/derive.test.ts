@@ -1,35 +1,45 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
+import { oklchFromHex } from './oklch'
 import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
 
-const HEX = /^#[0-9a-f]{6}$/i
+const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
+
+// why: hex inputs (overrides, locks) emit as their oklch projection — assert
+// against the exact projection so any change to the conversion math fails
+// here instead of silently drifting at the CSS surface.
+const RED = oklchFromHex('#ff0000')
+const GREEN = oklchFromHex('#00ff00')
+const ABCDEF = oklchFromHex('#abcdef')
+const FF5500 = oklchFromHex('#ff5500')
+const OOCCFF = oklchFromHex('#00ccff')
 
 describe('deriveTheme', () => {
   it('emits md primary role family for both modes', () => {
     const { md } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [md.light, md.dark]) {
-      expect(mode['--color-primary']).toMatch(HEX)
-      expect(mode['--color-on-primary']).toMatch(HEX)
-      expect(mode['--color-primary-container']).toMatch(HEX)
-      expect(mode['--color-on-primary-container']).toMatch(HEX)
+      expect(mode['--color-primary']).toMatch(OKLCH)
+      expect(mode['--color-on-primary']).toMatch(OKLCH)
+      expect(mode['--color-primary-container']).toMatch(OKLCH)
+      expect(mode['--color-on-primary-container']).toMatch(OKLCH)
     }
   })
 
   it('emits md surface family for both modes', () => {
     const { md } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [md.light, md.dark]) {
-      expect(mode['--color-surface']).toMatch(HEX)
-      expect(mode['--color-surface-container']).toMatch(HEX)
-      expect(mode['--color-surface-container-high']).toMatch(HEX)
-      expect(mode['--color-on-surface']).toMatch(HEX)
+      expect(mode['--color-surface']).toMatch(OKLCH)
+      expect(mode['--color-surface-container']).toMatch(OKLCH)
+      expect(mode['--color-surface-container-high']).toMatch(OKLCH)
+      expect(mode['--color-on-surface']).toMatch(OKLCH)
     }
   })
 
   it('emits shadcn primary + primary-foreground for both modes', () => {
     const { shadcn } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [shadcn.light, shadcn.dark]) {
-      expect(mode['--primary']).toMatch(HEX)
-      expect(mode['--primary-foreground']).toMatch(HEX)
+      expect(mode['--primary']).toMatch(OKLCH)
+      expect(mode['--primary-foreground']).toMatch(OKLCH)
     }
   })
 
@@ -103,7 +113,7 @@ describe('deriveTheme', () => {
         ...DEFAULT_INPUTS,
         md3PrimaryContainerOverride: { light: '#ff0000', dark: null },
       })
-      expect(overridden.md.light['--color-primary-container']).toBe('#ff0000')
+      expect(overridden.md.light['--color-primary-container']).toBe(RED)
       expect(overridden.md.dark['--color-primary-container']).toBe(
         baseline.md.dark['--color-primary-container'],
       )
@@ -118,7 +128,7 @@ describe('deriveTheme', () => {
       expect(overridden.md.light['--color-primary-container']).toBe(
         baseline.md.light['--color-primary-container'],
       )
-      expect(overridden.md.dark['--color-primary-container']).toBe('#00ff00')
+      expect(overridden.md.dark['--color-primary-container']).toBe(GREEN)
     })
 
     it('override propagates to shadcn primary via cross-layer mapping', () => {
@@ -129,8 +139,8 @@ describe('deriveTheme', () => {
         ...DEFAULT_INPUTS,
         md3PrimaryContainerOverride: { light: '#ff0000', dark: '#00ff00' },
       })
-      expect(overridden.shadcn.light['--primary']).toBe('#ff0000')
-      expect(overridden.shadcn.dark['--primary']).toBe('#00ff00')
+      expect(overridden.shadcn.light['--primary']).toBe(RED)
+      expect(overridden.shadcn.dark['--primary']).toBe(GREEN)
     })
   })
 
@@ -193,7 +203,7 @@ describe('deriveTheme', () => {
         md3PrimaryContainerOverride: { light: '#ff0000', dark: null },
         shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
       })
-      expect(shadcn.light['--primary']).toBe('#ff0000')
+      expect(shadcn.light['--primary']).toBe(RED)
     })
   })
 
@@ -212,8 +222,8 @@ describe('deriveTheme', () => {
         ...DEFAULT_INPUTS,
         primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
       })
-      expect(md.light['--color-primary']).toBe('#ff5500')
-      expect(md.dark['--color-primary']).toBe('#00ccff')
+      expect(md.light['--color-primary']).toBe(FF5500)
+      expect(md.dark['--color-primary']).toBe(OOCCFF)
     })
 
     it('lock derives on-primary / primary-container / on-primary-container from locked HCT', () => {
@@ -230,9 +240,9 @@ describe('deriveTheme', () => {
       expect(md.light['--color-on-primary-container']).not.toBe(
         baseline.md.light['--color-on-primary-container'],
       )
-      expect(md.light['--color-on-primary']).toMatch(HEX)
-      expect(md.light['--color-primary-container']).toMatch(HEX)
-      expect(md.light['--color-on-primary-container']).toMatch(HEX)
+      expect(md.light['--color-on-primary']).toMatch(OKLCH)
+      expect(md.light['--color-primary-container']).toMatch(OKLCH)
+      expect(md.light['--color-on-primary-container']).toMatch(OKLCH)
     })
 
     it('container override still wins over lock-derived container', () => {
@@ -241,9 +251,9 @@ describe('deriveTheme', () => {
         primaryHexLock: { light: '#ff5500', dark: null },
         md3PrimaryContainerOverride: { light: '#abcdef', dark: null },
       })
-      expect(md.light['--color-primary-container']).toBe('#abcdef')
+      expect(md.light['--color-primary-container']).toBe(ABCDEF)
       // primary itself still locked
-      expect(md.light['--color-primary']).toBe('#ff5500')
+      expect(md.light['--color-primary']).toBe(FF5500)
     })
 
     it('lock is mode-keyed — locking light leaves dark MCU-derived', () => {

@@ -1,5 +1,6 @@
-import { argbFromHex, Hct, hexFromArgb } from '@tonex/mcu'
+import { argbFromHex, Hct } from '@tonex/mcu'
 import type { TokenMap } from './derive'
+import { argbFromOklch, oklchFromArgb } from './oklch'
 
 // why: surface tint — replaces MCU's surfaces with a TW zinc base, then
 // blends primary's hue+chroma back in proportional to `level`. Tone is
@@ -10,19 +11,23 @@ import type { TokenMap } from './derive'
 //
 // Applies to surface-bg tokens only; `--color-on-surface` stays MCU-derived
 // (no shade map for text-on-surface).
+//
+// Internally the algorithm is argb (HCT operates on argb ints); the layer
+// at the API boundary is oklch strings — parse on input, format on output.
 
 const TARGET_CHROMA = 8
 
-// Tailwind v4 zinc — hex approximations of the OKLCH palette.
-const ZINC: Record<string, string> = {
-  '50': '#fafafa',
-  '100': '#f4f4f5',
-  '200': '#e4e4e7',
-  '300': '#d4d4d8',
-  '700': '#3f3f46',
-  '800': '#27272a',
-  '900': '#18181b',
-  '950': '#09090b',
+// Tailwind v4 zinc — hex approximations of the OKLCH palette. Stored as
+// argb ints because every consumer below needs HCT, not the hex string.
+const ZINC_ARGB: Record<string, number> = {
+  '50': argbFromHex('#fafafa'),
+  '100': argbFromHex('#f4f4f5'),
+  '200': argbFromHex('#e4e4e7'),
+  '300': argbFromHex('#d4d4d8'),
+  '700': argbFromHex('#3f3f46'),
+  '800': argbFromHex('#27272a'),
+  '900': argbFromHex('#18181b'),
+  '950': argbFromHex('#09090b'),
 }
 
 const SHADE_MAP: Record<'light' | 'dark', Record<string, string>> = {
@@ -45,16 +50,16 @@ function lerpHue(a: number, b: number, t: number): number {
   return (a + diff * t + 360) % 360
 }
 
-function blendOne(baseHex: string, primaryHex: string, level: number): string {
-  if (level <= 0) return baseHex
-  const base = Hct.fromInt(argbFromHex(baseHex))
-  const primary = Hct.fromInt(argbFromHex(primaryHex))
+function blendOne(baseArgb: number, primaryArgb: number, level: number): string {
+  if (level <= 0) return oklchFromArgb(baseArgb)
+  const base = Hct.fromInt(baseArgb)
+  const primary = Hct.fromInt(primaryArgb)
   const blended = Hct.from(
     lerpHue(base.hue, primary.hue, level),
     base.chroma + (TARGET_CHROMA - base.chroma) * level,
     base.tone,
   )
-  return hexFromArgb(blended.toInt())
+  return oklchFromArgb(blended.toInt())
 }
 
 export function applySurfaceTint(
@@ -62,13 +67,15 @@ export function applySurfaceTint(
   mode: 'light' | 'dark',
   level: number,
 ): TokenMap {
-  const primaryHex = mcuLayer['--color-primary']
+  const primaryOklch = mcuLayer['--color-primary']
+  if (!primaryOklch) return mcuLayer
+  const primaryArgb = argbFromOklch(primaryOklch)
   const out: TokenMap = { ...mcuLayer }
   const shades = SHADE_MAP[mode]
   for (const [token, shade] of Object.entries(shades)) {
-    const baseHex = ZINC[shade]
-    if (!baseHex || !primaryHex) continue
-    out[token] = blendOne(baseHex, primaryHex, level)
+    const baseArgb = ZINC_ARGB[shade]
+    if (baseArgb === undefined) continue
+    out[token] = blendOne(baseArgb, primaryArgb, level)
   }
   return out
 }

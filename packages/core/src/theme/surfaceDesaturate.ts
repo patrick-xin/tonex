@@ -1,5 +1,6 @@
-import { argbFromHex, Hct, hexFromArgb } from '@tonex/mcu'
+import { Hct } from '@tonex/mcu'
 import type { TokenMap } from './derive'
+import { argbFromOklch, oklchFromArgb } from './oklch'
 
 // why: surface desaturation — chroma multiplier on MCU output. Operates on
 // whatever MCU emitted: parse → HCT → scale chroma → emit. Tone and hue
@@ -19,11 +20,11 @@ const SURFACE_FAMILY = [
   '--color-on-surface',
 ] as const
 
-function scaleChroma(hex: string, level: number): string {
-  if (level <= 0) return hex
-  const hct = Hct.fromInt(argbFromHex(hex))
+function scaleChroma(value: string, level: number): string {
+  if (level <= 0) return value
+  const hct = Hct.fromInt(argbFromOklch(value))
   const next = Hct.from(hct.hue, hct.chroma * (1 - level), hct.tone)
-  return hexFromArgb(next.toInt())
+  return oklchFromArgb(next.toInt())
 }
 
 export function applySurfaceDesaturate(mcuLayer: TokenMap, level: number): TokenMap {

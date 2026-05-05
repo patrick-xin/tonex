@@ -3,7 +3,7 @@ import { deriveTheme } from './derive'
 import { DEFAULT_INPUTS } from './schema'
 import { applySurfaceTint } from './surfaceTint'
 
-const HEX = /^#[0-9a-f]{6}$/i
+const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 
 const SURFACE_BG = [
   '--color-surface',
@@ -32,7 +32,7 @@ describe('applySurfaceTint', () => {
     const tintedGreen = applySurfaceTint(green, 'light', 1)
     for (const tok of SURFACE_BG) {
       expect(tintedRed[tok]).not.toBe(tintedGreen[tok])
-      expect(tintedRed[tok]).toMatch(HEX)
+      expect(tintedRed[tok]).toMatch(OKLCH)
     }
   })
 
