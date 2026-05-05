@@ -17,3 +17,11 @@ MCU produces tinted neutrals (chromatic by design). Some users want clean, achro
 - The neutral ramp can visibly disagree with itself (e.g. slate `background` next to MCU-neutral `muted`). This is accepted.
 - `SurfaceProvider` produces only `Record<SurfaceRole, hex>`, never a full neutral palette.
 - There are exactly two source-level tint controls: `source.surface.tintLevel` (chrome ramp) and `source.componentTintLevel` (component ramp). They are not symmetric and cannot be unified.
+
+## Deferred amendment — 2026-05-05
+
+This ADR's body describes a **palette-sourced** mechanism (`surface.system: "tailwind"`, `SurfaceProvider`, `Record<SurfaceRole, hex>`, asymmetric chrome/component tint controls). What shipped in the small-loop work (commit `94e8849`) is **algorithmic post-derive**: `surfaceAlgo: 'none' | 'tint' | 'desaturate'` with two scalar levels, no palette dependency, all transforms inside `deriveTheme` per ADR-0017.
+
+The mechanism choice is captured in **ADR-0018** (post-MCU treatment as algorithmic). This ADR's body is preserved as historical context — the original framing motivated the surface-role asymmetry that ADR-0018 still echoes (treatment touches surface tokens, not component tokens), but the implementation path differs.
+
+See **issue #5** for the rationale and decision trail.
