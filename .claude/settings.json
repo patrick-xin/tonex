@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-context.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/edit-boundary.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are the tonex drift sentinel. Review the assistant's last turn (visible in the transcript via $ARGUMENTS) for these specific drift signals only:\n\n1. **Frozen ADR rewrite** — the assistant edited a `docs/adr/*.md` file and the edit changed body prose rather than appending a new `## Amendment` block at the bottom.\n2. **Stripped lifecycle header** — the assistant edited `CLAUDE.md`, `CONTEXT.md`, or any `docs/agents/*.md` file and removed or moved the `> **State:** Living.` header line at the top.\n3. **Sink-side color logic** — the assistant added color computation (conversion, rounding, role mapping, tonal math) inside `packages/core/src/theme/applyDom.ts` or any `exporters/*.ts` file. ADR-0017 pins all such logic to `deriveTheme`.\n4. **What-comments** — the assistant added a multi-line comment that explains *what* code does instead of *why*. The repo convention is `// why:` comments only at non-obvious choices; explanatory comments dilute that signal.\n\nIf one or more of these is clearly present, return JSON exactly: `{\"decision\":\"block\",\"reason\":\"<one-sentence specific drift, naming the file>\"}`. Otherwise return JSON exactly: `{}`. Do not return any other text. Bias toward letting the agent stop — only block on clear, named drift, never on vague suspicion.\n\nInput: $ARGUMENTS"
+          }
+        ]
+      }
+    ]
+  }
+}

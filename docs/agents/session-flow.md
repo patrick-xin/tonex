@@ -9,6 +9,15 @@ Reading order when an agent starts work in this repo. Designed so the user does 
 These reach the agent without explicit reads:
 - `CLAUDE.md` — repo-level instructions
 - (For Claude Code main agents only) machine-local memory at `~/.claude/projects/<repo>/memory/`
+- `SessionStart` hook output — branch, recent commits, uncommitted state (see `.claude/hooks/session-context.sh`)
+
+## Hooks
+
+`.claude/settings.json` registers three hooks. They're checked in so every agent in this repo runs the same drift-prevention layer:
+
+- **SessionStart** — prints repo state into opening context (above).
+- **PostToolUse on Edit|Write** — surfaces a reminder when a frozen ADR, sink-layer file (`applyDom.ts`, `exporters/*.ts`), or living doc with a lifecycle header is touched. Advisory, not blocking.
+- **Stop drift sentinel** — prompt-based pass that scans the last turn for four named drift patterns (frozen-ADR rewrites, stripped lifecycle headers, sink-side color logic, what-comments). Blocks the stop only on clear, named drift.
 
 ## Read on every non-trivial start
 
