@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
 import {
   DEFAULT_INPUTS,
+  DEFAULT_SHADCN_ROLE_BINDINGS,
   type MdTokenName,
   type PortableTheme,
   SCHEMA_VERSION,
@@ -103,6 +104,24 @@ export const useSource = create<SourceState>()(
       // "what's portable vs ephemeral." Persistence drift is no longer a
       // separate maintenance surface.
       partialize: selectPortable,
+      // why: forward migration ladder per ADR-0009. v1 → v2 expanded the
+      // shadcn role surface from 2 keys to 26; zustand persist replaces the
+      // bindings field wholesale on rehydrate, so v1 state would leave 24
+      // role keys undefined and bindShadcn would throw at the first lookup.
+      // Spread defaults under persisted bindings — preserves any user edits
+      // to the two roles v1 had while filling the rest from current defaults.
+      // Returning a partial PortableTheme is fine; zustand spreads it over
+      // initial state, so unmentioned fields keep their in-memory defaults.
+      migrate: (persistedState, version) => {
+        const s = persistedState as Partial<PortableTheme>
+        if (version < 2) {
+          s.shadcnRoleBindings = {
+            light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, ...s.shadcnRoleBindings?.light },
+            dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, ...s.shadcnRoleBindings?.dark },
+          }
+        }
+        return s as PortableTheme
+      },
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.

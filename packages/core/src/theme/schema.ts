@@ -1,6 +1,11 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 
-export const SCHEMA_VERSION = 1 as const
+// why: bumped to 2 in slice 2 — md token set expanded 8→28, shadcn roles
+// 2→26. Persisted v1 stores only 2 role bindings; rehydrate would replace
+// the new 26-key defaults wholesale (zustand persist shallow-merges field
+// values, not nested objects). Migration fills missing roles from defaults.
+// Future bumps: increment AND extend the migrate function in source.ts.
+export const SCHEMA_VERSION = 2 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 export const STORAGE_KEY = 'tonex-theme-v1' as const

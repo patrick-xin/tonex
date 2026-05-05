@@ -94,6 +94,31 @@ describe('useSource persistence round-trip', () => {
     expect(useSource.getState()).toMatchObject(NONDEFAULT_INPUTS)
   })
 
+  it('v1 → v2 migrate: missing role bindings fill from defaults; persisted ones survive', async () => {
+    // why: v1 only persisted --primary + --primary-foreground bindings. After
+    // the v2 expansion, rehydrate must merge defaults under persisted bindings
+    // so bindShadcn finds every role. Without this migration, deriveTheme
+    // throws "role X bound to missing md token undefined" on first render.
+    const v1State = {
+      ...DEFAULT_INPUTS,
+      shadcnRoleBindings: {
+        light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
+        dark: { '--primary': '--color-surface', '--primary-foreground': '--color-on-surface' },
+      },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v1State, version: 1 }))
+    await useSource.persist.rehydrate()
+
+    const bindings = useSource.getState().shadcnRoleBindings
+    // user's v1 edits survive
+    expect(bindings.light['--primary']).toBe('--color-primary')
+    expect(bindings.dark['--primary']).toBe('--color-surface')
+    // missing roles filled from defaults
+    expect(bindings.light['--background']).toBe('--color-surface')
+    expect(bindings.dark['--card']).toBe('--color-surface-bright')
+    expect(bindings.light['--sidebar-border']).toBe('--color-outline')
+  })
+
   it('setSeedHex no-ops when seedHexLock is true', () => {
     const s = useSource.getState()
     s.setSeedHex('#aabbcc')
