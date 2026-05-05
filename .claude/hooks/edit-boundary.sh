@@ -23,13 +23,13 @@ emit() {
 }
 
 case "$file_path" in
-  */docs/adr/[0-9]*.md)
+  docs/adr/[0-9]*.md|*/docs/adr/[0-9]*.md)
     emit "ADR boundary reminder: docs/adr/*.md is frozen (lifecycle header). New decisions get new ADRs; existing ADRs get amendment blocks appended at the bottom — never rewrite the body. If this edit changed body prose, undo and convert to an amendment block."
     ;;
-  */theme/applyDom.ts|*/exporters/*.ts)
+  packages/core/src/theme/applyDom.ts|*/packages/core/src/theme/applyDom.ts|*/exporters/*.ts)
     emit "Sink boundary reminder (ADR-0017): applyDom and exporters/* must only format what deriveTheme returned — no color conversion, rounding, or role mapping. If this edit added such logic, push it into deriveTheme instead."
     ;;
-  */docs/agents/*.md|*/CLAUDE.md|*/CONTEXT.md)
+  docs/agents/*.md|*/docs/agents/*.md|CLAUDE.md|*/CLAUDE.md|CONTEXT.md|*/CONTEXT.md)
     emit "Living-doc reminder: this file declares lifecycle state in a header line at the top (\`> **State:** Living. ...\`). Preserve the header on edits — its absence is the signal that a doc predates the lifecycle policy."
     ;;
 esac

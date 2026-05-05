@@ -1,4 +1,4 @@
-> **State:** Living glossary. Edit when domain vocabulary changes in code. Vocabulary for unbuilt features does not belong here.
+> **State:** Living. Edit when domain vocabulary changes in code. Vocabulary for unbuilt features does not belong here.
 
 ## Project domain
 
