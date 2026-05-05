@@ -65,6 +65,13 @@ export interface PortableTheme {
   // Container/on-* tones use M3 baseline (90/10 light, 30/90 dark); contrast-
   // aware family resolution is later work.
   primaryHexLock: { light: string | null; dark: string | null }
+  // why: source-input gate, not a per-token snapshot. When true, setSeedHex
+  // becomes a no-op — pathways that mutate the seed (hex input, HCT slider,
+  // image extraction) all flow through the same setter. Lock is orthogonal
+  // to override: locking after setting overrides preserves overrides because
+  // they live on different fields. Boolean (not mode-keyed) — locking the
+  // seed locks both modes since seedHex itself isn't mode-keyed.
+  seedHexLock: boolean
   // why: minimal single-token override to verify the source→derive→DOM→export
   // loop under mutation pressure with light/dark UX. Mode-keyed per ADR-0017.
   // Slice 6 generalizes this as md3TokenOverrides: { light: Record<MdTokenName,
@@ -96,6 +103,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   variant: DEFAULT_VARIANT,
   contrastLevel: 0,
   primaryHexLock: { light: null, dark: null },
+  seedHexLock: false,
   md3PrimaryContainerOverride: { light: null, dark: null },
   shadcnRoleBindings: {
     light: DEFAULT_SHADCN_ROLE_BINDINGS,

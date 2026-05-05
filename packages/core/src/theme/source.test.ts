@@ -20,6 +20,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   variant: 'tonalSpot',
   contrastLevel: 0.5,
   primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
+  seedHexLock: true,
   md3PrimaryContainerOverride: { light: '#aabbcc', dark: '#112233' },
   shadcnRoleBindings: {
     light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
@@ -48,6 +49,9 @@ describe('useSource persistence round-trip', () => {
     s.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
     s.setPrimaryHexLock('light', NONDEFAULT_INPUTS.primaryHexLock.light)
     s.setPrimaryHexLock('dark', NONDEFAULT_INPUTS.primaryHexLock.dark)
+    // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
+    // seed setter no-ops, so reordering would silently drop the seed write.
+    s.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
     s.setMd3PrimaryContainerOverride('light', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.light)
     s.setMd3PrimaryContainerOverride('dark', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.dark)
     for (const mode of ['light', 'dark'] as const) {
@@ -80,5 +84,16 @@ describe('useSource persistence round-trip', () => {
     )
     await useSource.persist.rehydrate()
     expect(useSource.getState()).toMatchObject(NONDEFAULT_INPUTS)
+  })
+
+  it('setSeedHex no-ops when seedHexLock is true', () => {
+    const s = useSource.getState()
+    s.setSeedHex('#aabbcc')
+    s.setSeedHexLock(true)
+    s.setSeedHex('#112233')
+    expect(useSource.getState().seedHex).toBe('#aabbcc')
+    s.setSeedHexLock(false)
+    s.setSeedHex('#112233')
+    expect(useSource.getState().seedHex).toBe('#112233')
   })
 })

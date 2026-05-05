@@ -16,6 +16,7 @@ interface SourceActions {
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
   setPrimaryHexLock(mode: 'light' | 'dark', hex: string | null): void
+  setSeedHexLock(locked: boolean): void
   setMd3PrimaryContainerOverride(mode: 'light' | 'dark', hex: string | null): void
   setShadcnRoleBinding(mode: 'light' | 'dark', role: ShadcnRoleName, mdToken: MdTokenName): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
@@ -42,6 +43,7 @@ export function selectPortable(s: SourceState): PortableTheme {
     setVariant: _sv,
     setContrastLevel: _scl,
     setPrimaryHexLock: _spl,
+    setSeedHexLock: _shl,
     setMd3PrimaryContainerOverride: _so,
     setShadcnRoleBinding: _sb,
     setSurfaceAlgo: _ssa,
@@ -59,13 +61,19 @@ export const useSource = create<SourceState>()(
     (set) => ({
       ...DEFAULT_INPUTS,
       _hydrated: false,
-      setSeedHex: (seedHex) => set({ seedHex }),
+      // why: seedHexLock gates the seed write at the setter so every pathway
+      // (hex input, HCT slider, image extraction) is blocked by one check
+      // instead of each consumer guarding individually. Silent no-op — UI is
+      // expected to disable the inputs cosmetically; this is the structural
+      // backstop for any caller that bypasses the disabled state.
+      setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
       setVariant: (variant) => set({ variant }),
       setContrastLevel: (contrastLevel) => set({ contrastLevel }),
       setPrimaryHexLock: (mode, hex) =>
         set((s) => ({
           primaryHexLock: { ...s.primaryHexLock, [mode]: hex },
         })),
+      setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
       setMd3PrimaryContainerOverride: (mode, hex) =>
         set((s) => ({
           md3PrimaryContainerOverride: { ...s.md3PrimaryContainerOverride, [mode]: hex },

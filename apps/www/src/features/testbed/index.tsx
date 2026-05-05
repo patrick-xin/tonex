@@ -16,6 +16,7 @@ import { ExportPanels } from './export-panels'
 import { MdSwatches } from './md-swatches'
 import { PrimaryContainerOverride } from './primary-container-override'
 import { PrimaryHexLock } from './primary-hex-lock'
+import { ResetButton } from './reset-button'
 import { SeedInput } from './seed-input'
 import { ShadcnBindings } from './shadcn-bindings'
 import { ShadcnPreview } from './shadcn-preview'
@@ -44,6 +45,8 @@ export function Testbed() {
       <ShadcnPreview />
 
       <ExportPanels />
+
+      <ResetButton />
     </main>
   )
 }
