@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # ColorSystem is a palette library slot, not an engine
 
 The existing type `ColorSystemDef` (in `color-systems/types.ts`) is named ambiguously — "system" reads like an engine. It is not. It is a curated palette library (Tailwind today, Radix tomorrow) that surfaces in two places in the app: the **surface choice** and the **color picker swatches**.

@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # MCU is the fixed color engine
 
 This tool's wedge is Material Color Utilities (MCU): one seed → multiple well-conditioned palettes (HCT/CAM16, accessibility-aware) across distinct moods.

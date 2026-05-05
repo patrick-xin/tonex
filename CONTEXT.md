@@ -1,46 +1,46 @@
+> **State:** Living glossary. Edit when domain vocabulary changes in code. Vocabulary for unbuilt features does not belong here.
+
 ## Project domain
 
-This is a tool that turns a logo or seed hex color into a copy-paste-ready shadcn theme via Material Color Utilities (MCU). See ADRs in `docs/adr/` for load-bearing decisions.
+This is a tool that turns a logo or seed hex color into a copy-paste-ready theme via Material Color Utilities (MCU). See ADRs in `docs/adr/` for load-bearing decisions.
 
 **Engine**:
 The fixed color-generation library: Material Color Utilities (MCU). Produces palettes from a seed using HCT/CAM16. Not swappable — see ADR-0001.
 
-**ColorSystem**:
-A curated third-party palette library (Tailwind today, Radix planned). Surfaces in two places: the surface picker and the color-picker swatches. Defined by `ColorSystemDef` in `color-systems/types.ts`. NOT an engine and NOT an output target — see ADR-0004.
-_Avoid_: "color engine," "color generator," "color provider"
-
 **Source**:
-The persisted state — only what the user picked, never what was computed. Hex seed, variant, contrast level, surface choice, tint levels, overrides. See ADR-0003 for the canonical seed representation.
+The persisted state — only what the user picked, never what was computed. `PortableTheme` in `packages/core/src/theme/schema.ts` is the wire shape; `SourceState` adds `_hydrated` and actions. Hex is the canonical seed representation — see ADR-0003.
 
 **Derived**:
-Pure functions of Source. The palettes, MD3 roles, shadcn tokens, CSS string. Never persisted. Currently scattered across multiple resolver files; being consolidated behind `deriveTheme`.
+Pure function of Source. `deriveTheme(source) → { md, shadcn, warnings }` in `packages/core/src/theme/derive.ts`. Both modes co-derive in one call. Never persisted. See ADR-0017.
 
 **Sink**:
-A side-effect adapter that consumes Derived output. DOM (writes CSS variables), clipboard (writes shadcn CSS string). Each Sink is a pure function of `ResolvedTheme` plus one effect call.
+A consumer of Derived output. Today: `applyDom` (runtime renderer). Future: exporters in `packages/core/src/theme/exporters/` (slice 4). Each Sink only formats what `deriveTheme` returned — never recomputes. See ADR-0017.
 
 **Spine**:
-The single pure orchestrator: `deriveTheme(source) → { md, shadcn, css, warnings }`. Composes named pure transforms (palettes, surface, tokens, css). See ADR-0005 — there is no class facade around this.
+The single pure orchestrator: `deriveTheme(source) → { md, shadcn, warnings }`. See ADR-0005 (no facade) and ADR-0017 (lean spine).
 
-**Chrome ramp** / **Component ramp**:
-Two distinct token sets with independent tint controls. Chrome = surface roles (background, card, popover, sidebar). Component = soft-fill tokens (muted, accent, border, secondary, ring, input). The asymmetry is intentional — see ADR-0002.
+**Variant**:
+A named MCU scheme strategy (cmf, tonalSpot, etc.) registered in `packages/core/src/variants/`. Each entry implements `VariantStrategy` and feeds `deriveTheme` via a registry lookup.
 
-**SurfaceProvider**:
-The slot that turns `source.surface` into chrome-ramp role overrides. Two adapters today: MD3 chroma-scaled neutral, Tailwind-blended palette. Output is `Record<SurfaceRole, hex>` — never a full neutral palette.
+**Surface treatment**:
+A post-MCU transform on the neutral ramp. `surfaceAlgo: 'none' | 'tint' | 'desaturate'` selects at most one transform. Runs inside `deriveTheme` between md emit and shadcn bind so all consumers see the treated values.
+
+**Primary lock**:
+A pin on `--color-primary` to an exact hex; the family (`--color-on-primary`, `--color-primary-container`, `--color-on-primary-container`) auto-derives at M3 baseline tones. Mode-keyed.
 
 ## Agent skills
 
 **Issue tracker**:
-The tool that hosts a repo's issues — GitHub Issues, Linear, a local `.scratch/` markdown convention, or similar. Skills like `to-issues`, `to-prd`, `triage`, and `qa` read from and write to it.
-_Avoid_: backlog manager, backlog backend, issue host
+GitHub Issues at `patrick-xin/tonex`. Skills like `to-issues`, `to-prd`, `triage` read from and write to it.
+_Avoid_: backlog manager. Use "ticket" only when quoting external systems that call them tickets.
 
 **Issue**:
-A single tracked unit of work inside an **Issue tracker** — a bug, task, PRD, or slice produced by `to-issues`.
-_Avoid_: ticket (use only when quoting external systems that call them tickets)
+A single tracked unit of work inside an Issue tracker — a bug, task, PRD, or slice produced by `to-issues`.
 
 **Triage role**:
-A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-afk`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
+A canonical state-machine label applied to an Issue during triage (e.g. `needs-triage`, `ready-for-agent`). See `docs/agents/triage-labels.md`.
 
 ## Relationships
 
-- An **Issue tracker** holds many **Issues**
-- An **Issue** carries one **Triage role** at a time
+- An Issue tracker holds many Issues
+- An Issue carries one Triage role at a time

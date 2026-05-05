@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # Hex is the canonical seed representation
 
 Most shadcn users think in hex (logos, brand books, color pickers). HCT (hue/chroma/tone) is MCU's internal perceptual representation but is unfamiliar to the target audience.

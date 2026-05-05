@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # WYSIWYG — preview and export never drift
 
 The previous prototype's load-bearing failure mode: users got one set of colors in the live preview, pasted the export into their own project, and saw different colors. Competitors (tweakcn, realtimecolors) hit the same trap. The cause was multiple derive paths producing the same logical tokens through subtly different code (rounding, color-space conversion, mode-specific resolution), one feeding the preview and another feeding the export.

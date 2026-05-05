@@ -67,7 +67,10 @@ export interface PortableTheme {
   primaryHexLock: { light: string | null; dark: string | null }
   // why: minimal single-token override to verify the source→derive→DOM→export
   // loop under mutation pressure with light/dark UX. Mode-keyed per ADR-0017.
-  // Slice 6 will generalize this to md3TokenOverrides: Record<TokenName, ModeKeyed>.
+  // Slice 6 generalizes this as md3TokenOverrides: { light: Record<MdTokenName,
+  // string>; dark: Record<MdTokenName, string> } — mode at the top per ADR-0017
+  // commitment 3 (mirrors :root + .dark export blocks one-to-one). Match the
+  // shape of shadcnRoleBindings below; do NOT use Record<Token, {light, dark}>.
   md3PrimaryContainerOverride: { light: string | null; dark: string | null }
   // why: cross-layer mapping is data, not code. Mode-keyed because some
   // slice-7 mappings will diverge across modes (e.g. light primary →

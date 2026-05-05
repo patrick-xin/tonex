@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # No ThemeSystem facade — keep Source / Derived / Sinks layered
 
 A reasonable-sounding suggestion is to collapse the theme code behind a single `ThemeSystem` facade with `.apply()`, `.toCSS()`, `.copyToClipboard()` methods. We considered it and rejected it.

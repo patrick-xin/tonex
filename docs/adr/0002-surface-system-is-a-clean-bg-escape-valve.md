@@ -1,3 +1,5 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
 # Surface system is a clean-bg escape valve, not a TW-flavored mode
 
 MCU produces tinted neutrals (chromatic by design). Some users want clean, achromatic backgrounds while keeping MCU-generated chromatic components — that combination is what the surface system exists to enable.
