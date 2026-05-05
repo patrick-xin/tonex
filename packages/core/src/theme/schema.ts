@@ -7,36 +7,141 @@ export const STORAGE_KEY = 'tonex-theme-v1' as const
 
 // why: canonical list of md tokens deriveTheme emits per mode. Used as the
 // value-domain of ShadcnRoleBindings — the type system rejects bindings to
-// tokens that don't exist. Adding a new md token: extend this list AND emit
-// it in derive.ts (both must move together; the test suite catches drift).
+// tokens that don't exist. Adding a new md token: extend this list AND
+// register a resolver in derive.ts MD_TOKEN_RESOLVERS (both must move
+// together; the test suite catches drift).
+//
+// Order: families grouped, primary first to match M3 spec ordering. Surface
+// dim/bright sit between base surface and the container ladder. Outline +
+// outline-variant tail. Tertiary family included for md-side completeness
+// even though no default shadcn binding currently consumes it — md is its
+// own export surface, not just shadcn's substrate.
 export const MD_TOKEN_NAMES = [
   '--color-primary',
   '--color-on-primary',
   '--color-primary-container',
   '--color-on-primary-container',
+  '--color-secondary',
+  '--color-on-secondary',
+  '--color-secondary-container',
+  '--color-on-secondary-container',
+  '--color-tertiary',
+  '--color-on-tertiary',
+  '--color-tertiary-container',
+  '--color-on-tertiary-container',
+  '--color-error',
+  '--color-on-error',
+  '--color-error-container',
+  '--color-on-error-container',
   '--color-surface',
+  '--color-on-surface',
+  '--color-on-surface-variant',
+  '--color-surface-dim',
+  '--color-surface-bright',
+  '--color-surface-container-lowest',
+  '--color-surface-container-low',
   '--color-surface-container',
   '--color-surface-container-high',
-  '--color-on-surface',
+  '--color-surface-container-highest',
+  '--color-outline',
+  '--color-outline-variant',
 ] as const
 export type MdTokenName = (typeof MD_TOKEN_NAMES)[number]
 
-// why: shadcn roles tonex currently maps. Slice 7 widens this — for now two
-// roles is enough to verify the binding mechanism end-to-end. Listed as a
-// const tuple (sibling to MD_TOKEN_NAMES) so iteration sites read from one
-// canonical source. Adding a role here forces the type to widen and every
-// iterator to surface the new entry.
-export const SHADCN_ROLE_NAMES = ['--primary', '--primary-foreground'] as const
+// why: shadcn-classic role surface. Listed as a const tuple (sibling to
+// MD_TOKEN_NAMES) so iteration sites read from one canonical source. Adding
+// a role here forces the type to widen, the bindings record to gain the
+// key, and every iterator (derive.bindShadcn, globals.css alias bridge,
+// testbed UI) to surface the new entry. No --destructive-foreground —
+// destructive's contrast partner is already bound via on-error in legacy
+// shadcn templates.
+export const SHADCN_ROLE_NAMES = [
+  '--background',
+  '--foreground',
+  '--card',
+  '--card-foreground',
+  '--popover',
+  '--popover-foreground',
+  '--primary',
+  '--primary-foreground',
+  '--secondary',
+  '--secondary-foreground',
+  '--muted',
+  '--muted-foreground',
+  '--accent',
+  '--accent-foreground',
+  '--destructive',
+  '--border',
+  '--input',
+  '--ring',
+  '--sidebar',
+  '--sidebar-foreground',
+  '--sidebar-primary',
+  '--sidebar-primary-foreground',
+  '--sidebar-accent',
+  '--sidebar-accent-foreground',
+  '--sidebar-border',
+  '--sidebar-ring',
+] as const
 export type ShadcnRoleName = (typeof SHADCN_ROLE_NAMES)[number]
 
 export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 
-// why: default bindings preserve slice-1 hardcoded behavior — shadcn primary
-// pairs with md primary-container as the "filled surface" tonal pair. Making
-// the rule a value (not a literal in derive.ts) is what enables editing.
-export const DEFAULT_SHADCN_ROLE_BINDINGS: ShadcnRoleBindings = {
+// why: default light bindings — lifted from legacy tonex's MD3_ROLE_MAP.
+// Structurally significant pairings:
+//   - card → surface-dim (light) / surface-bright (dark) — cards float
+//     darker than surface in light mode, lighter in dark mode.
+//   - popover → surface (light) / surface-container (dark) — same intent.
+//   - sidebar-foreground → on-surface (light) / on-surface-variant (dark) —
+//     softer text on dark sidebars.
+// border = input = ring = outline by design — outline is M3's edge token
+// and shadcn's three edge roles all want the same value at default.
+const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
+  '--background': '--color-surface',
+  '--foreground': '--color-on-surface',
+  '--card': '--color-surface-dim',
+  '--card-foreground': '--color-on-surface',
+  '--popover': '--color-surface',
+  '--popover-foreground': '--color-on-surface',
   '--primary': '--color-primary-container',
   '--primary-foreground': '--color-on-primary-container',
+  '--secondary': '--color-secondary-container',
+  '--secondary-foreground': '--color-on-secondary-container',
+  '--muted': '--color-surface-container-high',
+  '--muted-foreground': '--color-on-surface-variant',
+  '--accent': '--color-surface-container-high',
+  '--accent-foreground': '--color-on-surface',
+  '--destructive': '--color-error',
+  '--border': '--color-outline',
+  '--input': '--color-outline',
+  '--ring': '--color-outline',
+  '--sidebar': '--color-surface-container-low',
+  '--sidebar-foreground': '--color-on-surface',
+  '--sidebar-primary': '--color-primary',
+  '--sidebar-primary-foreground': '--color-on-primary',
+  '--sidebar-accent': '--color-surface-container-highest',
+  '--sidebar-accent-foreground': '--color-on-surface',
+  '--sidebar-border': '--color-outline',
+  '--sidebar-ring': '--color-outline',
+}
+
+// why: dark mode diverges from light only on the three asymmetric pairings
+// above. Spread + override keeps the delta visible at a glance and prevents
+// the two maps from silently drifting on edits — adding a key to LIGHT
+// flows through DARK automatically.
+const DEFAULT_SHADCN_BINDINGS_DARK: ShadcnRoleBindings = {
+  ...DEFAULT_SHADCN_BINDINGS_LIGHT,
+  '--card': '--color-surface-bright',
+  '--popover': '--color-surface-container',
+  '--sidebar-foreground': '--color-on-surface-variant',
+}
+
+export const DEFAULT_SHADCN_ROLE_BINDINGS: {
+  light: ShadcnRoleBindings
+  dark: ShadcnRoleBindings
+} = {
+  light: DEFAULT_SHADCN_BINDINGS_LIGHT,
+  dark: DEFAULT_SHADCN_BINDINGS_DARK,
 }
 
 // why: which surface treatment (if any) deriveTheme applies post-md-emit.
@@ -105,10 +210,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   primaryHexLock: { light: null, dark: null },
   seedHexLock: false,
   md3PrimaryContainerOverride: { light: null, dark: null },
-  shadcnRoleBindings: {
-    light: DEFAULT_SHADCN_ROLE_BINDINGS,
-    dark: DEFAULT_SHADCN_ROLE_BINDINGS,
-  },
+  shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   surfaceAlgo: 'none',
   surfaceTintLevel: 0,
   surfaceDesaturateLevel: 0,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
-import { DEFAULT_INPUTS } from './schema'
+import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
 
 const HEX = /^#[0-9a-f]{6}$/i
 
@@ -148,8 +148,16 @@ describe('deriveTheme', () => {
       const { md, shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         shadcnRoleBindings: {
-          light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
-          dark: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
+          light: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
+            '--primary': '--color-primary',
+            '--primary-foreground': '--color-on-primary',
+          },
+          dark: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
+            '--primary': '--color-primary',
+            '--primary-foreground': '--color-on-primary',
+          },
         },
       })
       expect(shadcn.light['--primary']).toBe(md.light['--color-primary'])
@@ -164,11 +172,12 @@ describe('deriveTheme', () => {
       const { md, shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         shadcnRoleBindings: {
-          light: {
-            '--primary': '--color-primary-container',
-            '--primary-foreground': '--color-on-primary-container',
+          light: DEFAULT_SHADCN_ROLE_BINDINGS.light,
+          dark: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
+            '--primary': '--color-primary',
+            '--primary-foreground': '--color-on-primary',
           },
-          dark: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
         },
       })
       expect(shadcn.light['--primary']).toBe(md.light['--color-primary-container'])
@@ -182,13 +191,7 @@ describe('deriveTheme', () => {
       const { shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         md3PrimaryContainerOverride: { light: '#ff0000', dark: null },
-        shadcnRoleBindings: {
-          light: {
-            '--primary': '--color-primary-container',
-            '--primary-foreground': '--color-on-primary-container',
-          },
-          dark: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
-        },
+        shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
       })
       expect(shadcn.light['--primary']).toBe('#ff0000')
     })
@@ -287,10 +290,12 @@ describe('deriveTheme', () => {
         surfaceTintLevel: 1,
         shadcnRoleBindings: {
           light: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
             '--primary': '--color-surface-container',
             '--primary-foreground': '--color-on-surface',
           },
           dark: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
             '--primary': '--color-surface-container',
             '--primary-foreground': '--color-on-surface',
           },

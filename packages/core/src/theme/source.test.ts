@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DEFAULT_INPUTS, type PortableTheme, SCHEMA_VERSION, STORAGE_KEY } from './schema'
+import {
+  DEFAULT_INPUTS,
+  type PortableTheme,
+  SCHEMA_VERSION,
+  SHADCN_ROLE_NAMES,
+  type ShadcnRoleBindings,
+  STORAGE_KEY,
+} from './schema'
 import { useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
@@ -14,6 +21,17 @@ import { useSource } from './source'
 // capture-clear-restore dance to make the read assertion meaningful (memory
 // already holds the values it would rehydrate). Two tests, one mutation each.
 
+// why: deeply non-default bindings — every role pinned to the same md token
+// per mode, with light vs dark intentionally different. The point isn't a
+// sensible mapping; it's that EVERY key persists round-trip independently.
+// `as` cast is safe because we map over the role tuple itself.
+const NONDEFAULT_BINDINGS_LIGHT: ShadcnRoleBindings = Object.fromEntries(
+  SHADCN_ROLE_NAMES.map((role) => [role, '--color-primary']),
+) as ShadcnRoleBindings
+const NONDEFAULT_BINDINGS_DARK: ShadcnRoleBindings = Object.fromEntries(
+  SHADCN_ROLE_NAMES.map((role) => [role, '--color-on-surface']),
+) as ShadcnRoleBindings
+
 const NONDEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seedHex: '#ff00aa',
@@ -22,10 +40,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
   seedHexLock: true,
   md3PrimaryContainerOverride: { light: '#aabbcc', dark: '#112233' },
-  shadcnRoleBindings: {
-    light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
-    dark: { '--primary': '--color-surface', '--primary-foreground': '--color-on-surface' },
-  },
+  shadcnRoleBindings: { light: NONDEFAULT_BINDINGS_LIGHT, dark: NONDEFAULT_BINDINGS_DARK },
   surfaceAlgo: 'tint',
   surfaceTintLevel: 0.42,
   surfaceDesaturateLevel: 0.73,
@@ -55,16 +70,9 @@ describe('useSource persistence round-trip', () => {
     s.setMd3PrimaryContainerOverride('light', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.light)
     s.setMd3PrimaryContainerOverride('dark', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.dark)
     for (const mode of ['light', 'dark'] as const) {
-      s.setShadcnRoleBinding(
-        mode,
-        '--primary',
-        NONDEFAULT_INPUTS.shadcnRoleBindings[mode]['--primary'],
-      )
-      s.setShadcnRoleBinding(
-        mode,
-        '--primary-foreground',
-        NONDEFAULT_INPUTS.shadcnRoleBindings[mode]['--primary-foreground'],
-      )
+      for (const role of SHADCN_ROLE_NAMES) {
+        s.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
+      }
     }
     s.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)

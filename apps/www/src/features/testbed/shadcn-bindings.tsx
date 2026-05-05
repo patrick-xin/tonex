@@ -18,7 +18,9 @@ export function ShadcnBindings() {
   if (!theme) return null
 
   const isCustom = MODES.some((mode) =>
-    SHADCN_ROLE_NAMES.some((role) => bindings[mode][role] !== DEFAULT_SHADCN_ROLE_BINDINGS[role]),
+    SHADCN_ROLE_NAMES.some(
+      (role) => bindings[mode][role] !== DEFAULT_SHADCN_ROLE_BINDINGS[mode][role],
+    ),
   )
 
   return (
@@ -56,7 +58,7 @@ export function ShadcnBindings() {
           onClick={() => {
             for (const mode of MODES) {
               for (const role of SHADCN_ROLE_NAMES) {
-                setBinding(mode, role, DEFAULT_SHADCN_ROLE_BINDINGS[role])
+                setBinding(mode, role, DEFAULT_SHADCN_ROLE_BINDINGS[mode][role])
               }
             }
           }}

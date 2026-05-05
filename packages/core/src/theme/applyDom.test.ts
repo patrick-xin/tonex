@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
 import { deriveTheme } from './derive'
 import { formatCss } from './format'
-import { DEFAULT_INPUTS, type PortableTheme } from './schema'
+import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS, type PortableTheme } from './schema'
 import { selectPortable, useSource } from './source'
 
 const STYLE_ID = 'tonex-tokens'
@@ -99,8 +99,16 @@ describe('applyDom (jsdom integration)', () => {
         source: {
           ...DEFAULT_INPUTS,
           shadcnRoleBindings: {
-            light: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
-            dark: { '--primary': '--color-primary', '--primary-foreground': '--color-on-primary' },
+            light: {
+              ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
+              '--primary': '--color-primary',
+              '--primary-foreground': '--color-on-primary',
+            },
+            dark: {
+              ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
+              '--primary': '--color-primary',
+              '--primary-foreground': '--color-on-primary',
+            },
           },
         },
       },
@@ -120,10 +128,12 @@ describe('applyDom (jsdom integration)', () => {
           surfaceTintLevel: 1,
           shadcnRoleBindings: {
             light: {
+              ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
               '--primary': '--color-surface-container',
               '--primary-foreground': '--color-on-surface',
             },
             dark: {
+              ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
               '--primary': '--color-surface-container',
               '--primary-foreground': '--color-on-surface',
             },

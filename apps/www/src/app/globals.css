@@ -6,33 +6,109 @@
    shadcn-on-tailwind-v4 incantation. */
 @custom-variant dark (&:is(.dark *));
 
-/* why: register tokens with Tailwind v4 so bg-primary, text-on-primary,
-   bg-primary-container, text-on-primary-container, text-primary-foreground
-   utilities exist. `inline` tells Tailwind to embed var(...) directly in
-   utility CSS without writing a :root declaration — values come from scope
+/* why: register tokens with Tailwind v4 so bg-X / text-X utilities exist for
+   every md and shadcn role. `inline` tells Tailwind to embed var(...) directly
+   in utility CSS without writing a :root declaration — values come from scope
    classes (.md, .shadcn) at the use site. Self-reference is valid; it just
-   says "the utility resolves --color-X at runtime." ADR-0013. */
+   says "the utility resolves --color-X at runtime." ADR-0013.
+
+   Block order: md tokens first (the 28 emitted by deriveTheme), then the
+   shadcn-only --color-* names that don't already exist in md. Names that
+   appear in both layers (--color-primary, --color-secondary, etc.) are
+   registered once — Tailwind doesn't care about layer; the cascade picks
+   the right value at each use site (md scope vs shadcn scope). */
 @theme inline {
+  /* md layer — 28 tokens */
   --color-primary: var(--color-primary);
   --color-on-primary: var(--color-on-primary);
   --color-primary-container: var(--color-primary-container);
   --color-on-primary-container: var(--color-on-primary-container);
-  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-tertiary: var(--color-tertiary);
+  --color-on-tertiary: var(--color-on-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-on-tertiary-container: var(--color-on-tertiary-container);
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error-container: var(--color-on-error-container);
   --color-surface: var(--color-surface);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-low: var(--color-surface-container-low);
   --color-surface-container: var(--color-surface-container);
   --color-surface-container-high: var(--color-surface-container-high);
-  --color-on-surface: var(--color-on-surface);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+
+  /* shadcn-only utility names not present in md */
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-border: var(--color-border);
+  --color-input: var(--color-input);
+  --color-ring: var(--color-ring);
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar-primary: var(--color-sidebar-primary);
+  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+  --color-sidebar-accent: var(--color-sidebar-accent);
+  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-ring: var(--color-sidebar-ring);
 }
 
-/* why: shadcn-classic components reference --primary / --primary-foreground
+/* why: shadcn-classic components reference --primary / --foreground / etc.
    directly (lifted UI per feedback_lift_vs_rewrite). Tailwind utilities expect
    --color-*. Bridge inside .shadcn so both naming conventions resolve to the
    same scope-set values without rewriting lifted components. The dark variant
    inherits because html.dark .shadcn overrides --primary; the alias re-resolves
-   var(--primary) at the element. */
+   var(--primary) at the element. One alias per shadcn role; the alias name
+   matches the Tailwind utility (e.g. bg-card → --color-card → var(--card)). */
 .shadcn {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 /* tonex:tokens:start — generated by scripts/bake-tokens.ts; do not hand-edit. */
@@ -41,10 +117,30 @@
   --color-on-primary: #eadeff;
   --color-primary-container: #6750a4;
   --color-on-primary-container: #fcf6ff;
+  --color-secondary: #645a7d;
+  --color-on-secondary: #fdf7ff;
+  --color-secondary-container: #ded1fa;
+  --color-on-secondary-container: #4f4667;
+  --color-tertiary: #594982;
+  --color-on-tertiary: #eadeff;
+  --color-tertiary-container: #65558f;
+  --color-on-tertiary-container: #fcf6ff;
+  --color-error: #9f3f47;
+  --color-on-error: #fff7f6;
+  --color-error-container: #fa868d;
+  --color-on-error-container: #580817;
   --color-surface: #fdf7ff;
+  --color-on-surface: #352f43;
+  --color-on-surface-variant: #625c72;
+  --color-surface-dim: #dfd6f0;
+  --color-surface-bright: #fdf7ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f8f1ff;
   --color-surface-container: #f3eaff;
   --color-surface-container-high: #ede4fb;
-  --color-on-surface: #352f43;
+  --color-surface-container-highest: #e8def9;
+  --color-outline: #7e778e;
+  --color-outline-variant: #b7aec7;
 }
 
 html.dark .md {
@@ -52,19 +148,87 @@ html.dark .md {
   --color-on-primary: #270762;
   --color-primary-container: #6750a4;
   --color-on-primary-container: #fcf6ff;
+  --color-secondary: #a398be;
+  --color-on-secondary: #231b3a;
+  --color-secondary-container: #342b4b;
+  --color-on-secondary-container: #b6aad2;
+  --color-tertiary: #a694d3;
+  --color-on-tertiary: #25154c;
+  --color-tertiary-container: #65558f;
+  --color-on-tertiary-container: #fcf6ff;
+  --color-error: #fa868d;
+  --color-on-error: #580817;
+  --color-error-container: #4c000f;
+  --color-on-error-container: #ef7e84;
   --color-surface: #0f0d16;
+  --color-on-surface: #ebe1fc;
+  --color-on-surface-variant: #b0a7c0;
+  --color-surface-dim: #0f0d16;
+  --color-surface-bright: #2f293d;
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #15111e;
   --color-surface-container: #1b1726;
   --color-surface-container-high: #221d2d;
-  --color-on-surface: #ebe1fc;
+  --color-surface-container-highest: #282336;
+  --color-outline: #797289;
+  --color-outline-variant: #4b455a;
 }
 
 .shadcn {
+  --background: #fdf7ff;
+  --foreground: #352f43;
+  --card: #dfd6f0;
+  --card-foreground: #352f43;
+  --popover: #fdf7ff;
+  --popover-foreground: #352f43;
   --primary: #6750a4;
   --primary-foreground: #fcf6ff;
+  --secondary: #ded1fa;
+  --secondary-foreground: #4f4667;
+  --muted: #ede4fb;
+  --muted-foreground: #625c72;
+  --accent: #ede4fb;
+  --accent-foreground: #352f43;
+  --destructive: #9f3f47;
+  --border: #7e778e;
+  --input: #7e778e;
+  --ring: #7e778e;
+  --sidebar: #f8f1ff;
+  --sidebar-foreground: #352f43;
+  --sidebar-primary: #5b4497;
+  --sidebar-primary-foreground: #eadeff;
+  --sidebar-accent: #e8def9;
+  --sidebar-accent-foreground: #352f43;
+  --sidebar-border: #7e778e;
+  --sidebar-ring: #7e778e;
 }
 
 html.dark .shadcn {
+  --background: #0f0d16;
+  --foreground: #ebe1fc;
+  --card: #2f293d;
+  --card-foreground: #ebe1fc;
+  --popover: #1b1726;
+  --popover-foreground: #ebe1fc;
   --primary: #6750a4;
   --primary-foreground: #fcf6ff;
+  --secondary: #342b4b;
+  --secondary-foreground: #b6aad2;
+  --muted: #221d2d;
+  --muted-foreground: #b0a7c0;
+  --accent: #221d2d;
+  --accent-foreground: #ebe1fc;
+  --destructive: #fa868d;
+  --border: #797289;
+  --input: #797289;
+  --ring: #797289;
+  --sidebar: #15111e;
+  --sidebar-foreground: #b0a7c0;
+  --sidebar-primary: #a890e9;
+  --sidebar-primary-foreground: #270762;
+  --sidebar-accent: #282336;
+  --sidebar-accent-foreground: #ebe1fc;
+  --sidebar-border: #797289;
+  --sidebar-ring: #797289;
 }
 /* tonex:tokens:end */
