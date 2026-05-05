@@ -23,3 +23,7 @@ A reasonable-sounding suggestion is to collapse the theme code behind a single `
 - `copyShadcnCss(tokens)` — export effect
 
 The file count under `lib/theme/` is higher than a facade design would have, but that's the **shape** of slot-fill, not a smell. Resist future suggestions to consolidate into a class.
+
+## Amendment — 2026-05-05
+
+Path correction: the theme code lives at `packages/core/src/theme/`, not `lib/theme/` (the prior prototype's path). The `useResolvedTokens` / `applyDom` / `deriveTheme` public surface listed under "Consequence" is accurate; only the directory reference was stale.

@@ -14,3 +14,7 @@ The existing type `ColorSystemDef` (in `color-systems/types.ts`) is named ambigu
 **Consequence:**
 - "Color system" in this codebase always means "palette library." Future readers (and Claude) should not interpret it as engine, generator, or output format.
 - A ColorSystem without a `surfaceShadeMap` is picker-only. A ColorSystem with one is also offerable as a surface. This asymmetry is intentional.
+
+## Amendment — 2026-05-05
+
+The body references `color-systems/types.ts`, `color-systems/registry.ts`, and the existing TW registration as if shipped. They are **not** yet in the rewrite — `packages/core/src/` currently contains only `theme/` and `variants/`. The decision is forward-looking; the file paths are the target shape, not the current shape. Build the slot when the second adapter (Radix) is actually in scope, per the **two adapters = real seam** test.

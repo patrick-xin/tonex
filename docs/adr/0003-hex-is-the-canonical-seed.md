@@ -12,3 +12,7 @@ Most shadcn users think in hex (logos, brand books, color pickers). HCT (hue/chr
 - The `draft` buffer already exists in the current code precisely because hex-input UX fights HCT-as-canonical. This ADR makes that already-implicit truth explicit.
 
 **Consequence:** Slider state path: HCT triple lives in a draft buffer while dragging, gets converted to hex on commit. Read path: components needing HCT call a `hctFromHex` selector. There is no `hue/chroma/tone` field on the persisted source.
+
+## Amendment — 2026-05-05
+
+The body references `theme-store.draft` as already existing. That was true of the prior prototype and is **not** yet true in the current rewrite — the HCT slider UI hasn't been ported, so no draft buffer exists in `packages/core/src/theme/source.ts` today. The decision (hex canonical, transient HCT draft on commit) still stands; the supporting "already exists" evidence does not. Build the draft buffer when the slider lands, not before.
