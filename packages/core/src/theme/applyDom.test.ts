@@ -120,6 +120,15 @@ describe('applyDom (jsdom integration)', () => {
         source: { ...DEFAULT_INPUTS, surfaceAlgo: 'tint', surfaceTintLevel: 0.5 },
       },
       {
+        name: 'tint with non-default palette',
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'tint',
+          surfaceTintLevel: 0.5,
+          surfacePaletteName: 'slate',
+        },
+      },
+      {
         name: 'desaturate treatment',
         source: { ...DEFAULT_INPUTS, surfaceAlgo: 'desaturate', surfaceDesaturateLevel: 0.7 },
       },

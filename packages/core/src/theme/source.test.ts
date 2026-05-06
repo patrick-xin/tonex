@@ -65,6 +65,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   },
   shadcnRoleBindings: { light: NONDEFAULT_BINDINGS_LIGHT, dark: NONDEFAULT_BINDINGS_DARK },
   surfaceAlgo: 'tint',
+  surfacePaletteName: 'slate',
   surfaceTintLevel: 0.42,
   surfaceDesaturateLevel: 0.73,
   customColors: NONDEFAULT_CUSTOM_COLORS,
@@ -102,6 +103,7 @@ describe('useSource persistence round-trip', () => {
       }
     }
     s.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
+    s.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
     s.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
     s.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
     for (const entry of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(entry)
@@ -169,6 +171,20 @@ describe('useSource persistence round-trip', () => {
       (useSource.getState() as Partial<{ md3PrimaryContainerOverride: unknown }>)
         .md3PrimaryContainerOverride,
     ).toBeUndefined()
+  })
+
+  it('v4 → v5 migrate: missing surfacePaletteName fills to default zinc', async () => {
+    // why: slice 7 generalized applySurfaceTint to read base shades from a
+    // user-picked TW neutral palette. Persisted v4 records have no
+    // surfacePaletteName field; rehydrate must fill it with 'zinc' so the
+    // default behavior matches v4 (where the algorithm was hardcoded to zinc).
+    // Without this fill, surfacePaletteName would be undefined and the tint
+    // algorithm would NPE on the palette lookup.
+    const v4State = { ...DEFAULT_INPUTS } as Partial<PortableTheme>
+    delete v4State.surfacePaletteName
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v4State, version: 4 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().surfacePaletteName).toBe('zinc')
   })
 
   it('v2 → v3 migrate: missing customColors fills to empty array', async () => {

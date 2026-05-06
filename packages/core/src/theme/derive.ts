@@ -231,7 +231,8 @@ function buildCustomColorsShadcn(
 }
 
 function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): TokenMap {
-  if (source.surfaceAlgo === 'tint') return applySurfaceTint(layer, mode, source.surfaceTintLevel)
+  if (source.surfaceAlgo === 'tint')
+    return applySurfaceTint(layer, mode, source.surfaceTintLevel, source.surfacePaletteName)
   if (source.surfaceAlgo === 'desaturate')
     return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel)
   return layer

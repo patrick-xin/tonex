@@ -27,7 +27,12 @@ export {
   validateCustomColorEntry,
 } from './theme/schema'
 export { type SourceState, selectPortable, useSource } from './theme/source'
-export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
+export {
+  applySurfaceDesaturate,
+  applySurfaceTint,
+  NEUTRAL_PALETTE_NAMES,
+  type NeutralPaletteName,
+} from './theme/surface'
 export { useResolvedTokens } from './theme/useResolvedTokens'
 export {
   DEFAULT_VARIANT,

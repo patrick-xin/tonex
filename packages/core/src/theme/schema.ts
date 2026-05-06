@@ -1,9 +1,14 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
+import type { NeutralPaletteName } from './surface'
 
-// why: bumped to 4 in slice 6 — md3PrimaryContainerOverride (single-token,
-// mode-keyed) generalized to md3TokenOverrides (per-token map per mode).
-// Migration lifts the persisted hex into md3TokenOverrides[mode][--color-
-// primary-container] and drops the old field.
+// why: bumped to 5 in slice 7 — applySurfaceTint generalized from hardcoded
+// zinc to any of NEUTRAL_PALETTE_NAMES. New field surfacePaletteName picks
+// the base palette; v4→v5 migration fills 'zinc' so existing users see
+// identical output (zinc was the prior hardcoded base).
+// v4 (slice 6): md3PrimaryContainerOverride (single-token, mode-keyed)
+// generalized to md3TokenOverrides (per-token map per mode). Migration
+// lifts the persisted hex into md3TokenOverrides[mode][--color-primary-
+// container] and drops the old field.
 // v3 (slice 3): customColors[] field added to PortableTheme. Persisted v2
 // stores have no customColors key; zustand persist shallow-merges, so
 // rehydrate would leave the field undefined and any iteration site
@@ -12,7 +17,7 @@ import { DEFAULT_VARIANT, type VariantName } from '../variants'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 4 as const
+export const SCHEMA_VERSION = 5 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -278,9 +283,13 @@ export interface PortableTheme {
   // deriveTheme so applyDom AND formatCss reflect it identically — preview
   // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
   // runs; the level for the selected algorithm controls strength.
-  // - surfaceTintLevel: 0=neutral zinc → 1=full primary character.
+  // - surfacePaletteName: which TW neutral palette feeds the tint base.
+  //   Only consumed when surfaceAlgo='tint'. Default 'zinc' preserves the
+  //   pre-slice-7 behavior bytewise (algorithm was hardcoded to zinc).
+  // - surfaceTintLevel: 0=neutral palette base → 1=full primary character.
   // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped.
   surfaceAlgo: SurfaceAlgo
+  surfacePaletteName: NeutralPaletteName
   surfaceTintLevel: number
   surfaceDesaturateLevel: number
   // why: user-defined dual-layer color slots (md: 4 tokens, shadcn: 2 tokens
@@ -305,6 +314,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   surfaceAlgo: 'none',
+  surfacePaletteName: 'zinc',
   surfaceTintLevel: 0,
   surfaceDesaturateLevel: 0,
   customColors: [],

@@ -15,6 +15,7 @@ import {
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from './schema'
+import type { NeutralPaletteName } from './surface'
 
 interface SourceActions {
   setSeedHex(seedHex: string): void
@@ -25,6 +26,7 @@ interface SourceActions {
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
+  setSurfacePaletteName(name: NeutralPaletteName): void
   setSurfaceTintLevel(level: number): void
   setSurfaceDesaturateLevel(level: number): void
   addCustomColor(entry: CustomColorEntry): void
@@ -55,6 +57,7 @@ export function selectPortable(s: SourceState): PortableTheme {
     setMd3TokenOverride: _so,
     setShadcnRoleBinding: _sb,
     setSurfaceAlgo: _ssa,
+    setSurfacePaletteName: _spn,
     setSurfaceTintLevel: _sst,
     setSurfaceDesaturateLevel: _ssd,
     addCustomColor: _acc,
@@ -104,6 +107,7 @@ export const useSource = create<SourceState>()(
           },
         })),
       setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
+      setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
       setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
       setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
       // why: validate at the store seam — UI's add-time validator surfaces
@@ -192,6 +196,13 @@ export const useSource = create<SourceState>()(
           if (legacy?.dark != null) lifted.dark['--color-primary-container'] = legacy.dark
           s.md3TokenOverrides = lifted
           delete (s as { md3PrimaryContainerOverride?: unknown }).md3PrimaryContainerOverride
+        }
+        if (version < 5) {
+          // why: v4 had no surfacePaletteName — applySurfaceTint was hardcoded
+          // to zinc. Fill 'zinc' so post-rehydrate output is bytewise identical
+          // to v4 for any user. Without this, the field is undefined and the
+          // tint algorithm's palette lookup NPEs.
+          s.surfacePaletteName = s.surfacePaletteName ?? 'zinc'
         }
         return s as PortableTheme
       },
