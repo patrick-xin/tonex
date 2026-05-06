@@ -112,7 +112,7 @@ export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
   '--background': '--color-surface',
   '--foreground': '--color-on-surface',
-  '--card': '--color-surface-container',
+  '--card': '--color-surface-dim',
   '--card-foreground': '--color-on-surface',
   '--popover': '--color-surface',
   '--popover-foreground': '--color-on-surface',
@@ -144,7 +144,7 @@ const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
 // flows through DARK automatically.
 const DEFAULT_SHADCN_BINDINGS_DARK: ShadcnRoleBindings = {
   ...DEFAULT_SHADCN_BINDINGS_LIGHT,
-  '--card': '--color-surface-container',
+  '--card': '--color-surface-bright',
   '--popover': '--color-surface-container',
   '--sidebar-foreground': '--color-on-surface-variant',
 }
