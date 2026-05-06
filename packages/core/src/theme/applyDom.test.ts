@@ -164,6 +164,15 @@ describe('applyDom (jsdom integration)', () => {
         },
       },
       {
+        // why: seedHexLock is a source-input gate, not a derived-side flag —
+        // it must NOT change the rendered output. Pairing it with a non-default
+        // seedHex confirms the seed is what drives derive while the lock just
+        // governs future writes. Pinning this round-trip prevents anyone from
+        // accidentally threading seedHexLock into derive in the future.
+        name: 'seedHexLock with non-default seed',
+        source: { ...DEFAULT_INPUTS, seedHex: '#ff5500', seedHexLock: true },
+      },
+      {
         name: 'customColors with shadcnSource=color',
         source: {
           ...DEFAULT_INPUTS,

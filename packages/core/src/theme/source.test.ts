@@ -11,7 +11,7 @@ import {
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'
-import { useSource } from './source'
+import { selectPortable, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the
@@ -264,5 +264,19 @@ describe('useSource persistence round-trip', () => {
     s.setSeedHexLock(false)
     s.setSeedHex('#112233')
     expect(useSource.getState().seedHex).toBe('#112233')
+  })
+
+  // why: structural reset assertion — from a fully non-default state, reset()
+  // must restore every PortableTheme field to DEFAULT_INPUTS. Uses the same
+  // NONDEFAULT_INPUTS fixture as the persistence round-trip; if a future
+  // schema field is added without DEFAULT_INPUTS coverage OR reset() drops
+  // wholesale-replace semantics, this fails. Compares via selectPortable so
+  // _hydrated and actions don't pollute the equality.
+  it('reset() restores every PortableTheme field from arbitrary state', () => {
+    useSource.setState({ ...NONDEFAULT_INPUTS, _hydrated: true })
+    expect(selectPortable(useSource.getState())).toEqual(NONDEFAULT_INPUTS)
+    useSource.getState().reset()
+    expect(selectPortable(useSource.getState())).toEqual(DEFAULT_INPUTS)
+    expect(useSource.getState()._hydrated).toBe(true)
   })
 })
