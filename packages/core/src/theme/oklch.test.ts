@@ -42,9 +42,9 @@ describe('oklch conversion', () => {
     // why: greys have undefined hue; the formatter snaps to 0 so two
     // independently-derived neutrals produce the same string. Without this
     // the drift-guard would be flaky on near-neutral surface tokens.
-    expect(oklchFromHex('#808080')).toMatch(/oklch\([\d.]+ 0\.0000 0\.00\)/)
-    expect(oklchFromHex('#ffffff')).toMatch(/oklch\([\d.]+ 0\.0000 0\.00\)/)
-    expect(oklchFromHex('#000000')).toMatch(/oklch\([\d.]+ 0\.0000 0\.00\)/)
+    expect(oklchFromHex('#808080')).toMatch(/oklch\([\d.]+ 0 0\)/)
+    expect(oklchFromHex('#ffffff')).toMatch(/oklch\([\d.]+ 0 0\)/)
+    expect(oklchFromHex('#000000')).toMatch(/oklch\([\d.]+ 0 0\)/)
   })
 
   it('rejects non-canonical input shape (alpha, commas, named alts)', () => {

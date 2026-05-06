@@ -56,6 +56,15 @@ const L_PRECISION = 4
 const C_PRECISION = 4
 const H_PRECISION = 2
 
+// why: emit precision-bounded numbers without trailing zeros. `toFixed` rounds
+// to the precision target but pads with zeros (`297.4` → `"297.40"`); biome's
+// CSS formatter strips those zeros on commit, breaking the drift-guard since
+// the file then no longer equals `formatCss(deriveTheme(DEFAULT_INPUTS))`.
+// Round via toFixed, then re-parse so the final string has no padding.
+function trim(n: number, precision: number): string {
+  return Number(n.toFixed(precision)).toString()
+}
+
 export function oklchFromArgb(argb: number): string {
   const r = (argb >> 16) & 0xff
   const g = (argb >> 8) & 0xff
@@ -84,7 +93,7 @@ export function oklchFromArgb(argb: number): string {
   // already noise from float math on near-neutral inputs.
   if (C < 1e-4) H = 0
 
-  return `oklch(${L.toFixed(L_PRECISION)} ${C.toFixed(C_PRECISION)} ${H.toFixed(H_PRECISION)})`
+  return `oklch(${trim(L, L_PRECISION)} ${trim(C, C_PRECISION)} ${trim(H, H_PRECISION)})`
 }
 
 // why: matches `oklch(L C H)` with whitespace flexibility but rejects the
