@@ -12,6 +12,7 @@
 // dev-only surface.
 
 import { ContrastLevel } from './contrast-level'
+import { CustomColors } from './custom-colors'
 import { ExportPanels } from './export-panels'
 import { MdSwatches } from './md-swatches'
 import { PrimaryContainerOverride } from './primary-container-override'
@@ -41,6 +42,7 @@ export function Testbed() {
       <PrimaryContainerOverride />
       <ShadcnBindings />
       <SurfaceTint />
+      <CustomColors />
 
       <MdSwatches />
       <ShadcnPreview />

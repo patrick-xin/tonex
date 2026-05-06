@@ -2,6 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  type CustomColorEntry,
   DEFAULT_INPUTS,
   type PortableTheme,
   SCHEMA_VERSION,
@@ -32,6 +33,24 @@ const NONDEFAULT_BINDINGS_DARK: ShadcnRoleBindings = Object.fromEntries(
   SHADCN_ROLE_NAMES.map((role) => [role, '--color-on-surface']),
 ) as ShadcnRoleBindings
 
+const NONDEFAULT_CUSTOM_COLORS: CustomColorEntry[] = [
+  {
+    id: 'id-success',
+    name: 'Success',
+    description: 'positive feedback',
+    hex: '#22c55e',
+    blend: true,
+    shadcnSource: 'color',
+  },
+  {
+    id: 'id-warning',
+    name: 'Warning',
+    hex: '#f59e0b',
+    blend: false,
+    shadcnSource: 'container',
+  },
+]
+
 const NONDEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seedHex: '#ff00aa',
@@ -44,6 +63,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   surfaceAlgo: 'tint',
   surfaceTintLevel: 0.42,
   surfaceDesaturateLevel: 0.73,
+  customColors: NONDEFAULT_CUSTOM_COLORS,
 }
 
 describe('useSource persistence round-trip', () => {
@@ -77,6 +97,7 @@ describe('useSource persistence round-trip', () => {
     s.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
     s.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
+    for (const entry of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(entry)
 
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
@@ -117,6 +138,74 @@ describe('useSource persistence round-trip', () => {
     expect(bindings.light['--background']).toBe('--color-surface')
     expect(bindings.dark['--card']).toBe('--color-surface-bright')
     expect(bindings.light['--sidebar-border']).toBe('--color-outline')
+  })
+
+  it('v2 → v3 migrate: missing customColors fills to empty array', async () => {
+    // why: v2 had no customColors field; rehydrate must fill it so derive's
+    // buildCustomColorsMd iteration doesn't NPE on `undefined.length`.
+    const v2State = {
+      ...DEFAULT_INPUTS,
+      // simulate a persisted v2 record that lacks the field entirely
+      customColors: undefined as unknown as CustomColorEntry[],
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v2State, version: 2 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().customColors).toEqual([])
+  })
+
+  describe('customColors CRUD', () => {
+    it('addCustomColor appends an entry', () => {
+      const s = useSource.getState()
+      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
+      expect(useSource.getState().customColors).toEqual([NONDEFAULT_CUSTOM_COLORS[0]])
+      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[1]!)
+      expect(useSource.getState().customColors).toEqual(NONDEFAULT_CUSTOM_COLORS)
+    })
+
+    it('updateCustomColor mutates by id, leaves others untouched', () => {
+      const s = useSource.getState()
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
+      s.updateCustomColor('id-success', { hex: '#000000', blend: false })
+      const updated = useSource.getState().customColors
+      expect(updated[0]).toMatchObject({ id: 'id-success', hex: '#000000', blend: false })
+      // other entry untouched
+      expect(updated[1]).toEqual(NONDEFAULT_CUSTOM_COLORS[1])
+    })
+
+    it('removeCustomColor drops by id', () => {
+      const s = useSource.getState()
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
+      s.removeCustomColor('id-success')
+      expect(useSource.getState().customColors).toEqual([NONDEFAULT_CUSTOM_COLORS[1]])
+    })
+
+    it('addCustomColor rejects duplicate slug', () => {
+      const s = useSource.getState()
+      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
+      expect(() =>
+        s.addCustomColor({ ...NONDEFAULT_CUSTOM_COLORS[0]!, id: 'id-different' }),
+      ).toThrow(/duplicates/)
+    })
+
+    it('addCustomColor rejects reserved name', () => {
+      const s = useSource.getState()
+      expect(() =>
+        s.addCustomColor({
+          id: 'id-bad',
+          name: 'primary',
+          hex: '#000000',
+          blend: false,
+          shadcnSource: 'color',
+        }),
+      ).toThrow(/reserved/)
+    })
+
+    it('updateCustomColor rejects rename to reserved or duplicate slug', () => {
+      const s = useSource.getState()
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
+      expect(() => s.updateCustomColor('id-success', { name: 'primary' })).toThrow(/reserved/)
+      expect(() => s.updateCustomColor('id-success', { name: 'Warning' })).toThrow(/duplicates/)
+    })
   })
 
   it('setSeedHex no-ops when seedHexLock is true', () => {

@@ -3,16 +3,19 @@ import {
   type DynamicScheme,
   Hct,
   MaterialDynamicColors,
+  customColor as mdCustomColor,
   TonalPalette,
 } from '@tonex/mcu'
 import { variants } from '../variants'
 import { oklchFromArgb, oklchFromHex } from './oklch'
 import {
+  type CustomColorEntry,
   MD_TOKEN_NAMES,
   type MdTokenName,
   type PortableTheme,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
+  slugifyCustomColorName,
 } from './schema'
 import { applySurfaceDesaturate } from './surfaceDesaturate'
 import { applySurfaceTint } from './surfaceTint'
@@ -141,14 +144,93 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const treatedLight = applyTreatment(mdLightBase, 'light', source)
   const treatedDark = applyTreatment(mdDarkBase, 'dark', source)
 
+  // why: customColor groups are computed once (light + dark together via MCU)
+  // then split per mode. Their md tokens MERGE INTO the treated md layers
+  // before shadcn binding so any future shadcn role rebound to a custom md
+  // token would resolve — current bindings can't (closed enum), but the
+  // ordering keeps the spine consistent: every md token in the final layer
+  // is a candidate for binding, customs included. Shadcn customs are
+  // produced separately and merged into shadcn layers post-bind.
+  const seedArgb = argbFromHex(source.seedHex)
+  const customGroups = source.customColors.map((entry) => ({
+    entry,
+    slug: slugifyCustomColorName(entry.name),
+    group: mdCustomColor(seedArgb, {
+      value: argbFromHex(entry.hex),
+      name: entry.name,
+      blend: entry.blend,
+    }),
+  }))
+
+  const customMdLight = buildCustomColorsMd(customGroups, 'light')
+  const customMdDark = buildCustomColorsMd(customGroups, 'dark')
+  const mdLight = { ...treatedLight, ...customMdLight }
+  const mdDark = { ...treatedDark, ...customMdDark }
+
   return {
-    md: { light: treatedLight, dark: treatedDark },
+    md: { light: mdLight, dark: mdDark },
     shadcn: {
-      light: bindShadcn(treatedLight, source.shadcnRoleBindings.light),
-      dark: bindShadcn(treatedDark, source.shadcnRoleBindings.dark),
+      light: {
+        ...bindShadcn(treatedLight, source.shadcnRoleBindings.light),
+        ...buildCustomColorsShadcn(customGroups, customMdLight),
+      },
+      dark: {
+        ...bindShadcn(treatedDark, source.shadcnRoleBindings.dark),
+        ...buildCustomColorsShadcn(customGroups, customMdDark),
+      },
     },
     warnings: [],
   }
+}
+
+interface ResolvedCustomGroup {
+  entry: CustomColorEntry
+  slug: string
+  group: ReturnType<typeof mdCustomColor>
+}
+
+// why: emits 4 md tokens per custom entry from MCU's CustomColorGroup. Tones
+// are MCU's choice (40/100/90/10 light, 80/20/30/90 dark) — we just convert
+// argb → oklch at the boundary so the layer stays in canonical format.
+function buildCustomColorsMd(
+  groups: ResolvedCustomGroup[],
+  mode: 'light' | 'dark',
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const { slug, group } of groups) {
+    const colors = group[mode]
+    out[`--color-${slug}`] = oklchFromArgb(colors.color)
+    out[`--color-on-${slug}`] = oklchFromArgb(colors.onColor)
+    out[`--color-${slug}-container`] = oklchFromArgb(colors.colorContainer)
+    out[`--color-on-${slug}-container`] = oklchFromArgb(colors.onColorContainer)
+  }
+  return out
+}
+
+// why: shadcn pair sourced from the SAME mdLayer the rest of derive uses, so
+// any value-shifting transforms (none today on custom colors, but in case of
+// future sink-side hooks) propagate. Pair selector is per-entry shadcnSource:
+// 'color' → --{slug}/--{slug}-foreground ← --color-{slug}/--color-on-{slug};
+// 'container' → ← --color-{slug}-container/--color-on-{slug}-container.
+function buildCustomColorsShadcn(
+  groups: ResolvedCustomGroup[],
+  mdLayer: Record<string, string>,
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const { entry, slug } of groups) {
+    const pair =
+      entry.shadcnSource === 'color'
+        ? { color: `--color-${slug}`, on: `--color-on-${slug}` }
+        : { color: `--color-${slug}-container`, on: `--color-on-${slug}-container` }
+    const colorValue = mdLayer[pair.color]
+    const onValue = mdLayer[pair.on]
+    if (colorValue === undefined || onValue === undefined) {
+      throw new Error(`[buildCustomColorsShadcn] missing md token for slug ${slug}`)
+    }
+    out[`--${slug}`] = colorValue
+    out[`--${slug}-foreground`] = onValue
+  }
+  return out
 }
 
 function applyTreatment(layer: TokenMap, mode: 'light' | 'dark', source: PortableTheme): TokenMap {

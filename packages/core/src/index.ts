@@ -7,6 +7,7 @@ export {
 } from './theme/derive'
 export { formatCss, formatLayer } from './theme/format'
 export {
+  type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
   MD_TOKEN_NAMES,
@@ -20,6 +21,8 @@ export {
   STORAGE_KEY,
   SURFACE_ALGOS,
   type SurfaceAlgo,
+  slugifyCustomColorName,
+  validateCustomColorEntry,
 } from './theme/schema'
 export { type SourceState, selectPortable, useSource } from './theme/source'
 export { applySurfaceDesaturate } from './theme/surfaceDesaturate'

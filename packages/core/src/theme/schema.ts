@@ -1,11 +1,14 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 
-// why: bumped to 2 in slice 2 — md token set expanded 8→28, shadcn roles
-// 2→26. Persisted v1 stores only 2 role bindings; rehydrate would replace
-// the new 26-key defaults wholesale (zustand persist shallow-merges field
-// values, not nested objects). Migration fills missing roles from defaults.
+// why: bumped to 3 in slice 3 — customColors[] field added to PortableTheme.
+// Persisted v2 stores have no customColors key; zustand persist shallow-
+// merges, so rehydrate would leave the field undefined and any iteration
+// site (deriveTheme buildCustomColorsMd) would NPE. Migration fills [].
+// v2 (slice 2): md token set expanded 8→28, shadcn roles 2→26 — persisted
+// v1 stores only had 2 role bindings; migration spreads defaults under
+// persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 2 as const
+export const SCHEMA_VERSION = 3 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 export const STORAGE_KEY = 'tonex-theme-v1' as const
@@ -149,6 +152,71 @@ export const DEFAULT_SHADCN_ROLE_BINDINGS: {
   dark: DEFAULT_SHADCN_BINDINGS_DARK,
 }
 
+// why: customColors are first-class dual-layer entries — they emit their
+// own md tokens (4 per entry: --color-{slug}, --color-on-{slug}, --color-
+// {slug}-container, --color-on-{slug}-container) AND their own shadcn
+// tokens (2 per entry: --{slug}, --{slug}-foreground), all derived from a
+// single user-supplied hex via MCU's customColor(). They do NOT participate
+// in shadcnRoleBindings — the role surface stays closed at SHADCN_ROLE_NAMES.
+// `id` is the stable CRUD identity; `name` is freely editable and the slug
+// is derived from it at emission time. `shadcnSource` picks which md pair
+// feeds the shadcn pair: 'color' → --{slug} ← --color-{slug}; 'container'
+// → --{slug} ← --color-{slug}-container (foreground follows the on-* twin).
+export interface CustomColorEntry {
+  id: string
+  name: string
+  description?: string
+  hex: string
+  blend: boolean
+  shadcnSource: 'color' | 'container'
+}
+
+// why: slug derives from name. Lowercase, non-alphanumeric runs collapse to
+// a single dash, edge dashes trimmed. Renaming is allowed (standard CRUD on
+// id) — consumers of the OLD slug in exported CSS will break, by design;
+// docs flag this. Empty slug after slugification is a validation failure.
+export function slugifyCustomColorName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// why: any kebab name a custom-color slug would emit MUST NOT collide with
+// an existing md token or shadcn role. Two collision sources: (1) the slug
+// itself maps to --color-{slug} (md) AND --{slug} (shadcn), so we derive
+// each blocked-slug from the kebab token name minus its `--color-`/`--`
+// prefix; (2) the partner tokens we auto-emit (`--color-on-{slug}`,
+// `--color-{slug}-container`, `--{slug}-foreground`) would collide if the
+// user picks a slug starting with `on-` or ending in `-container` /
+// `-foreground` — those patterns are blocked outright as a slug.
+const RESERVED_SLUGS: ReadonlySet<string> = new Set([
+  ...MD_TOKEN_NAMES.map((t) => t.slice('--color-'.length)),
+  ...SHADCN_ROLE_NAMES.map((t) => t.slice('--'.length)),
+])
+
+// why: returns null on success, an error message on failure. Caller decides
+// whether to throw, surface in UI, or both. `existingSlugs` lets the
+// caller exclude self when validating an edit (compare by id, gather slugs
+// of the OTHER entries). Pure, no I/O — UI and store both call this.
+export function validateCustomColorEntry(
+  entry: { name: string; hex: string },
+  existingSlugs: ReadonlySet<string>,
+): string | null {
+  const slug = slugifyCustomColorName(entry.name)
+  if (slug.length === 0) return 'name must contain at least one alphanumeric character'
+  if (slug.startsWith('on-'))
+    return `name cannot produce a slug starting with "on-" (got "${slug}")`
+  if (slug.endsWith('-container'))
+    return `name cannot produce a slug ending with "-container" (got "${slug}")`
+  if (slug.endsWith('-foreground'))
+    return `name cannot produce a slug ending with "-foreground" (got "${slug}")`
+  if (RESERVED_SLUGS.has(slug)) return `name "${slug}" collides with a reserved md or shadcn token`
+  if (existingSlugs.has(slug)) return `name "${slug}" duplicates an existing custom color`
+  if (!/^#[0-9a-fA-F]{6}$/.test(entry.hex)) return `hex must be a 6-digit "#rrggbb" value`
+  return null
+}
+
 // why: which surface treatment (if any) deriveTheme applies post-md-emit.
 // Mutually exclusive — composing tint and desaturate isn't a product feature.
 // Default 'none' keeps the drift-guard baseline (globals.css === formatCss(
@@ -202,6 +270,13 @@ export interface PortableTheme {
   surfaceAlgo: SurfaceAlgo
   surfaceTintLevel: number
   surfaceDesaturateLevel: number
+  // why: user-defined dual-layer color slots (md: 4 tokens, shadcn: 2 tokens
+  // sourced per entry.shadcnSource). Empty by default — drift-guard baseline
+  // (globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))) holds because
+  // an empty array means zero extra emission. Validate via
+  // validateCustomColorEntry on add/edit; deriveTheme assumes input is
+  // already validated and slug-unique.
+  customColors: CustomColorEntry[]
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -219,4 +294,5 @@ export const DEFAULT_INPUTS: PortableTheme = {
   surfaceAlgo: 'none',
   surfaceTintLevel: 0,
   surfaceDesaturateLevel: 0,
+  customColors: [],
 }

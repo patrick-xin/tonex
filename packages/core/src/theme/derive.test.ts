@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
 import { oklchFromHex } from './oklch'
-import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
+import { type CustomColorEntry, DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
 
 const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 
@@ -274,6 +274,102 @@ describe('deriveTheme', () => {
       // some primary-family tokens should differ. Asserting !== rather than
       // a specific value because exact tone math is MCU's spec, not ours.
       expect(high.md.light['--color-primary']).not.toBe(baseline.md.light['--color-primary'])
+    })
+  })
+
+  describe('customColors', () => {
+    const success: CustomColorEntry = {
+      id: 'id-success',
+      name: 'Success',
+      hex: '#22c55e',
+      blend: false,
+      shadcnSource: 'color',
+    }
+    const warning: CustomColorEntry = {
+      id: 'id-warning',
+      name: 'Warning',
+      hex: '#f59e0b',
+      blend: false,
+      shadcnSource: 'container',
+    }
+
+    it('empty array (default) emits no extra tokens', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({ ...DEFAULT_INPUTS, customColors: [] })
+      expect(explicit).toEqual(baseline)
+    })
+
+    it('one entry emits 4 md tokens (light + dark) via slug', () => {
+      const { md } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [success] })
+      for (const mode of [md.light, md.dark]) {
+        expect(mode['--color-success']).toMatch(OKLCH)
+        expect(mode['--color-on-success']).toMatch(OKLCH)
+        expect(mode['--color-success-container']).toMatch(OKLCH)
+        expect(mode['--color-on-success-container']).toMatch(OKLCH)
+      }
+      // light vs dark differ — MCU's customColor maps tones differently per mode
+      expect(md.light['--color-success']).not.toBe(md.dark['--color-success'])
+    })
+
+    it('one entry emits 2 shadcn tokens sourced from md per shadcnSource=color', () => {
+      const { md, shadcn } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [success] })
+      expect(shadcn.light['--success']).toBe(md.light['--color-success'])
+      expect(shadcn.light['--success-foreground']).toBe(md.light['--color-on-success'])
+      expect(shadcn.dark['--success']).toBe(md.dark['--color-success'])
+      expect(shadcn.dark['--success-foreground']).toBe(md.dark['--color-on-success'])
+    })
+
+    it('shadcnSource=container pulls shadcn pair from container/onContainer', () => {
+      const { md, shadcn } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [warning] })
+      expect(shadcn.light['--warning']).toBe(md.light['--color-warning-container'])
+      expect(shadcn.light['--warning-foreground']).toBe(md.light['--color-on-warning-container'])
+      expect(shadcn.dark['--warning']).toBe(md.dark['--color-warning-container'])
+      expect(shadcn.dark['--warning-foreground']).toBe(md.dark['--color-on-warning-container'])
+    })
+
+    it('multiple entries emit independent token sets', () => {
+      const { md, shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        customColors: [success, warning],
+      })
+      expect(md.light['--color-success']).toMatch(OKLCH)
+      expect(md.light['--color-warning']).toMatch(OKLCH)
+      expect(shadcn.light['--success']).toBe(md.light['--color-success'])
+      expect(shadcn.light['--warning']).toBe(md.light['--color-warning-container'])
+      expect(md.light['--color-success']).not.toBe(md.light['--color-warning'])
+    })
+
+    it('does not affect existing md or shadcn tokens', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const withCustom = deriveTheme({ ...DEFAULT_INPUTS, customColors: [success] })
+      expect(withCustom.md.light['--color-primary']).toBe(baseline.md.light['--color-primary'])
+      expect(withCustom.shadcn.light['--primary']).toBe(baseline.shadcn.light['--primary'])
+      expect(withCustom.shadcn.light['--background']).toBe(baseline.shadcn.light['--background'])
+    })
+
+    it('blend=true shifts custom color toward source hue', () => {
+      const blended = deriveTheme({
+        ...DEFAULT_INPUTS,
+        customColors: [{ ...success, blend: true }],
+      })
+      const unblended = deriveTheme({
+        ...DEFAULT_INPUTS,
+        customColors: [{ ...success, blend: false }],
+      })
+      expect(blended.md.light['--color-success']).not.toBe(unblended.md.light['--color-success'])
+    })
+
+    it('multi-word name slugifies for emission', () => {
+      const entry: CustomColorEntry = {
+        id: 'id-brand',
+        name: 'Brand X',
+        hex: '#3366ff',
+        blend: false,
+        shadcnSource: 'color',
+      }
+      const { md, shadcn } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [entry] })
+      expect(md.light['--color-brand-x']).toMatch(OKLCH)
+      expect(shadcn.light['--brand-x']).toBe(md.light['--color-brand-x'])
     })
   })
 

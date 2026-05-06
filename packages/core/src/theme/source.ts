@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
 import {
+  type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
   type MdTokenName,
@@ -10,6 +11,8 @@ import {
   type ShadcnRoleName,
   STORAGE_KEY,
   type SurfaceAlgo,
+  slugifyCustomColorName,
+  validateCustomColorEntry,
 } from './schema'
 
 interface SourceActions {
@@ -23,6 +26,9 @@ interface SourceActions {
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfaceTintLevel(level: number): void
   setSurfaceDesaturateLevel(level: number): void
+  addCustomColor(entry: CustomColorEntry): void
+  updateCustomColor(id: string, patch: Partial<Omit<CustomColorEntry, 'id'>>): void
+  removeCustomColor(id: string): void
   setHydrated(): void
   reset(): void
 }
@@ -50,6 +56,9 @@ export function selectPortable(s: SourceState): PortableTheme {
     setSurfaceAlgo: _ssa,
     setSurfaceTintLevel: _sst,
     setSurfaceDesaturateLevel: _ssd,
+    addCustomColor: _acc,
+    updateCustomColor: _ucc,
+    removeCustomColor: _rcc,
     setHydrated: _sh,
     reset: _r,
     ...portable
@@ -89,6 +98,34 @@ export const useSource = create<SourceState>()(
       setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
       setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
       setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
+      // why: validate at the store seam — UI's add-time validator surfaces
+      // the message in-form; this throw is the structural backstop for any
+      // caller that bypasses the form (programmatic add, future import path).
+      // Existing-slugs set excludes self for updates; for adds, all current
+      // slugs count.
+      addCustomColor: (entry) =>
+        set((s) => {
+          const existing = new Set(s.customColors.map((e) => slugifyCustomColorName(e.name)))
+          const err = validateCustomColorEntry(entry, existing)
+          if (err !== null) throw new Error(`[addCustomColor] ${err}`)
+          return { customColors: [...s.customColors, entry] }
+        }),
+      updateCustomColor: (id, patch) =>
+        set((s) => {
+          const target = s.customColors.find((e) => e.id === id)
+          if (target === undefined) throw new Error(`[updateCustomColor] no entry with id ${id}`)
+          const next: CustomColorEntry = { ...target, ...patch }
+          const otherSlugs = new Set(
+            s.customColors.filter((e) => e.id !== id).map((e) => slugifyCustomColorName(e.name)),
+          )
+          const err = validateCustomColorEntry(next, otherSlugs)
+          if (err !== null) throw new Error(`[updateCustomColor] ${err}`)
+          return {
+            customColors: s.customColors.map((e) => (e.id === id ? next : e)),
+          }
+        }),
+      removeCustomColor: (id) =>
+        set((s) => ({ customColors: s.customColors.filter((e) => e.id !== id) })),
       setHydrated: () => set({ _hydrated: true }),
       reset: () => set({ ...DEFAULT_INPUTS }),
     }),
@@ -119,6 +156,12 @@ export const useSource = create<SourceState>()(
             light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, ...s.shadcnRoleBindings?.light },
             dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, ...s.shadcnRoleBindings?.dark },
           }
+        }
+        if (version < 3) {
+          // why: v2 had no customColors field — fill empty so deriveTheme's
+          // iteration doesn't NPE. Empty array preserves every existing
+          // user's exact rendered output (zero extra emission).
+          s.customColors = s.customColors ?? []
         }
         return s as PortableTheme
       },

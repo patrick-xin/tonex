@@ -151,6 +151,36 @@ describe('applyDom (jsdom integration)', () => {
           primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
         },
       },
+      {
+        name: 'customColors with shadcnSource=color',
+        source: {
+          ...DEFAULT_INPUTS,
+          customColors: [
+            {
+              id: 'id-success',
+              name: 'Success',
+              hex: '#22c55e',
+              blend: false,
+              shadcnSource: 'color',
+            },
+          ],
+        },
+      },
+      {
+        name: 'customColors with shadcnSource=container + blend',
+        source: {
+          ...DEFAULT_INPUTS,
+          customColors: [
+            {
+              id: 'id-warning',
+              name: 'Warning',
+              hex: '#f59e0b',
+              blend: true,
+              shadcnSource: 'container',
+            },
+          ],
+        },
+      },
     ]
 
     for (const { name, source } of cases) {
