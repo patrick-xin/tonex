@@ -1,6 +1,7 @@
 import { argbFromHex, Hct } from '@tonex/mcu'
-import type { TokenMap } from './derive'
-import { argbFromOklch, oklchFromArgb } from './oklch'
+import type { TokenMap } from '../derive'
+import type { Mode } from '../mode'
+import { argbFromOklch, oklchFromArgb } from '../oklch'
 
 // why: surface tint — replaces MCU's surfaces with a TW zinc base, then
 // blends primary's hue+chroma back in proportional to `level`. Tone is
@@ -30,7 +31,7 @@ const ZINC_ARGB: Record<string, number> = {
   '950': argbFromHex('#09090b'),
 }
 
-const SHADE_MAP: Record<'light' | 'dark', Record<string, string>> = {
+const SHADE_MAP: Record<Mode, Record<string, string>> = {
   light: {
     '--color-surface': '50',
     '--color-surface-container': '100',
@@ -62,11 +63,7 @@ function blendOne(baseArgb: number, primaryArgb: number, level: number): string 
   return oklchFromArgb(blended.toInt())
 }
 
-export function applySurfaceTint(
-  mcuLayer: TokenMap,
-  mode: 'light' | 'dark',
-  level: number,
-): TokenMap {
+export function applySurfaceTint(mcuLayer: TokenMap, mode: Mode, level: number): TokenMap {
   const primaryOklch = mcuLayer['--color-primary']
   if (!primaryOklch) return mcuLayer
   const primaryArgb = argbFromOklch(primaryOklch)

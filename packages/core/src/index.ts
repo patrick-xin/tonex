@@ -6,6 +6,7 @@ export {
   type TokenMap,
 } from './theme/derive'
 export { formatCss, formatLayer } from './theme/format'
+export type { Mode } from './theme/mode'
 export {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -25,8 +26,7 @@ export {
   validateCustomColorEntry,
 } from './theme/schema'
 export { type SourceState, selectPortable, useSource } from './theme/source'
-export { applySurfaceDesaturate } from './theme/surfaceDesaturate'
-export { applySurfaceTint } from './theme/surfaceTint'
+export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
 export { useResolvedTokens } from './theme/useResolvedTokens'
 export {
   DEFAULT_VARIANT,

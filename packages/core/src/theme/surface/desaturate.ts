@@ -1,6 +1,6 @@
 import { Hct } from '@tonex/mcu'
-import type { TokenMap } from './derive'
-import { argbFromOklch, oklchFromArgb } from './oklch'
+import type { TokenMap } from '../derive'
+import { argbFromOklch, oklchFromArgb } from '../oklch'
 
 // why: surface desaturation — chroma multiplier on MCU output. Operates on
 // whatever MCU emitted: parse → HCT → scale chroma → emit. Tone and hue

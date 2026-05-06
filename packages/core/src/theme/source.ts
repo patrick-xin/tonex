@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
+import type { Mode } from './mode'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -19,10 +20,10 @@ interface SourceActions {
   setSeedHex(seedHex: string): void
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
-  setPrimaryHexLock(mode: 'light' | 'dark', hex: string | null): void
+  setPrimaryHexLock(mode: Mode, hex: string | null): void
   setSeedHexLock(locked: boolean): void
-  setMd3PrimaryContainerOverride(mode: 'light' | 'dark', hex: string | null): void
-  setShadcnRoleBinding(mode: 'light' | 'dark', role: ShadcnRoleName, mdToken: MdTokenName): void
+  setMd3PrimaryContainerOverride(mode: Mode, hex: string | null): void
+  setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfaceTintLevel(level: number): void
   setSurfaceDesaturateLevel(level: number): void

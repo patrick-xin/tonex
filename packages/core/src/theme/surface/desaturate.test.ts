@@ -1,9 +1,9 @@
 import { Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { deriveTheme } from './derive'
-import { argbFromOklch } from './oklch'
-import { DEFAULT_INPUTS } from './schema'
-import { applySurfaceDesaturate } from './surfaceDesaturate'
+import { deriveTheme } from '../derive'
+import { argbFromOklch } from '../oklch'
+import { DEFAULT_INPUTS } from '../schema'
+import { applySurfaceDesaturate } from './desaturate'
 
 const SURFACE_FAMILY = [
   '--color-surface',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { deriveTheme } from './derive'
-import { DEFAULT_INPUTS } from './schema'
-import { applySurfaceTint } from './surfaceTint'
+import { deriveTheme } from '../derive'
+import { DEFAULT_INPUTS } from '../schema'
+import { applySurfaceTint } from './tint'
 
 const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 

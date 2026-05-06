@@ -7,6 +7,7 @@ import {
   TonalPalette,
 } from '@tonex/mcu'
 import { variants } from '../variants'
+import type { Mode } from './mode'
 import { oklchFromArgb, oklchFromHex } from './oklch'
 import {
   type CustomColorEntry,
@@ -17,8 +18,7 @@ import {
   type ShadcnRoleBindings,
   slugifyCustomColorName,
 } from './schema'
-import { applySurfaceDesaturate } from './surfaceDesaturate'
-import { applySurfaceTint } from './surfaceTint'
+import { applySurfaceDesaturate, applySurfaceTint } from './surface'
 
 // why: emission format is `oklch(L C H)` — shadcn v4 + tailwind v4
 // convention. MCU still operates in argb internally; conversion happens at
@@ -192,10 +192,7 @@ interface ResolvedCustomGroup {
 // why: emits 4 md tokens per custom entry from MCU's CustomColorGroup. Tones
 // are MCU's choice (40/100/90/10 light, 80/20/30/90 dark) — we just convert
 // argb → oklch at the boundary so the layer stays in canonical format.
-function buildCustomColorsMd(
-  groups: ResolvedCustomGroup[],
-  mode: 'light' | 'dark',
-): Record<string, string> {
+function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): Record<string, string> {
   const out: Record<string, string> = {}
   for (const { slug, group } of groups) {
     const colors = group[mode]
@@ -233,7 +230,7 @@ function buildCustomColorsShadcn(
   return out
 }
 
-function applyTreatment(layer: TokenMap, mode: 'light' | 'dark', source: PortableTheme): TokenMap {
+function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): TokenMap {
   if (source.surfaceAlgo === 'tint') return applySurfaceTint(layer, mode, source.surfaceTintLevel)
   if (source.surfaceAlgo === 'desaturate')
     return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel)
@@ -246,7 +243,7 @@ function applyTreatment(layer: TokenMap, mode: 'light' | 'dark', source: Portabl
 // still wins over the lock-derived container — overrides are the lower-level
 // escape hatch when the auto-derive doesn't match the user's intent.
 const PRIMARY_FAMILY_TONES: Record<
-  'light' | 'dark',
+  Mode,
   { onPrimary: number; container: number; onContainer: number }
 > = {
   light: { onPrimary: 100, container: 90, onContainer: 10 },
@@ -260,7 +257,7 @@ const PRIMARY_FAMILY_TONES: Record<
 // override if both are present.
 function applyPrimaryFamily(
   layer: TokenMap,
-  mode: 'light' | 'dark',
+  mode: Mode,
   lockedHex: string | null,
   containerOverride: string | null,
 ): TokenMap {
