@@ -31,6 +31,7 @@ export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
 export { useResolvedTokens } from './theme/useResolvedTokens'
 export {
   DEFAULT_VARIANT,
+  type VariantGroup,
   type VariantName,
   type VariantStrategy,
   variants,

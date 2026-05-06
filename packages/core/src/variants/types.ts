@@ -1,0 +1,31 @@
+import type { DynamicScheme, Hct, Variant } from '@tonex/mcu'
+
+// why: extracted from cmf.ts on slice 5 — with 10 registry entries the
+// interface is no longer "the cmf-shape", it's the registry contract. Per
+// cmf.ts's original comment, the trigger was a third entry; ten makes it
+// non-negotiable.
+
+/**
+ * Bucket for picker UIs and docs. Lives on `VariantStrategy` so consumers
+ * never need to re-derive the taxonomy themselves.
+ *
+ * - `cmf`: the 2025 spec scheme. Structurally distinct (extra roles, fixed
+ *   colors), so it stands alone.
+ * - `standard`: source-faithful schemes — produce a palette that stays close
+ *   to the seed.
+ * - `expressive`: high-chroma, playful schemes that intentionally diverge
+ *   from the seed.
+ * - `subdued`: low-chroma / near-grayscale schemes.
+ */
+export type VariantGroup = 'cmf' | 'standard' | 'expressive' | 'subdued'
+
+export interface VariantStrategy {
+  /** Stable lowercase name. Used in source.variant and registry lookup. */
+  readonly name: string
+  /** MCU enum value. derive.ts uses this when an MCU API needs the enum. */
+  readonly mcuVariant: Variant
+  /** Picker / docs grouping bucket. */
+  readonly group: VariantGroup
+  /** Build a DynamicScheme from seed hct + mode + contrast. */
+  build(seedHct: Hct, isDark: boolean, contrastLevel: number): DynamicScheme
+}
