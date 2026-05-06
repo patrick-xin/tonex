@@ -57,7 +57,6 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   seedHex: '#ff00aa',
   variant: 'tonalSpot',
   contrastLevel: 0.5,
-  primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
   seedHexLock: true,
   md3TokenOverrides: {
     light: { '--color-primary-container': '#aabbcc', '--color-secondary': '#445566' },
@@ -84,29 +83,27 @@ describe('useSource persistence round-trip', () => {
 
   it('write half — every PortableTheme field is persisted via setters', () => {
     const s = useSource.getState()
-    s.setSeedHex(NONDEFAULT_INPUTS.seedHex)
-    s.setVariant(NONDEFAULT_INPUTS.variant)
-    s.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
-    s.setPrimaryHexLock('light', NONDEFAULT_INPUTS.primaryHexLock.light)
-    s.setPrimaryHexLock('dark', NONDEFAULT_INPUTS.primaryHexLock.dark)
+    s.actions.setSeedHex(NONDEFAULT_INPUTS.seedHex)
+    s.actions.setVariant(NONDEFAULT_INPUTS.variant)
+    s.actions.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
     // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
     // seed setter no-ops, so reordering would silently drop the seed write.
-    s.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
+    s.actions.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
     for (const mode of ['light', 'dark'] as const) {
       for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.md3TokenOverrides[mode])) {
-        s.setMd3TokenOverride(mode, token as MdTokenName, hex)
+        s.actions.setMd3TokenOverride(mode, token as MdTokenName, hex)
       }
     }
     for (const mode of ['light', 'dark'] as const) {
       for (const role of SHADCN_ROLE_NAMES) {
-        s.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
+        s.actions.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
       }
     }
-    s.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
-    s.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
-    s.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
-    s.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
-    for (const entry of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(entry)
+    s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
+    s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
+    s.actions.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
+    s.actions.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
+    for (const entry of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(entry)
 
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
@@ -187,6 +184,22 @@ describe('useSource persistence round-trip', () => {
     expect(useSource.getState().surfacePaletteName).toBe('zinc')
   })
 
+  it('v5 → v6 migrate: legacy primaryHexLock is dropped', async () => {
+    // why: slice-10 audit pruned primaryHexLock; rehydrate must delete the
+    // persisted field so it doesn't shadow current state. Asserting the
+    // field is absent (not just null) guards against the migration becoming
+    // a no-op via accidental key preservation.
+    const v5State = {
+      ...DEFAULT_INPUTS,
+      primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v5State, version: 5 }))
+    await useSource.persist.rehydrate()
+    expect(
+      (useSource.getState() as Partial<{ primaryHexLock: unknown }>).primaryHexLock,
+    ).toBeUndefined()
+  })
+
   it('v2 → v3 migrate: missing customColors fills to empty array', async () => {
     // why: v2 had no customColors field; rehydrate must fill it so derive's
     // buildCustomColorsMd iteration doesn't NPE on `undefined.length`.
@@ -203,16 +216,16 @@ describe('useSource persistence round-trip', () => {
   describe('customColors CRUD', () => {
     it('addCustomColor appends an entry', () => {
       const s = useSource.getState()
-      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
+      s.actions.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
       expect(useSource.getState().customColors).toEqual([NONDEFAULT_CUSTOM_COLORS[0]])
-      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[1]!)
+      s.actions.addCustomColor(NONDEFAULT_CUSTOM_COLORS[1]!)
       expect(useSource.getState().customColors).toEqual(NONDEFAULT_CUSTOM_COLORS)
     })
 
     it('updateCustomColor mutates by id, leaves others untouched', () => {
       const s = useSource.getState()
-      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
-      s.updateCustomColor('id-success', { hex: '#000000', blend: false })
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(e)
+      s.actions.updateCustomColor('id-success', { hex: '#000000', blend: false })
       const updated = useSource.getState().customColors
       expect(updated[0]).toMatchObject({ id: 'id-success', hex: '#000000', blend: false })
       // other entry untouched
@@ -221,23 +234,23 @@ describe('useSource persistence round-trip', () => {
 
     it('removeCustomColor drops by id', () => {
       const s = useSource.getState()
-      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
-      s.removeCustomColor('id-success')
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(e)
+      s.actions.removeCustomColor('id-success')
       expect(useSource.getState().customColors).toEqual([NONDEFAULT_CUSTOM_COLORS[1]])
     })
 
     it('addCustomColor rejects duplicate slug', () => {
       const s = useSource.getState()
-      s.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
+      s.actions.addCustomColor(NONDEFAULT_CUSTOM_COLORS[0]!)
       expect(() =>
-        s.addCustomColor({ ...NONDEFAULT_CUSTOM_COLORS[0]!, id: 'id-different' }),
+        s.actions.addCustomColor({ ...NONDEFAULT_CUSTOM_COLORS[0]!, id: 'id-different' }),
       ).toThrow(/duplicates/)
     })
 
     it('addCustomColor rejects reserved name', () => {
       const s = useSource.getState()
       expect(() =>
-        s.addCustomColor({
+        s.actions.addCustomColor({
           id: 'id-bad',
           name: 'primary',
           hex: '#000000',
@@ -249,20 +262,24 @@ describe('useSource persistence round-trip', () => {
 
     it('updateCustomColor rejects rename to reserved or duplicate slug', () => {
       const s = useSource.getState()
-      for (const e of NONDEFAULT_CUSTOM_COLORS) s.addCustomColor(e)
-      expect(() => s.updateCustomColor('id-success', { name: 'primary' })).toThrow(/reserved/)
-      expect(() => s.updateCustomColor('id-success', { name: 'Warning' })).toThrow(/duplicates/)
+      for (const e of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(e)
+      expect(() => s.actions.updateCustomColor('id-success', { name: 'primary' })).toThrow(
+        /reserved/,
+      )
+      expect(() => s.actions.updateCustomColor('id-success', { name: 'Warning' })).toThrow(
+        /duplicates/,
+      )
     })
   })
 
   it('setSeedHex no-ops when seedHexLock is true', () => {
     const s = useSource.getState()
-    s.setSeedHex('#aabbcc')
-    s.setSeedHexLock(true)
-    s.setSeedHex('#112233')
+    s.actions.setSeedHex('#aabbcc')
+    s.actions.setSeedHexLock(true)
+    s.actions.setSeedHex('#112233')
     expect(useSource.getState().seedHex).toBe('#aabbcc')
-    s.setSeedHexLock(false)
-    s.setSeedHex('#112233')
+    s.actions.setSeedHexLock(false)
+    s.actions.setSeedHex('#112233')
     expect(useSource.getState().seedHex).toBe('#112233')
   })
 
@@ -275,7 +292,7 @@ describe('useSource persistence round-trip', () => {
   it('reset() restores every PortableTheme field from arbitrary state', () => {
     useSource.setState({ ...NONDEFAULT_INPUTS, _hydrated: true })
     expect(selectPortable(useSource.getState())).toEqual(NONDEFAULT_INPUTS)
-    useSource.getState().reset()
+    useSource.getState().actions.reset()
     expect(selectPortable(useSource.getState())).toEqual(DEFAULT_INPUTS)
     expect(useSource.getState()._hydrated).toBe(true)
   })

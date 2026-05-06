@@ -2,7 +2,8 @@
 
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { hexFromOklch, TAILWIND_PALETTE_OKLCH } from '@tonex/core'
+import { TAILWIND_PALETTE_OKLCH } from '@tonex/core/data'
+import { hexFromOklch } from '@tonex/core/oklch'
 import { Check } from 'lucide-react'
 import type * as React from 'react'
 import { useCallback, useImperativeHandle, useRef, useState } from 'react'

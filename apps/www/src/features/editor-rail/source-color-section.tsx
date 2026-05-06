@@ -8,7 +8,7 @@ import { TwColorPickerCombobox } from './tw-color-picker-combobox'
 
 export function SourceColorSection() {
   const seedHex = useSource((s) => s.seedHex)
-  const setSeedHex = useSource((s) => s.setSeedHex)
+  const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
 
   return (

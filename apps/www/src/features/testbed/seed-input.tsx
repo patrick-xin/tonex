@@ -4,9 +4,9 @@ import { useSource } from '@tonex/core'
 
 export function SeedInput() {
   const seedHex = useSource((s) => s.seedHex)
-  const setSeedHex = useSource((s) => s.setSeedHex)
+  const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
-  const setSeedHexLock = useSource((s) => s.setSeedHexLock)
+  const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)
   const hydrated = useSource((s) => s._hydrated)
 
   return (

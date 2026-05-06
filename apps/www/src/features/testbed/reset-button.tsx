@@ -3,7 +3,7 @@
 import { useSource } from '@tonex/core'
 
 export function ResetButton() {
-  const reset = useSource((s) => s.reset)
+  const reset = useSource((s) => s.actions.reset)
   return (
     <button
       type="button"

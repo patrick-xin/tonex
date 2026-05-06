@@ -13,7 +13,15 @@ In this monorepo:
 - Yes → domain → `@tonex/core`
 - No → app-only → www is fine
 
-**Why:** Pattern-gravity in monorepos. When debugging in www, the temptation is to inline-define a type because core feels "far away" (different package, longer import path) — even when the type already exists in core. The discipline blocks domain duplication structurally. The single barrel `packages/core/src/index.ts` re-exports everything www can need.
+**Why:** Pattern-gravity in monorepos. When debugging in www, the temptation is to inline-define a type because core feels "far away" (different package, longer import path) — even when the type already exists in core. The discipline blocks domain duplication structurally. Core exposes typed subpaths so each surface grows independently:
+
+- `@tonex/core` — engine: `deriveTheme`, `applyDom`, `useSource`, `useResolvedTokens`, `selectPortable`, `exportCss`, `formatCss`, `sourceColorHexFromImage`, surface algos, `Mode`, `SourceState`, `SourceActions`
+- `@tonex/core/schema` — `PortableTheme`, MD3/shadcn token + role names, defaults, validators
+- `@tonex/core/oklch` — `hexFromOklch`
+- `@tonex/core/data` — `TAILWIND_PALETTE_OKLCH`, `NEUTRAL_PALETTE_NAMES`
+- `@tonex/core/variants` — variant registry + types
+
+Adding a schema field doesn't widen the engine surface; adding an engine API doesn't drag schema into every importer.
 
 When in doubt, lean toward core. Adding to core and importing is easier to maintain than later promoting from www.
 

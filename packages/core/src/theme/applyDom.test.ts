@@ -45,8 +45,8 @@ describe('applyDom (jsdom integration)', () => {
   it('uses a single style element, replacing textContent on update', () => {
     useSource.setState({ _hydrated: true })
     unsubscribe = applyDom()
-    useSource.getState().setSeedHex('#ff0000')
-    useSource.getState().setSeedHex('#00ff00')
+    useSource.getState().actions.setSeedHex('#ff0000')
+    useSource.getState().actions.setSeedHex('#00ff00')
 
     const styles = document.head.querySelectorAll(`style#${STYLE_ID}`)
     expect(styles).toHaveLength(1)
@@ -57,7 +57,7 @@ describe('applyDom (jsdom integration)', () => {
     unsubscribe = applyDom()
     const before = document.getElementById(STYLE_ID)?.textContent
 
-    useSource.getState().setSeedHex('#ff0000')
+    useSource.getState().actions.setSeedHex('#ff0000')
     const after = document.getElementById(STYLE_ID)?.textContent
 
     expect(after).not.toBe(before)
@@ -70,7 +70,7 @@ describe('applyDom (jsdom integration)', () => {
 
     unsubscribe()
     unsubscribe = undefined
-    useSource.getState().setSeedHex('#ff0000')
+    useSource.getState().actions.setSeedHex('#ff0000')
     const after = document.getElementById(STYLE_ID)?.textContent
 
     expect(after).toBe(before)
@@ -155,13 +155,6 @@ describe('applyDom (jsdom integration)', () => {
       {
         name: 'contrast level high',
         source: { ...DEFAULT_INPUTS, contrastLevel: 0.5 },
-      },
-      {
-        name: 'primary hex lock both modes',
-        source: {
-          ...DEFAULT_INPUTS,
-          primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
-        },
       },
       {
         // why: seedHexLock is a source-input gate, not a derived-side flag —

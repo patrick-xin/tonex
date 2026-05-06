@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 export const ColorLock = () => {
   const seedHexLock = useSource((s) => s.seedHexLock)
-  const setSeedHexLock = useSource((s) => s.setSeedHexLock)
+  const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)
 
   const toggle = () => setSeedHexLock(!seedHexLock)
 

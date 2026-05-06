@@ -8,7 +8,7 @@ import { useSource } from '@tonex/core'
 // the same recomputed scheme by construction.
 export function ContrastLevel() {
   const contrastLevel = useSource((s) => s.contrastLevel)
-  const setContrastLevel = useSource((s) => s.setContrastLevel)
+  const setContrastLevel = useSource((s) => s.actions.setContrastLevel)
 
   return (
     <label className="flex gap-3 items-center">

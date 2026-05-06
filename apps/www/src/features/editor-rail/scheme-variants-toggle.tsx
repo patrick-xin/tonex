@@ -1,6 +1,7 @@
 'use client'
 
-import { useSource, type VariantGroup, type VariantName, variants } from '@tonex/core'
+import { useSource } from '@tonex/core'
+import { type VariantGroup, type VariantName, variants } from '@tonex/core/variants'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 const SCHEME_VARIANT_GROUPS: VariantGroup[] = ['cmf', 'standard', 'expressive', 'subdued']
@@ -29,7 +30,7 @@ const VARIANT_NAMES = Object.keys(variants) as VariantName[]
 
 export function SchemeVariantsToggle() {
   const variant = useSource((s) => s.variant)
-  const setVariant = useSource((s) => s.setVariant)
+  const setVariant = useSource((s) => s.actions.setVariant)
 
   return (
     <div className="flex flex-col gap-4">

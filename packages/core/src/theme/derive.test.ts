@@ -11,8 +11,6 @@ const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 const RED = oklchFromHex('#ff0000')
 const GREEN = oklchFromHex('#00ff00')
 const ABCDEF = oklchFromHex('#abcdef')
-const FF5500 = oklchFromHex('#ff5500')
-const OOCCFF = oklchFromHex('#00ccff')
 
 describe('deriveTheme', () => {
   it('emits md primary role family for both modes', () => {
@@ -114,23 +112,6 @@ describe('deriveTheme', () => {
       expect(overridden.md.dark['--color-secondary']).toBe(baseline.md.dark['--color-secondary'])
       // unmapped tokens unaffected
       expect(overridden.md.light['--color-tertiary']).toBe(baseline.md.light['--color-tertiary'])
-    })
-
-    it('override wins over primary lock when both target the same token', () => {
-      // why: preserves the slice-1 semantic that override is the lower-level
-      // escape hatch — lock regenerates the family, override overrides. Order
-      // in derive.ts: lock first, generic override map last.
-      const { md } = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: '#ff5500', dark: null },
-        md3TokenOverrides: {
-          light: { '--color-primary-container': '#abcdef' },
-          dark: {},
-        },
-      })
-      expect(md.light['--color-primary-container']).toBe(ABCDEF)
-      // primary itself remains locked
-      expect(md.light['--color-primary']).toBe(FF5500)
     })
 
     it('empty override maps produce no behavioral change', () => {
@@ -258,65 +239,6 @@ describe('deriveTheme', () => {
         shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
       })
       expect(shadcn.light['--primary']).toBe(RED)
-    })
-  })
-
-  describe('primaryHexLock', () => {
-    it('null lock leaves primary family at MCU values', () => {
-      const baseline = deriveTheme(DEFAULT_INPUTS)
-      const explicit = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: null, dark: null },
-      })
-      expect(explicit.md.light['--color-primary']).toBe(baseline.md.light['--color-primary'])
-    })
-
-    it('locked primary equals input hex exactly', () => {
-      const { md } = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
-      })
-      expect(md.light['--color-primary']).toBe(FF5500)
-      expect(md.dark['--color-primary']).toBe(OOCCFF)
-    })
-
-    it('lock derives on-primary / primary-container / on-primary-container from locked HCT', () => {
-      const { md } = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: '#ff5500', dark: null },
-      })
-      // family members regenerate, so they shouldn't equal MCU baseline for the seed
-      const baseline = deriveTheme(DEFAULT_INPUTS)
-      expect(md.light['--color-on-primary']).not.toBe(baseline.md.light['--color-on-primary'])
-      expect(md.light['--color-primary-container']).not.toBe(
-        baseline.md.light['--color-primary-container'],
-      )
-      expect(md.light['--color-on-primary-container']).not.toBe(
-        baseline.md.light['--color-on-primary-container'],
-      )
-      expect(md.light['--color-on-primary']).toMatch(OKLCH)
-      expect(md.light['--color-primary-container']).toMatch(OKLCH)
-      expect(md.light['--color-on-primary-container']).toMatch(OKLCH)
-    })
-
-    it('container override still wins over lock-derived container', () => {
-      const { md } = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: '#ff5500', dark: null },
-        md3TokenOverrides: { light: { '--color-primary-container': '#abcdef' }, dark: {} },
-      })
-      expect(md.light['--color-primary-container']).toBe(ABCDEF)
-      // primary itself still locked
-      expect(md.light['--color-primary']).toBe(FF5500)
-    })
-
-    it('lock is mode-keyed — locking light leaves dark MCU-derived', () => {
-      const baseline = deriveTheme(DEFAULT_INPUTS)
-      const { md } = deriveTheme({
-        ...DEFAULT_INPUTS,
-        primaryHexLock: { light: '#ff5500', dark: null },
-      })
-      expect(md.dark['--color-primary']).toBe(baseline.md.dark['--color-primary'])
     })
   })
 

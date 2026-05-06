@@ -1,19 +1,18 @@
 'use client'
 
+import { useResolvedTokens, useSource } from '@tonex/core'
 import {
   DEFAULT_SHADCN_ROLE_BINDINGS,
   MD_TOKEN_NAMES,
   type MdTokenName,
   SHADCN_ROLE_NAMES,
-  useResolvedTokens,
-  useSource,
-} from '@tonex/core'
+} from '@tonex/core/schema'
 
 const MODES: ('light' | 'dark')[] = ['light', 'dark']
 
 export function ShadcnBindings() {
   const bindings = useSource((s) => s.shadcnRoleBindings)
-  const setBinding = useSource((s) => s.setShadcnRoleBinding)
+  const setBinding = useSource((s) => s.actions.setShadcnRoleBinding)
   const theme = useResolvedTokens()
   if (!theme) return null
 

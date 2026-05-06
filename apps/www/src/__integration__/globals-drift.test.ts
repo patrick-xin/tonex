@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DEFAULT_INPUTS, deriveTheme, formatCss } from '@tonex/core'
+import { deriveTheme, formatCss } from '@tonex/core'
+import { DEFAULT_INPUTS } from '@tonex/core/schema'
 import { describe, expect, it } from 'vitest'
 
 // why: globals.css ships first-paint defaults baked from
@@ -16,7 +17,7 @@ import { describe, expect, it } from 'vitest'
 // To regenerate after intentional changes: `pnpm bake`.
 
 const here = dirname(fileURLToPath(import.meta.url))
-const cssPath = join(here, '../app/globals.css')
+const cssPath = join(here, '../styles/globals.css')
 
 function extractTokenBlock(css: string): string {
   const m = css.match(/\/\* tonex:tokens:start[^*]*\*\/\n([\s\S]*?)\n\/\* tonex:tokens:end \*\//)

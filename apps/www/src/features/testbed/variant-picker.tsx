@@ -1,6 +1,7 @@
 'use client'
 
-import { useSource, type VariantGroup, type VariantName, variants } from '@tonex/core'
+import { useSource } from '@tonex/core'
+import { type VariantGroup, type VariantName, variants } from '@tonex/core/variants'
 
 // why: render order for <optgroup>. Locking it here (rather than alphabetic
 // over keys) gives a stable reading flow: cmf first (current default + 2025
@@ -16,7 +17,7 @@ const GROUP_LABEL: Record<VariantGroup, string> = {
 
 export function VariantPicker() {
   const variant = useSource((s) => s.variant)
-  const setVariant = useSource((s) => s.setVariant)
+  const setVariant = useSource((s) => s.actions.setVariant)
   const grouped = (Object.keys(variants) as VariantName[]).reduce<
     Record<VariantGroup, VariantName[]>
   >(

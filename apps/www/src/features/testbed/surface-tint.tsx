@@ -1,6 +1,8 @@
 'use client'
 
-import { NEUTRAL_PALETTE_NAMES, type SurfaceAlgo, useSource } from '@tonex/core'
+import { useSource } from '@tonex/core'
+import { NEUTRAL_PALETTE_NAMES } from '@tonex/core/data'
+import type { SurfaceAlgo } from '@tonex/core/schema'
 
 const ALGOS: ReadonlyArray<{ id: SurfaceAlgo; label: string; hint: string }> = [
   { id: 'none', label: 'none', hint: 'mcu surfaces unchanged' },
@@ -23,10 +25,10 @@ export function SurfaceTint() {
   const surfacePaletteName = useSource((s) => s.surfacePaletteName)
   const tintLevel = useSource((s) => s.surfaceTintLevel)
   const desatLevel = useSource((s) => s.surfaceDesaturateLevel)
-  const setSurfaceAlgo = useSource((s) => s.setSurfaceAlgo)
-  const setSurfacePaletteName = useSource((s) => s.setSurfacePaletteName)
-  const setTintLevel = useSource((s) => s.setSurfaceTintLevel)
-  const setDesatLevel = useSource((s) => s.setSurfaceDesaturateLevel)
+  const setSurfaceAlgo = useSource((s) => s.actions.setSurfaceAlgo)
+  const setSurfacePaletteName = useSource((s) => s.actions.setSurfacePaletteName)
+  const setTintLevel = useSource((s) => s.actions.setSurfaceTintLevel)
+  const setDesatLevel = useSource((s) => s.actions.setSurfaceDesaturateLevel)
 
   const level = surfaceAlgo === 'desaturate' ? desatLevel : tintLevel
   const setLevel = surfaceAlgo === 'desaturate' ? setDesatLevel : setTintLevel

@@ -14,7 +14,7 @@ const TOKEN = '--color-primary-container'
 
 export function PrimaryContainerOverride() {
   const overrides = useSource((s) => s.md3TokenOverrides)
-  const setOverride = useSource((s) => s.setMd3TokenOverride)
+  const setOverride = useSource((s) => s.actions.setMd3TokenOverride)
   const theme = useResolvedTokens()
   if (!theme) return null
 

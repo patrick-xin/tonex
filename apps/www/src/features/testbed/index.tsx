@@ -16,7 +16,6 @@ import { CustomColors } from './custom-colors'
 import { ExportPanels } from './export-panels'
 import { MdSwatches } from './md-swatches'
 import { PrimaryContainerOverride } from './primary-container-override'
-import { PrimaryHexLock } from './primary-hex-lock'
 import { PrimitivesDemo } from './primitives-demo'
 import { ResetButton } from './reset-button'
 import { SeedInput } from './seed-input'
@@ -38,7 +37,6 @@ export function Testbed() {
       <SeedInput />
       <VariantPicker />
       <ContrastLevel />
-      <PrimaryHexLock />
       <PrimaryContainerOverride />
       <ShadcnBindings />
       <SurfaceTint />

@@ -1,11 +1,11 @@
 'use client'
 
+import { useSource } from '@tonex/core'
 import {
   type CustomColorEntry,
   slugifyCustomColorName,
-  useSource,
   validateCustomColorEntry,
-} from '@tonex/core'
+} from '@tonex/core/schema'
 import { useState } from 'react'
 
 // why: testbed leaf for slice 3 — minimal CRUD surface for customColors. No
@@ -14,9 +14,9 @@ import { useState } from 'react'
 // Reads validation errors via store throws — caught here and surfaced inline.
 export function CustomColors() {
   const customColors = useSource((s) => s.customColors)
-  const addCustomColor = useSource((s) => s.addCustomColor)
-  const updateCustomColor = useSource((s) => s.updateCustomColor)
-  const removeCustomColor = useSource((s) => s.removeCustomColor)
+  const addCustomColor = useSource((s) => s.actions.addCustomColor)
+  const updateCustomColor = useSource((s) => s.actions.updateCustomColor)
+  const removeCustomColor = useSource((s) => s.actions.removeCustomColor)
 
   const [draftName, setDraftName] = useState('')
   const [draftHex, setDraftHex] = useState('#22c55e')

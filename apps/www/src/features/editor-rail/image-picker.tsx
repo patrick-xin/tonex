@@ -1,13 +1,13 @@
 'use client'
 
 import { SpinnerIcon } from '@phosphor-icons/react'
-import { hexFromArgb, sourceColorFromImage, useSource } from '@tonex/core'
+import { sourceColorHexFromImage, useSource } from '@tonex/core'
 import { useRef, useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { focusWithinRing } from '@/components/ui/styles'
 
 export function ImagePicker({ className }: { className?: string }) {
-  const setSeedHex = useSource((s) => s.setSeedHex)
+  const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
   const imgRef = useRef<HTMLImageElement>(null)
   const prevUrlRef = useRef<string | null>(null)
@@ -26,8 +26,7 @@ export function ImagePicker({ className }: { className?: string }) {
     if (!img) return
 
     img.onload = async () => {
-      const argb = await sourceColorFromImage(img)
-      setSeedHex(hexFromArgb(argb))
+      setSeedHex(await sourceColorHexFromImage(img))
       setLoading(false)
     }
     img.src = url
@@ -74,7 +73,7 @@ export function ImagePicker({ className }: { className?: string }) {
         )}
       </label>
 
-      {/* biome-ignore lint/performance/noImgElement: needs HTMLImageElement ref for MCU sourceColorFromImage; next/image opaque DOM */}
+      {/* biome-ignore lint/performance/noImgElement: needs HTMLImageElement ref for sourceColorHexFromImage; next/image opaque DOM */}
       <img ref={imgRef} alt="" className="hidden" />
     </div>
   )

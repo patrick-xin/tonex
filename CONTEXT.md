@@ -25,8 +25,8 @@ A named MCU scheme strategy (cmf, tonalSpot, etc.) registered in `packages/core/
 **Surface treatment**:
 A post-MCU transform on the neutral ramp. `surfaceAlgo: 'none' | 'tint' | 'desaturate'` selects at most one transform. Runs inside `deriveTheme` between md emit and shadcn bind so all consumers see the treated values.
 
-**Primary lock**:
-A pin on `--color-primary` to an exact hex; the family (`--color-on-primary`, `--color-primary-container`, `--color-on-primary-container`) auto-derives at M3 baseline tones. Mode-keyed.
+**Lock**:
+A boolean gate on a Source field that no-ops the corresponding setter while true. Today there is one: `seedHexLock` blocks every seed-write pathway (hex input, image extraction) at the store seam. Pinning a token to an exact hex is a separate concept — see `md3TokenOverrides` in `packages/core/src/theme/schema.ts`.
 
 ## Agent skills
 

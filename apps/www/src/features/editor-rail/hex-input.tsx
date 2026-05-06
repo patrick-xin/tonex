@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 
 export function HexInput({ hideLabel = false }: { hideLabel?: boolean }) {
   const seedHex = useSource((s) => s.seedHex)
-  const setSeedHex = useSource((s) => s.setSeedHex)
+  const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
 
   const [hexInput, setHexInput] = useState(seedHex)

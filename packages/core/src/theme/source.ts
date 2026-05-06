@@ -17,11 +17,10 @@ import {
 } from './schema'
 import type { NeutralPaletteName } from './surface'
 
-interface SourceActions {
+export interface SourceActions {
   setSeedHex(seedHex: string): void
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
-  setPrimaryHexLock(mode: Mode, hex: string | null): void
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
@@ -36,37 +35,28 @@ interface SourceActions {
   reset(): void
 }
 
-export type SourceState = PortableTheme & SourceActions & { _hydrated: boolean }
+// why: actions live nested under `actions` so SourceState — PortableTheme −
+// `_hydrated` − `actions` is the persistable surface, and selectPortable
+// excludes both ephemeral fields with two destructure keys. Adding a new
+// action requires zero edits to selectPortable / partialize; adding a new
+// portable field flows through automatically. Pattern: persist fields are
+// flat (top-level), actions are bundled. The bundle has stable identity
+// across renders since it's constructed once in the store factory.
+export type SourceState = PortableTheme & {
+  _hydrated: boolean
+  actions: SourceActions
+}
 
 // why: single projection from SourceState → PortableTheme. Used by:
 //   - partialize (persistence write)
 //   - applyDom (state.getState() → deriveTheme input)
 //   - useResolvedTokens (subscription input via useShallow)
-// Blacklist style: actions + _hydrated are the only non-portable bits, so as
-// PortableTheme grows new fields flow through with no maintenance. Adding a
-// new ACTION requires extending this destructure — TypeScript catches that
-// because the rest type is checked against PortableTheme via the return type.
+// Two-key blacklist replaces the prior 16-key destructure: anything that's
+// not _hydrated or actions is, by definition, persistable. New actions land
+// inside the bundle; new portable fields land at top level. The shape itself
+// enforces the partition — no per-action maintenance burden.
 export function selectPortable(s: SourceState): PortableTheme {
-  const {
-    _hydrated: _h,
-    setSeedHex: _ss,
-    setVariant: _sv,
-    setContrastLevel: _scl,
-    setPrimaryHexLock: _spl,
-    setSeedHexLock: _shl,
-    setMd3TokenOverride: _so,
-    setShadcnRoleBinding: _sb,
-    setSurfaceAlgo: _ssa,
-    setSurfacePaletteName: _spn,
-    setSurfaceTintLevel: _sst,
-    setSurfaceDesaturateLevel: _ssd,
-    addCustomColor: _acc,
-    updateCustomColor: _ucc,
-    removeCustomColor: _rcc,
-    setHydrated: _sh,
-    reset: _r,
-    ...portable
-  } = s
+  const { _hydrated: _h, actions: _a, ...portable } = s
   return portable
 }
 
@@ -75,71 +65,69 @@ export const useSource = create<SourceState>()(
     (set) => ({
       ...DEFAULT_INPUTS,
       _hydrated: false,
-      // why: seedHexLock gates the seed write at the setter so every pathway
-      // (hex input, HCT slider, image extraction) is blocked by one check
-      // instead of each consumer guarding individually. Silent no-op — UI is
-      // expected to disable the inputs cosmetically; this is the structural
-      // backstop for any caller that bypasses the disabled state.
-      setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
-      setVariant: (variant) => set({ variant }),
-      setContrastLevel: (contrastLevel) => set({ contrastLevel }),
-      setPrimaryHexLock: (mode, hex) =>
-        set((s) => ({
-          primaryHexLock: { ...s.primaryHexLock, [mode]: hex },
-        })),
-      setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
-      // why: hex sets the override for one (mode, token); null deletes the
-      // entry so the token returns to MCU/lock-derived. Mode and token are
-      // typed so any unknown token is a TS error at the call site, not a
-      // silent no-op at derive time.
-      setMd3TokenOverride: (mode, token, hex) =>
-        set((s) => {
-          const next = { ...s.md3TokenOverrides[mode] }
-          if (hex === null) delete next[token]
-          else next[token] = hex
-          return { md3TokenOverrides: { ...s.md3TokenOverrides, [mode]: next } }
-        }),
-      setShadcnRoleBinding: (mode, role, mdToken) =>
-        set((s) => ({
-          shadcnRoleBindings: {
-            ...s.shadcnRoleBindings,
-            [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
-          },
-        })),
-      setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
-      setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
-      setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
-      setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
-      // why: validate at the store seam — UI's add-time validator surfaces
-      // the message in-form; this throw is the structural backstop for any
-      // caller that bypasses the form (programmatic add, future import path).
-      // Existing-slugs set excludes self for updates; for adds, all current
-      // slugs count.
-      addCustomColor: (entry) =>
-        set((s) => {
-          const existing = new Set(s.customColors.map((e) => slugifyCustomColorName(e.name)))
-          const err = validateCustomColorEntry(entry, existing)
-          if (err !== null) throw new Error(`[addCustomColor] ${err}`)
-          return { customColors: [...s.customColors, entry] }
-        }),
-      updateCustomColor: (id, patch) =>
-        set((s) => {
-          const target = s.customColors.find((e) => e.id === id)
-          if (target === undefined) throw new Error(`[updateCustomColor] no entry with id ${id}`)
-          const next: CustomColorEntry = { ...target, ...patch }
-          const otherSlugs = new Set(
-            s.customColors.filter((e) => e.id !== id).map((e) => slugifyCustomColorName(e.name)),
-          )
-          const err = validateCustomColorEntry(next, otherSlugs)
-          if (err !== null) throw new Error(`[updateCustomColor] ${err}`)
-          return {
-            customColors: s.customColors.map((e) => (e.id === id ? next : e)),
-          }
-        }),
-      removeCustomColor: (id) =>
-        set((s) => ({ customColors: s.customColors.filter((e) => e.id !== id) })),
-      setHydrated: () => set({ _hydrated: true }),
-      reset: () => set({ ...DEFAULT_INPUTS }),
+      actions: {
+        // why: seedHexLock gates the seed write at the setter so every pathway
+        // (hex input, HCT slider, image extraction) is blocked by one check
+        // instead of each consumer guarding individually. Silent no-op — UI is
+        // expected to disable the inputs cosmetically; this is the structural
+        // backstop for any caller that bypasses the disabled state.
+        setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
+        setVariant: (variant) => set({ variant }),
+        setContrastLevel: (contrastLevel) => set({ contrastLevel }),
+        setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
+        // why: hex sets the override for one (mode, token); null deletes the
+        // entry so the token returns to MCU. Mode and token are typed so any
+        // unknown token is a TS error at the call site, not a silent no-op
+        // at derive time.
+        setMd3TokenOverride: (mode, token, hex) =>
+          set((s) => {
+            const next = { ...s.md3TokenOverrides[mode] }
+            if (hex === null) delete next[token]
+            else next[token] = hex
+            return { md3TokenOverrides: { ...s.md3TokenOverrides, [mode]: next } }
+          }),
+        setShadcnRoleBinding: (mode, role, mdToken) =>
+          set((s) => ({
+            shadcnRoleBindings: {
+              ...s.shadcnRoleBindings,
+              [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
+            },
+          })),
+        setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
+        setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
+        setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
+        setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
+        // why: validate at the store seam — UI's add-time validator surfaces
+        // the message in-form; this throw is the structural backstop for any
+        // caller that bypasses the form (programmatic add, future import path).
+        // Existing-slugs set excludes self for updates; for adds, all current
+        // slugs count.
+        addCustomColor: (entry) =>
+          set((s) => {
+            const existing = new Set(s.customColors.map((e) => slugifyCustomColorName(e.name)))
+            const err = validateCustomColorEntry(entry, existing)
+            if (err !== null) throw new Error(`[addCustomColor] ${err}`)
+            return { customColors: [...s.customColors, entry] }
+          }),
+        updateCustomColor: (id, patch) =>
+          set((s) => {
+            const target = s.customColors.find((e) => e.id === id)
+            if (target === undefined) throw new Error(`[updateCustomColor] no entry with id ${id}`)
+            const next: CustomColorEntry = { ...target, ...patch }
+            const otherSlugs = new Set(
+              s.customColors.filter((e) => e.id !== id).map((e) => slugifyCustomColorName(e.name)),
+            )
+            const err = validateCustomColorEntry(next, otherSlugs)
+            if (err !== null) throw new Error(`[updateCustomColor] ${err}`)
+            return {
+              customColors: s.customColors.map((e) => (e.id === id ? next : e)),
+            }
+          }),
+        removeCustomColor: (id) =>
+          set((s) => ({ customColors: s.customColors.filter((e) => e.id !== id) })),
+        setHydrated: () => set({ _hydrated: true }),
+        reset: () => set({ ...DEFAULT_INPUTS }),
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -149,9 +137,10 @@ export const useSource = create<SourceState>()(
       // client, real localStorage is wired up and onRehydrateStorage fires
       // after the read completes, flipping _hydrated true.
       storage: typeof window === 'undefined' ? undefined : createJSONStorage(() => localStorage),
-      // why: same blacklist as selectPortable — one source of truth for
-      // "what's portable vs ephemeral." Persistence drift is no longer a
-      // separate maintenance surface.
+      // why: selectPortable excludes _hydrated + actions; everything else is
+      // PortableTheme by construction. One source of truth for "what's
+      // portable vs ephemeral." Persistence drift is no longer a separate
+      // maintenance surface.
       partialize: selectPortable,
       // why: forward migration ladder per ADR-0009. v1 → v2 expanded the
       // shadcn role surface from 2 keys to 26; zustand persist replaces the
@@ -204,13 +193,20 @@ export const useSource = create<SourceState>()(
           // tint algorithm's palette lookup NPEs.
           s.surfacePaletteName = s.surfacePaletteName ?? 'zinc'
         }
+        if (version < 6) {
+          // why: slice-10 audit pruned primaryHexLock — see SCHEMA_VERSION
+          // header. md3TokenOverrides still covers the pin-a-hex case for
+          // --color-primary; the family-regen story is deferred. Drop the
+          // field so it doesn't shadow the new shape on rehydrate.
+          delete (s as { primaryHexLock?: unknown }).primaryHexLock
+        }
         return s as PortableTheme
       },
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated()
+        state?.actions.setHydrated()
       },
     },
   ),

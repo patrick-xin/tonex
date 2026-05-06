@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./oklch": "./src/oklch.ts",
+    "./data": "./src/data.ts",
+    "./variants": "./src/variants/index.ts"
   },
   "scripts": {
     "test": "vitest run",

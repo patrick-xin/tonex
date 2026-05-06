@@ -1,10 +1,15 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 import type { NeutralPaletteName } from './surface'
 
-// why: bumped to 5 in slice 7 — applySurfaceTint generalized from hardcoded
-// zinc to any of NEUTRAL_PALETTE_NAMES. New field surfacePaletteName picks
-// the base palette; v4→v5 migration fills 'zinc' so existing users see
-// identical output (zinc was the prior hardcoded base).
+// why: bumped to 6 in the slice-10 architecture audit — primaryHexLock
+// pruned. The half-feature pinned --color-primary to a hex and regenerated
+// the family from a TonalPalette; md3TokenOverrides covers the pin use
+// case and the family-regen story is deferred until a real product need
+// surfaces. Migration v5→v6 deletes the persisted field.
+// v5 (slice 7): applySurfaceTint generalized from hardcoded zinc to any of
+// NEUTRAL_PALETTE_NAMES. New field surfacePaletteName picks the base
+// palette; v4→v5 migration fills 'zinc' so existing users see identical
+// output (zinc was the prior hardcoded base).
 // v4 (slice 6): md3PrimaryContainerOverride (single-token, mode-keyed)
 // generalized to md3TokenOverrides (per-token map per mode). Migration
 // lifts the persisted hex into md3TokenOverrides[mode][--color-primary-
@@ -17,7 +22,7 @@ import type { NeutralPaletteName } from './surface'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 5 as const
+export const SCHEMA_VERSION = 6 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -250,13 +255,6 @@ export interface PortableTheme {
   // -1..1 per MCU spec; 0 is the baseline. Drives tone offsets across all
   // dynamic colors, so changing it shifts every md token in lockstep.
   contrastLevel: number
-  // why: pin primary to an exact hex; on-primary / primary-container /
-  // on-primary-container auto-derive from a TonalPalette built off the
-  // locked HCT (mode-keyed). This is the "brand color is non-negotiable"
-  // product story — variant + contrastLevel still drive non-primary roles.
-  // Container/on-* tones use M3 baseline (90/10 light, 30/90 dark); contrast-
-  // aware family resolution is later work.
-  primaryHexLock: { light: string | null; dark: string | null }
   // why: source-input gate, not a per-token snapshot. When true, setSeedHex
   // becomes a no-op — pathways that mutate the seed (hex input, HCT slider,
   // image extraction) all flow through the same setter. Lock is orthogonal
@@ -309,7 +307,6 @@ export const DEFAULT_INPUTS: PortableTheme = {
   seedHex: '#6750a4',
   variant: DEFAULT_VARIANT,
   contrastLevel: 0,
-  primaryHexLock: { light: null, dark: null },
   seedHexLock: false,
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
