@@ -5,6 +5,7 @@ export {
   type ResolvedLayer,
   type TokenMap,
 } from './theme/derive'
+export { type ExportLayer, exportCss } from './theme/exporters/css'
 export { formatCss, formatLayer } from './theme/format'
 export type { Mode } from './theme/mode'
 export {
