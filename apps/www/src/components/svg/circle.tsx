@@ -1,0 +1,19 @@
+import { cn } from 'tailwind-variants'
+
+export function CircleIcon({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      className={cn('size-24 text-primary', className)}
+      viewBox="0 0 380 380"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <title>Circle Icon</title>
+      <path
+        d="M350 190C350 278.366 278.366 350 190 350C101.634 350 30 278.366 30 190C30 101.634 101.634 30 190 30C278.366 30 350 101.634 350 190Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}

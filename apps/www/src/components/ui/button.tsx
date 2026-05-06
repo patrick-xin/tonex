@@ -54,6 +54,12 @@ const buttonStyles = tv({
         focusVisibleTertiaryRing,
         'active:bg-[color-mix(in_srgb,var(--color-on-tertiary)_12%,var(--color-tertiary))]',
       ],
+      inverse: [
+        'bg-inverse-surface text-inverse-on-surface',
+        'hover:bg-[color-mix(in_srgb,var(--color-inverse-on-surface)_8%,var(--color-inverse-surface))]',
+        'active:bg-[color-mix(in_srgb,var(--color-inverse-on-surface)_12%,var(--color-inverse-surface))]',
+        focusVisiblePrimaryRing,
+      ],
       danger: [
         'bg-error text-on-error',
         'hover:bg-[color-mix(in_srgb,var(--color-on-error)_8%,var(--color-error))]',
@@ -71,12 +77,19 @@ const buttonStyles = tv({
         'active:bg-primary/12',
         focusVisibleRing,
       ],
+      fab: [
+        'bg-primary-container text-on-primary-container elevation-3 transition-shadow',
+        'hover:elevation-4 hover:bg-[color-mix(in_srgb,var(--color-on-primary-container)_8%,var(--color-primary-container))]',
+        'focus-visible:outline-offset-2 focus-visible:outline-primary-container/50 focus-visible:ring-4 focus-visible:ring-primary-container/12',
+        'active:bg-[color-mix(in_srgb,var(--color-on-primary-container)_12%,var(--color-primary-container))]',
+      ],
       unstyled: 'bg-transparent hover:bg-transparent',
     },
   },
   defaultVariants: {
     size: 'default',
     variant: 'brand',
+    shape: 'default',
   },
 })
 

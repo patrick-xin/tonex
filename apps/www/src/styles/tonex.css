@@ -1,0 +1,575 @@
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Spacing around window */
+  --toast-viewport-padding: 2rem;
+  /* Toast width */
+  --toast-width: 22rem;
+  /* Spacing between toasts */
+  --toast-gap: 0.75rem;
+  /* Spacing between stacked toast */
+  --toast-peek: 0.75rem;
+  /* Mobile vs Desktop Widths */
+  --toast-max-width-mobile: 80%;
+  --toast-max-width-desktop: var(--toast-width);
+  /* Drawer bleed */
+  --drawer-bleed: 3rem;
+
+  /* For popups/toasts */
+  --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* For drawers/dialogs */
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* For popups */
+@utility animate-popup {
+  @apply origin-[var(--transform-origin)] transition-[opacity,scale,transform] ease-spring duration-150;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+/* For popups with translucent effect, including bg color, radii, shadow, animation, and outline */
+@utility animate-popup-blur {
+  @apply origin-[var(--transform-origin)] transition-[opacity,scale,transform] ease-spring duration-150;
+
+  transition-duration: 50ms, 150ms, 150ms;
+
+  transition-timing-function: ease-out, var(--ease-spring), var(--ease-spring);
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+/* For popups, including bg color, radii, shadow, animation, and outline */
+@utility surface-popup {
+  @apply bg-surface-container rounded-md shadow-lg animate-popup overlay-outline;
+}
+
+/* For popups with translucent effect, including bg color, radii, shadow, animation, and outline */
+@utility surface-popup-blur {
+  @apply relative bg-surface/80 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-lg rounded-md shadow-sm overlay-outline animate-popup-blur;
+}
+
+/* @utility surface-popup-blur {
+  @apply relative bg-surface/60 backdrop-blur-2xl rounded-md shadow-lg animate-popup-blur overlay-outline;
+} */
+
+/* For dialogs */
+@utility surface-dialog {
+  @apply bg-surface rounded-lg shadow-lg dark:shadow-sm overlay-outline;
+}
+
+/* For dialogs with translucent effect */
+@utility surface-dialog-blur {
+  @apply relative bg-surface/80 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl rounded-lg shadow-lg dark:shadow-sm overlay-outline;
+}
+
+/* For dialogs */
+@utility animate-fade-up {
+  @apply transition-all duration-450 ease-smooth;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    translate: 0 100%;
+  }
+}
+
+@utility animate-fade-down {
+  @apply transition-all duration-450 ease-smooth;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    translate: 0 -100%;
+  }
+}
+
+@utility animate-slide-left {
+  @apply transition-all duration-450 ease-smooth;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    translate: 100% 0;
+  }
+}
+
+@utility animate-slide-right {
+  @apply transition-all duration-450 ease-smooth;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    translate: -100% 0;
+  }
+}
+
+@utility animate-fade-zoom {
+  @apply transition-all duration-240 ease-smooth;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.94;
+  }
+}
+
+@utility animate-fade {
+  @apply transition-all duration-240;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+/* Overlay Outline */
+@utility overlay-outline {
+  @apply outline outline-outline-variant dark:-outline-offset-1;
+}
+
+/* Active Highlight */
+/* @utility highlight-on-active {
+  @apply data-highlighted:relative data-highlighted:z-0 data-highlighted:before:absolute data-highlighted:before:inset-x-1.5 data-highlighted:before:inset-y-0 data-highlighted:before:z-[-1] data-highlighted:before:rounded-md 
+  data-highlighted:before:bg-on-surface-variant/8 data-popup-open:relative data-popup-open:z-0 data-popup-open:before:absolute data-popup-open:before:inset-x-1.5 data-popup-open:before:inset-y-0 data-popup-open:before:z-[-1] data-popup-open:before:rounded-md data-popup-open:before:bg-on-surface-variant/8 dark:data-highlighted:data-popup-open:before:bg-on-surface-variant/12;
+} */
+
+@utility highlight-on-active {
+  @apply data-highlighted:relative data-highlighted:z-0 data-highlighted:before:absolute data-highlighted:before:inset-x-1.5 data-highlighted:before:inset-y-0 data-highlighted:before:z-[-1] data-highlighted:before:rounded-md data-highlighted:before:bg-surface-dim dark:data-highlighted:before:bg-surface-bright;
+}
+
+/*
+ * MD3 Elevation — levels 0–5
+ *
+ * Usage: class="elevation-3" or "hover:elevation-4"
+ * Animate: add "transition-shadow" to the element.
+ *
+ * Follows the official --md-elevation-level pattern but
+ * implemented as Tailwind utilities so variants work.
+ */
+@utility elevation-0 {
+  --md-elevation-level: 0;
+  box-shadow: none;
+}
+@utility elevation-1 {
+  --md-elevation-level: 1;
+  box-shadow:
+    0 1px 2px 0 color-mix(in srgb, var(--md-shadow, #000) 30%, transparent),
+    0 1px 3px 1px color-mix(in srgb, var(--md-shadow, #000) 15%, transparent);
+}
+@utility elevation-2 {
+  --md-elevation-level: 2;
+  box-shadow:
+    0 1px 2px 0 color-mix(in srgb, var(--md-shadow, #000) 30%, transparent),
+    0 2px 6px 2px color-mix(in srgb, var(--md-shadow, #000) 15%, transparent);
+}
+@utility elevation-3 {
+  --md-elevation-level: 3;
+  box-shadow:
+    0 4px 8px 3px color-mix(in srgb, var(--md-shadow, #000) 15%, transparent),
+    0 1px 3px 0 color-mix(in srgb, var(--md-shadow, #000) 30%, transparent);
+}
+@utility elevation-4 {
+  --md-elevation-level: 4;
+  box-shadow:
+    0 6px 10px 4px color-mix(in srgb, var(--md-shadow, #000) 15%, transparent),
+    0 2px 3px 0 color-mix(in srgb, var(--md-shadow, #000) 30%, transparent);
+}
+@utility elevation-5 {
+  --md-elevation-level: 5;
+  box-shadow:
+    0 8px 12px 6px color-mix(in srgb, var(--md-shadow, #000) 15%, transparent),
+    0 4px 4px 0 color-mix(in srgb, var(--md-shadow, #000) 30%, transparent);
+}
+
+/*
+   Drawer Popup
+*/
+@layer utilities {
+  .drawer-popup {
+    touch-action: auto;
+    transition: transform 450ms var(--ease-smooth);
+
+    &[data-swiping] {
+      @apply select-none;
+    }
+
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+    }
+  }
+
+  /* Bottom */
+  .drawer-popup[data-side="bottom"] {
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    max-height: 80vh;
+    transform: translateY(var(--drawer-swipe-movement-y));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% + var(--viewport-padding) + 2px));
+    }
+  }
+
+  /* Bottom fullBleed */
+  .drawer-popup[data-side="bottom"][data-layout="fullBleed"] {
+    @apply -mb-(--drawer-bleed);
+    --viewport-padding: 0px;
+    max-height: calc(80vh + var(--drawer-bleed));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+    }
+  }
+
+  /* Bottom responsive */
+  .drawer-popup[data-side="bottom"][data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-bottom: calc(-1 * var(--drawer-bleed));
+      --viewport-padding: 0px;
+      max-height: calc(80vh + var(--drawer-bleed));
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+      }
+    }
+  }
+
+  /* Top */
+  .drawer-popup[data-side="top"] {
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    max-height: 80vh;
+    transform: translateY(var(--drawer-swipe-movement-y));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(-100% - var(--viewport-padding) - 2px));
+    }
+  }
+
+  /* Top fullBleed */
+  .drawer-popup[data-side="top"][data-layout="fullBleed"] {
+    @apply -mt-(--drawer-bleed);
+    --viewport-padding: 0px;
+    max-height: calc(80vh + var(--drawer-bleed));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(-100% + var(--drawer-bleed) - 2px));
+    }
+  }
+
+  /* Top responsive */
+  .drawer-popup[data-side="top"][data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-top: calc(-1 * var(--drawer-bleed));
+      --viewport-padding: 0px;
+      max-height: calc(80vh + var(--drawer-bleed));
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateY(calc(-100% + var(--drawer-bleed) - 2px));
+      }
+    }
+  }
+
+  /* Left */
+  .drawer-popup[data-side="left"] {
+    @apply h-full w-80 sm:w-96 max-w-[calc(100vw-2rem)];
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    transform: translateX(var(--drawer-swipe-movement-x));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateX(calc(-100% - var(--viewport-padding) - 2px));
+    }
+  }
+
+  /* Left fullBleed */
+  .drawer-popup[data-side="left"][data-layout="fullBleed"] {
+    @apply -ml-(--drawer-bleed) w-[calc(20rem+var(--drawer-bleed))] sm:w-[calc(24rem+var(--drawer-bleed))] max-w-[100vw];
+    --viewport-padding: 0px;
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateX(calc(-100% + var(--drawer-bleed) - 2px));
+    }
+  }
+
+  /* Left responsive */
+  .drawer-popup[data-side="left"][data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-left: calc(-1 * var(--drawer-bleed));
+      width: calc(24rem + var(--drawer-bleed));
+      max-width: 100vw;
+      --viewport-padding: 0px;
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateX(calc(-100% + var(--drawer-bleed) - 2px));
+      }
+    }
+  }
+
+  /* Right */
+  .drawer-popup[data-side="right"] {
+    @apply h-full w-80 sm:w-96 max-w-[calc(100vw-2rem)];
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    transform: translateX(var(--drawer-swipe-movement-x));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateX(calc(100% + var(--viewport-padding) + 2px));
+    }
+  }
+
+  /* Right fullBleed */
+  .drawer-popup[data-side="right"][data-layout="fullBleed"] {
+    @apply -mr-(--drawer-bleed) w-[calc(20rem+var(--drawer-bleed))] sm:w-[calc(24rem+var(--drawer-bleed))] max-w-[100vw];
+    --viewport-padding: 0px;
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateX(calc(100% - var(--drawer-bleed) + 2px));
+    }
+  }
+
+  /* Right responsive */
+  .drawer-popup[data-side="right"][data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-right: calc(-1 * var(--drawer-bleed));
+      width: calc(24rem + var(--drawer-bleed));
+      max-width: 100vw;
+      --viewport-padding: 0px;
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateX(calc(100% - var(--drawer-bleed) + 2px));
+      }
+    }
+  }
+}
+
+/*
+   Drawer Indent
+*/
+@layer utilities {
+  .drawer-indent {
+    --indent-progress: var(--drawer-swipe-progress);
+    --indent-radius: calc(1rem * (1 - var(--indent-progress)));
+    --indent-transition: calc(1 - clamp(0, calc(var(--drawer-swipe-progress) * 100000), 1));
+
+    @apply origin-[center_top] will-change-transform;
+    transform: scale(1) translateY(0);
+    transition:
+      transform 0.4s var(--ease-smooth),
+      border-radius 0.25s var(--ease-smooth);
+    transition-duration:
+      calc(400ms * var(--indent-transition)), calc(250ms * var(--indent-transition));
+
+    &[data-active] {
+      transform: scale(calc(0.98 + (0.02 * var(--indent-progress))))
+        translateY(calc(0.5rem * (1 - var(--indent-progress))));
+      border-top-left-radius: var(--indent-radius);
+      border-top-right-radius: var(--indent-radius);
+    }
+  }
+}
+
+/*
+   Drawer Snap Popup
+*/
+@layer utilities {
+  .drawer-snap-popup {
+    @apply overflow-visible min-h-0 touch-none;
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    max-height: calc(100dvh - var(--drawer-snap-top-margin, 1rem));
+
+    /* Snap-based transform + dynamic padding */
+    transform: translateY(calc(var(--drawer-snap-point-offset) + var(--drawer-swipe-movement-y)));
+    padding-bottom: max(
+      0px,
+      calc(var(--drawer-snap-point-offset) + var(--drawer-swipe-movement-y))
+    );
+
+    transition: transform 450ms var(--ease-smooth);
+
+    /* Bleed pseudo-element below rounded corners */
+    &::after {
+      content: "";
+      @apply pointer-events-none absolute inset-x-0 top-full;
+      height: var(--drawer-bleed);
+      background-color: inherit;
+    }
+
+    &[data-swiping] {
+      @apply select-none;
+    }
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% + var(--viewport-padding) + 2px));
+      padding-bottom: 0;
+      box-shadow:
+        0 -16px 48px rgb(0 0 0 / 0),
+        0 6px 18px rgb(0 0 0 / 0);
+    }
+
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+    }
+  }
+
+  /* Snap fullBleed */
+  .drawer-snap-popup[data-layout="fullBleed"] {
+    @apply -mb-(--drawer-bleed);
+    --viewport-padding: 0px;
+    max-height: calc(100dvh - var(--drawer-snap-top-margin, 1rem) + var(--drawer-bleed));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+    }
+  }
+
+  /* Snap responsive */
+  .drawer-snap-popup[data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-bottom: calc(-1 * var(--drawer-bleed));
+      --viewport-padding: 0px;
+      max-height: calc(100dvh - var(--drawer-snap-top-margin, 1rem) + var(--drawer-bleed));
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+      }
+    }
+  }
+}
+
+/*
+   Drawer Stacked Popup
+*/
+@layer utilities {
+  .drawer-stacked-popup {
+    touch-action: auto;
+    --drawer-bleed: 0px;
+    --viewport-padding: 1rem;
+    max-height: 80vh;
+
+    /* Stacking math */
+    --peek: 1rem;
+    --stack-progress: clamp(0, var(--drawer-swipe-progress), 1);
+    --stack-step: 0.05;
+    --stack-peek-offset: max(
+      0px,
+      calc((var(--nested-drawers) - var(--stack-progress)) * var(--peek))
+    );
+    --scale-base: calc(max(0, 1 - (var(--nested-drawers) * var(--stack-step))));
+    --scale: clamp(0, calc(var(--scale-base) + (var(--stack-step) * var(--stack-progress))), 1);
+    --shrink: calc(1 - var(--scale));
+    --height: max(
+      0px,
+      calc(var(--drawer-frontmost-height, var(--drawer-height)) - var(--drawer-bleed))
+    );
+
+    height: var(--drawer-height, auto);
+    transform-origin: 50% calc(100% - var(--drawer-bleed));
+    transform: translateY(
+        calc(
+          var(--drawer-swipe-movement-y) -
+          var(--stack-peek-offset) -
+          (var(--shrink) * var(--height))
+        )
+      )
+      scale(var(--scale));
+
+    transition:
+      transform 450ms var(--ease-smooth),
+      height 450ms var(--ease-smooth),
+      box-shadow 450ms var(--ease-smooth);
+
+    /* Shadow */
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+
+    /* Pseudo overlay for nested dimming */
+    &::after {
+      content: "";
+      @apply absolute inset-0 rounded-[inherit] bg-transparent pointer-events-none;
+      transition: background-color 450ms var(--ease-smooth);
+    }
+
+    /* Enter/exit */
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% + var(--viewport-padding) + 2px));
+    }
+
+    &[data-ending-style] {
+      box-shadow: 0 2px 10px rgb(0 0 0 / 0);
+      transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+    }
+
+    /* Swipe states */
+    &[data-swiping] {
+      transition-duration: 0s;
+      @apply select-none;
+    }
+
+    &[data-nested-drawer-swiping] {
+      transition-duration: 0s;
+    }
+
+    /* Nested drawer open */
+    &[data-nested-drawer-open] {
+      height: calc(var(--height) + var(--drawer-bleed));
+      overflow: hidden;
+
+      &::after {
+        background-color: rgb(0 0 0 / 0.05);
+      }
+    }
+  }
+
+  /* Stacked fullBleed */
+  .drawer-stacked-popup[data-layout="fullBleed"] {
+    @apply -mb-(--drawer-bleed);
+    --viewport-padding: 0px;
+    max-height: calc(80vh + var(--drawer-bleed));
+
+    &[data-ending-style],
+    &[data-starting-style] {
+      transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+    }
+  }
+
+  /* Stacked responsive */
+  .drawer-stacked-popup[data-layout="responsive"] {
+    @media (min-width: 640px) {
+      margin-bottom: calc(-1 * var(--drawer-bleed));
+      --viewport-padding: 0px;
+      max-height: calc(80vh + var(--drawer-bleed));
+
+      &[data-ending-style],
+      &[data-starting-style] {
+        transform: translateY(calc(100% - var(--drawer-bleed) + 2px));
+      }
+    }
+  }
+}

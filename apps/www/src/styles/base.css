@@ -1,0 +1,56 @@
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-outline-variant) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans bg-surface text-on-surface outline-0;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-outline-variant);
+    border-radius: 5px;
+  }
+  ::selection {
+    @apply bg-primary-container text-on-primary-container;
+  }
+
+  .root {
+    isolation: isolate;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility extend-touch-target {
+  @media (pointer: coarse) {
+    @apply relative touch-manipulation after:absolute after:-inset-2;
+  }
+}
+
+@layer base {
+  [data-panel] > div {
+    @apply no-scrollbar mask-[linear-gradient(to_bottom,transparent,black_1.6rem,black_calc(100%-1.2rem),transparent)];
+  }
+}

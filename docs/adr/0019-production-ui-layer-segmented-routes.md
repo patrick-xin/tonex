@@ -31,3 +31,11 @@ Foundation slices (1–8) shipped a layer-unified engine: `deriveTheme(source)` 
 - `docs/agents/slice-strategy.md` acknowledges blueprint slices (this one) as legitimate precedent for doc-only slices.
 
 This ADR does not amend ADR-0017. ADR-0017's five commitments hold unchanged: both modes co-derived in one call, all four blocks always emitted, mode owned by next-themes, derive is the single source of truth, `globals.css` baked from defaults. Layer *presentation* is downstream of all of them.
+
+## Amendment 2026-05-06 — md route shortened to `/theme`
+
+Commitment 1 originally pinned the routes as `/theme/md3` and `/theme/shadcn`. Implementation in slice 10 settled on `/theme` (md) and `/theme/shadcn` instead — md sits at the `/theme` root, shadcn keeps its named segment. Implemented via Next.js route groups: `app/(app)/theme/(md)/page.tsx` resolves to `/theme`, `app/(app)/theme/(shadcn)/shadcn/page.tsx` to `/theme/shadcn`. Layer encapsulation via parens is preserved per the ADR's own ban on multiplexing the same URL — the two route-group folders resolve to distinct URLs.
+
+**Why:** md3 is the broader-audience default per the brief tagline; the shorter URL signals it. Shadcn keeps its named segment because it's the targeted-audience export. The original `/theme/md3` symmetry was not load-bearing — what is load-bearing is one route per layer, plain folder paths, and no in-app layer toggle. All three still hold.
+
+Commitments 2–7 are unchanged.
