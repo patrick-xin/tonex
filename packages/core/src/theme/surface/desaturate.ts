@@ -9,15 +9,24 @@ import { argbFromOklch, oklchFromArgb } from '../oklch'
 // level=0: MCU as-is (no effect).
 // level=1: chroma forced to 0 (pure neutral).
 //
-// Applies to all surface-family tokens including `--color-on-surface`,
-// because text-on-tinted-surface was the original complaint (e.g. `#352f43`
-// purple-tinted text in temp.md).
+// Covers the FULL md surface ramp + on-surface text pair. Uniform multiplier
+// means new tokens cost nothing to include; leaving them out would let a
+// "neutral" surface sit next to an MCU-tinted `--color-surface-container-low`
+// in the same ramp (visible inconsistency). on-surface and on-surface-variant
+// are included because text-on-tinted-surface was the original complaint
+// (e.g. `#352f43` purple-tinted text in temp.md).
 
 const SURFACE_FAMILY = [
   '--color-surface',
+  '--color-surface-dim',
+  '--color-surface-bright',
+  '--color-surface-container-lowest',
+  '--color-surface-container-low',
   '--color-surface-container',
   '--color-surface-container-high',
+  '--color-surface-container-highest',
   '--color-on-surface',
+  '--color-on-surface-variant',
 ] as const
 
 function scaleChroma(value: string, level: number): string {

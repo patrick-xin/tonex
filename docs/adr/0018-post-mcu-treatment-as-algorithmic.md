@@ -28,3 +28,14 @@ Algorithms live as free functions: `applySurfaceTint(layer, mode, level)` and `a
 - Adding a third algorithm (e.g. `'lift'`, `'dim'`) is one new file in `packages/core/src/theme/`, one entry in `SURFACE_ALGOS`, one branch in `applyTreatment`. No type-shape pressure until issue #3's second-consumer trigger fires.
 - Future palette-sourced surfaces (the original ADR-0002 idea, now via ColorSystem's optional `surfaceShadeMap` per ADR-0004) remain possible as a separate, additive feature — picker-driven, not algorithm-driven. If/when shipped, it composes alongside (not instead of) the algorithmic treatments here.
 - Issue #3 governs the abstraction question (a unified `SurfaceTreatment` registry). This ADR governs the mechanism. The two are independent: mechanism is decided now; abstraction waits for a concrete second consumer.
+
+## Amendment — 2026-05-05
+
+The body lists the treatment family as four tokens (`--color-surface`, `--color-surface-container`, `--color-surface-container-high`, `--color-on-surface`). That list was authored against slice 1's md token set. Slice 2 expanded the md surface ramp to nine tokens (`-dim`, `-bright`, `-container-lowest`, `-container-low`, `-container-highest`, plus `--color-on-surface-variant`).
+
+Each algorithm now picks its own subset of the **expanded ramp**, not a uniform 4-token family:
+
+- `applySurfaceDesaturate` covers the **full** ramp (8 surface-bg tokens + `on-surface` + `on-surface-variant`). Uniform chroma scaling — no design call to add tokens.
+- `applySurfaceTint` covers **three** surface-bg tokens (`--color-surface`, `--color-surface-container`, `--color-surface-container-high`). Expansion to the full ramp is deferred: each new token needs a chosen zinc shade in `SHADE_MAP`, which is a product call best made when a UI surfaces the full ramp under tint. `--color-on-surface` and `--color-on-surface-variant` stay MCU-derived (no shade map for text-on-surface).
+
+The "treatment touches the md surface family only — primary stays MCU" invariant from the body is unchanged. What changed is "family" is now a per-algorithm subset, declared in each algorithm's leading `// why:` block.

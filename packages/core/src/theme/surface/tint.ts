@@ -10,8 +10,14 @@ import { argbFromOklch, oklchFromArgb } from '../oklch'
 // level=0: pure zinc (no primary character).
 // level=1: zinc with chroma forced to TARGET_CHROMA and hue snapped to primary.
 //
-// Applies to surface-bg tokens only; `--color-on-surface` stays MCU-derived
-// (no shade map for text-on-surface).
+// Scope: deliberately narrower than desaturate. Only the three core surface-bg
+// tokens (`--color-surface`, `--color-surface-container`, `--color-surface-
+// container-high`) are tinted — a known gap relative to the full md surface
+// ramp added in slice 2 (`-dim`, `-bright`, `-container-lowest`, `-container-
+// low`, `-container-highest` flow through MCU untouched). Expanding requires
+// picking zinc shades for each new token (a design call), not just enlarging
+// SHADE_MAP. Defer until a UI exposes the full ramp under tint. on-surface +
+// on-surface-variant are MCU-derived (no shade map for text-on-surface).
 //
 // Internally the algorithm is argb (HCT operates on argb ints); the layer
 // at the API boundary is oklch strings — parse on input, format on output.

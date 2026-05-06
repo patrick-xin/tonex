@@ -11,6 +11,11 @@ import { DEFAULT_VARIANT, type VariantName } from '../variants'
 export const SCHEMA_VERSION = 3 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
+// why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
+// The trailing `-v1` is pinned for migration continuity — zustand keys storage
+// by this name and runs `migrate` against whatever's at this key. Renaming
+// would orphan every existing user's persisted state. SCHEMA_VERSION (above)
+// is the version axis; this constant must NOT track it.
 export const STORAGE_KEY = 'tonex-theme-v1' as const
 
 // why: canonical list of md tokens deriveTheme emits per mode. Used as the
@@ -107,7 +112,7 @@ export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
   '--background': '--color-surface',
   '--foreground': '--color-on-surface',
-  '--card': '--color-surface-dim',
+  '--card': '--color-surface-container',
   '--card-foreground': '--color-on-surface',
   '--popover': '--color-surface',
   '--popover-foreground': '--color-on-surface',
@@ -139,7 +144,7 @@ const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
 // flows through DARK automatically.
 const DEFAULT_SHADCN_BINDINGS_DARK: ShadcnRoleBindings = {
   ...DEFAULT_SHADCN_BINDINGS_LIGHT,
-  '--card': '--color-surface-bright',
+  '--card': '--color-surface-container',
   '--popover': '--color-surface-container',
   '--sidebar-foreground': '--color-on-surface-variant',
 }
@@ -250,12 +255,10 @@ export interface PortableTheme {
   // they live on different fields. Boolean (not mode-keyed) — locking the
   // seed locks both modes since seedHex itself isn't mode-keyed.
   seedHexLock: boolean
-  // why: minimal single-token override to verify the source→derive→DOM→export
-  // loop under mutation pressure with light/dark UX. Mode-keyed per ADR-0017.
-  // Slice 6 generalizes this as md3TokenOverrides: { light: Record<MdTokenName,
-  // string>; dark: Record<MdTokenName, string> } — mode at the top per ADR-0017
-  // commitment 3 (mirrors :root + .dark export blocks one-to-one). Match the
-  // shape of shadcnRoleBindings below; do NOT use Record<Token, {light, dark}>.
+  // why: mode-keyed per ADR-0017 commitment 3 — `{ light, dark }` at the top
+  // mirrors the export's `:root + .dark` block structure one-to-one. When this
+  // generalizes to a full token-override map, keep the SAME shape (mode at top,
+  // Record<Token, hex> inside) — not Record<Token, { light, dark }>.
   md3PrimaryContainerOverride: { light: string | null; dark: string | null }
   // why: cross-layer mapping is data, not code. Mode-keyed because some
   // slice-7 mappings will diverge across modes (e.g. light primary →

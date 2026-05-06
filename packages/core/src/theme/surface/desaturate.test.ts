@@ -7,9 +7,15 @@ import { applySurfaceDesaturate } from './desaturate'
 
 const SURFACE_FAMILY = [
   '--color-surface',
+  '--color-surface-dim',
+  '--color-surface-bright',
+  '--color-surface-container-lowest',
+  '--color-surface-container-low',
   '--color-surface-container',
   '--color-surface-container-high',
+  '--color-surface-container-highest',
   '--color-on-surface',
+  '--color-on-surface-variant',
 ] as const
 
 describe('applySurfaceDesaturate', () => {
