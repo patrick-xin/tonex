@@ -1,0 +1,33 @@
+> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+
+# Production UI — layer-segmented routes, layer-unified engine
+
+Foundation slices (1–8) shipped a layer-unified engine: `deriveTheme(source)` co-emits both md and shadcn tokens for both modes, on a single DOM, governed by ADR-0017 (no preview/export drift). Production UI design must serve two audiences (md3 users and shadcn users) without forking that engine and without reframing the product as "pick a layer."
+
+**Decision:** Production UI is **layer-segmented at the route level** and **layer-unified at the engine level**. Two parallel views over one source store.
+
+1. **Two editor routes: `/theme/md3` and `/theme/shadcn`.** Plain folder paths. Next.js route groups (parens) are used for layout encapsulation, but never to multiplex the same URL. The route is the layer label; no in-app layer toggle.
+
+2. **One source store, shared across both routes.** Single persistence key (`tonex-theme-v1`). Navigating between routes preserves all state. There is no per-route store, no per-route persistence, no migration on route change.
+
+3. **Layer scoping (`.md`, `.shadcn`) is set by the route on a shared editor layout element.** `next-themes` continues to own dark mode (per ADR-0017 commitment 4). `applyDom` continues to emit all four blocks regardless of route — both layers are always present on the DOM. The route controls only which block the canvas *reads*.
+
+4. **Chrome dogfoods `components/ui/` (md-styled) on every route.** Rail, top tabs, status strip, modals, settings, cross-route layer switcher — all sourced from tonex's own md-styled component library, regardless of which output the user is generating. Tonex IS an md-styled product that helps users generate themes for either output. A shadcn user sees an md-styled editor with a shadcn-styled canvas; this is intentional.
+
+5. **Canvas is the only layer-segmented surface.** `/theme/md3` canvas uses `components/ui/`; `/theme/shadcn` canvas uses `components/shadcn/`. Each canvas reads tokens from the layer block emitted by `applyDom` — no re-derivation, no re-skin, no runtime layer prop on shared components.
+
+6. **`/` is a chooser landing.** Separate concern from the editor; ships in its own slice. Until then, `/` may placeholder-redirect to `/theme/shadcn` (the larger audience target per the brief tagline) or render a known-stub. Editor routes are independently navigable.
+
+7. **`/sink` survives until editor parity.** The legacy testbed continues to verify the engine while production editor routes are built. Once `/theme/{md3,shadcn}` cover every editing affordance plus canvas verification, `/sink` retires. Feature-driven, not date-driven.
+
+**Why:** ADR-0017's WYSIWYG promise is "both layers always coherent." A layer toggle in the chrome introduces cognitive load that competes with that promise — the user starts thinking of one layer as primary and the other as an export target. Two routes solve audience legibility (a shadcn user sees shadcn components; an md3 user sees md3 components) without forking the engine, without persisting layer choice as a separate axis, and without inventing a third state shape. The product positioning becomes "edit once, export both," which is the differentiator that motivated the engine architecture in the first place.
+
+**Consequence:**
+
+- Implementation slices (10+) lift testbed rail controls into `features/editor-rail/` per ADR-0020 (lift standard). The rail is shared between routes; per-route differences are slot-level (a shadcn-only collapsible appears only on `/theme/shadcn`, by route-level composition, not runtime branching).
+- The cross-route layer switcher is a chrome control that fires `<Link href="/theme/{other}">`. State persists via the shared store; no extra plumbing.
+- The "Customize Tokens" tab inside the rail (per legacy reference) is a content swap inside the rail body, not a route. Same store, same route — just a different rail mode.
+- `CONTEXT.md` gains *Editor route*, *Chrome*, *Canvas* vocabulary when those terms become felt in code, per CONTEXT.md's "vocabulary for unbuilt features doesn't belong here" rule.
+- `docs/agents/slice-strategy.md` acknowledges blueprint slices (this one) as legitimate precedent for doc-only slices.
+
+This ADR does not amend ADR-0017. ADR-0017's five commitments hold unchanged: both modes co-derived in one call, all four blocks always emitted, mode owned by next-themes, derive is the single source of truth, `globals.css` baked from defaults. Layer *presentation* is downstream of all of them.

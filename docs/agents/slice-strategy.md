@@ -46,3 +46,4 @@ Slice 1 (the day-one tracer) verifies BOTH layers — md default + shadcn sub-sc
 - When asked "what should I build next?" — name the slice's one-sentence promise FIRST. Refuse expansions.
 - Each slice's tests (Red) are the contract. Don't write code outside what the test demands.
 - Refactor (the third R) only happens green. Never refactor while red.
+- **Blueprint slices** (no code, only ADRs / repo doc updates) are legitimate when an architectural decision spans multiple implementation slices and must land before any of those slices ship. Slice 9 was the precedent: ADR-0019 + ADR-0020 + this doc landed without code, unblocking the parallel lifts that followed.
