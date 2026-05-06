@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
+import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import {
   type CustomColorEntry,
@@ -19,6 +20,14 @@ import type { NeutralPaletteName } from './surface'
 
 export interface SourceActions {
   setSeedHex(seedHex: string): void
+  // why: HCT setters all decompose the current seed, replace one axis, and
+  // recompose to a hex routed through setSeedHex. Centralizing through the
+  // hex setter means seedHexLock gates every mutation pathway with one check
+  // — no per-axis lock plumbing, no chance of a future setter forgetting the
+  // gate.
+  setSeedHue(hue: number): void
+  setSeedChroma(chroma: number): void
+  setSeedTone(tone: number): void
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
   setSeedHexLock(locked: boolean): void
@@ -72,6 +81,24 @@ export const useSource = create<SourceState>()(
         // expected to disable the inputs cosmetically; this is the structural
         // backstop for any caller that bypasses the disabled state.
         setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
+        setSeedHue: (hue) =>
+          set((s) => {
+            if (s.seedHexLock) return {}
+            const current = hctFromHex(s.seedHex)
+            return { seedHex: hexFromHct({ ...current, hue }) }
+          }),
+        setSeedChroma: (chroma) =>
+          set((s) => {
+            if (s.seedHexLock) return {}
+            const current = hctFromHex(s.seedHex)
+            return { seedHex: hexFromHct({ ...current, chroma }) }
+          }),
+        setSeedTone: (tone) =>
+          set((s) => {
+            if (s.seedHexLock) return {}
+            const current = hctFromHex(s.seedHex)
+            return { seedHex: hexFromHct({ ...current, tone }) }
+          }),
         setVariant: (variant) => set({ variant }),
         setContrastLevel: (contrastLevel) => set({ contrastLevel }),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),

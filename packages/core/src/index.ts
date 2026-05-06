@@ -12,6 +12,11 @@
 // engine surface, adding a variant doesn't touch the schema barrel.
 export { applyDom } from './theme/applyDom'
 export {
+  type CustomColorPreview,
+  type CustomColorPreviewRoles,
+  previewCustomColor,
+} from './theme/custom-color'
+export {
   type DerivedTheme,
   deriveTheme,
   type ResolvedLayer,
@@ -19,6 +24,7 @@ export {
 } from './theme/derive'
 export { type ExportLayer, exportCss } from './theme/exporters/css'
 export { formatCss, formatLayer } from './theme/format'
+export { CHROMA_HUE_LOCK, type HctTriplet, hctFromHex, hexFromHct, maxChroma } from './theme/hct'
 export { sourceColorHexFromImage } from './theme/image'
 export type { Mode } from './theme/mode'
 export { type SourceActions, type SourceState, selectPortable, useSource } from './theme/source'

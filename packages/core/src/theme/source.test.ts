@@ -294,6 +294,60 @@ describe('useSource persistence round-trip', () => {
     })
   })
 
+  // why: HCT setters must replace exactly one axis and route through the same
+  // lock gate as setSeedHex. Round-trip via hctFromHex on the resulting hex
+  // because hexFromHct may snap to gamut — direct equality on the requested
+  // axis would fail at extreme values.
+  describe('HCT setters', () => {
+    it('setSeedHue replaces hue, preserves tone (chroma may gamut-clamp)', async () => {
+      // why: chroma can drop when hue changes — gamut wall narrows for some
+      // hues at the same (chroma, tone). That's MCU's solver doing its job,
+      // not a bug. Use a low-chroma seed so the assertion isolates the axis
+      // replacement from gamut clamping; tone is the genuinely-invariant axis.
+      const { hexFromHct, hctFromHex } = await import('./hct')
+      useSource.setState({ seedHex: hexFromHct({ hue: 0, chroma: 10, tone: 50 }) })
+      const before = hctFromHex(useSource.getState().seedHex)
+      useSource.getState().actions.setSeedHue(120)
+      const after = hctFromHex(useSource.getState().seedHex)
+      // why: MCU's solver produces hue values within ~1° of the request
+      // after the round trip through hexFromHct → hctFromHex. ±2 covers
+      // every observed drift without coupling to exact solver output.
+      expect(Math.abs(after.hue - 120)).toBeLessThan(2)
+      expect(Math.abs(after.chroma - before.chroma)).toBeLessThan(2)
+      expect(Math.abs(after.tone - before.tone)).toBeLessThan(2)
+    })
+
+    it('setSeedTone replaces tone, preserves hue', async () => {
+      const { hctFromHex } = await import('./hct')
+      const before = hctFromHex(useSource.getState().seedHex)
+      useSource.getState().actions.setSeedTone(80)
+      const after = hctFromHex(useSource.getState().seedHex)
+      expect(Math.abs(after.tone - 80)).toBeLessThan(2)
+      expect(Math.abs(after.hue - before.hue)).toBeLessThan(2)
+    })
+
+    it('setSeedChroma replaces chroma, preserves hue + tone', async () => {
+      const { hctFromHex } = await import('./hct')
+      const before = hctFromHex(useSource.getState().seedHex)
+      useSource.getState().actions.setSeedChroma(20)
+      const after = hctFromHex(useSource.getState().seedHex)
+      expect(Math.abs(after.chroma - 20)).toBeLessThan(2)
+      expect(Math.abs(after.hue - before.hue)).toBeLessThan(2)
+      expect(Math.abs(after.tone - before.tone)).toBeLessThan(2)
+    })
+
+    it('all three setters no-op when seedHexLock is true', () => {
+      const s = useSource.getState()
+      s.actions.setSeedHex('#6750a4')
+      s.actions.setSeedHexLock(true)
+      const locked = useSource.getState().seedHex
+      s.actions.setSeedHue(0)
+      s.actions.setSeedChroma(80)
+      s.actions.setSeedTone(50)
+      expect(useSource.getState().seedHex).toBe(locked)
+    })
+  })
+
   it('setSeedHex no-ops when seedHexLock is true', () => {
     const s = useSource.getState()
     s.actions.setSeedHex('#aabbcc')

@@ -1,5 +1,6 @@
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { ColorLock } from './color-lock'
+import { HctControlSliders } from './hct/hct-control-sliders'
 import { ImagePicker } from './image-picker'
 import { SourceColorSection } from './source-color-section'
 
@@ -13,8 +14,11 @@ export const SourceColorTabs = () => {
         </TabsListContent>
         <ColorLock />
       </div>
-      <TabsPanel value="source-color" className="p-1">
+      <TabsPanel value="source-color" className="p-1 space-y-4">
         <SourceColorSection />
+        <div className="px-2">
+          <HctControlSliders />
+        </div>
       </TabsPanel>
       <TabsPanel value="image" keepMounted>
         <ImagePicker />
