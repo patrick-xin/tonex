@@ -92,17 +92,68 @@ describe('deriveTheme', () => {
     expect(a).toEqual(b)
   })
 
-  describe('md3PrimaryContainerOverride', () => {
-    it('null overrides leave md primary-container at MCU value', () => {
+  describe('md3TokenOverrides (slice 6 — generic per-token override map)', () => {
+    it('overrides any md token in the addressed mode and leaves others at MCU', () => {
+      // why: slice 6 promise — any md token can be overridden via
+      // md3TokenOverrides[mode][token]. Verifies (a) a non-primary-family
+      // token is overridable (--color-secondary), (b) light/dark are
+      // independent maps, (c) tokens not in the override map flow through
+      // unchanged.
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const explicitNull = deriveTheme({
+      const overridden = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3PrimaryContainerOverride: { light: null, dark: null },
+        md3TokenOverrides: {
+          light: { '--color-primary': '#ff0000', '--color-secondary': '#00ff00' },
+          dark: { '--color-primary': '#abcdef' },
+        },
       })
-      expect(explicitNull.md.light['--color-primary-container']).toBe(
+      expect(overridden.md.light['--color-primary']).toBe(RED)
+      expect(overridden.md.light['--color-secondary']).toBe(GREEN)
+      expect(overridden.md.dark['--color-primary']).toBe(ABCDEF)
+      // light override of secondary doesn't bleed into dark
+      expect(overridden.md.dark['--color-secondary']).toBe(baseline.md.dark['--color-secondary'])
+      // unmapped tokens unaffected
+      expect(overridden.md.light['--color-tertiary']).toBe(baseline.md.light['--color-tertiary'])
+    })
+
+    it('override wins over primary lock when both target the same token', () => {
+      // why: preserves the slice-1 semantic that override is the lower-level
+      // escape hatch — lock regenerates the family, override overrides. Order
+      // in derive.ts: lock first, generic override map last.
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        primaryHexLock: { light: '#ff5500', dark: null },
+        md3TokenOverrides: {
+          light: { '--color-primary-container': '#abcdef' },
+          dark: {},
+        },
+      })
+      expect(md.light['--color-primary-container']).toBe(ABCDEF)
+      // primary itself remains locked
+      expect(md.light['--color-primary']).toBe(FF5500)
+    })
+
+    it('empty override maps produce no behavioral change', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        md3TokenOverrides: { light: {}, dark: {} },
+      })
+      expect(explicit).toEqual(baseline)
+    })
+  })
+
+  describe('md3TokenOverrides — primary-container case', () => {
+    it('empty maps leave md primary-container at MCU value', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        md3TokenOverrides: { light: {}, dark: {} },
+      })
+      expect(explicit.md.light['--color-primary-container']).toBe(
         baseline.md.light['--color-primary-container'],
       )
-      expect(explicitNull.md.dark['--color-primary-container']).toBe(
+      expect(explicit.md.dark['--color-primary-container']).toBe(
         baseline.md.dark['--color-primary-container'],
       )
     })
@@ -111,7 +162,7 @@ describe('deriveTheme', () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)
       const overridden = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3PrimaryContainerOverride: { light: '#ff0000', dark: null },
+        md3TokenOverrides: { light: { '--color-primary-container': '#ff0000' }, dark: {} },
       })
       expect(overridden.md.light['--color-primary-container']).toBe(RED)
       expect(overridden.md.dark['--color-primary-container']).toBe(
@@ -123,7 +174,7 @@ describe('deriveTheme', () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)
       const overridden = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3PrimaryContainerOverride: { light: null, dark: '#00ff00' },
+        md3TokenOverrides: { light: {}, dark: { '--color-primary-container': '#00ff00' } },
       })
       expect(overridden.md.light['--color-primary-container']).toBe(
         baseline.md.light['--color-primary-container'],
@@ -137,7 +188,10 @@ describe('deriveTheme', () => {
       // — this is the no-drift contract under editing pressure (ADR-0017).
       const overridden = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3PrimaryContainerOverride: { light: '#ff0000', dark: '#00ff00' },
+        md3TokenOverrides: {
+          light: { '--color-primary-container': '#ff0000' },
+          dark: { '--color-primary-container': '#00ff00' },
+        },
       })
       expect(overridden.shadcn.light['--primary']).toBe(RED)
       expect(overridden.shadcn.dark['--primary']).toBe(GREEN)
@@ -200,7 +254,7 @@ describe('deriveTheme', () => {
       // drift. This is the slice-2 small-loop contract end-to-end.
       const { shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3PrimaryContainerOverride: { light: '#ff0000', dark: null },
+        md3TokenOverrides: { light: { '--color-primary-container': '#ff0000' }, dark: {} },
         shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
       })
       expect(shadcn.light['--primary']).toBe(RED)
@@ -249,7 +303,7 @@ describe('deriveTheme', () => {
       const { md } = deriveTheme({
         ...DEFAULT_INPUTS,
         primaryHexLock: { light: '#ff5500', dark: null },
-        md3PrimaryContainerOverride: { light: '#abcdef', dark: null },
+        md3TokenOverrides: { light: { '--color-primary-container': '#abcdef' }, dark: {} },
       })
       expect(md.light['--color-primary-container']).toBe(ABCDEF)
       // primary itself still locked

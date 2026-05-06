@@ -91,7 +91,10 @@ describe('applyDom (jsdom integration)', () => {
         name: 'override applied',
         source: {
           ...DEFAULT_INPUTS,
-          md3PrimaryContainerOverride: { light: '#abcdef', dark: '#123456' },
+          md3TokenOverrides: {
+            light: { '--color-primary-container': '#abcdef' },
+            dark: { '--color-primary-container': '#123456' },
+          },
         },
       },
       {

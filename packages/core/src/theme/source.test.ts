@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
+  type MdTokenName,
   type PortableTheme,
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
@@ -58,7 +59,10 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   contrastLevel: 0.5,
   primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
   seedHexLock: true,
-  md3PrimaryContainerOverride: { light: '#aabbcc', dark: '#112233' },
+  md3TokenOverrides: {
+    light: { '--color-primary-container': '#aabbcc', '--color-secondary': '#445566' },
+    dark: { '--color-primary-container': '#112233' },
+  },
   shadcnRoleBindings: { light: NONDEFAULT_BINDINGS_LIGHT, dark: NONDEFAULT_BINDINGS_DARK },
   surfaceAlgo: 'tint',
   surfaceTintLevel: 0.42,
@@ -87,8 +91,11 @@ describe('useSource persistence round-trip', () => {
     // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
     // seed setter no-ops, so reordering would silently drop the seed write.
     s.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
-    s.setMd3PrimaryContainerOverride('light', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.light)
-    s.setMd3PrimaryContainerOverride('dark', NONDEFAULT_INPUTS.md3PrimaryContainerOverride.dark)
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.md3TokenOverrides[mode])) {
+        s.setMd3TokenOverride(mode, token as MdTokenName, hex)
+      }
+    }
     for (const mode of ['light', 'dark'] as const) {
       for (const role of SHADCN_ROLE_NAMES) {
         s.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
@@ -138,6 +145,30 @@ describe('useSource persistence round-trip', () => {
     expect(bindings.light['--background']).toBe('--color-surface')
     expect(bindings.dark['--card']).toBe('--color-surface-bright')
     expect(bindings.light['--sidebar-border']).toBe('--color-outline')
+  })
+
+  it('v3 → v4 migrate: lifts md3PrimaryContainerOverride into md3TokenOverrides', async () => {
+    // why: slice 6 generalized the single-token override field into a
+    // per-token map. Persisted v3 state has md3PrimaryContainerOverride as a
+    // mode-keyed { light, dark } pair; rehydrate must place each non-null
+    // value into md3TokenOverrides[mode]['--color-primary-container'] and
+    // drop the old field. Null values produce no entry (override absence).
+    const v3State = {
+      ...DEFAULT_INPUTS,
+      md3PrimaryContainerOverride: { light: '#aabbcc', dark: null },
+    }
+    // remove the new field so the persisted shape matches v3 exactly
+    delete (v3State as Partial<PortableTheme>).md3TokenOverrides
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v3State, version: 3 }))
+    await useSource.persist.rehydrate()
+
+    const overrides = useSource.getState().md3TokenOverrides
+    expect(overrides.light['--color-primary-container']).toBe('#aabbcc')
+    expect(overrides.dark['--color-primary-container']).toBeUndefined()
+    expect(
+      (useSource.getState() as Partial<{ md3PrimaryContainerOverride: unknown }>)
+        .md3PrimaryContainerOverride,
+    ).toBeUndefined()
   })
 
   it('v2 → v3 migrate: missing customColors fills to empty array', async () => {

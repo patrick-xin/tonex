@@ -1,14 +1,18 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 
-// why: bumped to 3 in slice 3 — customColors[] field added to PortableTheme.
-// Persisted v2 stores have no customColors key; zustand persist shallow-
-// merges, so rehydrate would leave the field undefined and any iteration
-// site (deriveTheme buildCustomColorsMd) would NPE. Migration fills [].
+// why: bumped to 4 in slice 6 — md3PrimaryContainerOverride (single-token,
+// mode-keyed) generalized to md3TokenOverrides (per-token map per mode).
+// Migration lifts the persisted hex into md3TokenOverrides[mode][--color-
+// primary-container] and drops the old field.
+// v3 (slice 3): customColors[] field added to PortableTheme. Persisted v2
+// stores have no customColors key; zustand persist shallow-merges, so
+// rehydrate would leave the field undefined and any iteration site
+// (deriveTheme buildCustomColorsMd) would NPE. Migration fills [].
 // v2 (slice 2): md token set expanded 8→28, shadcn roles 2→26 — persisted
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 3 as const
+export const SCHEMA_VERSION = 4 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -255,11 +259,17 @@ export interface PortableTheme {
   // they live on different fields. Boolean (not mode-keyed) — locking the
   // seed locks both modes since seedHex itself isn't mode-keyed.
   seedHexLock: boolean
-  // why: mode-keyed per ADR-0017 commitment 3 — `{ light, dark }` at the top
-  // mirrors the export's `:root + .dark` block structure one-to-one. When this
-  // generalizes to a full token-override map, keep the SAME shape (mode at top,
-  // Record<Token, hex> inside) — not Record<Token, { light, dark }>.
-  md3PrimaryContainerOverride: { light: string | null; dark: string | null }
+  // why: per ADR-0017 commitment 3 — mode-keyed `{ light, dark }` at the top,
+  // `Record<MdTokenName, hex>` inside. Mirrors the export's `:root + .dark`
+  // block structure one-to-one. Partial because most tokens stay at MCU; an
+  // entry's presence means "user pinned this token for this mode". null is
+  // not a value — clearing is `delete overrides[mode][token]` in the setter.
+  // Override beats both MCU and primaryHexLock (lock regenerates the family,
+  // overrides land last per derive.ts).
+  md3TokenOverrides: {
+    light: Partial<Record<MdTokenName, string>>
+    dark: Partial<Record<MdTokenName, string>>
+  }
   // why: cross-layer mapping is data, not code. Mode-keyed because some
   // slice-7 mappings will diverge across modes (e.g. light primary →
   // primary-container, dark primary → primary for contrast). ADR-0017.
@@ -292,7 +302,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   contrastLevel: 0,
   primaryHexLock: { light: null, dark: null },
   seedHexLock: false,
-  md3PrimaryContainerOverride: { light: null, dark: null },
+  md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   surfaceAlgo: 'none',
   surfaceTintLevel: 0,

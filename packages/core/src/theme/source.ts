@@ -22,7 +22,7 @@ interface SourceActions {
   setContrastLevel(level: number): void
   setPrimaryHexLock(mode: Mode, hex: string | null): void
   setSeedHexLock(locked: boolean): void
-  setMd3PrimaryContainerOverride(mode: Mode, hex: string | null): void
+  setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfaceTintLevel(level: number): void
@@ -52,7 +52,7 @@ export function selectPortable(s: SourceState): PortableTheme {
     setContrastLevel: _scl,
     setPrimaryHexLock: _spl,
     setSeedHexLock: _shl,
-    setMd3PrimaryContainerOverride: _so,
+    setMd3TokenOverride: _so,
     setShadcnRoleBinding: _sb,
     setSurfaceAlgo: _ssa,
     setSurfaceTintLevel: _sst,
@@ -85,10 +85,17 @@ export const useSource = create<SourceState>()(
           primaryHexLock: { ...s.primaryHexLock, [mode]: hex },
         })),
       setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
-      setMd3PrimaryContainerOverride: (mode, hex) =>
-        set((s) => ({
-          md3PrimaryContainerOverride: { ...s.md3PrimaryContainerOverride, [mode]: hex },
-        })),
+      // why: hex sets the override for one (mode, token); null deletes the
+      // entry so the token returns to MCU/lock-derived. Mode and token are
+      // typed so any unknown token is a TS error at the call site, not a
+      // silent no-op at derive time.
+      setMd3TokenOverride: (mode, token, hex) =>
+        set((s) => {
+          const next = { ...s.md3TokenOverrides[mode] }
+          if (hex === null) delete next[token]
+          else next[token] = hex
+          return { md3TokenOverrides: { ...s.md3TokenOverrides, [mode]: next } }
+        }),
       setShadcnRoleBinding: (mode, role, mdToken) =>
         set((s) => ({
           shadcnRoleBindings: {
@@ -163,6 +170,28 @@ export const useSource = create<SourceState>()(
           // iteration doesn't NPE. Empty array preserves every existing
           // user's exact rendered output (zero extra emission).
           s.customColors = s.customColors ?? []
+        }
+        if (version < 4) {
+          // why: v3 stored md3PrimaryContainerOverride: { light, dark }.
+          // Slice 6 generalized this to md3TokenOverrides — a per-token map
+          // per mode. Lift any non-null v3 hex into the new map under
+          // --color-primary-container, then delete the legacy field so it
+          // doesn't leak past rehydrate (same field on the in-memory state
+          // would shadow the new shape).
+          const legacy = (
+            s as { md3PrimaryContainerOverride?: { light: string | null; dark: string | null } }
+          ).md3PrimaryContainerOverride
+          const lifted: {
+            light: Partial<Record<MdTokenName, string>>
+            dark: Partial<Record<MdTokenName, string>>
+          } = {
+            light: {},
+            dark: {},
+          }
+          if (legacy?.light != null) lifted.light['--color-primary-container'] = legacy.light
+          if (legacy?.dark != null) lifted.dark['--color-primary-container'] = legacy.dark
+          s.md3TokenOverrides = lifted
+          delete (s as { md3PrimaryContainerOverride?: unknown }).md3PrimaryContainerOverride
         }
         return s as PortableTheme
       },

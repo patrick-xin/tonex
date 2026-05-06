@@ -125,17 +125,17 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const lightScheme = variant.build(seedHct, false, source.contrastLevel)
   const darkScheme = variant.build(seedHct, true, source.contrastLevel)
 
-  const mdLightBase = applyPrimaryFamily(
-    buildMdLayer(lightScheme),
-    'light',
-    source.primaryHexLock.light,
-    source.md3PrimaryContainerOverride.light,
+  // why: lock regenerates the primary family from a TonalPalette; the
+  // generic override map then wins over the result (and over MCU baseline).
+  // Separating the two lets every md token participate in overrides while
+  // keeping the lock semantic primary-family-specific.
+  const mdLightBase = applyMd3TokenOverrides(
+    applyPrimaryLock(buildMdLayer(lightScheme), 'light', source.primaryHexLock.light),
+    source.md3TokenOverrides.light,
   )
-  const mdDarkBase = applyPrimaryFamily(
-    buildMdLayer(darkScheme),
-    'dark',
-    source.primaryHexLock.dark,
-    source.md3PrimaryContainerOverride.dark,
+  const mdDarkBase = applyMd3TokenOverrides(
+    applyPrimaryLock(buildMdLayer(darkScheme), 'dark', source.primaryHexLock.dark),
+    source.md3TokenOverrides.dark,
   )
 
   // why: treatment runs BEFORE shadcn binds so any binding pointed at a
@@ -239,9 +239,7 @@ function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): Tok
 
 // why: M3 baseline tones for the primary family. When the user pins primary
 // to an exact hex, build a TonalPalette from the locked HCT (preserves hue +
-// chroma) and read these tones for the derived siblings. Container-override
-// still wins over the lock-derived container — overrides are the lower-level
-// escape hatch when the auto-derive doesn't match the user's intent.
+// chroma) and read these tones for the derived siblings.
 const PRIMARY_FAMILY_TONES: Record<
   Mode,
   { onPrimary: number; container: number; onContainer: number }
@@ -250,33 +248,38 @@ const PRIMARY_FAMILY_TONES: Record<
   dark: { onPrimary: 20, container: 30, onContainer: 90 },
 }
 
-// why: applies primary-family overrides + lock to a fully-built md layer.
-// Operates by mutation-on-copy so non-primary tokens flow through unchanged.
-// Order: container override always lands first; lock (if set) regenerates
-// the family from a TonalPalette but yields the container slot back to the
-// override if both are present.
-function applyPrimaryFamily(
-  layer: TokenMap,
-  mode: Mode,
-  lockedHex: string | null,
-  containerOverride: string | null,
-): TokenMap {
-  const out = { ...layer }
-  // why: overrides + locks are STORED as hex (user-facing color pickers emit
-  // hex). Convert at the boundary so the layer stays in canonical oklch.
-  if (containerOverride !== null) {
-    out['--color-primary-container'] = oklchFromHex(containerOverride)
+// why: pins primary to an exact hex and regenerates onPrimary / primary-
+// container / on-primary-container from a TonalPalette built off the locked
+// HCT. No-op when lockedHex is null. Override map (applied AFTER this) is
+// the escape hatch if the auto-derived siblings still don't match intent.
+function applyPrimaryLock(layer: TokenMap, mode: Mode, lockedHex: string | null): TokenMap {
+  if (lockedHex === null) return layer
+  const palette = TonalPalette.fromHct(Hct.fromInt(argbFromHex(lockedHex)))
+  const tones = PRIMARY_FAMILY_TONES[mode]
+  return {
+    ...layer,
+    '--color-primary': oklchFromHex(lockedHex),
+    '--color-on-primary': oklchFromArgb(palette.tone(tones.onPrimary)),
+    '--color-primary-container': oklchFromArgb(palette.tone(tones.container)),
+    '--color-on-primary-container': oklchFromArgb(palette.tone(tones.onContainer)),
   }
-  if (lockedHex !== null) {
-    const palette = TonalPalette.fromHct(Hct.fromInt(argbFromHex(lockedHex)))
-    const tones = PRIMARY_FAMILY_TONES[mode]
-    out['--color-primary'] = oklchFromHex(lockedHex)
-    out['--color-on-primary'] = oklchFromArgb(palette.tone(tones.onPrimary))
-    out['--color-primary-container'] =
-      containerOverride !== null
-        ? oklchFromHex(containerOverride)
-        : oklchFromArgb(palette.tone(tones.container))
-    out['--color-on-primary-container'] = oklchFromArgb(palette.tone(tones.onContainer))
+}
+
+// why: generic per-token override map for one mode. Overrides are STORED as
+// hex (user-facing color pickers emit hex); convert at the boundary so the
+// layer stays in canonical oklch. Tokens not present in the override flow
+// through unchanged. Runs LAST in the md pipeline (after MCU build + lock)
+// so override always wins.
+function applyMd3TokenOverrides(
+  layer: TokenMap,
+  overrides: Partial<Record<MdTokenName, string>>,
+): TokenMap {
+  const keys = Object.keys(overrides) as MdTokenName[]
+  if (keys.length === 0) return layer
+  const out = { ...layer }
+  for (const token of keys) {
+    const hex = overrides[token]
+    if (hex !== undefined) out[token] = oklchFromHex(hex)
   }
   return out
 }
