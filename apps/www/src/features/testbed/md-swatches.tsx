@@ -1,7 +1,7 @@
 'use client'
 
 import { useResolvedTokens } from '@tonex/core'
-import { useActiveMode } from './use-active-mode'
+import { useActiveMode } from '../use-active-mode'
 
 export function MdSwatches() {
   const theme = useResolvedTokens()

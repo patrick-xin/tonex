@@ -117,27 +117,51 @@ describe('applyDom (jsdom integration)', () => {
       },
       {
         name: 'tint treatment',
-        source: { ...DEFAULT_INPUTS, surfaceAlgo: 'tint', surfaceTintLevel: 0.5 },
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'tint',
+          surfaceTintLevel: { light: 0.5, dark: 0.5 },
+        },
       },
       {
         name: 'tint with non-default palette',
         source: {
           ...DEFAULT_INPUTS,
           surfaceAlgo: 'tint',
-          surfaceTintLevel: 0.5,
+          surfaceTintLevel: { light: 0.5, dark: 0.5 },
           surfacePaletteName: 'slate',
         },
       },
       {
+        name: 'tint with per-mode divergence',
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'tint',
+          surfaceTintLevel: { light: 0.8, dark: 0.2 },
+        },
+      },
+      {
         name: 'desaturate treatment',
-        source: { ...DEFAULT_INPUTS, surfaceAlgo: 'desaturate', surfaceDesaturateLevel: 0.7 },
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'desaturate',
+          surfaceDesaturateLevel: { light: 0.7, dark: 0.7 },
+        },
+      },
+      {
+        name: 'desaturate with per-mode divergence',
+        source: {
+          ...DEFAULT_INPUTS,
+          surfaceAlgo: 'desaturate',
+          surfaceDesaturateLevel: { light: 0, dark: 1 },
+        },
       },
       {
         name: 'tint + shadcn bound to surface',
         source: {
           ...DEFAULT_INPUTS,
           surfaceAlgo: 'tint',
-          surfaceTintLevel: 1,
+          surfaceTintLevel: { light: 1, dark: 1 },
           shadcnRoleBindings: {
             light: {
               ...DEFAULT_SHADCN_ROLE_BINDINGS.light,

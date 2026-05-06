@@ -355,14 +355,18 @@ describe('deriveTheme', () => {
       const explicit = deriveTheme({
         ...DEFAULT_INPUTS,
         surfaceAlgo: 'desaturate',
-        surfaceDesaturateLevel: 0,
+        surfaceDesaturateLevel: { light: 0, dark: 0 },
       })
       expect(explicit.md.light['--color-surface']).toBe(baseline.md.light['--color-surface'])
     })
 
     it("'tint' replaces md surface tokens with treated values", () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const tinted = deriveTheme({ ...DEFAULT_INPUTS, surfaceAlgo: 'tint', surfaceTintLevel: 1 })
+      const tinted = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: { light: 1, dark: 1 },
+      })
       expect(tinted.md.light['--color-surface']).not.toBe(baseline.md.light['--color-surface'])
       // why: shadcn primary by default binds to primary-container (not surface),
       // so the treatment should NOT change shadcn primary at default bindings.
@@ -373,7 +377,7 @@ describe('deriveTheme', () => {
       const tinted = deriveTheme({
         ...DEFAULT_INPUTS,
         surfaceAlgo: 'tint',
-        surfaceTintLevel: 1,
+        surfaceTintLevel: { light: 1, dark: 1 },
         shadcnRoleBindings: {
           light: {
             ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
@@ -391,6 +395,41 @@ describe('deriveTheme', () => {
       // shadcn binds". If treatment were post-bind, shadcn primary would equal
       // the untreated md surface-container, breaking preview === export.
       expect(tinted.shadcn.light['--primary']).toBe(tinted.md.light['--color-surface-container'])
+    })
+
+    it('per-mode tint levels — moving light does not affect dark', () => {
+      // why: load-bearing assertion that per-mode levels are independent.
+      // Light tint = 1 (full primary character), dark tint = 0 (base shade).
+      // Both modes are tinted — comparison is against a uniform-dark-level
+      // baseline so "dark unchanged" means dark's value matches the dark-only
+      // controlled rendering. Tint has no MCU short-circuit (level 0 = base
+      // palette shade, NOT MCU output), so we compare against the same dark
+      // level rather than against MCU.
+      const splitA = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: { light: 1, dark: 0 },
+      })
+      const splitB = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: { light: 0, dark: 0 },
+      })
+      expect(splitA.md.light['--color-surface']).not.toBe(splitB.md.light['--color-surface'])
+      expect(splitA.md.dark['--color-surface']).toBe(splitB.md.dark['--color-surface'])
+    })
+
+    it('per-mode levels — desaturate diverges across modes independently', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const split = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'desaturate',
+        surfaceDesaturateLevel: { light: 0, dark: 1 },
+      })
+      // light untouched (level 0 short-circuit)
+      expect(split.md.light['--color-surface']).toBe(baseline.md.light['--color-surface'])
+      // dark fully neutralised
+      expect(split.md.dark['--color-surface']).not.toBe(baseline.md.dark['--color-surface'])
     })
   })
 })

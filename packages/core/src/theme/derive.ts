@@ -228,8 +228,8 @@ function buildCustomColorsShadcn(
 
 function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): TokenMap {
   if (source.surfaceAlgo === 'tint')
-    return applySurfaceTint(layer, mode, source.surfaceTintLevel, source.surfacePaletteName)
-  return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel)
+    return applySurfaceTint(layer, mode, source.surfaceTintLevel[mode], source.surfacePaletteName)
+  return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel[mode])
 }
 
 // why: generic per-token override map for one mode. Overrides are STORED as

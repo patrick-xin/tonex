@@ -12,6 +12,7 @@ import {
   SliderValue,
   sliderStyles,
 } from '@/components/ui/slider'
+import { useActiveMode } from '../use-active-mode'
 
 export function SurfaceLevelSlider({
   disabled,
@@ -27,17 +28,26 @@ export function SurfaceLevelSlider({
   const desatLevel = useSource((s) => s.surfaceDesaturateLevel)
   const setTintLevel = useSource((s) => s.actions.setSurfaceTintLevel)
   const setDesatLevel = useSource((s) => s.actions.setSurfaceDesaturateLevel)
+  const mode = useActiveMode()
   const { track, indicator, thumb, control, root } = sliderStyles({
     size: 'sm',
   })
 
-  const level = algo === 'desaturate' ? desatLevel : tintLevel
-  const setLevel = algo === 'desaturate' ? setDesatLevel : setTintLevel
+  // why: pre-mount mode is null. Show the light value disabled rather than
+  // unmount — keeps the rail layout stable across the hydration boundary.
+  // Once mode resolves, the slider edits the active mode independently.
+  const resolvedMode = mode ?? 'light'
+  const isPending = mode === null
+  const level = algo === 'desaturate' ? desatLevel[resolvedMode] : tintLevel[resolvedMode]
+  const setLevel =
+    algo === 'desaturate'
+      ? (next: number) => setDesatLevel(resolvedMode, next)
+      : (next: number) => setTintLevel(resolvedMode, next)
   const defaultLabel = algo === 'desaturate' ? 'Desaturate Level' : 'Tint Level'
 
   return (
     <SliderRoot
-      disabled={disabled}
+      disabled={disabled || isPending}
       thumbAlignment="edge-client-only"
       className={root({ className: 'space-y-3' })}
       format={{ style: 'percent' }}
@@ -58,7 +68,7 @@ export function SurfaceLevelSlider({
           className={cn(
             'text-sm capitalize text-on-surface-variant',
             labelClassName,
-            disabled && 'text-on-surface/38',
+            (disabled || isPending) && 'text-on-surface/38',
           )}
         >
           {label ?? defaultLabel}

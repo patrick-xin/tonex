@@ -26,8 +26,8 @@ export interface SourceActions {
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfacePaletteName(name: NeutralPaletteName): void
-  setSurfaceTintLevel(level: number): void
-  setSurfaceDesaturateLevel(level: number): void
+  setSurfaceTintLevel(mode: Mode, level: number): void
+  setSurfaceDesaturateLevel(mode: Mode, level: number): void
   addCustomColor(entry: CustomColorEntry): void
   updateCustomColor(id: string, patch: Partial<Omit<CustomColorEntry, 'id'>>): void
   removeCustomColor(id: string): void
@@ -95,8 +95,15 @@ export const useSource = create<SourceState>()(
           })),
         setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
         setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
-        setSurfaceTintLevel: (surfaceTintLevel) => set({ surfaceTintLevel }),
-        setSurfaceDesaturateLevel: (surfaceDesaturateLevel) => set({ surfaceDesaturateLevel }),
+        // why: per-mode write — only the addressed mode's level moves. Mirrors
+        // setMd3TokenOverride's per-mode shape so all per-mode writers in
+        // SourceActions take `(mode, value)` first.
+        setSurfaceTintLevel: (mode, level) =>
+          set((s) => ({ surfaceTintLevel: { ...s.surfaceTintLevel, [mode]: level } })),
+        setSurfaceDesaturateLevel: (mode, level) =>
+          set((s) => ({
+            surfaceDesaturateLevel: { ...s.surfaceDesaturateLevel, [mode]: level },
+          })),
         // why: validate at the store seam — UI's add-time validator surfaces
         // the message in-form; this throw is the structural backstop for any
         // caller that bypasses the form (programmatic add, future import path).
@@ -199,6 +206,23 @@ export const useSource = create<SourceState>()(
           // --color-primary; the family-regen story is deferred. Drop the
           // field so it doesn't shadow the new shape on rehydrate.
           delete (s as { primaryHexLock?: unknown }).primaryHexLock
+        }
+        if (version < 7) {
+          // why: lift flat number → { light, dark }. Same level on both modes
+          // means post-migrate output is byte-identical to v6. Undefined
+          // (legacy unset) falls back to DEFAULT_INPUTS via zustand's spread
+          // over initial state, so we only act when the legacy number is real.
+          const legacyTint = (s as { surfaceTintLevel?: number | { light: number; dark: number } })
+            .surfaceTintLevel
+          if (typeof legacyTint === 'number') {
+            s.surfaceTintLevel = { light: legacyTint, dark: legacyTint }
+          }
+          const legacyDesat = (
+            s as { surfaceDesaturateLevel?: number | { light: number; dark: number } }
+          ).surfaceDesaturateLevel
+          if (typeof legacyDesat === 'number') {
+            s.surfaceDesaturateLevel = { light: legacyDesat, dark: legacyDesat }
+          }
         }
         return s as PortableTheme
       },

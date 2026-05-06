@@ -1,11 +1,19 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 import type { NeutralPaletteName } from './surface'
 
-// why: bumped to 6 in the slice-10 architecture audit — primaryHexLock
-// pruned. The half-feature pinned --color-primary to a hex and regenerated
-// the family from a TonalPalette; md3TokenOverrides covers the pin use
-// case and the family-regen story is deferred until a real product need
-// surfaces. Migration v5→v6 deletes the persisted field.
+// why: bumped to 7 — surfaceTintLevel and surfaceDesaturateLevel migrated
+// from flat number to { light, dark } so a user can edit one mode's level
+// without mutating the other. Aligns surfaces with the per-mode shape
+// already used by md3TokenOverrides and shadcnRoleBindings. surfaceAlgo
+// and surfacePaletteName stay flat: algo is an "open question" per the
+// originating issue (defer mode-keying until real usage pressure); palette
+// is a tint *source*, not a per-mode value. Migration v6→v7 lifts the flat
+// number into both modes (unshipped values stay byte-equal post-migrate).
+// v6 (slice 10): primaryHexLock pruned. The half-feature pinned --color-
+// primary to a hex and regenerated the family from a TonalPalette;
+// md3TokenOverrides covers the pin use case and the family-regen story is
+// deferred until a real product need surfaces. Migration v5→v6 deletes the
+// persisted field.
 // v5 (slice 7): applySurfaceTint generalized from hardcoded zinc to any of
 // NEUTRAL_PALETTE_NAMES. New field surfacePaletteName picks the base
 // palette; v4→v5 migration fills 'zinc' so existing users see identical
@@ -22,7 +30,7 @@ import type { NeutralPaletteName } from './surface'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 6 as const
+export const SCHEMA_VERSION = 7 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -287,11 +295,14 @@ export interface PortableTheme {
   //   Only consumed when surfaceAlgo='tint'. Default 'zinc' preserves the
   //   pre-slice-7 behavior bytewise (algorithm was hardcoded to zinc).
   // - surfaceTintLevel: 0=neutral palette base → 1=full primary character.
-  // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped.
+  //   Mode-keyed since v7 — independent levels per mode.
+  // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped. Mode-keyed
+  //   since v7. The level=0 short-circuit in applySurfaceDesaturate keeps
+  //   the drift-guard baseline byte-identical when both modes are 0.
   surfaceAlgo: SurfaceAlgo
   surfacePaletteName: NeutralPaletteName
-  surfaceTintLevel: number
-  surfaceDesaturateLevel: number
+  surfaceTintLevel: { light: number; dark: number }
+  surfaceDesaturateLevel: { light: number; dark: number }
   // why: user-defined dual-layer color slots (md: 4 tokens, shadcn: 2 tokens
   // sourced per entry.shadcnSource). Empty by default — drift-guard baseline
   // (globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))) holds because
@@ -314,7 +325,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   surfaceAlgo: 'desaturate',
   surfacePaletteName: 'zinc',
-  surfaceTintLevel: 0,
-  surfaceDesaturateLevel: 0,
+  surfaceTintLevel: { light: 0, dark: 0 },
+  surfaceDesaturateLevel: { light: 0, dark: 0 },
   customColors: [],
 }

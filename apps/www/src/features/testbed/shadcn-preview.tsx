@@ -1,7 +1,7 @@
 'use client'
 
 import { useResolvedTokens } from '@tonex/core'
-import { useActiveMode } from './use-active-mode'
+import { useActiveMode } from '../use-active-mode'
 
 // why: the preview pane is where the shadcn sub-scope lives. <div class="shadcn">
 // flips CSS variable resolution from md tokens to shadcn tokens within this

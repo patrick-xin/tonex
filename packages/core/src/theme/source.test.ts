@@ -65,8 +65,8 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   shadcnRoleBindings: { light: NONDEFAULT_BINDINGS_LIGHT, dark: NONDEFAULT_BINDINGS_DARK },
   surfaceAlgo: 'tint',
   surfacePaletteName: 'slate',
-  surfaceTintLevel: 0.42,
-  surfaceDesaturateLevel: 0.73,
+  surfaceTintLevel: { light: 0.42, dark: 0.18 },
+  surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
   customColors: NONDEFAULT_CUSTOM_COLORS,
 }
 
@@ -101,8 +101,10 @@ describe('useSource persistence round-trip', () => {
     }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
-    s.actions.setSurfaceTintLevel(NONDEFAULT_INPUTS.surfaceTintLevel)
-    s.actions.setSurfaceDesaturateLevel(NONDEFAULT_INPUTS.surfaceDesaturateLevel)
+    for (const mode of ['light', 'dark'] as const) {
+      s.actions.setSurfaceTintLevel(mode, NONDEFAULT_INPUTS.surfaceTintLevel[mode])
+      s.actions.setSurfaceDesaturateLevel(mode, NONDEFAULT_INPUTS.surfaceDesaturateLevel[mode])
+    }
     for (const entry of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(entry)
 
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -184,6 +186,23 @@ describe('useSource persistence round-trip', () => {
     expect(useSource.getState().surfacePaletteName).toBe('zinc')
   })
 
+  it('v6 → v7 migrate: flat surface levels lift into per-mode shape', async () => {
+    // why: pre-v7 the levels were flat numbers shared across modes. Migration
+    // mirrors the value into both modes so post-rehydrate output is identical
+    // (level 0 in both modes is identity; non-zero values render the same in
+    // both modes as before). A v6-shaped record with no levels at all flows
+    // through DEFAULT_INPUTS via zustand's spread.
+    const v6State = {
+      ...DEFAULT_INPUTS,
+      surfaceTintLevel: 0.42 as unknown as PortableTheme['surfaceTintLevel'],
+      surfaceDesaturateLevel: 0.73 as unknown as PortableTheme['surfaceDesaturateLevel'],
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v6State, version: 6 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().surfaceTintLevel).toEqual({ light: 0.42, dark: 0.42 })
+    expect(useSource.getState().surfaceDesaturateLevel).toEqual({ light: 0.73, dark: 0.73 })
+  })
+
   it('v5 → v6 migrate: legacy primaryHexLock is dropped', async () => {
     // why: slice-10 audit pruned primaryHexLock; rehydrate must delete the
     // persisted field so it doesn't shadow current state. Asserting the
@@ -191,6 +210,9 @@ describe('useSource persistence round-trip', () => {
     // a no-op via accidental key preservation.
     const v5State = {
       ...DEFAULT_INPUTS,
+      // legacy v5 shape — flat number levels (lifted to {light,dark} in v7)
+      surfaceTintLevel: 0 as unknown as PortableTheme['surfaceTintLevel'],
+      surfaceDesaturateLevel: 0 as unknown as PortableTheme['surfaceDesaturateLevel'],
       primaryHexLock: { light: '#ff5500', dark: '#00ccff' },
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v5State, version: 5 }))
