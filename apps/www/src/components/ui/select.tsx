@@ -1,0 +1,403 @@
+'use client'
+
+import { Select as BaseSelect } from '@base-ui/react/select'
+import { CaretDownIcon, CaretUpIcon, CheckIcon } from '@phosphor-icons/react'
+import type * as React from 'react'
+import { cn, type VariantProps } from 'tailwind-variants'
+import { ArrowSvg } from '@/components/ui/arrow-svg'
+import { buttonStyles } from './button'
+
+function Select<Value, Multiple extends boolean | undefined = false>(
+  props: BaseSelect.Root.Props<Value, Multiple>,
+): React.JSX.Element {
+  return <BaseSelect.Root {...props} data-slot="select" />
+}
+
+function SelectLabel({ children, className, ...props }: BaseSelect.Label.Props) {
+  return (
+    <BaseSelect.Label
+      className={cn(
+        'flex items-center gap-2 text-sm leading-none font-medium cursor-default group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-38 peer-disabled:cursor-not-allowed peer-disabled:opacity-38',
+        className,
+      )}
+      data-slot="select-label"
+      {...props}
+    >
+      {children}
+    </BaseSelect.Label>
+  )
+}
+
+function SelectTrigger({ children, className, ...props }: BaseSelect.Trigger.Props) {
+  return (
+    <BaseSelect.Trigger
+      className={cn(
+        'select-none pointer-coarse:after:absolute pointer-coarse:after:min-h-10 pointer-coarse:after:min-w-10',
+        className,
+      )}
+      data-slot="select-trigger"
+      {...props}
+    >
+      {children}
+    </BaseSelect.Trigger>
+  )
+}
+
+function SelectValue({
+  className,
+  placeholder,
+  children,
+  ...props
+}: BaseSelect.Value.Props & {
+  placeholder?: string
+}) {
+  return (
+    <BaseSelect.Value
+      className={cn(
+        'flex items-center gap-2 line-clamp-1 data-placeholder:text-on-surface-variant data-placeholder:before:content-[attr(data-placeholder-text)]',
+        className,
+      )}
+      data-placeholder-text={placeholder}
+      data-slot="select-value"
+      {...props}
+    >
+      {children}
+    </BaseSelect.Value>
+  )
+}
+
+function SelectIcon({ className, ...props }: BaseSelect.Icon.Props) {
+  return (
+    <BaseSelect.Icon
+      className={cn('pointer-events-none', className)}
+      data-slot="select-icon"
+      {...props}
+    />
+  )
+}
+
+function SelectBackdrop({ className, ...props }: BaseSelect.Backdrop.Props) {
+  return (
+    <BaseSelect.Backdrop
+      className={cn('bg-scrim', className)}
+      data-slot="select-backdrop"
+      {...props}
+    />
+  )
+}
+
+function SelectPortal({ className, ...props }: BaseSelect.Portal.Props) {
+  return <BaseSelect.Portal className={cn(className)} data-slot="select-portal" {...props} />
+}
+
+function SelectPositioner({
+  className,
+  alignItemWithTrigger,
+  ...props
+}: BaseSelect.Positioner.Props) {
+  return (
+    <BaseSelect.Positioner
+      alignItemWithTrigger={alignItemWithTrigger}
+      className={cn('outline-hidden select-none z-10', className)}
+      data-slot="select-positioner"
+      {...props}
+    />
+  )
+}
+
+function SelectPopup({ className, ...props }: BaseSelect.Popup.Props) {
+  return <BaseSelect.Popup className={cn(className)} data-slot="select-popup" {...props} />
+}
+
+function SelectList({ className, ...props }: BaseSelect.List.Props) {
+  return <BaseSelect.List className={cn(className)} data-slot="select-list" {...props} />
+}
+
+function SelectArrow({ className, ...props }: BaseSelect.Arrow.Props) {
+  return (
+    <BaseSelect.Arrow
+      className={cn(
+        'data-[side=bottom]:top-[-8px] data-[side=left]:right-[-13px] data-[side=left]:rotate-90 data-[side=right]:left-[-13px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-8px] data-[side=top]:rotate-180 bg-red-900',
+        className,
+      )}
+      data-slot="select-arrow"
+      {...props}
+    >
+      <ArrowSvg />
+    </BaseSelect.Arrow>
+  )
+}
+
+function SelectItem({ className, children, ...props }: BaseSelect.Item.Props) {
+  return (
+    <BaseSelect.Item className={cn(className)} data-slot="select-item" {...props}>
+      {children}
+    </BaseSelect.Item>
+  )
+}
+
+function SelectItemText({ className, ...props }: BaseSelect.ItemText.Props) {
+  return <BaseSelect.ItemText className={cn(className)} data-slot="select-item-text" {...props} />
+}
+
+function SelectItemIndicator({ className, ...props }: BaseSelect.ItemIndicator.Props) {
+  return (
+    <BaseSelect.ItemIndicator
+      className={cn(className)}
+      data-slot="select-item-indicator"
+      {...props}
+    />
+  )
+}
+
+function SelectGroup({ className, ...props }: BaseSelect.Group.Props) {
+  return <BaseSelect.Group className={cn(className)} data-slot="select-group" {...props} />
+}
+
+function SelectGroupLabel({ className, ...props }: BaseSelect.GroupLabel.Props) {
+  return (
+    <BaseSelect.GroupLabel
+      className={cn(
+        'px-3.5 py-1.5 text-xs uppercase text-on-surface-variant/60 font-semibold select-none',
+        className,
+      )}
+      data-slot="select-label"
+      {...props}
+    />
+  )
+}
+
+function SelectSeparator({ className, ...props }: BaseSelect.Separator.Props) {
+  return (
+    <BaseSelect.Separator
+      className={cn('bg-outline-variant pointer-events-none -mx-1 my-1 h-px', className)}
+      data-slot="select-separator"
+      {...props}
+    />
+  )
+}
+
+function SelectScrollUpArrow({ className, ...props }: BaseSelect.ScrollUpArrow.Props) {
+  return (
+    <BaseSelect.ScrollUpArrow
+      className={cn(
+        "top-0 z-1 flex h-7 w-full cursor-default items-center justify-center rounded-md bg-surface-container-high text-center text-xs before:absolute data-[side=none]:before:-top-full before:left-0 before:h-full before:w-full before:content-['']",
+        className,
+      )}
+      data-slot="select-scroll-up-button"
+      {...props}
+    >
+      <CaretUpIcon className="size-4" />
+    </BaseSelect.ScrollUpArrow>
+  )
+}
+
+function SelectScrollDownArrow({ className, ...props }: BaseSelect.ScrollDownArrow.Props) {
+  return (
+    <BaseSelect.ScrollDownArrow
+      className={cn(
+        "bottom-0 z-1 flex h-7 w-full cursor-default items-center justify-center rounded-md bg-surface-container-high text-center text-xs before:absolute data-[side=none]:before:-bottom-full before:left-0 before:h-full before:w-full before:content-['']",
+        className,
+      )}
+      data-slot="select-scroll-down-button"
+      {...props}
+    >
+      <CaretDownIcon className="size-4" />
+    </BaseSelect.ScrollDownArrow>
+  )
+}
+
+type SelectTriggerGroupProps = Omit<BaseSelect.Trigger.Props, 'children'> & {
+  size?: 'default' | 'sm' | 'lg'
+  indicatorIcon?: React.ReactNode
+  indicatorPlacement?: 'start' | 'end'
+  placeholder?: string
+  children?: BaseSelect.Value.Props['children']
+  label?: string
+  variant?: VariantProps<typeof buttonStyles>['variant']
+}
+
+function SelectTriggerGroup({
+  className,
+  children,
+  size = 'default',
+  indicatorIcon,
+  indicatorPlacement = 'end',
+  placeholder,
+  label,
+  variant = 'outline',
+  ...props
+}: SelectTriggerGroupProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      {label && <SelectLabel>{label}</SelectLabel>}
+      <BaseSelect.Trigger
+        className={cn(
+          buttonStyles({ variant, size: size }),
+          'group flex items-center gap-2 min-w-32 text-on-surface',
+          "[&>span[data-slot='select-value']]:flex-1 [&>span[data-slot='select-value']]:text-left [&>span[data-slot='select-value']]:truncate [&>span[data-slot='select-value']]:min-w-0",
+          indicatorPlacement === 'start' ? 'pl-1' : 'pl-3 pr-1',
+          className,
+        )}
+        data-size={size}
+        data-slot="select-trigger-group"
+        {...props}
+      >
+        <BaseSelect.Value
+          className="flex flex-1 items-center gap-2 truncate line-clamp-1 data-placeholder:text-on-surface-variant data-placeholder:before:content-[attr(data-placeholder-text)]"
+          data-placeholder-text={placeholder}
+          data-slot="select-value"
+        >
+          {children}
+        </BaseSelect.Value>
+        {indicatorIcon && (
+          <BaseSelect.Icon
+            className={cn(
+              'flex-none shrink-0 pointer-events-none size-4 flex items-center justify-center',
+              "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:transition-all",
+              indicatorPlacement === 'start' && '-order-1',
+            )}
+            data-slot="select-icon"
+          >
+            {indicatorIcon || <CaretDownIcon />}
+          </BaseSelect.Icon>
+        )}
+      </BaseSelect.Trigger>
+    </div>
+  )
+}
+
+function SelectContent({
+  className,
+  children,
+  side = 'bottom',
+  align = 'start',
+  sideOffset = 6,
+  alignOffset = 0,
+  alignItemWithTrigger = false,
+  ...props
+}: BaseSelect.Popup.Props &
+  Pick<
+    BaseSelect.Positioner.Props,
+    'side' | 'sideOffset' | 'align' | 'alignOffset' | 'alignItemWithTrigger'
+  >) {
+  return (
+    <SelectPortal>
+      <BaseSelect.Positioner
+        align={align}
+        alignItemWithTrigger={alignItemWithTrigger}
+        alignOffset={alignOffset}
+        className="outline-hidden select-none z-10"
+        data-slot="select-positioner"
+        side={side}
+        sideOffset={sideOffset}
+      >
+        <BaseSelect.Popup
+          className={cn(
+            'relative overflow-hidden bg-clip-padding',
+            'surface-popup',
+            '[&:not([data-side=none])]:max-h-(--available-height) min-w-(--anchor-width)',
+            'data-[side=none]:data-ending-style:transition-none data-[side=none]:data-starting-style:transition-none data-[side=none]:data-starting-style:scale-100 data-[side=none]:data-starting-style:opacity-100 data-[side=none]:min-w-[calc(var(--anchor-width)+0.2rem)]',
+            className,
+          )}
+          data-slot="select-content"
+          {...props}
+        >
+          <SelectScrollUpArrow />
+          <BaseSelect.List
+            className="relative py-1 scroll-py-6 overflow-y-auto max-h-[min(20rem,var(--available-height))]"
+            data-slot="select-list"
+          >
+            {children}
+          </BaseSelect.List>
+          <SelectScrollDownArrow />
+        </BaseSelect.Popup>
+      </BaseSelect.Positioner>
+    </SelectPortal>
+  )
+}
+
+interface SelectItemContentProps extends BaseSelect.Item.Props {
+  indicatorPlacement?: 'start' | 'end'
+  indicatorIcon?: React.ReactNode
+  hideIndicator?: boolean
+}
+
+function SelectItemContent({
+  className,
+  children,
+  indicatorPlacement = 'end',
+  indicatorIcon = <CheckIcon />,
+  hideIndicator = false,
+  ...props
+}: SelectItemContentProps) {
+  const hasIndicator = !hideIndicator
+  const isStart = hasIndicator && indicatorPlacement === 'start'
+  const isEnd = hasIndicator && indicatorPlacement === 'end'
+
+  return (
+    <BaseSelect.Item
+      className={cn(
+        'group relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 text-sm outline-none',
+        'highlight-on-active',
+        'data-disabled:pointer-events-none data-disabled:opacity-38',
+        hasIndicator && 'grid gap-2 pl-3.5',
+        isStart && 'grid-cols-[1rem_1fr] pr-8',
+        isEnd && 'grid-cols-[1fr_1rem] pr-3',
+        !hasIndicator && 'px-3.5',
+        className,
+      )}
+      data-slot="select-item"
+      {...props}
+    >
+      {hasIndicator && (
+        <BaseSelect.ItemIndicator
+          className={cn(
+            'flex items-center justify-center row-start-1',
+            "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-on-surface",
+            isStart ? 'col-start-1' : 'col-start-2',
+          )}
+          data-slot="select-item-indicator"
+        >
+          {indicatorIcon}
+        </BaseSelect.ItemIndicator>
+      )}
+      <BaseSelect.ItemText
+        className={cn(
+          'flex items-center gap-2 row-start-1 truncate text-on-surface',
+          isStart && 'col-start-2',
+          isEnd && 'col-start-1',
+        )}
+        data-slot="select-item-text"
+      >
+        {children}
+      </BaseSelect.ItemText>
+    </BaseSelect.Item>
+  )
+}
+
+export {
+  Select,
+  SelectArrow,
+  SelectBackdrop,
+  SelectContent,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectIcon,
+  SelectItem,
+  SelectItemContent,
+  SelectItemIndicator,
+  SelectItemText,
+  SelectLabel,
+  SelectList,
+  SelectPopup,
+  SelectPortal,
+  SelectPositioner,
+  SelectScrollDownArrow,
+  SelectScrollUpArrow,
+  SelectSeparator,
+  SelectTrigger,
+  // Composite components
+  SelectTriggerGroup,
+  SelectValue,
+}

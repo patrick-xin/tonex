@@ -3,6 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { AnimatedCollapsible } from './animated-collapsible'
 import { SchemeVariantsToggle } from './scheme-variants-toggle'
 import { SourceColorTabs } from './source-color-tabs'
+import { SurfaceAdjustment } from './surface-adjustment'
 
 export function EditorRail() {
   return (
@@ -18,6 +19,9 @@ export function EditorRail() {
         <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
           <SchemeVariantsToggle />
         </AnimatedCollapsible>
+        <div className="p-2">
+          <SurfaceAdjustment />
+        </div>
       </ScrollArea>
     </aside>
   )

@@ -350,9 +350,13 @@ describe('deriveTheme', () => {
   })
 
   describe('surfaceAlgo', () => {
-    it("'none' leaves md surface family untouched", () => {
+    it("'desaturate' at level 0 leaves md surface family untouched (identity)", () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const explicit = deriveTheme({ ...DEFAULT_INPUTS, surfaceAlgo: 'none' })
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'desaturate',
+        surfaceDesaturateLevel: 0,
+      })
       expect(explicit.md.light['--color-surface']).toBe(baseline.md.light['--color-surface'])
     })
 

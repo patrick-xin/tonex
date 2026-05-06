@@ -1,7 +1,6 @@
 'use client'
 
 import { useSource } from '@tonex/core'
-import { ColorSwatch } from './color-swatch'
 import { HexInput } from './hex-input'
 import { NativeColorInput } from './native-color-input'
 import { TwColorPickerCombobox } from './tw-color-picker-combobox'
@@ -13,7 +12,6 @@ export function SourceColorSection() {
 
   return (
     <div className="flex items-center gap-2 px-2">
-      <ColorSwatch color={seedHex} name="Source color" size="lg" isSelected={false} />
       <NativeColorInput currentHex={seedHex} onColorChange={setSeedHex} />
       <HexInput hideLabel />
       <TwColorPickerCombobox currentColor={seedHex} onSelect={setSeedHex} disabled={seedHexLock} />

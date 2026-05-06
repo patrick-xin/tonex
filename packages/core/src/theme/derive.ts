@@ -135,7 +135,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
 
   // why: treatment runs BEFORE shadcn binds so any binding pointed at a
   // surface token reflects the treated value automatically. Default
-  // surfaceAlgo='none' is the zero-cost branch — drift-guard baseline holds.
+  // surfaceAlgo='desaturate' at level 0 is identity via the desaturate
+  // short-circuit — drift-guard baseline holds byte-for-byte.
   const treatedLight = applyTreatment(mdLightBase, 'light', source)
   const treatedDark = applyTreatment(mdDarkBase, 'dark', source)
 
@@ -228,9 +229,7 @@ function buildCustomColorsShadcn(
 function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): TokenMap {
   if (source.surfaceAlgo === 'tint')
     return applySurfaceTint(layer, mode, source.surfaceTintLevel, source.surfacePaletteName)
-  if (source.surfaceAlgo === 'desaturate')
-    return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel)
-  return layer
+  return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel)
 }
 
 // why: generic per-token override map for one mode. Overrides are STORED as

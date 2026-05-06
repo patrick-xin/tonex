@@ -5,7 +5,6 @@ import { NEUTRAL_PALETTE_NAMES } from '@tonex/core/data'
 import type { SurfaceAlgo } from '@tonex/core/schema'
 
 const ALGOS: ReadonlyArray<{ id: SurfaceAlgo; label: string; hint: string }> = [
-  { id: 'none', label: 'none', hint: 'mcu surfaces unchanged' },
   {
     id: 'tint',
     label: 'tint',
@@ -32,7 +31,6 @@ export function SurfaceTint() {
 
   const level = surfaceAlgo === 'desaturate' ? desatLevel : tintLevel
   const setLevel = surfaceAlgo === 'desaturate' ? setDesatLevel : setTintLevel
-  const sliderDisabled = surfaceAlgo === 'none'
   const paletteDisabled = surfaceAlgo !== 'tint'
 
   return (
@@ -95,8 +93,7 @@ export function SurfaceTint() {
           step={0.01}
           value={level}
           onChange={(e) => setLevel(Number(e.target.value))}
-          disabled={sliderDisabled}
-          className="flex-1 disabled:opacity-40"
+          className="flex-1"
           aria-label={`${surfaceAlgo} level`}
         />
         <code className="text-xs font-mono w-10">{level.toFixed(2)}</code>

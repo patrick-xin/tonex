@@ -236,11 +236,13 @@ export function validateCustomColorEntry(
   return null
 }
 
-// why: which surface treatment (if any) deriveTheme applies post-md-emit.
-// Mutually exclusive — composing tint and desaturate isn't a product feature.
-// Default 'none' keeps the drift-guard baseline (globals.css === formatCss(
-// deriveTheme(DEFAULT_INPUTS))) trivially green.
-export const SURFACE_ALGOS = ['none', 'tint', 'desaturate'] as const
+// why: which surface treatment deriveTheme applies post-md-emit. Mutually
+// exclusive — composing tint and desaturate isn't a product feature. There is
+// no 'none' algo: identity is desaturate at level 0 (chroma multiplier 0 =
+// MCU as-is, see surface/desaturate.ts). Drift-guard baseline (globals.css
+// === formatCss(deriveTheme(DEFAULT_INPUTS))) holds because applySurfaceDesaturate
+// short-circuits at level <= 0 returning the untreated layer byte-for-byte.
+export const SURFACE_ALGOS = ['tint', 'desaturate'] as const
 export type SurfaceAlgo = (typeof SURFACE_ALGOS)[number]
 
 // why: PortableTheme is the portable wire shape — what gets serialized to
@@ -310,7 +312,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   seedHexLock: false,
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
-  surfaceAlgo: 'none',
+  surfaceAlgo: 'desaturate',
   surfacePaletteName: 'zinc',
   surfaceTintLevel: 0,
   surfaceDesaturateLevel: 0,
