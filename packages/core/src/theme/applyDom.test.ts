@@ -1,12 +1,55 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
-import { deriveTheme } from './derive'
-import { formatCss } from './format'
+import { deriveTheme, type ResolvedLayer, type TokenMap } from './derive'
 import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS, type PortableTheme } from './schema'
 import { selectPortable, useSource } from './source'
 
 const STYLE_ID = 'tonex-tokens'
+
+// why: applyDom no longer rewrites textContent on update — it sets per-token
+// declarations on four stable rules (ADR-0017 amendment 2026-05-06). Tests
+// that assert "what's in the live DOM" therefore read tokens BACK from the
+// live CSSOM via getPropertyValue rather than parsing textContent. The
+// drift-guard contract is data-level: applyDom's effective tokens equal what
+// deriveTheme produced for the same source.
+function readTokensFromStyle(): {
+  md: ResolvedLayer
+  shadcn: ResolvedLayer
+} {
+  const el = document.getElementById(STYLE_ID)
+  if (!(el instanceof HTMLStyleElement)) {
+    throw new Error(`expected <style id="${STYLE_ID}">`)
+  }
+  const sheet = el.sheet
+  if (sheet === null) throw new Error('style element has no sheet')
+  const layers: Record<string, TokenMap> = {}
+  for (let i = 0; i < sheet.cssRules.length; i++) {
+    const r = sheet.cssRules[i]
+    if (!(r instanceof CSSStyleRule)) continue
+    const tokens: TokenMap = {}
+    for (let j = 0; j < r.style.length; j++) {
+      const name = r.style.item(j)
+      if (name === '') continue
+      tokens[name] = r.style.getPropertyValue(name).trim()
+    }
+    layers[r.selectorText] = tokens
+  }
+  return {
+    md: { light: layers['.md'] ?? {}, dark: layers['html.dark .md'] ?? {} },
+    shadcn: { light: layers['.shadcn'] ?? {}, dark: layers['html.dark .shadcn'] ?? {} },
+  }
+}
+
+function tokenCount(): number {
+  const written = readTokensFromStyle()
+  return (
+    Object.keys(written.md.light).length +
+    Object.keys(written.md.dark).length +
+    Object.keys(written.shadcn.light).length +
+    Object.keys(written.shadcn.dark).length
+  )
+}
 
 describe('applyDom (jsdom integration)', () => {
   let unsubscribe: (() => void) | undefined
@@ -22,27 +65,29 @@ describe('applyDom (jsdom integration)', () => {
     unsubscribe = undefined
   })
 
-  it('writes nothing pre-hydration', () => {
+  it('writes no token declarations pre-hydration', () => {
     unsubscribe = applyDom()
-    const css = document.getElementById(STYLE_ID)?.textContent ?? ''
-    expect(css).toBe('')
+    // why: scaffold (four empty rules) IS written so we can capture stable
+    // CSSStyleRule references; pre-hydration the rules have zero declarations.
+    // Asserting token count = 0 instead of textContent='' captures the actual
+    // contract (no live values applied) without false-positive on the scaffold.
+    expect(tokenCount()).toBe(0)
   })
 
   it('writes all four scope blocks after hydration', () => {
     useSource.setState({ _hydrated: true })
     unsubscribe = applyDom()
-    const css = document.getElementById(STYLE_ID)?.textContent ?? ''
+    const written = readTokensFromStyle()
 
-    expect(css).toMatch(/^\.md\s*\{/m)
-    expect(css).toMatch(/^html\.dark \.md\s*\{/m)
-    expect(css).toMatch(/^\.shadcn\s*\{/m)
-    expect(css).toMatch(/^html\.dark \.shadcn\s*\{/m)
-
-    expect(css).toContain('--color-primary:')
-    expect(css).toContain('--primary:')
+    expect(Object.keys(written.md.light).length).toBeGreaterThan(0)
+    expect(Object.keys(written.md.dark).length).toBeGreaterThan(0)
+    expect(Object.keys(written.shadcn.light).length).toBeGreaterThan(0)
+    expect(Object.keys(written.shadcn.dark).length).toBeGreaterThan(0)
+    expect(written.md.light['--color-primary']).toBeDefined()
+    expect(written.shadcn.light['--primary']).toBeDefined()
   })
 
-  it('uses a single style element, replacing textContent on update', () => {
+  it('uses a single style element across updates', () => {
     useSource.setState({ _hydrated: true })
     unsubscribe = applyDom()
     useSource.getState().actions.setSeedHex('#ff0000')
@@ -52,36 +97,58 @@ describe('applyDom (jsdom integration)', () => {
     expect(styles).toHaveLength(1)
   })
 
-  it('updates when source changes', () => {
+  it('updates token values when source changes', () => {
     useSource.setState({ _hydrated: true, seedHex: '#6750a4' })
     unsubscribe = applyDom()
-    const before = document.getElementById(STYLE_ID)?.textContent
+    const before = readTokensFromStyle().md.light['--color-primary']
 
     useSource.getState().actions.setSeedHex('#ff0000')
-    const after = document.getElementById(STYLE_ID)?.textContent
+    const after = readTokensFromStyle().md.light['--color-primary']
 
+    expect(before).toBeDefined()
+    expect(after).toBeDefined()
     expect(after).not.toBe(before)
   })
 
   it('unsubscribe stops further DOM writes', () => {
     useSource.setState({ _hydrated: true })
     unsubscribe = applyDom()
-    const before = document.getElementById(STYLE_ID)?.textContent
+    const before = readTokensFromStyle().md.light['--color-primary']
 
     unsubscribe()
     unsubscribe = undefined
     useSource.getState().actions.setSeedHex('#ff0000')
-    const after = document.getElementById(STYLE_ID)?.textContent
+    const after = readTokensFromStyle().md.light['--color-primary']
 
     expect(after).toBe(before)
   })
 
-  // why: drift-guard at the spine seam — applyDom and the export path
-  // (formatCss(deriveTheme(...))) must produce identical text for ANY source
-  // state, not just DEFAULT_INPUTS. The www-side globals-drift test only
-  // covers DEFAULT_INPUTS; this closes the gap for arbitrary mutations.
-  // Anything that recomputes inside applyDom or formatCss without the other
-  // following will fail one of these cases. ADR-0017.
+  // why: per-token writes only touch CHANGED properties. Pin this so a
+  // future regression to "rewrite everything" loses the perf win silently —
+  // the test would still pass on data, but this assertion catches the
+  // implementation drift. Issue #9.
+  it('removeProperty fires when a token disappears (customColor removed)', () => {
+    const success = {
+      id: 'id-success',
+      name: 'Success',
+      hex: '#22c55e',
+      blend: false,
+      shadcnSource: 'color' as const,
+    }
+    useSource.setState({ _hydrated: true, customColors: [success] })
+    unsubscribe = applyDom()
+    expect(readTokensFromStyle().md.light['--color-success']).toBeDefined()
+
+    useSource.getState().actions.removeCustomColor('id-success')
+    expect(readTokensFromStyle().md.light['--color-success']).toBeUndefined()
+  })
+
+  // why: drift-guard at the spine seam — applyDom's effective tokens must
+  // equal deriveTheme(source) output for ANY source, not just DEFAULT_INPUTS.
+  // The www-side globals-drift test only covers DEFAULT_INPUTS; this closes
+  // the gap. Anything that recomputes inside applyDom or deriveTheme without
+  // the other following will fail one of these cases. ADR-0017 +
+  // ADR-0017 amendment 2026-05-06 (data-level pinning).
   describe('preview === export round-trip', () => {
     const cases: Array<{ name: string; source: PortableTheme }> = [
       { name: 'default inputs', source: DEFAULT_INPUTS },
@@ -222,12 +289,15 @@ describe('applyDom (jsdom integration)', () => {
     ]
 
     for (const { name, source } of cases) {
-      it(`applyDom matches formatCss(deriveTheme(...)) for ${name}`, () => {
+      it(`applyDom matches deriveTheme(...) for ${name}`, () => {
         useSource.setState({ ...source, _hydrated: true })
         unsubscribe = applyDom()
-        const written = document.getElementById(STYLE_ID)?.textContent ?? ''
-        const expected = formatCss(deriveTheme(source))
-        expect(written).toBe(expected)
+        const written = readTokensFromStyle()
+        const expected = deriveTheme(source)
+        expect(written.md.light).toEqual(expected.md.light)
+        expect(written.md.dark).toEqual(expected.md.dark)
+        expect(written.shadcn.light).toEqual(expected.shadcn.light)
+        expect(written.shadcn.dark).toEqual(expected.shadcn.dark)
       })
     }
 
@@ -237,9 +307,13 @@ describe('applyDom (jsdom integration)', () => {
       // it. This test pins the shape match without coupling to specific keys.
       useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true, seedHex: '#abc123' })
       unsubscribe = applyDom()
-      const written = document.getElementById(STYLE_ID)?.textContent ?? ''
+      const written = readTokensFromStyle()
       const projected = selectPortable(useSource.getState())
-      expect(written).toBe(formatCss(deriveTheme(projected)))
+      const expected = deriveTheme(projected)
+      expect(written.md.light).toEqual(expected.md.light)
+      expect(written.md.dark).toEqual(expected.md.dark)
+      expect(written.shadcn.light).toEqual(expected.shadcn.light)
+      expect(written.shadcn.dark).toEqual(expected.shadcn.dark)
     })
   })
 })

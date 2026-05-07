@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { type DerivedTheme, deriveTheme } from './derive'
+import type { DerivedTheme } from './derive'
+import { getDerivedTheme } from './derive-cache'
 import { selectPortable, useSource } from './source'
 
 // why: returns null pre-hydration so SSR and the first client render agree.
@@ -10,14 +10,13 @@ import { selectPortable, useSource } from './source'
 //
 // Subscription shape: useShallow(selectPortable) gives one stable PortableTheme
 // reference across no-op writes — adding a new source field flows through
-// selectPortable with no edits here. useMemo keys on the same object so
-// deriveTheme runs only when at least one PortableTheme field changes.
+// selectPortable with no edits here. getDerivedTheme then memoizes at module
+// scope so all consumers share one derive per source change instead of
+// running the spine pipeline once per hook call. Issue #9.
 export function useResolvedTokens(): DerivedTheme | null {
   const hydrated = useSource((s) => s._hydrated)
   const portable = useSource(useShallow(selectPortable))
 
-  return useMemo(() => {
-    if (!hydrated) return null
-    return deriveTheme(portable)
-  }, [hydrated, portable])
+  if (!hydrated) return null
+  return getDerivedTheme(portable)
 }

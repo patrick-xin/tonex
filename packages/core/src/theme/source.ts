@@ -5,6 +5,7 @@ import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
+import { createDebouncedStorage } from './persist-storage'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -71,6 +72,33 @@ export interface SourceActions {
 export type SourceState = PortableTheme & {
   _hydrated: boolean
   actions: SourceActions
+}
+
+// why: trailing-edge debounce for the persist write. 200ms balances two
+// concerns: long enough that 60Hz streaming inputs (slider drag, native
+// color picker, hex keystrokes) coalesce ~12 ticks into one IO call,
+// short enough that an intentional pause-then-reload still lands the
+// user's most recent state. Lifecycle flush covers tab close so no edits
+// are lost mid-debounce. Issue #9.
+const PERSIST_DEBOUNCE_MS = 200
+
+// why: hold a reference to the wrapper outside createJSONStorage's closure
+// so flushPersist can call __flush. SSR has no storage, so this stays null
+// on the server and flushPersist becomes a no-op.
+const debouncedStorage =
+  typeof window === 'undefined'
+    ? null
+    : createDebouncedStorage({ storage: localStorage, delayMs: PERSIST_DEBOUNCE_MS })
+
+// why: drain any pending debounced write to localStorage immediately. Tests
+// need this to assert "after these setters, localStorage contains X" without
+// awaiting real timers; future workflows that read localStorage right after
+// a streaming write (e.g. an export-to-file path that snapshots the persisted
+// blob) can call it too. No-op on the server. Lifecycle handlers (pagehide,
+// visibilitychange) call the same underlying __flush automatically — this
+// is the manual seam.
+export function flushPersist(): void {
+  debouncedStorage?.__flush()
 }
 
 // why: single projection from SourceState → PortableTheme. Used by:
@@ -205,9 +233,14 @@ export const useSource = create<SourceState>()(
       version: SCHEMA_VERSION,
       // why: pass `undefined` for storage on the server so persist becomes a
       // no-op during SSR — initial server render uses DEFAULT_INPUTS. On the
-      // client, real localStorage is wired up and onRehydrateStorage fires
-      // after the read completes, flipping _hydrated true.
-      storage: typeof window === 'undefined' ? undefined : createJSONStorage(() => localStorage),
+      // client, real localStorage is wired up via createDebouncedStorage so
+      // streaming writes (slider drag, native picker drag, hex typing)
+      // coalesce into a single trailing IO write per ~200ms instead of
+      // firing setItem at frame rate. Issue #9. JSON.stringify still happens
+      // per tick inside createJSONStorage (microseconds, not the bottleneck);
+      // the wrapped Storage debounces the actual setItem call. Lifecycle
+      // flush in createDebouncedStorage covers tab close.
+      storage: debouncedStorage === null ? undefined : createJSONStorage(() => debouncedStorage),
       // why: selectPortable excludes _hydrated + actions; everything else is
       // PortableTheme by construction. One source of truth for "what's
       // portable vs ephemeral." Persistence drift is no longer a separate

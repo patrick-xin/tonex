@@ -30,3 +30,18 @@ This is enforced by five concrete commitments:
 ## Amendment to ADR-0005
 
 ADR-0005's spine signature line currently reads `deriveTheme(source) → { md, shadcn, css, warnings }`. The `css` field is struck. The "named pure transforms (palettes, surface, tokens, css)" list loses `css`. This decision is part of (1) above — kept here so a future reader of ADR-0005 sees the amendment in one hop.
+
+## Amendment — 2026-05-06: per-token applyDom writes (issue #9)
+
+The third Consequence bullet — "`applyDom` updates a single `<style>` element in `<head>` (append-once, replace `textContent` on update)" — is refined. The single-element + append-once + cascade-order parts hold. **Updates no longer replace `textContent`.** They use per-token `CSSStyleRule.style.setProperty` against four stable rules (one per scope: `.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`), diffed against the last-written values. Only tokens whose value changed are written.
+
+**Why:** at 60Hz slider drag, replacing `textContent` forces the browser to re-parse the full CSS (~120 declarations × 4 blocks) and re-resolve the cascade for every element matching one of the scope selectors — per tick. Per-token `setProperty` against stable rules invalidates only the changed properties' computed-style cache. Issue #9.
+
+**What's preserved (the WYSIWYG contract):**
+- applyDom still consumes `DerivedTheme` directly, identical input to exporters. The drift-guard contract — preview === export — holds because both sides still derive from the same `deriveTheme(source)` output.
+- The four scope blocks still exist; mode toggle is still a `<html class="dark">` flip per commitment 4.
+- `formatCss` is unchanged. Exporters still produce identical strings; `globals.css` is still baked from `formatCss(deriveTheme(DEFAULT_INPUTS))`.
+
+**Drift-guard test shape:** the existing string comparison `<style>.textContent === formatCss(deriveTheme(source))` no longer holds (the `<style>` text stays as the empty four-rule scaffold; the actual values live in the live `CSSStyleRule.style` declarations). The test is reformed to read tokens back from each rule via `CSSStyleDeclaration.getPropertyValue` and compare to `deriveTheme(source)`'s `{md, shadcn}` maps. Same contract — preview's effective tokens equal what an export would emit — pinned at the data layer instead of the textual layer. The textual layer is still pinned for exporters via `formatCss` unit tests.
+
+**Sink boundary unchanged:** `applyDom` still does no color logic — no conversion, rounding, or role mapping. `getDerivedTheme` is a pure cache wrapper around `deriveTheme`; its output is the same `DerivedTheme` shape the spine produced.

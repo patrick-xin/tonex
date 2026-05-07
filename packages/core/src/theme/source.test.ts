@@ -13,7 +13,7 @@ import {
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'
-import { selectPortable, useSource } from './source'
+import { flushPersist, selectPortable, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the
@@ -131,6 +131,10 @@ describe('useSource persistence round-trip', () => {
     s.actions.setCmfSecondSourceHex(NONDEFAULT_INPUTS.cmfSecondSourceHex)
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
 
+    // why: persist writes are debounced (issue #9) — drain the pending
+    // write so the localStorage assertion below sees the latest state
+    // without racing the timer.
+    flushPersist()
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
     const raw = JSON.parse(stored)

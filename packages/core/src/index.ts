@@ -27,6 +27,12 @@ export { formatCss, formatLayer } from './theme/format'
 export { CHROMA_HUE_LOCK, type HctTriplet, hctFromHex, hexFromHct, maxChroma } from './theme/hct'
 export { sourceColorHexFromImage } from './theme/image'
 export type { Mode } from './theme/mode'
-export { type SourceActions, type SourceState, selectPortable, useSource } from './theme/source'
+export {
+  flushPersist,
+  type SourceActions,
+  type SourceState,
+  selectPortable,
+  useSource,
+} from './theme/source'
 export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
 export { useResolvedTokens } from './theme/useResolvedTokens'
