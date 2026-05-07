@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./base.css";
+@import "./toast.css";
 @import "./tonex.css";
 
 /* why: next-themes uses attribute="class" — `.dark` lands on <html>. Tailwind

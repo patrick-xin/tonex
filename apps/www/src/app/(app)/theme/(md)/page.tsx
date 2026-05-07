@@ -1,5 +1,6 @@
 import { ButtonsDemo } from '@/components/demos/buttons'
 import { Card } from '@/components/ui/card'
+import { ExportButton } from '../../../../features/export/export-button'
 
 export default function MD3Page() {
   return (
@@ -12,6 +13,7 @@ export default function MD3Page() {
       <Card variant="highest">highest</Card>
       <Card variant="dimmed">dimmed</Card>
       <Card variant="bright">bright</Card>
+      <ExportButton />
     </section>
   )
 }

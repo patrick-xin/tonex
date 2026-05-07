@@ -1,0 +1,155 @@
+/*
+   Toast Viewport
+*/
+@layer utilities {
+  .toast-viewport {
+    @apply fixed z-10 flex flex-col w-[var(--toast-max-width-mobile)] lg:w-[var(--toast-max-width-desktop)] outline-none pointer-events-none;
+  }
+  /* Viewport Positioning */
+  .toast-viewport[data-position^="top"] {
+    top: var(--toast-viewport-padding);
+    bottom: auto;
+  }
+  .toast-viewport[data-position^="bottom"] {
+    bottom: var(--toast-viewport-padding);
+    top: auto;
+  }
+
+  .toast-viewport[data-position$="left"] {
+    left: var(--toast-viewport-padding);
+    right: auto;
+  }
+  .toast-viewport[data-position$="right"] {
+    right: var(--toast-viewport-padding);
+    left: auto;
+  }
+  .toast-viewport[data-position$="center"] {
+    @apply left-1/2 right-auto -translate-x-1/2;
+  }
+}
+
+/* 
+   Toast Root
+*/
+@layer utilities {
+  .toast-root {
+    @apply absolute w-full pointer-events-auto z-[calc(1000-var(--toast-index))];
+
+    /* Transitions */
+    transition:
+      transform 0.5s var(--ease-spring),
+      opacity 0.5s var(--ease-spring),
+      height 0.15s var(--ease-spring);
+
+    /* Height Calculation */
+    height: var(--toast-frontmost-height, var(--toast-height));
+
+    /* Common Ghost Element (for hit areas) */
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: calc(var(--toast-gap) + 1px);
+      background: transparent;
+    }
+
+    /* Math for collapsed stacking (shrinking effect) */
+    --toast-scale: calc(max(0, 1 - (var(--toast-index) * 0.1)));
+    --toast-shrink: calc(1 - var(--toast-scale));
+    --toast-height-approx: var(--toast-frontmost-height, var(--toast-height));
+  }
+  /* 
+    Positions
+  */
+  /* Bottom */
+  .toast-root[data-position^="bottom"] {
+    @apply bottom-0 top-auto;
+    transform-origin: bottom center;
+
+    /* Direction Multipliers: Bottom is "Positive" direction for entering from below */
+    --dir-y: 1;
+
+    /* Calculate Offsets */
+    --collapsed-offset-y: calc(
+      (var(--toast-index) * var(--toast-peek) * -1) /* Stack peek upwards */ -
+      (var(--toast-shrink) * var(--toast-height-approx)) /* Shrink upwards */
+    );
+
+    --expanded-offset-y: calc(
+      (var(--toast-offset-y) * -1) /* Move up based on total stack height */ -
+      (var(--toast-index) * var(--toast-gap))
+    );
+
+    /* Default Transform: Collapsed + Swipe Handling */
+    transform: translateX(var(--toast-swipe-movement-x, 0px))
+      translateY(calc(var(--toast-swipe-movement-y, 0px) + var(--collapsed-offset-y)))
+      scale(var(--toast-scale));
+  }
+
+  /* Top */
+  .toast-root[data-position^="top"] {
+    @apply top-0 bottom-auto;
+    transform-origin: top center;
+
+    /* Direction Multipliers: Top is "Negative" direction for entering from above */
+    --dir-y: -1;
+
+    /* Calculate Offsets (Signs flipped from Bottom) */
+    --collapsed-offset-y: calc(
+      (var(--toast-index) * var(--toast-peek)) /* Stack peek downwards */ +
+      (var(--toast-shrink) * var(--toast-height-approx)) /* Shrink downwards */
+    );
+
+    --expanded-offset-y: calc(var(--toast-offset-y) + (var(--toast-index) * var(--toast-gap)));
+
+    /* Default Transform: Collapsed + Swipe Handling */
+    transform: translateX(var(--toast-swipe-movement-x, 0px))
+      translateY(calc(var(--toast-swipe-movement-y, 0px) + var(--collapsed-offset-y)))
+      scale(var(--toast-scale));
+  }
+
+  /* 
+    State Modifiers
+  */
+  /* Expanded State */
+  .toast-root[data-expanded] {
+    height: var(--toast-height);
+    transform: translateX(var(--toast-swipe-movement-x, 0px)) translateY(var(--expanded-offset-y))
+      scale(1);
+  }
+  /* Entering Animation */
+  .toast-root[data-starting-style] {
+    opacity: 0;
+    transform: translateY(calc(var(--dir-y) * 150%));
+  }
+  /* Exiting Animation */
+  .toast-root[data-ending-style] {
+    opacity: 0;
+    /* Default Exit */
+    &:not([data-swipe-direction]) {
+      transform: translateY(calc(var(--dir-y) * 150%));
+    }
+    /* Swipe Up/Down */
+    &[data-swipe-direction="up"] {
+      transform: translateY(calc(var(--toast-swipe-movement-y) - 150%));
+    }
+    &[data-swipe-direction="down"] {
+      transform: translateY(calc(var(--toast-swipe-movement-y) + 150%));
+    }
+    /* Swipe Left/Right */
+    &[data-swipe-direction="left"] {
+      transform: translateX(calc(var(--toast-swipe-movement-x) - 150%))
+        translateY(var(--expanded-offset-y));
+    }
+    &[data-swipe-direction="right"] {
+      transform: translateX(calc(var(--toast-swipe-movement-x) + 150%))
+        translateY(var(--expanded-offset-y));
+    }
+  }
+  /* Limited State */
+  .toast-root[data-limited] {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
