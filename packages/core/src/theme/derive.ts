@@ -52,23 +52,46 @@ const mdc = new MaterialDynamicColors()
 // would hide MCU's actual API surface behind string mangling. Adding an md
 // token: extend MD_TOKEN_NAMES in schema.ts AND add the resolver here.
 // TypeScript's Record<MdTokenName, ...> ensures both move together.
+// why: dim getters are typed `DynamicColor | undefined` but at runtime under
+// MCU's current spec stack (MaterialDynamicColors.colorSpec === 2026 → 2025 →
+// 2021) they always return a real DynamicColor — the 2025 layer defines them
+// directly without `extendSpecVersion`, so the 2021 base's `undefined` is
+// shadowed for any scheme regardless of specVersion. The non-null assertion
+// captures this invariant. If MCU ever pulls dim back into 2021, this throws
+// at the boundary instead of leaking undefined into oklchFromArgb.
 const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-primary': (s) => mdc.primary().getArgb(s),
   '--color-on-primary': (s) => mdc.onPrimary().getArgb(s),
   '--color-primary-container': (s) => mdc.primaryContainer().getArgb(s),
   '--color-on-primary-container': (s) => mdc.onPrimaryContainer().getArgb(s),
+  '--color-primary-fixed': (s) => mdc.primaryFixed().getArgb(s),
+  '--color-primary-fixed-dim': (s) => mdc.primaryFixedDim().getArgb(s),
+  '--color-on-primary-fixed': (s) => mdc.onPrimaryFixed().getArgb(s),
+  '--color-on-primary-fixed-variant': (s) => mdc.onPrimaryFixedVariant().getArgb(s),
+  '--color-primary-dim': (s) => mdc.primaryDim()!.getArgb(s),
   '--color-secondary': (s) => mdc.secondary().getArgb(s),
   '--color-on-secondary': (s) => mdc.onSecondary().getArgb(s),
   '--color-secondary-container': (s) => mdc.secondaryContainer().getArgb(s),
   '--color-on-secondary-container': (s) => mdc.onSecondaryContainer().getArgb(s),
+  '--color-secondary-fixed': (s) => mdc.secondaryFixed().getArgb(s),
+  '--color-secondary-fixed-dim': (s) => mdc.secondaryFixedDim().getArgb(s),
+  '--color-on-secondary-fixed': (s) => mdc.onSecondaryFixed().getArgb(s),
+  '--color-on-secondary-fixed-variant': (s) => mdc.onSecondaryFixedVariant().getArgb(s),
+  '--color-secondary-dim': (s) => mdc.secondaryDim()!.getArgb(s),
   '--color-tertiary': (s) => mdc.tertiary().getArgb(s),
   '--color-on-tertiary': (s) => mdc.onTertiary().getArgb(s),
   '--color-tertiary-container': (s) => mdc.tertiaryContainer().getArgb(s),
   '--color-on-tertiary-container': (s) => mdc.onTertiaryContainer().getArgb(s),
+  '--color-tertiary-fixed': (s) => mdc.tertiaryFixed().getArgb(s),
+  '--color-tertiary-fixed-dim': (s) => mdc.tertiaryFixedDim().getArgb(s),
+  '--color-on-tertiary-fixed': (s) => mdc.onTertiaryFixed().getArgb(s),
+  '--color-on-tertiary-fixed-variant': (s) => mdc.onTertiaryFixedVariant().getArgb(s),
+  '--color-tertiary-dim': (s) => mdc.tertiaryDim()!.getArgb(s),
   '--color-error': (s) => mdc.error().getArgb(s),
   '--color-on-error': (s) => mdc.onError().getArgb(s),
   '--color-error-container': (s) => mdc.errorContainer().getArgb(s),
   '--color-on-error-container': (s) => mdc.onErrorContainer().getArgb(s),
+  '--color-error-dim': (s) => mdc.errorDim()!.getArgb(s),
   '--color-surface': (s) => mdc.surface().getArgb(s),
   '--color-on-surface': (s) => mdc.onSurface().getArgb(s),
   '--color-on-surface-variant': (s) => mdc.onSurfaceVariant().getArgb(s),
@@ -79,6 +102,12 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-surface-container': (s) => mdc.surfaceContainer().getArgb(s),
   '--color-surface-container-high': (s) => mdc.surfaceContainerHigh().getArgb(s),
   '--color-surface-container-highest': (s) => mdc.surfaceContainerHighest().getArgb(s),
+  '--color-surface-tint': (s) => mdc.surfaceTint().getArgb(s),
+  '--color-inverse-surface': (s) => mdc.inverseSurface().getArgb(s),
+  '--color-inverse-on-surface': (s) => mdc.inverseOnSurface().getArgb(s),
+  '--color-inverse-primary': (s) => mdc.inversePrimary().getArgb(s),
+  '--color-shadow': (s) => mdc.shadow().getArgb(s),
+  '--color-scrim': (s) => mdc.scrim().getArgb(s),
   '--color-outline': (s) => mdc.outline().getArgb(s),
   '--color-outline-variant': (s) => mdc.outlineVariant().getArgb(s),
 }
