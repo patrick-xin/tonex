@@ -50,7 +50,7 @@ const PALETTE_PREVIEW_TOKEN: Record<PaletteName, MdTokenName> = {
 // row to the next reuses the SAME popover, sliding between payloads instead
 // of dismissing and remounting. Cosmetic but matches the legacy editor-rail
 // feel; the BasePopover handle pattern is the documented hook for it.
-const popoverHandle = createPopoverHandle<React.ComponentType>()
+export const popoverHandle = createPopoverHandle<React.ComponentType>()
 
 export function AnimatedButtonColorPicker({
   palette,
@@ -108,7 +108,16 @@ export function AnimatedButtonColorPicker({
       ) : (
         trigger
       )}
-      <Popover handle={popoverHandle}>
+      <Popover
+        handle={popoverHandle}
+        onOpenChange={(isOpen, eventDetails) => {
+          if (isOpen || eventDetails.reason !== 'outside-press') return
+          const target = eventDetails.event?.target as HTMLElement | undefined
+          if (target?.closest('[data-open]'))
+            // press landed inside another popover popup → that's inner picker, keep outer open
+            eventDetails.cancel()
+        }}
+      >
         {({ payload: Payload }) => (
           <PopoverPortal>
             <PopoverPositioner
