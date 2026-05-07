@@ -1,14 +1,25 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 import type { NeutralPaletteName } from './surface'
 
-// why: bumped to 7 — surfaceTintLevel and surfaceDesaturateLevel migrated
-// from flat number to { light, dark } so a user can edit one mode's level
-// without mutating the other. Aligns surfaces with the per-mode shape
-// already used by md3TokenOverrides and shadcnRoleBindings. surfaceAlgo
-// and surfacePaletteName stay flat: algo is an "open question" per the
-// originating issue (defer mode-keying until real usage pressure); palette
-// is a tint *source*, not a per-mode value. Migration v6→v7 lifts the flat
-// number into both modes (unshipped values stay byte-equal post-migrate).
+// why: bumped to 8 — paletteOverrides added. Per-palette hex overrides for
+// MCU's six tonal palettes (primary, secondary, tertiary, neutral,
+// neutralVariant, error). Override applies post-construction by replacing
+// the palette field on the DynamicScheme; MCU's variant-specific tone
+// choices flow through unchanged so the family-regen is correct for every
+// scheme (not just tonalSpot). Flat hex map (not mode-keyed): a palette is
+// a tone ramp, the scheme picks tones from it per mode. Empty default
+// keeps drift-guard byte-identical. Migration v7→v8 fills `{}`. Closes the
+// "family-regen" gap left open when primaryHexLock was pruned in v6 — same
+// product need, generalized to all six palettes, lifted from the legacy
+// generator's validated implementation.
+// v7: surfaceTintLevel and surfaceDesaturateLevel migrated from flat number
+// to { light, dark } so a user can edit one mode's level without mutating
+// the other. Aligns surfaces with the per-mode shape already used by
+// md3TokenOverrides and shadcnRoleBindings. surfaceAlgo and surfacePaletteName
+// stay flat: algo is an "open question" per the originating issue (defer
+// mode-keying until real usage pressure); palette is a tint *source*, not a
+// per-mode value. Migration v6→v7 lifts the flat number into both modes
+// (unshipped values stay byte-equal post-migrate).
 // v6 (slice 10): primaryHexLock pruned. The half-feature pinned --color-
 // primary to a hex and regenerated the family from a TonalPalette;
 // md3TokenOverrides covers the pin use case and the family-regen story is
@@ -30,7 +41,7 @@ import type { NeutralPaletteName } from './surface'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 7 as const
+export const SCHEMA_VERSION = 8 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -244,6 +255,25 @@ export function validateCustomColorEntry(
   return null
 }
 
+// why: canonical list of MCU's six tonal palettes. Each entry corresponds
+// to a `*Palette` field on DynamicScheme that drives a family of md tokens
+// (primary → primary/onPrimary/primary-container/on-primary-container; the
+// neutral pair drives surface + outline). Order matches MCU's emission
+// order in the spec — primary first, error last. Used as the value-domain
+// of paletteOverrides AND as the iteration source in apply.ts so adding /
+// removing a palette is a one-line edit. Adding a new MCU palette: extend
+// this tuple AND add a mutation case in palette-override/apply.ts (both
+// must move together; the type system enforces it via the Record type).
+export const PALETTE_NAMES = [
+  'primary',
+  'secondary',
+  'tertiary',
+  'neutral',
+  'neutralVariant',
+  'error',
+] as const
+export type PaletteName = (typeof PALETTE_NAMES)[number]
+
 // why: which surface treatment deriveTheme applies post-md-emit. Mutually
 // exclusive — composing tint and desaturate isn't a product feature. There is
 // no 'none' algo: identity is desaturate at level 0 (chroma multiplier 0 =
@@ -310,6 +340,19 @@ export interface PortableTheme {
   // validateCustomColorEntry on add/edit; deriveTheme assumes input is
   // already validated and slug-unique.
   customColors: CustomColorEntry[]
+  // why: per-palette hex override map. Replaces the corresponding
+  // TonalPalette on the DynamicScheme post-construction; MCU then computes
+  // every dependent token using its variant-specific tone choices, so the
+  // family-regen stays correct for monochrome / vibrant / expressive (not
+  // just tonalSpot). Flat hex (not mode-keyed): a palette is a tone ramp,
+  // the scheme reads tones from it per mode. Empty default keeps drift-
+  // guard baseline byte-identical. Some entries are conditionally invalid
+  // (e.g. tertiary under variant=cmf because CMF's tertiary is driven by
+  // a second-source HCT) — see palette-override/disabled-reason.ts. Setter
+  // and engine both consult that selector; UI disables the input when the
+  // selector returns a reason. Hex format validated at the setter boundary
+  // via isValidHex; deriveTheme assumes input is already valid.
+  paletteOverrides: Partial<Record<PaletteName, string>>
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -328,4 +371,12 @@ export const DEFAULT_INPUTS: PortableTheme = {
   surfaceTintLevel: { light: 0, dark: 0 },
   surfaceDesaturateLevel: { light: 0, dark: 0 },
   customColors: [],
+  paletteOverrides: {},
+}
+
+// why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
+// inline check pattern and by the paletteOverride setter. Centralizing
+// avoids two regex literals drifting on case/format rules.
+export function isValidHex(hex: string): boolean {
+  return /^#[0-9a-fA-F]{6}$/.test(hex)
 }

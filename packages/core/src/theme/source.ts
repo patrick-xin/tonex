@@ -3,11 +3,14 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
 import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
+import { paletteOverrideDisabledReason } from './palette-override'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
+  isValidHex,
   type MdTokenName,
+  type PaletteName,
   type PortableTheme,
   SCHEMA_VERSION,
   type ShadcnRoleName,
@@ -40,6 +43,14 @@ export interface SourceActions {
   addCustomColor(entry: CustomColorEntry): void
   updateCustomColor(id: string, patch: Partial<Omit<CustomColorEntry, 'id'>>): void
   removeCustomColor(id: string): void
+  // why: hex sets the override for one palette; null deletes the entry so
+  // MCU's seed-derived palette flows through unchanged. No-op when the
+  // (palette, source) combination is disabled per
+  // paletteOverrideDisabledReason — UI is the truth source for "user could
+  // have done this", but this guard is the structural backstop for any
+  // caller that bypasses the disabled state. Hex format validated; a
+  // malformed value throws at the seam, not silently at derive time.
+  setPaletteOverride(palette: PaletteName, hex: string | null): void
   setHydrated(): void
   reset(): void
 }
@@ -159,6 +170,18 @@ export const useSource = create<SourceState>()(
           }),
         removeCustomColor: (id) =>
           set((s) => ({ customColors: s.customColors.filter((e) => e.id !== id) })),
+        setPaletteOverride: (palette, hex) =>
+          set((s) => {
+            if (paletteOverrideDisabledReason(palette, s) !== null) return {}
+            const next = { ...s.paletteOverrides }
+            if (hex === null) {
+              delete next[palette]
+            } else {
+              if (!isValidHex(hex)) throw new Error(`[setPaletteOverride] invalid hex "${hex}"`)
+              next[palette] = hex
+            }
+            return { paletteOverrides: next }
+          }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },
@@ -250,6 +273,13 @@ export const useSource = create<SourceState>()(
           if (typeof legacyDesat === 'number') {
             s.surfaceDesaturateLevel = { light: legacyDesat, dark: legacyDesat }
           }
+        }
+        if (version < 8) {
+          // why: v7 had no paletteOverrides — fill empty so deriveTheme's
+          // iteration over PALETTE_NAMES finds a defined object. Empty map
+          // preserves every existing user's exact rendered output (zero
+          // mutations applied to the scheme).
+          s.paletteOverrides = s.paletteOverrides ?? {}
         }
         return s as PortableTheme
       },

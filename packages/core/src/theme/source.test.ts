@@ -5,6 +5,8 @@ import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
   type MdTokenName,
+  PALETTE_NAMES,
+  type PaletteName,
   type PortableTheme,
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
@@ -68,6 +70,14 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
   surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
   customColors: NONDEFAULT_CUSTOM_COLORS,
+  paletteOverrides: {
+    primary: '#ff0066',
+    secondary: '#33ccaa',
+    tertiary: '#ffaa00',
+    neutral: '#888899',
+    neutralVariant: '#776655',
+    error: '#ee2244',
+  },
 }
 
 describe('useSource persistence round-trip', () => {
@@ -106,6 +116,10 @@ describe('useSource persistence round-trip', () => {
       s.actions.setSurfaceDesaturateLevel(mode, NONDEFAULT_INPUTS.surfaceDesaturateLevel[mode])
     }
     for (const entry of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(entry)
+    for (const palette of PALETTE_NAMES) {
+      const hex = NONDEFAULT_INPUTS.paletteOverrides[palette]
+      if (hex !== undefined) s.actions.setPaletteOverride(palette, hex)
+    }
 
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
@@ -220,6 +234,20 @@ describe('useSource persistence round-trip', () => {
     expect(
       (useSource.getState() as Partial<{ primaryHexLock: unknown }>).primaryHexLock,
     ).toBeUndefined()
+  })
+
+  it('v7 → v8 migrate: missing paletteOverrides fills to empty map', async () => {
+    // why: v7 had no paletteOverrides field; rehydrate must fill it so
+    // applyPaletteOverrides' iteration over PALETTE_NAMES finds a defined
+    // object and the indexer doesn't NPE. Empty map applies zero mutations
+    // to the scheme, so post-migrate output is byte-identical to v7.
+    const v7State = {
+      ...DEFAULT_INPUTS,
+      paletteOverrides: undefined as unknown as PortableTheme['paletteOverrides'],
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v7State, version: 7 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().paletteOverrides).toEqual({})
   })
 
   it('v2 → v3 migrate: missing customColors fills to empty array', async () => {
@@ -345,6 +373,71 @@ describe('useSource persistence round-trip', () => {
       s.actions.setSeedChroma(80)
       s.actions.setSeedTone(50)
       expect(useSource.getState().seedHex).toBe(locked)
+    })
+  })
+
+  describe('setPaletteOverride', () => {
+    it('writes hex under the addressed palette key', () => {
+      const s = useSource.getState()
+      s.actions.setPaletteOverride('primary', '#ff0066')
+      expect(useSource.getState().paletteOverrides.primary).toBe('#ff0066')
+      s.actions.setPaletteOverride('error', '#ee2244')
+      expect(useSource.getState().paletteOverrides).toEqual({
+        primary: '#ff0066',
+        error: '#ee2244',
+      })
+    })
+
+    it('null deletes the key (not stores null)', () => {
+      const s = useSource.getState()
+      s.actions.setPaletteOverride('primary', '#ff0066')
+      s.actions.setPaletteOverride('primary', null)
+      expect(useSource.getState().paletteOverrides).not.toHaveProperty('primary')
+    })
+
+    it('throws on malformed hex', () => {
+      const s = useSource.getState()
+      expect(() => s.actions.setPaletteOverride('primary', 'ff0066')).toThrow(/invalid hex/)
+      expect(() => s.actions.setPaletteOverride('primary', '#ff')).toThrow(/invalid hex/)
+      expect(() => s.actions.setPaletteOverride('primary', '#zzzzzz')).toThrow(/invalid hex/)
+    })
+
+    it('no-ops when paletteOverrideDisabledReason returns a string (cmf + tertiary)', () => {
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      s.actions.setPaletteOverride('tertiary', '#ffaa00')
+      expect(useSource.getState().paletteOverrides).not.toHaveProperty('tertiary')
+      // other palettes still write under cmf
+      s.actions.setPaletteOverride('primary', '#ff0066')
+      expect(useSource.getState().paletteOverrides.primary).toBe('#ff0066')
+    })
+
+    it('does not strip a previously-set override when the source enters a disabled state', () => {
+      // why: setter only blocks NEW writes; existing overrides survive
+      // variant changes. Engine consults disabled-reason at apply time and
+      // skips disabled entries without mutating state. This keeps the
+      // setter's responsibility narrow and the data shape stable across
+      // variant flips. DEFAULT_VARIANT is 'cmf', so the test must first
+      // switch to a non-cmf variant to set tertiary, then flip to cmf.
+      const s = useSource.getState()
+      s.actions.setVariant('tonalSpot')
+      s.actions.setPaletteOverride('tertiary', '#ffaa00')
+      s.actions.setVariant('cmf')
+      expect(useSource.getState().paletteOverrides.tertiary).toBe('#ffaa00')
+    })
+
+    it('typecheck: PaletteName narrows to the six MCU palettes', () => {
+      // why: compile-time guard via the const tuple. Adding a stray name
+      // (e.g. 'background') would be a TS error, not a runtime no-op.
+      const palettes: PaletteName[] = [
+        'primary',
+        'secondary',
+        'tertiary',
+        'neutral',
+        'neutralVariant',
+        'error',
+      ]
+      expect(palettes).toHaveLength(6)
     })
   })
 

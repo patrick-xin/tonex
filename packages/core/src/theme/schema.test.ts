@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { slugifyCustomColorName, validateCustomColorEntry } from './schema'
+import { isValidHex, slugifyCustomColorName, validateCustomColorEntry } from './schema'
 
 describe('slugifyCustomColorName', () => {
   it('lowercases and collapses non-alphanumeric runs to single dash', () => {
@@ -75,5 +75,21 @@ describe('validateCustomColorEntry', () => {
     expect(validateCustomColorEntry({ name: 'Brand', hex: '22c55e' }, empty)).toMatch(/hex/)
     expect(validateCustomColorEntry({ name: 'Brand', hex: '#22c' }, empty)).toMatch(/hex/)
     expect(validateCustomColorEntry({ name: 'Brand', hex: '#zzzzzz' }, empty)).toMatch(/hex/)
+  })
+})
+
+describe('isValidHex', () => {
+  it('accepts 6-digit hex with mixed case', () => {
+    expect(isValidHex('#22c55e')).toBe(true)
+    expect(isValidHex('#FFFFFF')).toBe(true)
+    expect(isValidHex('#000000')).toBe(true)
+  })
+
+  it('rejects missing hash, wrong length, non-hex chars', () => {
+    expect(isValidHex('22c55e')).toBe(false)
+    expect(isValidHex('#22c')).toBe(false)
+    expect(isValidHex('#22c55ezz')).toBe(false)
+    expect(isValidHex('#zzzzzz')).toBe(false)
+    expect(isValidHex('')).toBe(false)
   })
 })

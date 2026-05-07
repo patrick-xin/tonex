@@ -179,6 +179,133 @@ describe('deriveTheme', () => {
     })
   })
 
+  describe('paletteOverrides', () => {
+    it('empty map produces no behavioral change vs default source', () => {
+      // why: drift-guard contract. paletteOverrides defaulting to {} must
+      // emit byte-identical output to a source without the field. Any
+      // non-empty interaction with applyPaletteOverrides for an empty map
+      // would break this and the bake/drift test downstream.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({ ...DEFAULT_INPUTS, paletteOverrides: {} })
+      expect(explicit).toEqual(baseline)
+    })
+
+    it('primary override regenerates the entire primary family, leaves others untouched', () => {
+      // why: the load-bearing claim of this feature. Overriding primary
+      // changes all four primary-family tokens, AND nothing in the secondary,
+      // tertiary, neutral, error families moves. Verifies that mutation lands
+      // on primaryPalette only — not via accidentally cloning the scheme or
+      // mutating shared state.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        paletteOverrides: { primary: '#ff0066' },
+      })
+      // primary family moves
+      expect(overridden.md.light['--color-primary']).not.toBe(baseline.md.light['--color-primary'])
+      expect(overridden.md.light['--color-on-primary']).not.toBe(
+        baseline.md.light['--color-on-primary'],
+      )
+      expect(overridden.md.light['--color-primary-container']).not.toBe(
+        baseline.md.light['--color-primary-container'],
+      )
+      expect(overridden.md.light['--color-on-primary-container']).not.toBe(
+        baseline.md.light['--color-on-primary-container'],
+      )
+      // siblings stay
+      expect(overridden.md.light['--color-secondary']).toBe(baseline.md.light['--color-secondary'])
+      expect(overridden.md.light['--color-tertiary']).toBe(baseline.md.light['--color-tertiary'])
+      expect(overridden.md.light['--color-error']).toBe(baseline.md.light['--color-error'])
+      // dark mode primary also moves (same palette, both modes)
+      expect(overridden.md.dark['--color-primary']).not.toBe(baseline.md.dark['--color-primary'])
+    })
+
+    it('error override regenerates the error family only', () => {
+      // why: secondary check on a different palette to confirm the loop
+      // generalizes. Error has the same family shape as primary (color/on/
+      // container/on-container).
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        paletteOverrides: { error: '#22c55e' },
+      })
+      expect(overridden.md.light['--color-error']).not.toBe(baseline.md.light['--color-error'])
+      expect(overridden.md.light['--color-on-error']).not.toBe(
+        baseline.md.light['--color-on-error'],
+      )
+      expect(overridden.md.light['--color-error-container']).not.toBe(
+        baseline.md.light['--color-error-container'],
+      )
+      // primary untouched
+      expect(overridden.md.light['--color-primary']).toBe(baseline.md.light['--color-primary'])
+    })
+
+    it('neutral override propagates to surface family', () => {
+      // why: neutralPalette drives the surface ramp inside MCU. Surface
+      // tokens must reflect the override. Tested under variant=tonalSpot to
+      // avoid CMF's neutral-handling differences.
+      const tonal: typeof DEFAULT_INPUTS = { ...DEFAULT_INPUTS, variant: 'tonalSpot' }
+      const baseline = deriveTheme(tonal)
+      const overridden = deriveTheme({
+        ...tonal,
+        paletteOverrides: { neutral: '#888899' },
+      })
+      expect(overridden.md.light['--color-surface']).not.toBe(baseline.md.light['--color-surface'])
+      expect(overridden.md.light['--color-surface-container']).not.toBe(
+        baseline.md.light['--color-surface-container'],
+      )
+    })
+
+    it('token override beats palette override per-token (token wins)', () => {
+      // why: ordering contract — palette override regenerates the family,
+      // then token override pins specific tokens. Surgical pin must always
+      // beat broad regen so the user's deliberate per-token choice survives.
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        paletteOverrides: { primary: '#ff0066' },
+        md3TokenOverrides: {
+          light: { '--color-primary': '#ff0000' },
+          dark: {},
+        },
+      })
+      // light --color-primary is the token-pinned hex, not the palette regen
+      expect(overridden.md.light['--color-primary']).toBe(RED)
+      // dark --color-primary still reflects the palette override (no token pin)
+      // — assert by NOT being the baseline cmf dark primary.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      expect(overridden.md.dark['--color-primary']).not.toBe(baseline.md.dark['--color-primary'])
+    })
+
+    it('disabled override (cmf + tertiary) is a no-op at derive time', () => {
+      // why: even if the field carries a value (e.g. user set tertiary under
+      // tonalSpot, then switched to cmf — setter doesn't strip), derive must
+      // skip applying it. Otherwise the user sees a half-applied family that
+      // disagrees with the disabled UI state.
+      const baseline = deriveTheme({ ...DEFAULT_INPUTS, variant: 'cmf' })
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        paletteOverrides: { tertiary: '#ffaa00' },
+      })
+      expect(overridden.md.light['--color-tertiary']).toBe(baseline.md.light['--color-tertiary'])
+      expect(overridden.md.light['--color-tertiary-container']).toBe(
+        baseline.md.light['--color-tertiary-container'],
+      )
+    })
+
+    it('palette override propagates through to shadcn via the binding chain', () => {
+      // why: end-to-end — palette override changes md primary-container,
+      // shadcn.--primary mirrors md primary-container, so shadcn must reflect
+      // the regen automatically (no separate shadcn rewrite needed).
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        paletteOverrides: { primary: '#ff0066' },
+      })
+      expect(overridden.shadcn.light['--primary']).not.toBe(baseline.shadcn.light['--primary'])
+    })
+  })
+
   describe('shadcnRoleBindings', () => {
     it('default bindings preserve slice-1 mapping rule', () => {
       // why: locks the default behavior so changing the data shape can't

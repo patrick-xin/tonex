@@ -8,6 +8,7 @@ import {
 import { variants } from '../variants'
 import type { Mode } from './mode'
 import { oklchFromArgb, oklchFromHex } from './oklch'
+import { applyPaletteOverrides } from './palette-override'
 import {
   type CustomColorEntry,
   MD_TOKEN_NAMES,
@@ -124,9 +125,17 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const lightScheme = variant.build(seedHct, false, source.contrastLevel)
   const darkScheme = variant.build(seedHct, true, source.contrastLevel)
 
-  // why: MCU build → generic override map. Override is the only pin path;
-  // every md token in the layer is a valid override target. Runs LAST so
-  // user pins always win over MCU.
+  // why: palette-level override runs FIRST — mutates the scheme's tonal
+  // palette fields in place so every md token derived from MCU sees the
+  // overridden source. MCU's variant-specific tone choices (e.g. monochrome's
+  // primary at tone 100/0 vs tonalSpot's 40/80) flow through unchanged
+  // because we're swapping the palette, not the tone selection. Disabled
+  // overrides (paletteOverrideDisabledReason) are skipped inside.
+  applyPaletteOverrides(lightScheme, darkScheme, source)
+
+  // why: MCU build → palette override → md emit → generic token override.
+  // Token override is the surgical pin and runs LAST so user pins always
+  // win over both MCU and the palette regen.
   const mdLightBase = applyMd3TokenOverrides(
     buildMdLayer(lightScheme),
     source.md3TokenOverrides.light,
