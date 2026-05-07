@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { VariantName } from '../variants'
+import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
@@ -51,6 +52,11 @@ export interface SourceActions {
   // caller that bypasses the disabled state. Hex format validated; a
   // malformed value throws at the seam, not silently at derive time.
   setPaletteOverride(palette: PaletteName, hex: string | null): void
+  // why: hex pins the second source for the cmf variant; null clears it so
+  // SchemeCmf falls back to single-source (second = seed). No-op when
+  // disabled per cmfSecondSourceDisabledReason — same backstop pattern as
+  // setPaletteOverride. Hex format validated; malformed throws at the seam.
+  setCmfSecondSourceHex(hex: string | null): void
   setHydrated(): void
   reset(): void
 }
@@ -182,6 +188,14 @@ export const useSource = create<SourceState>()(
             }
             return { paletteOverrides: next }
           }),
+        setCmfSecondSourceHex: (hex) =>
+          set((s) => {
+            if (cmfSecondSourceDisabledReason(s) !== null) return {}
+            if (hex !== null && !isValidHex(hex)) {
+              throw new Error(`[setCmfSecondSourceHex] invalid hex "${hex}"`)
+            }
+            return { cmfSecondSourceHex: hex }
+          }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },
@@ -280,6 +294,14 @@ export const useSource = create<SourceState>()(
           // preserves every existing user's exact rendered output (zero
           // mutations applied to the scheme).
           s.paletteOverrides = s.paletteOverrides ?? {}
+        }
+        if (version < 9) {
+          // why: v8 had no cmfSecondSourceHex — fill null so deriveTheme's
+          // optional-second-source branch evaluates to undefined and the
+          // cmf strategy takes the single-source path (byte-identical to
+          // v8). Explicit null (not undefined) so consumers can rely on the
+          // field's presence in the persisted shape.
+          s.cmfSecondSourceHex = s.cmfSecondSourceHex ?? null
         }
         return s as PortableTheme
       },

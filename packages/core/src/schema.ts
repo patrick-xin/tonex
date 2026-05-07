@@ -4,6 +4,7 @@
 // barrel so adding a schema field doesn't touch consumers that only need
 // engine functions, and vice versa.
 
+export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
   type CustomColorEntry,

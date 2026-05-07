@@ -1,7 +1,16 @@
 import { DEFAULT_VARIANT, type VariantName } from '../variants'
 import type { NeutralPaletteName } from './surface'
 
-// why: bumped to 8 — paletteOverrides added. Per-palette hex overrides for
+// why: bumped to 9 — cmfSecondSourceHex added. Optional second source color
+// for the CMF variant; SchemeCmf accepts Hct[] and uses the second entry as
+// `secondarySourceColorHct`, which feeds the tertiaryPalette (full reassign
+// with second hue+chroma) AND the errorPalette (hue picked via a lookup
+// over both source hues). Threaded into VariantStrategy.build as an optional
+// 4th param; only the cmf strategy reads it. null default = single-source
+// build (MCU's documented fallback: second = first), byte-identical to v8.
+// Disabled when variant !== 'cmf' (see cmf-second-source.ts); setter and
+// engine both consult that selector. Migration v8→v9 fills null.
+// v8: paletteOverrides added. Per-palette hex overrides for
 // MCU's six tonal palettes (primary, secondary, tertiary, neutral,
 // neutralVariant, error). Override applies post-construction by replacing
 // the palette field on the DynamicScheme; MCU's variant-specific tone
@@ -41,7 +50,7 @@ import type { NeutralPaletteName } from './surface'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 8 as const
+export const SCHEMA_VERSION = 9 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -353,6 +362,18 @@ export interface PortableTheme {
   // selector returns a reason. Hex format validated at the setter boundary
   // via isValidHex; deriveTheme assumes input is already valid.
   paletteOverrides: Partial<Record<PaletteName, string>>
+  // why: optional second source color for the CMF variant. SchemeCmf accepts
+  // Hct[]; when an array is passed the second entry becomes the
+  // `secondarySourceColorHct`, which (a) reassigns tertiaryPalette to a
+  // TonalPalette built from the second hue+chroma and (b) feeds the
+  // errorPalette hue via SchemeCmf.getErrorHue(primaryHue, secondHue). null
+  // means single-source — MCU's documented fallback is secondHct = seedHct,
+  // which the SchemeCmf constructor handles internally. Only the cmf
+  // strategy reads this field; non-cmf strategies ignore it. Setter and
+  // engine both consult cmfSecondSourceDisabledReason (variant !== 'cmf'
+  // disables the field). Hex format validated at the setter boundary via
+  // isValidHex.
+  cmfSecondSourceHex: string | null
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -372,6 +393,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   surfaceDesaturateLevel: { light: 0, dark: 0 },
   customColors: [],
   paletteOverrides: {},
+  cmfSecondSourceHex: null,
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's

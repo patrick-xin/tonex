@@ -26,6 +26,13 @@ export interface VariantStrategy {
   readonly mcuVariant: Variant
   /** Picker / docs grouping bucket. */
   readonly group: VariantGroup
-  /** Build a DynamicScheme from seed hct + mode + contrast. */
-  build(seedHct: Hct, isDark: boolean, contrastLevel: number): DynamicScheme
+  /**
+   * Build a DynamicScheme from seed hct + mode + contrast. Optional
+   * `secondHct` is the variant-specific extra source — currently only cmf
+   * consumes it (drives `secondarySourceColorHct`, which reassigns the
+   * tertiaryPalette and shifts the errorPalette hue). Other strategies
+   * ignore it. derive.ts resolves `source.cmfSecondSourceHex` and threads
+   * the hct here.
+   */
+  build(seedHct: Hct, isDark: boolean, contrastLevel: number, secondHct?: Hct): DynamicScheme
 }

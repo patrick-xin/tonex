@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
+import { hexFromHct } from './hct'
 import { oklchFromHex } from './oklch'
 import { type CustomColorEntry, DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
+
+// why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
+// final else clause: (secondHue > 12 && secondHue <= 28) ? 32 : 16. Single-
+// source falls into bucket 16; second.hue=20 lands in bucket 32. Constructed
+// via Hct so the fixture is deterministic regardless of hex<->HCT rounding.
+const CMF_SECOND_HEX_BUCKET_SHIFT = hexFromHct({ hue: 20, chroma: 60, tone: 50 })
 
 const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 
@@ -303,6 +310,97 @@ describe('deriveTheme', () => {
         paletteOverrides: { primary: '#ff0066' },
       })
       expect(overridden.shadcn.light['--primary']).not.toBe(baseline.shadcn.light['--primary'])
+    })
+  })
+
+  describe('cmfSecondSourceHex', () => {
+    it('null is identity — output equals single-source build byte-for-byte', () => {
+      // why: drift-guard contract. cmfSecondSourceHex defaulting to null
+      // must produce a build path identical to passing no second hct at
+      // all, which the cmf strategy short-circuits via the secondHct ===
+      // undefined branch. Locks that no array allocation slips into the
+      // default path where it would shift any md token.
+      const baseline = deriveTheme({ ...DEFAULT_INPUTS, variant: 'cmf' })
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        cmfSecondSourceHex: null,
+      })
+      expect(explicit.md.light).toEqual(baseline.md.light)
+      expect(explicit.md.dark).toEqual(baseline.md.dark)
+      expect(explicit.shadcn.light).toEqual(baseline.shadcn.light)
+      expect(explicit.shadcn.dark).toEqual(baseline.shadcn.dark)
+    })
+
+    it('shifts tertiary and error md tokens away from baseline under cmf', () => {
+      // why: SchemeCmf reads sourceColorHcts[1] to drive tertiaryPalette
+      // (full reassign with second hue+chroma) AND errorPalette hue (via
+      // getErrorHue lookup over both source hues). Tertiary always shifts.
+      // Error shift requires the second hue to land in a different bucket
+      // than the seed — see CMF_SECOND_HEX_BUCKET_SHIFT comment. Primary
+      // and secondary must not shift.
+      const baseline = deriveTheme({ ...DEFAULT_INPUTS, variant: 'cmf' })
+      const second = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        cmfSecondSourceHex: CMF_SECOND_HEX_BUCKET_SHIFT,
+      })
+      expect(second.md.light['--color-tertiary']).not.toBe(baseline.md.light['--color-tertiary'])
+      expect(second.md.light['--color-error']).not.toBe(baseline.md.light['--color-error'])
+      expect(second.md.light['--color-primary']).toBe(baseline.md.light['--color-primary'])
+      expect(second.md.light['--color-secondary']).toBe(baseline.md.light['--color-secondary'])
+    })
+
+    it('non-cmf variant ignores the field — output equals baseline', () => {
+      // why: structural backstop for the disabled-state contract. Even if
+      // a value persisted from a prior cmf session is on the source, the
+      // non-cmf strategy ignores its 4th `secondHct` param. Engine also
+      // skips threading the hct when disabled-reason fires (defense in
+      // depth). Either path produces identical output to no-value baseline.
+      const baseline = deriveTheme({ ...DEFAULT_INPUTS, variant: 'tonalSpot' })
+      const stale = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'tonalSpot',
+        cmfSecondSourceHex: CMF_SECOND_HEX_BUCKET_SHIFT,
+      })
+      expect(stale.md.light).toEqual(baseline.md.light)
+      expect(stale.md.dark).toEqual(baseline.md.dark)
+    })
+
+    it('propagates to shadcn through the binding chain', () => {
+      // why: shadcn.--destructive defaults to md --color-error under cmf;
+      // changing the second source must flow through to the bound role.
+      const baseline = deriveTheme({ ...DEFAULT_INPUTS, variant: 'cmf' })
+      const second = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        cmfSecondSourceHex: CMF_SECOND_HEX_BUCKET_SHIFT,
+      })
+      expect(second.shadcn.light['--destructive']).not.toBe(baseline.shadcn.light['--destructive'])
+    })
+
+    it('composes with paletteOverrides — override wins on overlapping palette', () => {
+      // why: ordering contract — palette-override apply runs AFTER variant
+      // build (which is where second-source folds into tertiary/error). So
+      // a paletteOverrides.error hex stomps the second-source-shifted error
+      // palette, while tertiary stays where second-source put it (override
+      // is disabled for tertiary under cmf).
+      const errorOverride = '#22c55e'
+      const out = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        cmfSecondSourceHex: CMF_SECOND_HEX_BUCKET_SHIFT,
+        paletteOverrides: { error: errorOverride },
+      })
+      const secondOnly = deriveTheme({
+        ...DEFAULT_INPUTS,
+        variant: 'cmf',
+        cmfSecondSourceHex: CMF_SECOND_HEX_BUCKET_SHIFT,
+      })
+      // override stomps second-source for error
+      expect(out.md.light['--color-error']).not.toBe(secondOnly.md.light['--color-error'])
+      // tertiary stays as second-source produced it (override disabled)
+      expect(out.md.light['--color-tertiary']).toBe(secondOnly.md.light['--color-tertiary'])
     })
   })
 

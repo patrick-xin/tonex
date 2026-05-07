@@ -6,6 +6,7 @@ import {
   customColor as mdCustomColor,
 } from '@tonex/mcu'
 import { variants } from '../variants'
+import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { oklchFromArgb, oklchFromHex } from './oklch'
 import { applyPaletteOverrides } from './palette-override'
@@ -122,8 +123,18 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const seedHct = Hct.fromInt(argbFromHex(source.seedHex))
   const variant = variants[source.variant]
 
-  const lightScheme = variant.build(seedHct, false, source.contrastLevel)
-  const darkScheme = variant.build(seedHct, true, source.contrastLevel)
+  // why: cmf is the only strategy that reads the second hct; resolve once
+  // here and let other strategies ignore the param. Skip when the field is
+  // disabled (variant !== cmf) so a value persisted under cmf doesn't bleed
+  // into the call signature for non-cmf strategies — keeps the no-cmf build
+  // path byte-identical to v8.
+  const secondHct =
+    source.cmfSecondSourceHex !== null && cmfSecondSourceDisabledReason(source) === null
+      ? Hct.fromInt(argbFromHex(source.cmfSecondSourceHex))
+      : undefined
+
+  const lightScheme = variant.build(seedHct, false, source.contrastLevel, secondHct)
+  const darkScheme = variant.build(seedHct, true, source.contrastLevel, secondHct)
 
   // why: palette-level override runs FIRST — mutates the scheme's tonal
   // palette fields in place so every md token derived from MCU sees the

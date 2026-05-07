@@ -78,6 +78,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     neutralVariant: '#776655',
     error: '#ee2244',
   },
+  cmfSecondSourceHex: '#aabbcc',
 }
 
 describe('useSource persistence round-trip', () => {
@@ -120,6 +121,15 @@ describe('useSource persistence round-trip', () => {
       const hex = NONDEFAULT_INPUTS.paletteOverrides[palette]
       if (hex !== undefined) s.actions.setPaletteOverride(palette, hex)
     }
+    // why: cmfSecondSourceHex is only writable under variant=cmf — the
+    // setter consults cmfSecondSourceDisabledReason and no-ops on non-cmf.
+    // Stage cmf, write the field, restore the fixture variant. Switching
+    // back to non-cmf does not strip the value (engine ignores at apply
+    // time when disabled, by design), so the persisted state matches the
+    // fixture's variant=tonalSpot AND cmfSecondSourceHex='#aabbcc' shape.
+    s.actions.setVariant('cmf')
+    s.actions.setCmfSecondSourceHex(NONDEFAULT_INPUTS.cmfSecondSourceHex)
+    s.actions.setVariant(NONDEFAULT_INPUTS.variant)
 
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
@@ -234,6 +244,21 @@ describe('useSource persistence round-trip', () => {
     expect(
       (useSource.getState() as Partial<{ primaryHexLock: unknown }>).primaryHexLock,
     ).toBeUndefined()
+  })
+
+  it('v8 → v9 migrate: missing cmfSecondSourceHex fills to null', async () => {
+    // why: v8 had no cmfSecondSourceHex field; rehydrate must fill it so
+    // deriveTheme's optional-second-source branch evaluates cleanly to
+    // undefined and the cmf strategy takes the single-source path. null
+    // is the canonical "field present, value not set" — distinguishes
+    // from undefined (key absent) at the persisted layer.
+    const v8State = {
+      ...DEFAULT_INPUTS,
+      cmfSecondSourceHex: undefined as unknown as PortableTheme['cmfSecondSourceHex'],
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v8State, version: 8 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().cmfSecondSourceHex).toBeNull()
   })
 
   it('v7 → v8 migrate: missing paletteOverrides fills to empty map', async () => {
@@ -438,6 +463,62 @@ describe('useSource persistence round-trip', () => {
         'error',
       ]
       expect(palettes).toHaveLength(6)
+    })
+  })
+
+  describe('setCmfSecondSourceHex', () => {
+    it('writes hex when variant is cmf', () => {
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      s.actions.setCmfSecondSourceHex('#ff8800')
+      expect(useSource.getState().cmfSecondSourceHex).toBe('#ff8800')
+    })
+
+    it('null clears the value', () => {
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      s.actions.setCmfSecondSourceHex('#ff8800')
+      s.actions.setCmfSecondSourceHex(null)
+      expect(useSource.getState().cmfSecondSourceHex).toBeNull()
+    })
+
+    it('throws on malformed hex', () => {
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      expect(() => s.actions.setCmfSecondSourceHex('ff8800')).toThrow(/invalid hex/)
+      expect(() => s.actions.setCmfSecondSourceHex('#ff')).toThrow(/invalid hex/)
+      expect(() => s.actions.setCmfSecondSourceHex('#zzzzzz')).toThrow(/invalid hex/)
+    })
+
+    it('no-ops when variant is not cmf', () => {
+      const s = useSource.getState()
+      s.actions.setVariant('tonalSpot')
+      s.actions.setCmfSecondSourceHex('#ff8800')
+      expect(useSource.getState().cmfSecondSourceHex).toBeNull()
+    })
+
+    it('does not strip a previously-set value when the source enters a disabled state', () => {
+      // why: same shape as setPaletteOverride's disabled-state behavior —
+      // setter only blocks NEW writes; existing values survive variant
+      // flips. Engine ignores them at apply time when disabled. Lets the
+      // user toggle variants to compare without losing their CMF input.
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      s.actions.setCmfSecondSourceHex('#ff8800')
+      s.actions.setVariant('tonalSpot')
+      expect(useSource.getState().cmfSecondSourceHex).toBe('#ff8800')
+    })
+
+    it('clearing to null is also disabled when variant is not cmf', () => {
+      // why: the setter gate is uniform — both write and clear are blocked
+      // while the field is disabled. Otherwise a UI that bypassed the
+      // disabled state could clear the value and lose the user's input.
+      const s = useSource.getState()
+      s.actions.setVariant('cmf')
+      s.actions.setCmfSecondSourceHex('#ff8800')
+      s.actions.setVariant('tonalSpot')
+      s.actions.setCmfSecondSourceHex(null)
+      expect(useSource.getState().cmfSecondSourceHex).toBe('#ff8800')
     })
   })
 
