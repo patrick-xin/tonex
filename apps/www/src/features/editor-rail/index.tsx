@@ -11,21 +11,19 @@ export function EditorRail() {
   return (
     <aside
       className={cn(
-        'w-72 h-[calc(100dvh-80px)] xl:h-[calc(100dvh-16px)] my-auto ml-2 overflow-hidden rounded-2xl hidden sm:flex flex-col shadow-sm bg-surface-container',
+        'w-80 h-[calc(100dvh-80px)] xl:h-[calc(100dvh-16px)] my-auto ml-2 overflow-hidden rounded-2xl hidden sm:flex flex-col shadow-sm bg-surface-container px-2',
       )}
     >
       <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
-        <div className="py-3">
-          <SourceColorTabs />
-        </div>
+        <SourceColorTabs />
         <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
           <SchemeVariantsToggle />
         </AnimatedCollapsible>
-        <FineTuneColors />
+        <AnimatedCollapsible defaultOpen variant="ghost" title="Fine Tune Palette" height={0}>
+          <FineTuneColors />
+        </AnimatedCollapsible>
         <CustomColorList />
-        <div className="p-2">
-          <SurfaceAdjustment />
-        </div>
+        <SurfaceAdjustment />
       </ScrollArea>
     </aside>
   )

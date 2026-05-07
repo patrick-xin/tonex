@@ -16,11 +16,9 @@ export const SurfaceAdjustment = ({
   const surfaceAlgo = useSource((s) => s.surfaceAlgo)
   const setSurfaceAlgo = useSource((s) => s.actions.setSurfaceAlgo)
   return (
-    <div className="space-y-3" ref={triggerRef}>
-      <div className="flex flex-row justify-between items-center">
-        <div className="leading-snug font-medium select-none transition-colors text-on-surface text-sm">
-          Surface Adjustment
-        </div>
+    <div className="p-2 space-y-3" ref={triggerRef}>
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium text-on-surface">Surface Adjustment</div>
         <ToggleGroup
           variant="outline"
           size="xs"
@@ -31,16 +29,15 @@ export const SurfaceAdjustment = ({
           }}
         >
           {ALGOS.map((v) => (
-            <ToggleGroupItem className="h-6" key={v} value={v}>
+            <ToggleGroupItem className="h-6 capitalize" key={v} value={v}>
               {v}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
-      <div>
+      <div className="space-y-3">
         <SurfaceLevelSlider labelClassName="text-xs" />
-
-        <div className="-mx-2 mt-3">{surfaceAlgo === 'tint' && <SurfacePaletteSelect />}</div>
+        {surfaceAlgo === 'tint' && <SurfacePaletteSelect />}
       </div>
     </div>
   )

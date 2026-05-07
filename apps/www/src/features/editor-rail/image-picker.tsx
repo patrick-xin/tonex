@@ -33,7 +33,7 @@ export function ImagePicker({ className }: { className?: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 mx-1">
+    <div className="flex flex-col gap-2">
       <label
         className={cn(
           'group relative flex h-26 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low text-on-surface-variant text-sm transition-colors hover:border-primary hover:text-primary overflow-hidden select-none',

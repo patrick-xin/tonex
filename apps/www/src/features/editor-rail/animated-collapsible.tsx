@@ -62,7 +62,7 @@ export function AnimatedCollapsible({
             hidden={false}
             initial={false}
           >
-            <div className={cn('px-2 pt-3 pb-2', contentClassName)}>{children}</div>
+            <div className={cn('p-2', contentClassName)}>{children}</div>
           </m.div>
         }
       />

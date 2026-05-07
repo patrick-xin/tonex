@@ -6,7 +6,7 @@ import { SourceColorSection } from './source-color-section'
 
 export const SourceColorTabs = () => {
   return (
-    <Tabs defaultValue="source-color" className="gap-2">
+    <Tabs defaultValue="source-color" className="p-2 gap-2">
       <div className="flex items-center justify-between">
         <TabsListContent className="bg-transparent flex-1">
           <TabsTab value="source-color">Source color</TabsTab>
@@ -14,11 +14,9 @@ export const SourceColorTabs = () => {
         </TabsListContent>
         <ColorLock />
       </div>
-      <TabsPanel value="source-color" className="p-1 space-y-4">
+      <TabsPanel value="source-color" className="space-y-3">
         <SourceColorSection />
-        <div className="px-2">
-          <HctControlSliders />
-        </div>
+        <HctControlSliders />
       </TabsPanel>
       <TabsPanel value="image" keepMounted>
         <ImagePicker />

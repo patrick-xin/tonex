@@ -28,7 +28,7 @@ export function SurfacePaletteSelect() {
         indicatorIcon={<ChevronsUpDown className="size-3.5" />}
         size="sm"
         variant="ghost"
-        className="capitalize data-popup-open:bg-primary/8 text-xs px-2"
+        className="capitalize data-popup-open:bg-primary/8 text-xs px-2 -mx-2"
         placeholder="Select palette"
       />
       <SelectContent align="start">

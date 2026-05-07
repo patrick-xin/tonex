@@ -19,7 +19,8 @@ const SLOTS: ReadonlyArray<{ label: string; palette: PaletteName }> = [
 
 export function FineTuneColors() {
   return (
-    <div className="flex flex-col gap-0.5">
+    // need -mx so text aligns with other sections on panel
+    <div className="flex flex-col gap-1 -mx-2">
       {SLOTS.map((s) => (
         <Row key={s.palette} label={s.label} palette={s.palette} />
       ))}
