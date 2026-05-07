@@ -4,6 +4,7 @@ import { CHROMA_HUE_LOCK, hctFromHex, hexFromHct, maxChroma } from '@tonex/core'
 import { useId, useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ColorPicker } from '../../color-picker'
 import { ChromaSlider } from '../hct/chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from '../hct/gradients'
 import { HctSlider } from '../hct/hct-slider'
@@ -53,6 +54,7 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
+        <ColorPicker onChange={onChange} value={value} align="start" />
         <NativeColorInput className="size-8" currentHex={value} onColorChange={onChange} />
         <Label htmlFor={hexInputId} className="flex items-center gap-3 cursor-pointer">
           <Input
