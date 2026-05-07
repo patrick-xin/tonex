@@ -1,7 +1,7 @@
 'use client'
 
 import { CHROMA_HUE_LOCK, hctFromHex, hexFromHct, maxChroma } from '@tonex/core'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useId, useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ChromaSlider } from '../hct/chroma-slider'
@@ -9,6 +9,7 @@ import { chromaGradient, hueGradient, toneGradient } from '../hct/gradients'
 import { HctSlider } from '../hct/hct-slider'
 import { NativeColorInput } from '../native-color-input'
 import { TwColorPickerCombobox } from '../tw-color-picker-combobox'
+import { useHexFieldState } from '../use-hex-field-state'
 
 interface PaletteColorPickerProps {
   value: string
@@ -23,16 +24,7 @@ interface PaletteColorPickerProps {
 // sliders specifically.
 export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps) {
   const hexInputId = useId()
-  const isHexFocused = useRef(false)
-  const [hexInput, setHexInput] = useState(value)
-
-  // why: keep the text input's local state separate so the user can type
-  // partial strings ("#ff" → "#ff00" → "#ff0000") without each invalid
-  // intermediate firing onChange. Sync from prop when not focused so external
-  // writes (variant change, palette swap) refresh the field.
-  useEffect(() => {
-    if (!isHexFocused.current) setHexInput(value)
-  }, [value])
+  const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
 
   const parsed = hctFromHex(value)
   // why: when chroma drops below the perception lock threshold, MCU's
@@ -58,14 +50,6 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
   const chromaG = useMemo(() => chromaGradient(hue, tone, gamutLimit), [hue, tone, gamutLimit])
   const toneG = useMemo(() => toneGradient(hue, chroma), [hue, chroma])
 
-  const handleHexChange = useCallback(
-    (val: string) => {
-      setHexInput(val)
-      if (/^#[0-9a-fA-F]{6}$/.test(val)) onChange(val)
-    },
-    [onChange],
-  )
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -77,14 +61,8 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
             inputSize="sm"
             type="text"
             value={hexInput}
-            onChange={(e) => handleHexChange(e.target.value)}
-            onFocus={() => {
-              isHexFocused.current = true
-            }}
-            onBlur={() => {
-              isHexFocused.current = false
-              setHexInput(value)
-            }}
+            onChange={(e) => handleChange(e.target.value)}
+            {...inputProps}
             maxLength={7}
             spellCheck={false}
             placeholder="#000000"

@@ -15,7 +15,7 @@ import {
   validateCustomColorEntry,
 } from '@tonex/core/schema'
 import { useTheme } from 'next-themes'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -38,6 +38,8 @@ import { Switch } from '@/components/ui/switch'
 import { ChromaSlider } from '../hct/chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from '../hct/gradients'
 import { HctSlider } from '../hct/hct-slider'
+import { NativeColorInput } from '../native-color-input'
+import { useHexFieldState } from '../use-hex-field-state'
 import { NewCustomColor, RolePreviewSwatches } from './new-custom-color'
 
 export function CustomColorList() {
@@ -47,9 +49,9 @@ export function CustomColorList() {
 
   if (customColors.length === 0) {
     return (
-      <div className="flex flex-col gap-1 p-2">
+      <div className="p-2">
         <div className="flex items-center justify-between">
-          <div className="font-medium text-sm">Custom Colors</div>
+          <div className="text-sm font-medium text-on-surface">Custom Colors</div>
           <NewCustomColor iconSize="icon-xs" icon />
         </div>
       </div>
@@ -57,9 +59,9 @@ export function CustomColorList() {
   }
 
   return (
-    <div className="space-y-3 p-2">
+    <div className="p-2 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="font-medium text-sm">Custom Colors</div>
+        <div className="text-sm font-medium text-on-surface">Custom Colors</div>
         <NewCustomColor iconSize="icon-xs" icon />
       </div>
       <div className="flex flex-col gap-2">
@@ -164,8 +166,6 @@ function EditCustomColorDialog({
   const [chroma, setChroma] = useState(initial.chroma)
   const [tone, setTone] = useState(initial.tone)
 
-  const [hexInput, setHexInput] = useState(entry.hex)
-  const isHexFocused = useRef(false)
   const [error, setError] = useState<string | null>(null)
 
   const colorHex = hexFromHct({ hue, chroma, tone })
@@ -181,13 +181,11 @@ function EditCustomColorDialog({
     setTone(t.tone)
   }, [])
 
-  const handleHexInput = useCallback(
-    (val: string) => {
-      setHexInput(val)
-      if (/^#[0-9a-fA-F]{6}$/.test(val)) setFromHex(val)
-    },
-    [setFromHex],
-  )
+  const {
+    hexInput,
+    handleChange: handleHexInput,
+    inputProps: hexInputProps,
+  } = useHexFieldState(colorHex, setFromHex)
 
   // why: exclude self when validating an edit so the entry's existing slug
   // doesn't trip the duplicate check against itself.
@@ -250,17 +248,11 @@ function EditCustomColorDialog({
           </div>
 
           <div className="border-t border-outline-variant/40 pt-4 flex items-center gap-3">
-            <label className="cursor-pointer shrink-0">
-              <input
-                type="color"
-                value={colorHex}
-                onChange={(e) => {
-                  setFromHex(e.target.value)
-                  setHexInput(e.target.value)
-                }}
-                className="size-10 rounded-xl border-none outline-0 cursor-pointer appearance-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
-              />
-            </label>
+            <NativeColorInput
+              className="size-8"
+              currentHex={colorHex}
+              onColorChange={handleHexInput}
+            />
             <div className="flex items-center gap-2 text-sm flex-1">
               <Label htmlFor="edit-hex-input">Hex</Label>
               <Input
@@ -268,15 +260,9 @@ function EditCustomColorDialog({
                 className="font-mono"
                 inputSize="sm"
                 type="text"
-                value={isHexFocused.current ? hexInput : colorHex}
+                value={hexInput}
                 onChange={(e) => handleHexInput(e.target.value)}
-                onFocus={() => {
-                  isHexFocused.current = true
-                  setHexInput(colorHex)
-                }}
-                onBlur={() => {
-                  isHexFocused.current = false
-                }}
+                {...hexInputProps}
                 maxLength={7}
                 spellCheck={false}
                 placeholder="#000000"

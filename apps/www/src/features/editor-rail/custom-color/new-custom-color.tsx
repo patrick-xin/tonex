@@ -15,7 +15,7 @@ import {
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from '@tonex/core/schema'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -33,6 +33,8 @@ import { Switch } from '@/components/ui/switch'
 import { ChromaSlider } from '../hct/chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from '../hct/gradients'
 import { HctSlider } from '../hct/hct-slider'
+import { NativeColorInput } from '../native-color-input'
+import { useHexFieldState } from '../use-hex-field-state'
 
 // why: shift seed hue by 120° for a complementary starting color. Pure on
 // core's hex↔HCT helpers — no MCU import in www.
@@ -61,9 +63,6 @@ export function NewCustomColor({
   const [blend, setBlend] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [hexInput, setHexInput] = useState('')
-  const isHexFocused = useRef(false)
-
   const colorHex = hexFromHct({ hue, chroma, tone })
   const gamutLimit = maxChroma(hue, tone)
   const hueG = hueGradient()
@@ -77,13 +76,11 @@ export function NewCustomColor({
     setTone(t.tone)
   }, [])
 
-  const handleHexInput = useCallback(
-    (val: string) => {
-      setHexInput(val)
-      if (/^#[0-9a-fA-F]{6}$/.test(val)) setFromHex(val)
-    },
-    [setFromHex],
-  )
+  const {
+    hexInput,
+    handleChange: handleHexInput,
+    inputProps: hexInputProps,
+  } = useHexFieldState(colorHex, setFromHex)
 
   const handleOpen = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -93,7 +90,6 @@ export function NewCustomColor({
       setError(null)
       const startHex = complementaryHex(seedHex)
       setFromHex(startHex)
-      setHexInput(startHex)
     }
     setOpen(nextOpen)
   }
@@ -177,17 +173,11 @@ export function NewCustomColor({
           </div>
 
           <div className="border-t border-outline-variant/40 pt-4 flex items-center gap-3">
-            <label className="cursor-pointer shrink-0">
-              <input
-                type="color"
-                value={colorHex}
-                onChange={(e) => {
-                  setFromHex(e.target.value)
-                  setHexInput(e.target.value)
-                }}
-                className="size-10 rounded-xl border-none outline-0 cursor-pointer appearance-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
-              />
-            </label>
+            <NativeColorInput
+              className="size-8"
+              currentHex={colorHex}
+              onColorChange={handleHexInput}
+            />
             <div className="flex items-center gap-2 text-sm flex-1">
               <Label htmlFor="custom-hex-input">Hex</Label>
               <Input
@@ -195,15 +185,9 @@ export function NewCustomColor({
                 className="font-mono"
                 inputSize="sm"
                 type="text"
-                value={isHexFocused.current ? hexInput : colorHex}
+                value={hexInput}
                 onChange={(e) => handleHexInput(e.target.value)}
-                onFocus={() => {
-                  isHexFocused.current = true
-                  setHexInput(colorHex)
-                }}
-                onBlur={() => {
-                  isHexFocused.current = false
-                }}
+                {...hexInputProps}
                 maxLength={7}
                 spellCheck={false}
                 placeholder="#000000"

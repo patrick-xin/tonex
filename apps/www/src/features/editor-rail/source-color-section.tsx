@@ -11,7 +11,7 @@ export function SourceColorSection() {
   const seedHexLock = useSource((s) => s.seedHexLock)
 
   return (
-    <div className="flex items-center gap-2 px-2">
+    <div className="flex items-center gap-2">
       <NativeColorInput currentHex={seedHex} onColorChange={setSeedHex} />
       <HexInput hideLabel />
       <TwColorPickerCombobox currentColor={seedHex} onSelect={setSeedHex} disabled={seedHexLock} />
