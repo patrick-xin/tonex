@@ -2,6 +2,7 @@ import { cn } from 'tailwind-variants'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AnimatedCollapsible } from './animated-collapsible'
 import { CustomColorList } from './custom-color/custom-color-list'
+import { FineTuneColors } from './palette-override/fine-tune-colors'
 import { SchemeVariantsToggle } from './scheme-variants-toggle'
 import { SourceColorTabs } from './source-color-tabs'
 import { SurfaceAdjustment } from './surface-adjustment'
@@ -20,6 +21,7 @@ export function EditorRail() {
         <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
           <SchemeVariantsToggle />
         </AnimatedCollapsible>
+        <FineTuneColors />
         <CustomColorList />
         <div className="p-2">
           <SurfaceAdjustment />
