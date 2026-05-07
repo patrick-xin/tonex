@@ -6,3 +6,10 @@ dist
 .DS_Store
 coverage
 .claude/settings.local.json
+
+# Private docs — vision/positioning, strategic notes not for public repo
+docs/private/
+NOTES.md
+
+# Per-developer IDE settings
+.vscode/

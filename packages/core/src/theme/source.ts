@@ -14,6 +14,7 @@ import {
   type MdTokenName,
   type PaletteName,
   type PortableTheme,
+  parsePortableTheme,
   SCHEMA_VERSION,
   type ShadcnRoleName,
   STORAGE_KEY,
@@ -341,8 +342,19 @@ export const useSource = create<SourceState>()(
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
-      onRehydrateStorage: () => (state) => {
-        state?.actions.setHydrated()
+      //
+      // Validate the rehydrated portable shape against PortableThemeSchema
+      // (ADR-0009). Migration ladder above lifts persisted shape to v9; this
+      // is the v9 contract check. On parse failure (corrupted localStorage,
+      // schema bug, partial write) reset to DEFAULT_INPUTS — all-or-nothing
+      // recovery, the rare path that's simpler than per-field fallback. If
+      // rehydrate itself errored or no state came back, leave the in-memory
+      // DEFAULT_INPUTS in place and just flip the hydrated flag.
+      onRehydrateStorage: () => (state, error) => {
+        if (state === undefined || error !== undefined) return
+        const result = parsePortableTheme(selectPortable(state))
+        if (!result.ok) state.actions.reset()
+        state.actions.setHydrated()
       },
     },
   ),

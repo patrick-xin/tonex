@@ -1,5 +1,6 @@
-import { DEFAULT_VARIANT, type VariantName } from '../variants'
-import type { NeutralPaletteName } from './surface'
+import * as v from 'valibot'
+import { DEFAULT_VARIANT, type VariantName, variants } from '../variants'
+import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 
 // why: bumped to 9 — cmfSecondSourceHex added. Optional second source color
 // for the CMF variant; SchemeCmf accepts Hct[] and uses the second entry as
@@ -401,4 +402,97 @@ export const DEFAULT_INPUTS: PortableTheme = {
 // avoids two regex literals drifting on case/format rules.
 export function isValidHex(hex: string): boolean {
   return /^#[0-9a-fA-F]{6}$/.test(hex)
+}
+
+// why: ADR-0009 — runtime contract for PortableTheme. Migration ladder lifts
+// persisted shape to v9; this schema validates the v9 result post-rehydrate.
+// Recovery on failure is all-or-nothing reset to DEFAULT_INPUTS, gated in
+// source.ts:onRehydrateStorage. Field-level helpers (isValidHex,
+// validateCustomColorEntry) are reused as refinements so the validation
+// logic has one source of truth.
+//
+// Cast is safe: `variants` is typed `Record<VariantName, ...>`, so its keys
+// are exactly the VariantName union at runtime. Picklist needs a non-empty
+// tuple literal type; the cast widens to the form valibot wants without
+// changing runtime behavior.
+const VARIANT_NAMES = Object.keys(variants) as [VariantName, ...VariantName[]]
+
+const HexSchema = v.pipe(v.string(), v.check(isValidHex, 'invalid hex'))
+
+const CustomColorEntrySchema = v.pipe(
+  v.object({
+    id: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    hex: HexSchema,
+    blend: v.boolean(),
+    shadcnSource: v.picklist(['color', 'container'] as const),
+  }),
+  // why: validateCustomColorEntry handles slug derivation, reserved-name
+  // collision, and hex format. Pass an empty existing-set — slug uniqueness
+  // across entries is enforced at the array level below.
+  v.check((e) => validateCustomColorEntry(e, new Set()) === null, 'invalid custom color entry'),
+)
+
+const CustomColorsSchema = v.pipe(
+  v.array(CustomColorEntrySchema),
+  v.check((arr) => {
+    const slugs = arr.map((e) => slugifyCustomColorName(e.name))
+    return new Set(slugs).size === slugs.length
+  }, 'duplicate custom color slug'),
+)
+
+// why: per-mode partial map of md token → hex. Empty default. valibot's
+// v.record constrains keys to MD_TOKEN_NAMES and values to hex; partiality
+// is correct because user pins are sparse.
+const Md3TokenOverridesPerModeSchema = v.record(v.picklist(MD_TOKEN_NAMES), HexSchema)
+
+// why: exhaustive map — every shadcn role must have a binding for derive's
+// bindShadcn lookup to succeed. v.record validates keys and values; the
+// trailing v.check enforces all 26 keys present (otherwise rehydrate would
+// produce a half-populated map and bindShadcn throws).
+const ShadcnRoleBindingsSchema = v.pipe(
+  v.record(v.picklist(SHADCN_ROLE_NAMES), v.picklist(MD_TOKEN_NAMES)),
+  v.check(
+    (rec) => SHADCN_ROLE_NAMES.every((k) => k in rec),
+    'shadcn bindings missing required role',
+  ),
+)
+
+const PaletteOverridesSchema = v.record(v.picklist(PALETTE_NAMES), HexSchema)
+
+const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
+
+export const PortableThemeSchema = v.object({
+  version: v.literal(SCHEMA_VERSION),
+  seedHex: HexSchema,
+  variant: v.picklist(VARIANT_NAMES),
+  contrastLevel: v.number(),
+  seedHexLock: v.boolean(),
+  md3TokenOverrides: v.object({
+    light: Md3TokenOverridesPerModeSchema,
+    dark: Md3TokenOverridesPerModeSchema,
+  }),
+  shadcnRoleBindings: v.object({
+    light: ShadcnRoleBindingsSchema,
+    dark: ShadcnRoleBindingsSchema,
+  }),
+  surfaceAlgo: v.picklist(SURFACE_ALGOS),
+  surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),
+  surfaceTintLevel: ModeKeyedNumberSchema,
+  surfaceDesaturateLevel: ModeKeyedNumberSchema,
+  customColors: CustomColorsSchema,
+  paletteOverrides: PaletteOverridesSchema,
+  cmfSecondSourceHex: v.union([HexSchema, v.null()]),
+})
+
+// why: returns a discriminated result instead of throwing — the caller
+// (onRehydrateStorage) decides recovery. All-or-nothing: any failure means
+// reset to DEFAULT_INPUTS, so we don't surface field-level errors here.
+export function parsePortableTheme(
+  input: unknown,
+): { ok: true; theme: PortableTheme } | { ok: false } {
+  const result = v.safeParse(PortableThemeSchema, input)
+  if (!result.success) return { ok: false }
+  return { ok: true, theme: result.output as PortableTheme }
 }

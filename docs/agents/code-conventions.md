@@ -38,3 +38,31 @@ When porting components or modules from a prior prototype:
 - Mixed files (component with embedded logic) → split: lift the JSX, rewrite the logic.
 
 When rewriting logic, read the old file for *behavior reference* only. Don't paste. Write fresh in the new structure with `// why:` comments at non-obvious choices.
+
+### Before lifting: primitive-shape diff
+
+When porting a feature whose data shape doesn't decompose cleanly into core's current shape (e.g. legacy `paletteOverrides` family-regen vs core's per-token `md3TokenOverrides`), STOP and surface the gap as a planning question. Don't substitute the closest available primitive and rationalise the difference as a UX simplification.
+
+Signals the gap is real, not a refactor opportunity:
+
+- Schema/code comments using the words "deferred", "pruned", "half-feature", "future slice", "until a real product need surfaces" — these mean core OWES this primitive, not that it evolved past it.
+- Type/file names in the legacy that don't have a tonex analog (`PaletteOverrides`, `paletteKey`).
+- Legacy data shape that doesn't decompose 1:1 into the core shape (legacy single-value-per-key vs core mode-keyed-per-token, etc.).
+
+Pre-lift check: list the legacy's data shape, list core's nearest shape, and decide whether the diff is decompose-able (flat → mode-keyed) or reflects a missing capability. If missing, the response is "core needs X first," not "let me map onto Y."
+
+ADR-0020 holds the authoritative lift-vs-rewrite matrix; this rule applies to row 2 ("lift JSX, rewrite wiring") specifically — the wiring rewrite is what depends on the primitive-shape diff being honest.
+
+## Disable invalid interactions; don't warn after the fact
+
+When an interaction is invalid in some state combination, disable the affordance with an explanation (tooltip, greyed input). Don't allow the action and emit a `warnings: string[]` entry from the engine afterwards. Warnings are post-hoc telemetry; disable is up-front intent shaping.
+
+Pattern: tertiary palette override is disabled when `variant === 'cmf'` because CMF builds tertiary from a second-source picker, so the override would only half-apply.
+
+**How to apply:**
+
+- For any feature where a state combination makes an input invalid, design the disable rule first-class.
+- Prefer a single source-of-truth selector (e.g. `disabledReasonFor(input, source): string | null`) consumed by *both* the engine (to skip the operation) and the UI (to grey out + show tooltip).
+- Don't add `warnings.push(...)` for state-combination conflicts. Reserve `warnings` for genuinely runtime-only failures the UI couldn't pre-empt.
+
+**Why:** when a warning fires, the user has already committed the action — they can't tell why output diverges from intent and have to read warning text to recover. Disabling shapes intent at the moment the user would violate the constraint.

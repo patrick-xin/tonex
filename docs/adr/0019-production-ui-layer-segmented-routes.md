@@ -39,3 +39,17 @@ Commitment 1 originally pinned the routes as `/theme/md3` and `/theme/shadcn`. I
 **Why:** md3 is the broader-audience default per the brief tagline; the shorter URL signals it. Shadcn keeps its named segment because it's the targeted-audience export. The original `/theme/md3` symmetry was not load-bearing — what is load-bearing is one route per layer, plain folder paths, and no in-app layer toggle. All three still hold.
 
 Commitments 2–7 are unchanged.
+
+## Amendment 2026-05-07 — outer `(app)` group + `(root)` landing + md `components` subroute
+
+Route tree expanded to anticipate non-editor surfaces (marketing, docs, future) without polluting the editor namespace. Three additions:
+
+1. **Outer `(app)` route group.** Editor and testbed live under `app/(app)/`. Layouts or middleware that should apply only to the in-app surface attach here; pages outside the group (marketing landings, future docs) get their own siblings without leaking the app chrome.
+2. **`(root)` route group for `/`.** The chooser landing is `app/(app)/(root)/page.tsx` rather than `app/(app)/page.tsx`. The group exists so the landing can grow siblings (about, pricing, future entry points) under a shared layout without colliding with `/theme` or `/sink`.
+3. **Md-side `/theme/components` subroute.** A second md route at `app/(app)/theme/(md)/components/page.tsx`. Sits inside the `(md)` group so it inherits md scoping — same chrome, same layer assignment, different canvas content.
+
+Commitment 1's "two editor routes" framing referred to the **layer split** (md vs shadcn), not a hard cap on total routes. Md-side surfaces may grow within `(md)/`; shadcn-side surfaces may grow within `(shadcn)/`. The load-bearing rule is unchanged: one route group per layer, plain folder paths, no in-app layer toggle.
+
+**TBD:** Further `apps/www/src/` structure decisions (additional groups, marketing namespace, docs surface) defer until the UI pressure for them lands. Avoid speculative structure — pattern-gravity per ADR-0014 means the first concrete instance shapes the next ten.
+
+Commitments 2–7 are unchanged.

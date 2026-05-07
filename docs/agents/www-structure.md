@@ -9,14 +9,18 @@
 ```
 apps/www/src/
   app/
-    page.tsx                     # chooser landing (placeholder until built)
-    layout.tsx                   # outer chrome
-    _providers.tsx               # app-wide providers ONLY here
-    theme/
-      layout.tsx                 # editor chrome (rail + tabs + status strip)
-      md3/page.tsx               # md editor route
-      shadcn/page.tsx            # shadcn editor route
-    sink/page.tsx                # testbed; retires after production parity
+    layout.tsx                  # outer chrome
+    _providers.tsx              # app-wide providers ONLY here
+    (app)/                      # main app group
+      (root)/page.tsx           # chooser landing (placeholder until built)
+      sink/page.tsx             # testbed; retires after production parity
+      theme/
+        layout.tsx              # editor chrome (rail + tabs + status strip)
+        (md)/
+          page.tsx              # md editor route (/theme)
+          components/page.tsx   # md components route (/theme/components)
+        (shadcn)/
+          shadcn/page.tsx       # shadcn editor route (/theme/shadcn)
   features/                      # workflow features, layer-agnostic
     testbed/                     # current verification surface; retiring
     editor-rail/                 # production rail (slice 10+)
@@ -28,6 +32,8 @@ apps/www/src/
 ```
 
 Most slots are created on demand. The two editor routes and the chrome/canvas split are not.
+
+The route-group wrapping (`(app)`, `(root)`, `(md)`, `(shadcn)`) anticipates additional surfaces (marketing, docs, more md/shadcn pages) without polluting the editor namespace — see ADR-0019 amendment 2026-05-07. Further `apps/www/src/` structure decisions (new groups, top-level namespaces, additional `features/`/`components/` conventions) are **TBD until more UI lands**. Pattern-gravity (ADR-0014) means the first concrete instance shapes the next ten — no speculative structure.
 
 ## Five hard rules
 
@@ -44,7 +50,7 @@ Most slots are created on demand. The two editor routes and the chrome/canvas sp
 ## Chrome vs canvas (per ADR-0019)
 
 - **Chrome** = editor shell (rail, top tabs, status strip, modals, settings, cross-route layer switcher). Always sourced from `components/ui/`, on every route. Tonex dogfoods its own md-styled component library regardless of which output the user is generating.
-- **Canvas** = preview surface inside `app/theme/{md3,shadcn}/page.tsx`. Layer-segmented: md3 canvas reads from `components/ui/`; shadcn canvas reads from `components/shadcn/`.
+- **Canvas** = preview surface inside `app/(app)/theme/{(md), (shadcn)/shadcn}/page.tsx`. Layer-segmented: md canvas reads from `components/ui/`; shadcn canvas reads from `components/shadcn/`.
 
 A shadcn user sees an md-styled editor with a shadcn-styled canvas. That is intentional — the editor IS a tonex product, not a generic shell.
 

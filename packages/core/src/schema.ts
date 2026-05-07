@@ -16,6 +16,8 @@ export {
   PALETTE_NAMES,
   type PaletteName,
   type PortableTheme,
+  PortableThemeSchema,
+  parsePortableTheme,
   SCHEMA_VERSION,
   type SchemaVersion,
   SHADCN_ROLE_NAMES,

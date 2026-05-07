@@ -550,4 +550,29 @@ describe('useSource persistence round-trip', () => {
     expect(selectPortable(useSource.getState())).toEqual(DEFAULT_INPUTS)
     expect(useSource.getState()._hydrated).toBe(true)
   })
+
+  // why: ADR-0009 — schema validates the v9 result post-migrate; on parse
+  // failure the recovery is all-or-nothing reset. Simulate a tampered
+  // localStorage record whose version field is current (so the migrate
+  // ladder is a no-op) but whose seedHex is malformed. Without the parse
+  // gate, deriveTheme would consume the bad hex and throw at MCU. With it,
+  // the source snaps back to DEFAULT_INPUTS and the user gets a working
+  // editor instead of a broken one.
+  it('rehydrate with invalid persisted state resets to DEFAULT_INPUTS', async () => {
+    const corrupt = { ...DEFAULT_INPUTS, seedHex: 'not-a-hex' }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: corrupt, version: SCHEMA_VERSION }))
+    await useSource.persist.rehydrate()
+    expect(selectPortable(useSource.getState())).toEqual(DEFAULT_INPUTS)
+    expect(useSource.getState()._hydrated).toBe(true)
+  })
+
+  it('rehydrate with valid persisted state passes through untouched', async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ state: NONDEFAULT_INPUTS, version: SCHEMA_VERSION }),
+    )
+    await useSource.persist.rehydrate()
+    expect(selectPortable(useSource.getState())).toEqual(NONDEFAULT_INPUTS)
+    expect(useSource.getState()._hydrated).toBe(true)
+  })
 })
