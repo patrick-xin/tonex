@@ -1,9 +1,11 @@
 import { Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
-import { argbFromOklch } from '../oklch'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceDesaturate } from './desaturate'
+
+// why: layer is argb-canonical (ADR-0021). Hct.fromInt consumes argb
+// directly — no oklch parse needed for HCT-domain assertions.
 
 const SURFACE_FAMILY = [
   '--color-surface',
@@ -34,7 +36,7 @@ describe('applySurfaceDesaturate', () => {
     const layer = deriveTheme(DEFAULT_INPUTS).md.light
     const out = applySurfaceDesaturate(layer, 1)
     for (const tok of SURFACE_FAMILY) {
-      const hct = Hct.fromInt(argbFromOklch(out[tok]))
+      const hct = Hct.fromInt(out[tok])
       // why: HCT.from(hue, 0, tone)→argb→hex→Hct.fromInt can pump chroma back
       // up by a few units; sRGB gamut + 8-bit quantization lose the "pure
       // neutral" we asked for. <4 is the structural assertion (was ~30+).
@@ -47,8 +49,8 @@ describe('applySurfaceDesaturate', () => {
     for (const level of [0, 0.25, 0.5, 0.75, 1]) {
       const out = applySurfaceDesaturate(layer, level)
       for (const tok of SURFACE_FAMILY) {
-        const before = Hct.fromInt(argbFromOklch(layer[tok]))
-        const after = Hct.fromInt(argbFromOklch(out[tok]))
+        const before = Hct.fromInt(layer[tok])
+        const after = Hct.fromInt(out[tok])
         expect(Math.abs(after.tone - before.tone)).toBeLessThan(1)
       }
     }

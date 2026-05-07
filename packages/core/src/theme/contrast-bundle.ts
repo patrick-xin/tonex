@@ -1,0 +1,95 @@
+import { type DerivedTheme, deriveTheme } from './derive'
+import type { PortableTheme } from './schema'
+
+// why: ADR-0021 commitment 5 — class-scoped contrast variants emit as one
+// CSS file with three tiers. `buildContrastBundle` orchestrates the 3×
+// deriveTheme call needed when `includeContrastVariants: true`; the resulting
+// `ContrastBundle` then flows through `exportCss(bundle, layer, options)` so
+// emission code can iterate tiers uniformly.
+//
+// Edge case (user's preview contrast ≠ 0 + variants on): the `default` tier
+// reflects the user's chosen baseline (whatever `source.contrastLevel` is at
+// call time); `medium`/`high` are *additions* at canonical 0.5 / 1.0 — they
+// don't override the user's preview. The dialog's preview pane reflects the
+// same behavior so what users see matches what they paste.
+
+// why: canonical accessibility tiers per WCAG-aligned MCU contrast levels.
+// Pinned at module scope so the values are searchable and a future bump
+// (e.g. 0.45 / 0.95) is a one-line change with the test file as forcing.
+const CANONICAL_MEDIUM_CONTRAST = 0.5
+const CANONICAL_HIGH_CONTRAST = 1.0
+
+// why: ContrastBundle uses optional fields rather than a discriminated union
+// so consumers can branch on presence (`if (bundle.medium) ...`) without
+// type-narrowing ceremony. Single-contrast bundles set only `default`;
+// multi-contrast bundles set all three. Adding a fourth tier (e.g. low
+// contrast at -0.5) would extend this interface — exportCss already iterates
+// over present tiers, so emission would auto-include it.
+export interface ContrastBundle {
+  default: DerivedTheme
+  medium?: DerivedTheme
+  high?: DerivedTheme
+}
+
+// why: ADR-0021 commitment 6 — the dialog options object. All fields are
+// optional and default to today's lean output. Shared across
+// `buildContrastBundle` (reads includeContrastVariants) and `exportCss`
+// (reads everything else). Slice 3 wires `includeContrastVariants` only;
+// slice 4 wires `colorFormat` + the include* tier filters.
+export interface ExportOptions {
+  colorFormat?: 'oklch' | 'hex'
+  includeExtended?: boolean
+  includePalette?: boolean
+  includeChart?: boolean
+  includeContrastVariants?: boolean
+}
+
+// why: single-slot cache keyed on `(source, opts)`. Toggling
+// `includeContrastVariants` off then on with the same source hits the cache
+// (toggling doesn't re-derive the default tier — the cached bundle just
+// gets re-emitted by exportCss). New source → cache miss → 1× or 3× derive.
+let cachedSource: PortableTheme | null = null
+let cachedOpts: ExportOptions | null = null
+let cachedBundle: ContrastBundle | null = null
+
+export function buildContrastBundle(
+  source: PortableTheme,
+  opts: ExportOptions = {},
+): ContrastBundle {
+  if (cachedBundle !== null && cachedSource === source && optsEqual(cachedOpts, opts)) {
+    return cachedBundle
+  }
+
+  const defaultTheme = deriveTheme(source)
+  const bundle: ContrastBundle = opts.includeContrastVariants
+    ? {
+        default: defaultTheme,
+        medium: deriveTheme({ ...source, contrastLevel: CANONICAL_MEDIUM_CONTRAST }),
+        high: deriveTheme({ ...source, contrastLevel: CANONICAL_HIGH_CONTRAST }),
+      }
+    : { default: defaultTheme }
+
+  cachedSource = source
+  cachedOpts = opts
+  cachedBundle = bundle
+  return bundle
+}
+
+// why: cache equivalence on the only field this module reads. Other
+// ExportOptions fields (colorFormat, includeChart, etc.) are exporter-side;
+// flipping them shouldn't invalidate the bundle since the underlying
+// DerivedTheme is the same. Keeping the comparison narrow lets the bundle
+// cache stay hot across format-only toggles.
+function optsEqual(a: ExportOptions | null, b: ExportOptions): boolean {
+  if (a === null) return false
+  return Boolean(a.includeContrastVariants) === Boolean(b.includeContrastVariants)
+}
+
+// why: test-only seam. Cache is implicit module state; tests need to reset
+// between cases when fixtures overlap. Double-underscore prefix keeps it
+// out of the public re-export.
+export function __resetContrastBundleCache(): void {
+  cachedSource = null
+  cachedOpts = null
+  cachedBundle = null
+}

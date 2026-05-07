@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
-import { deriveTheme, type ResolvedLayer, type TokenMap } from './derive'
+import { deriveTheme, type TokenMap } from './derive'
+import { oklchString } from './oklch'
 import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS, type PortableTheme } from './schema'
 import { selectPortable, useSource } from './source'
 
 const STYLE_ID = 'tonex-tokens'
+
+interface ProjectedLayer {
+  light: Record<string, string>
+  dark: Record<string, string>
+}
 
 // why: applyDom no longer rewrites textContent on update — it sets per-token
 // declarations on four stable rules (ADR-0017 amendment 2026-05-06). Tests
@@ -13,9 +19,14 @@ const STYLE_ID = 'tonex-tokens'
 // live CSSOM via getPropertyValue rather than parsing textContent. The
 // drift-guard contract is data-level: applyDom's effective tokens equal what
 // deriveTheme produced for the same source.
+//
+// ADR-0021: TokenMap is argb-canonical at the derive boundary; the DOM holds
+// oklch strings (the projected form applyDom writes via oklchString). Read-
+// back is naturally a string map — projectLayer projects deriveTheme's argb
+// output to the same string domain so the comparison stays apples-to-apples.
 function readTokensFromStyle(): {
-  md: ResolvedLayer
-  shadcn: ResolvedLayer
+  md: { light: Record<string, string>; dark: Record<string, string> }
+  shadcn: { light: Record<string, string>; dark: Record<string, string> }
 } {
   const el = document.getElementById(STYLE_ID)
   if (!(el instanceof HTMLStyleElement)) {
@@ -23,11 +34,11 @@ function readTokensFromStyle(): {
   }
   const sheet = el.sheet
   if (sheet === null) throw new Error('style element has no sheet')
-  const layers: Record<string, TokenMap> = {}
+  const layers: Record<string, Record<string, string>> = {}
   for (let i = 0; i < sheet.cssRules.length; i++) {
     const r = sheet.cssRules[i]
     if (!(r instanceof CSSStyleRule)) continue
-    const tokens: TokenMap = {}
+    const tokens: Record<string, string> = {}
     for (let j = 0; j < r.style.length; j++) {
       const name = r.style.item(j)
       if (name === '') continue
@@ -38,6 +49,34 @@ function readTokensFromStyle(): {
   return {
     md: { light: layers['.md'] ?? {}, dark: layers['html.dark .md'] ?? {} },
     shadcn: { light: layers['.shadcn'] ?? {}, dark: layers['html.dark .shadcn'] ?? {} },
+  }
+}
+
+function projectLayer(layer: TokenMap): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [name, argb] of Object.entries(layer)) {
+    out[name] = oklchString(argb)
+  }
+  return out
+}
+
+// why: DOM holds core + chart merged per ADR-0021 commitment 4. Extended and
+// palette stay data-only — never written by applyDom — so this projection
+// helper deliberately omits them; any future regression that emits extended
+// would surface here as an unexpected key.
+function projectTheme(theme: ReturnType<typeof deriveTheme>): {
+  md: ProjectedLayer
+  shadcn: ProjectedLayer
+} {
+  return {
+    md: {
+      light: projectLayer({ ...theme.md.light, ...theme.md.lightChart }),
+      dark: projectLayer({ ...theme.md.dark, ...theme.md.darkChart }),
+    },
+    shadcn: {
+      light: projectLayer({ ...theme.shadcn.light, ...theme.shadcn.lightChart }),
+      dark: projectLayer({ ...theme.shadcn.dark, ...theme.shadcn.darkChart }),
+    },
   }
 }
 
@@ -293,7 +332,7 @@ describe('applyDom (jsdom integration)', () => {
         useSource.setState({ ...source, _hydrated: true })
         unsubscribe = applyDom()
         const written = readTokensFromStyle()
-        const expected = deriveTheme(source)
+        const expected = projectTheme(deriveTheme(source))
         expect(written.md.light).toEqual(expected.md.light)
         expect(written.md.dark).toEqual(expected.md.dark)
         expect(written.shadcn.light).toEqual(expected.shadcn.light)
@@ -309,7 +348,7 @@ describe('applyDom (jsdom integration)', () => {
       unsubscribe = applyDom()
       const written = readTokensFromStyle()
       const projected = selectPortable(useSource.getState())
-      const expected = deriveTheme(projected)
+      const expected = projectTheme(deriveTheme(projected))
       expect(written.md.light).toEqual(expected.md.light)
       expect(written.md.dark).toEqual(expected.md.dark)
       expect(written.shadcn.light).toEqual(expected.shadcn.light)

@@ -126,6 +126,129 @@ export const MD_TOKEN_NAMES = [
 ] as const
 export type MdTokenName = (typeof MD_TOKEN_NAMES)[number]
 
+// why: ADR-0021 commitment 2 — three-class md partition. MD_TOKEN_NAMES keeps
+// its current family-grouped order (the baked globals.css emission order is
+// load-bearing for the drift-guard); these subsets partition it by semantics
+// class so each consumer reads what it needs. Type unions let role-binding
+// editors (slice 7+) statically constrain the editable surface to a tier.
+//
+// Adding/removing a token: extend MD_TOKEN_NAMES (resolver in derive.ts), then
+// place it in either MD_CORE_TOKEN_NAMES or MD_EXTENDED_TOKEN_NAMES. The two
+// sets must partition MD_TOKEN_NAMES exhaustively (asserted in schema.test.ts).
+
+export const MD_CORE_TOKEN_NAMES = [
+  '--color-primary',
+  '--color-on-primary',
+  '--color-primary-container',
+  '--color-on-primary-container',
+  '--color-secondary',
+  '--color-on-secondary',
+  '--color-secondary-container',
+  '--color-on-secondary-container',
+  '--color-tertiary',
+  '--color-on-tertiary',
+  '--color-tertiary-container',
+  '--color-on-tertiary-container',
+  '--color-error',
+  '--color-on-error',
+  '--color-error-container',
+  '--color-on-error-container',
+  '--color-surface',
+  '--color-on-surface',
+  '--color-on-surface-variant',
+  '--color-surface-dim',
+  '--color-surface-bright',
+  '--color-surface-container-lowest',
+  '--color-surface-container-low',
+  '--color-surface-container',
+  '--color-surface-container-high',
+  '--color-surface-container-highest',
+  '--color-outline',
+  '--color-outline-variant',
+] as const satisfies readonly MdTokenName[]
+export type MdCoreTokenName = (typeof MD_CORE_TOKEN_NAMES)[number]
+
+export const MD_EXTENDED_TOKEN_NAMES = [
+  '--color-primary-fixed',
+  '--color-primary-fixed-dim',
+  '--color-on-primary-fixed',
+  '--color-on-primary-fixed-variant',
+  '--color-primary-dim',
+  '--color-secondary-fixed',
+  '--color-secondary-fixed-dim',
+  '--color-on-secondary-fixed',
+  '--color-on-secondary-fixed-variant',
+  '--color-secondary-dim',
+  '--color-tertiary-fixed',
+  '--color-tertiary-fixed-dim',
+  '--color-on-tertiary-fixed',
+  '--color-on-tertiary-fixed-variant',
+  '--color-tertiary-dim',
+  '--color-error-dim',
+  '--color-surface-tint',
+  '--color-inverse-surface',
+  '--color-inverse-on-surface',
+  '--color-inverse-primary',
+  '--color-shadow',
+  '--color-scrim',
+] as const satisfies readonly MdTokenName[]
+export type MdExtendedTokenName = (typeof MD_EXTENDED_TOKEN_NAMES)[number]
+
+// why: ADR-0021 commitment 2 — chart tokens are derived from the primary
+// palette via a fixed 5-tone mapping. Mode-aware (mirrors core role tokens),
+// not contrast-invariant. Names match the shadcn convention prefixed with
+// `--color-` so they line up with Tailwind v4 utility resolution.
+export const MD_CHART_TOKEN_NAMES = [
+  '--color-chart-1',
+  '--color-chart-2',
+  '--color-chart-3',
+  '--color-chart-4',
+  '--color-chart-5',
+] as const
+export type MdChartTokenName = (typeof MD_CHART_TOKEN_NAMES)[number]
+
+// why: shadcn-side chart names mirror the prevailing shadcn convention
+// (`--chart-1` … `--chart-5`). Values are sourced from the same primary
+// palette tones — chart is one underlying domain, surfaced under each
+// layer's namespace.
+export const SHADCN_CHART_TOKEN_NAMES = [
+  '--chart-1',
+  '--chart-2',
+  '--chart-3',
+  '--chart-4',
+  '--chart-5',
+] as const
+export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
+
+// why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
+// each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
+// ramp; the scheme picks tones from it per mode). 13 tones × 6 palettes = 78.
+// Naming follows Material 3's `--md-ref-palette-{palette}-{tone}` so users
+// recognise the convention. Consumed by inspect UIs (landing showcase, tone-
+// palette swatches, per-token override editor) via useResolvedTokens(); never
+// emitted to DOM by applyDom (data-only per commitment 4).
+export const MD_PALETTE_TONE_NAMES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100] as const
+export type MdPaletteToneName = (typeof MD_PALETTE_TONE_NAMES)[number]
+
+export const MD_PALETTE_FAMILY_NAMES = [
+  'primary',
+  'secondary',
+  'tertiary',
+  'neutral',
+  'neutral-variant',
+  'error',
+] as const
+export type MdPaletteFamilyName = (typeof MD_PALETTE_FAMILY_NAMES)[number]
+
+// why: cross-product the family × tone tuples once at module scope. Adding a
+// new tone or family flows through this array (and into derive's emission
+// loop) without an explicit name list. The `as const` widens to the full 78-
+// element tuple type so MdPaletteTokenName is the exact union.
+export const MD_PALETTE_TOKEN_NAMES: readonly string[] = MD_PALETTE_FAMILY_NAMES.flatMap((family) =>
+  MD_PALETTE_TONE_NAMES.map((tone) => `--md-ref-palette-${family}-${tone}` as const),
+)
+export type MdPaletteTokenName = `--md-ref-palette-${MdPaletteFamilyName}-${MdPaletteToneName}`
+
 // why: shadcn-classic role surface. Listed as a const tuple (sibling to
 // MD_TOKEN_NAMES) so iteration sites read from one canonical source. Adding
 // a role here forces the type to widen, the bindings record to gain the

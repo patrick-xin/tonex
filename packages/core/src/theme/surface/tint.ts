@@ -1,7 +1,7 @@
 import { Hct } from '@tonex/mcu'
 import type { TokenMap } from '../derive'
 import type { Mode } from '../mode'
-import { argbFromOklch, oklchFromArgb } from '../oklch'
+import { argbFromOklch } from '../oklch'
 import {
   NEUTRAL_PALETTE_NAMES,
   type NeutralPaletteName,
@@ -27,8 +27,9 @@ import {
 // SHADE_MAP. Defer until a UI exposes the full ramp under tint. on-surface +
 // on-surface-variant are MCU-derived (no shade map for text-on-surface).
 //
-// Internally the algorithm is argb (HCT operates on argb ints); the layer
-// at the API boundary is oklch strings — parse on input, format on output.
+// Argb-canonical per ADR-0021 — input layer holds argb, HCT math is native
+// argb, output stays argb. Stringification happens at the format/applyDom
+// seam.
 
 const TARGET_CHROMA = 8
 
@@ -68,8 +69,8 @@ function lerpHue(a: number, b: number, t: number): number {
   return (a + diff * t + 360) % 360
 }
 
-function blendOne(baseArgb: number, primaryArgb: number, level: number): string {
-  if (level <= 0) return oklchFromArgb(baseArgb)
+function blendOne(baseArgb: number, primaryArgb: number, level: number): number {
+  if (level <= 0) return baseArgb
   const base = Hct.fromInt(baseArgb)
   const primary = Hct.fromInt(primaryArgb)
   const blended = Hct.from(
@@ -77,7 +78,7 @@ function blendOne(baseArgb: number, primaryArgb: number, level: number): string 
     base.chroma + (TARGET_CHROMA - base.chroma) * level,
     base.tone,
   )
-  return oklchFromArgb(blended.toInt())
+  return blended.toInt()
 }
 
 export function applySurfaceTint(
@@ -86,9 +87,8 @@ export function applySurfaceTint(
   level: number,
   paletteName: NeutralPaletteName,
 ): TokenMap {
-  const primaryOklch = mcuLayer['--color-primary']
-  if (!primaryOklch) return mcuLayer
-  const primaryArgb = argbFromOklch(primaryOklch)
+  const primaryArgb = mcuLayer['--color-primary']
+  if (primaryArgb === undefined) return mcuLayer
   const out: TokenMap = { ...mcuLayer }
   const shades = SHADE_MAP[mode]
   const palette = NEUTRAL_PALETTE_ARGB[paletteName]

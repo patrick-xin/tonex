@@ -1,7 +1,17 @@
 'use client'
 
-import { exportCss, useResolvedTokens, useSource } from '@tonex/core'
+import {
+  buildContrastBundle,
+  type ExportOptions,
+  exportCss,
+  exportDart,
+  exportJson,
+  exportTs,
+  selectPortable,
+  useSource,
+} from '@tonex/core'
 import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 export type ExportTab = 'Tailwind' | 'shadcn' | 'TS' | 'JSON' | 'Dart'
 
@@ -9,22 +19,10 @@ export type ExportTab = 'Tailwind' | 'shadcn' | 'TS' | 'JSON' | 'Dart'
 // shadcn tab emits :root + .dark only since the user already owns the @import
 // and @theme inline in their shadcn project. Both go through core's exportCss
 // so the drift-guard (ADR-0017) covers what users actually paste. TS / JSON /
-// Dart are placeholders — we ship the tabs visible so users see the roadmap,
-// but render a TODO body until the formatters land in core.
-const STUB_TS = `// TS export — coming soon.
-// Will produce a typed const map of all md tokens (light + dark), suitable
-// for design-token consumption from JS/TS code (Storybook, RN, etc).
-`
-
-const STUB_JSON = `{
-  "_comment": "JSON export — coming soon. Will follow the design-token-community-group spec, mode-keyed (light/dark) with the full md token surface."
-}
-`
-
-const STUB_DART = `// Dart export — coming soon.
-// Will produce ColorScheme + per-mode ThemeData for a Flutter app consuming
-// the same source-of-truth tokens.
-`
+// Dart bodies live in `@tonex/core/exporters/{ts,json,dart}.ts` — they ship
+// as visible tabs from day one with TODO bodies (ADR-0021 commitment 9); when
+// a real formatter lands the file body swaps and this manager keeps the
+// same call.
 
 function formatHeader(seed: string, variant: string, contrast: number, spec: string): string {
   return [
@@ -42,18 +40,29 @@ export interface ExportContent {
   ext: string
 }
 
-export function useExportContent({ exportTab }: { exportTab: ExportTab }): ExportContent {
-  const theme = useResolvedTokens()
+export function useExportContent({
+  exportTab,
+  options,
+}: {
+  exportTab: ExportTab
+  options: ExportOptions
+}): ExportContent {
+  const hydrated = useSource((s) => s._hydrated)
+  // why: useShallow + selectPortable mirrors useResolvedTokens — one stable
+  // PortableTheme reference per source change. buildContrastBundle's cache
+  // keys on this reference + the relevant options bits, so toggling format-
+  // only flags doesn't re-derive the (potentially 3×) tier set.
+  const portable = useSource(useShallow(selectPortable))
   const seedHex = useSource((s) => s.seedHex)
   const variant = useSource((s) => s.variant)
   const contrastLevel = useSource((s) => s.contrastLevel)
 
   return useMemo(() => {
-    if (exportTab === 'TS') return { exportContent: STUB_TS, ext: 'ts' }
-    if (exportTab === 'JSON') return { exportContent: STUB_JSON, ext: 'json' }
-    if (exportTab === 'Dart') return { exportContent: STUB_DART, ext: 'dart' }
+    if (exportTab === 'TS') return { exportContent: exportTs(), ext: 'ts' }
+    if (exportTab === 'JSON') return { exportContent: exportJson(), ext: 'json' }
+    if (exportTab === 'Dart') return { exportContent: exportDart(), ext: 'dart' }
 
-    if (!theme) return { exportContent: '/* Loading… */', ext: 'css' }
+    if (!hydrated) return { exportContent: '/* Loading… */', ext: 'css' }
 
     // why: SchemeCmf hardcodes specVersion '2026'; everything else inherits
     // DynamicScheme.DEFAULT_SPEC_VERSION ('2021'). Surface this in the header
@@ -61,6 +70,12 @@ export function useExportContent({ exportTab }: { exportTab: ExportTab }): Expor
     const spec = variant === 'cmf' ? '2026' : '2021'
     const header = formatHeader(seedHex, variant, contrastLevel, spec)
     const layer = exportTab === 'Tailwind' ? 'md' : 'shadcn'
-    return { exportContent: header + exportCss(theme, layer), ext: 'css' }
-  }, [exportTab, theme, seedHex, variant, contrastLevel])
+    // why: ADR-0021 commitment 5 — buildContrastBundle is lazy here. Toggling
+    // includeContrastVariants triggers the 3× derive only on dialog mount /
+    // option change, not on every source render. WYSIWYG-visibility per
+    // commitment 7 — the string we hand to the dialog pane equals what the
+    // user pastes byte-for-byte.
+    const bundle = buildContrastBundle(portable, options)
+    return { exportContent: header + exportCss(bundle, layer, options), ext: 'css' }
+  }, [exportTab, hydrated, portable, options, seedHex, variant, contrastLevel])
 }

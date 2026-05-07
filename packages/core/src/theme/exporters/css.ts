@@ -1,5 +1,7 @@
+import type { ContrastBundle, ExportOptions } from '../contrast-bundle'
 import type { DerivedTheme, TokenMap } from '../derive'
-import { SHADCN_ROLE_NAMES } from '../schema'
+import { hexString, oklchString } from '../oklch'
+import { MD_TOKEN_NAMES, SHADCN_ROLE_NAMES } from '../schema'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +
@@ -12,14 +14,54 @@ import { SHADCN_ROLE_NAMES } from '../schema'
 // ADR-0017: this file is a sink — it stringifies what deriveTheme returned
 // and never recomputes a color, role mapping, or numeric format. If a value
 // looks wrong, the bug is upstream in derive.ts, not here.
+//
+// Argb-canonical per ADR-0021 — TokenMap holds argb numbers; projection to
+// oklch / hex happens here at stringification time. The PRD's commitment 1
+// deliberately moves projection out of derive and into this seam so a future
+// colorspace lands as a one-helper change.
+//
+// Bundle-shaped per ADR-0021 commitment 5 — single-contrast wraps the theme
+// as `{ default: theme }`; multi-contrast bundles add `medium`/`high` tiers
+// that emit as class-scoped `html.contrast-medium .md` / `html.contrast-high
+// .md` rule blocks. Iteration is bundle-driven so emission auto-includes
+// any tier the bundle carries.
+//
+// Slice 4: ExportOptions filters wired here. Defaults reflect the lean
+// dialog output (extended/palette/chart all off, oklch). Filter combinations
+// are applied per rule block before stringification — toggling a flag in the
+// dialog produces exact byte-equal output to what the user pastes.
 
 export type ExportLayer = 'md' | 'shadcn'
 
 const SHADCN_ROLE_SET: ReadonlySet<string> = new Set(SHADCN_ROLE_NAMES)
 
-function block(selector: string, tokens: TokenMap): string {
+// why: contrast tier → CSS class-axis prefix. Default tier emits without a
+// contrast class; medium/high tiers add `html.contrast-medium` /
+// `html.contrast-high` to the existing `.dark` axis. ADR-0013 establishes
+// `<html class="dark">` as our mode axis; contrast classes layer on top.
+const CONTRAST_CLASS_PREFIX = {
+  default: '',
+  medium: 'html.contrast-medium ',
+  high: 'html.contrast-high ',
+} as const
+const CONTRAST_CLASS_PREFIX_DARK = {
+  default: 'html.dark ',
+  medium: 'html.contrast-medium.dark ',
+  high: 'html.contrast-high.dark ',
+} as const
+
+type ContrastTier = keyof typeof CONTRAST_CLASS_PREFIX
+
+// why: colorspace projection at the seam (ADR-0021 commitment 1). Adding a
+// third colorspace later (lab, p3) is one branch here plus one helper in
+// oklch.ts.
+function projectArgb(argb: number, fmt: 'oklch' | 'hex'): string {
+  return fmt === 'hex' ? hexString(argb) : oklchString(argb)
+}
+
+function block(selector: string, tokens: TokenMap, fmt: 'oklch' | 'hex'): string {
   const decls = Object.entries(tokens)
-    .map(([name, value]) => `  ${name}: ${value};`)
+    .map(([name, argb]) => `  ${name}: ${projectArgb(argb, fmt)};`)
     .join('\n')
   return `${selector} {\n${decls}\n}`
 }
@@ -29,38 +71,156 @@ function themeInlineBlock(utilityNames: string[], sourceFor: (name: string) => s
   return `@theme inline {\n${decls}\n}`
 }
 
-export function exportCss(theme: DerivedTheme, layer: ExportLayer): string {
+// why: re-key core emission against MD_TOKEN_NAMES so the family-grouped
+// order matches today's globals.css. Custom-color slugs append at the tail
+// in insertion order (matches deriveTheme's spread order).
+function mergeMdEmission(core: TokenMap, extended: TokenMap | null): TokenMap {
+  const out: TokenMap = {}
+  for (const name of MD_TOKEN_NAMES) {
+    const argb = core[name] ?? extended?.[name]
+    if (argb !== undefined && (core[name] !== undefined || extended !== null)) {
+      out[name] = argb
+    }
+  }
+  for (const [name, argb] of Object.entries(core)) {
+    if (!(name in out)) out[name] = argb
+  }
+  return out
+}
+
+// why: enumerate tiers present in the bundle in canonical order. Default
+// always present; medium/high optional. exportCss emits each tier as a
+// `(light, dark)` pair under the corresponding contrast-class prefix.
+function tiersOf(bundle: ContrastBundle): Array<[ContrastTier, DerivedTheme]> {
+  const out: Array<[ContrastTier, DerivedTheme]> = [['default', bundle.default]]
+  if (bundle.medium !== undefined) out.push(['medium', bundle.medium])
+  if (bundle.high !== undefined) out.push(['high', bundle.high])
+  return out
+}
+
+interface ResolvedOptions {
+  colorFormat: 'oklch' | 'hex'
+  includeExtended: boolean
+  includePalette: boolean
+  includeChart: boolean
+}
+
+function resolveOptions(options: ExportOptions): ResolvedOptions {
+  return {
+    colorFormat: options.colorFormat ?? 'oklch',
+    includeExtended: options.includeExtended ?? false,
+    includePalette: options.includePalette ?? false,
+    includeChart: options.includeChart ?? false,
+  }
+}
+
+// why: build the per-tier md token map honoring all filter flags. Palette
+// is layered in only when requested AND only on the default-tier light
+// rule (mode/contrast-invariant — ADR-0021 commitment 5 says palette
+// declares once); other (mode, tier) pairs skip it.
+function buildMdRuleTokens(
+  theme: DerivedTheme,
+  mode: 'light' | 'dark',
+  tier: ContrastTier,
+  opts: ResolvedOptions,
+): TokenMap {
+  const core = mode === 'light' ? theme.md.light : theme.md.dark
+  const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
+  const chart = mode === 'light' ? theme.md.lightChart : theme.md.darkChart
+  const merged = mergeMdEmission(core, opts.includeExtended ? extended : null)
+  if (opts.includeChart) Object.assign(merged, chart)
+  if (opts.includePalette && mode === 'light' && tier === 'default') {
+    Object.assign(merged, theme.md.palette)
+  }
+  return merged
+}
+
+function buildShadcnRuleTokens(
+  theme: DerivedTheme,
+  mode: 'light' | 'dark',
+  opts: ResolvedOptions,
+): TokenMap {
+  const core = mode === 'light' ? theme.shadcn.light : theme.shadcn.dark
+  const chart = mode === 'light' ? theme.shadcn.lightChart : theme.shadcn.darkChart
+  if (!opts.includeChart) return core
+  return { ...core, ...chart }
+}
+
+// why: @theme inline lists every Tailwind utility name. Adding tokens via
+// flags (extended, chart) extends the list; palette tokens are reference
+// data (`--md-ref-palette-*`) — never registered as utilities. Custom-color
+// slugs always emit because they're brand surfaces, not opt-in ornament.
+function mdUtilityNames(theme: DerivedTheme, opts: ResolvedOptions): string[] {
+  const set = new Set<string>(Object.keys(theme.md.light))
+  if (opts.includeExtended) for (const k of Object.keys(theme.md.lightExtended)) set.add(k)
+  if (opts.includeChart) for (const k of Object.keys(theme.md.lightChart)) set.add(k)
+  return Array.from(set)
+}
+
+export function exportCss(
+  bundle: ContrastBundle,
+  layer: ExportLayer,
+  options: ExportOptions = {},
+): string {
+  const opts = resolveOptions(options)
+  const tiers = tiersOf(bundle)
+
   if (layer === 'md') {
-    const tokens = Object.keys(theme.md.light)
-    return [
+    const tokens = mdUtilityNames(bundle.default, opts)
+    const lines: string[] = [
       '@import "tailwindcss";',
       '',
       '@custom-variant dark (&:is(.dark *));',
       '',
       themeInlineBlock(tokens, (t) => t),
       '',
-      block(':root', theme.md.light),
-      '',
-      block('.dark', theme.md.dark),
-      '',
-    ].join('\n')
+    ]
+    for (const [tier, theme] of tiers) {
+      const lightTokens = buildMdRuleTokens(theme, 'light', tier, opts)
+      const darkTokens = buildMdRuleTokens(theme, 'dark', tier, opts)
+      lines.push(
+        block(`${CONTRAST_CLASS_PREFIX[tier]}.md`, lightTokens, opts.colorFormat),
+        '',
+        block(`${CONTRAST_CLASS_PREFIX_DARK[tier]}.md`, darkTokens, opts.colorFormat),
+        '',
+      )
+    }
+    return lines.join('\n')
   }
 
   // shadcn: any key outside the closed SHADCN_ROLE_NAMES set is a
   // custom-color slug pair (--{slug}, --{slug}-foreground) the user added.
-  const customSlugTokens = Object.keys(theme.shadcn.light).filter((k) => !SHADCN_ROLE_SET.has(k))
-  const parts = [block(':root', theme.shadcn.light), '', block('.dark', theme.shadcn.dark)]
+  const customSlugTokens = Object.keys(bundle.default.shadcn.light).filter(
+    (k) => !SHADCN_ROLE_SET.has(k),
+  )
+  const parts: string[] = []
+  for (const [tier, theme] of tiers) {
+    parts.push(
+      block(
+        `${CONTRAST_CLASS_PREFIX[tier]}.shadcn`,
+        buildShadcnRuleTokens(theme, 'light', opts),
+        opts.colorFormat,
+      ),
+      '',
+      block(
+        `${CONTRAST_CLASS_PREFIX_DARK[tier]}.shadcn`,
+        buildShadcnRuleTokens(theme, 'dark', opts),
+        opts.colorFormat,
+      ),
+      '',
+    )
+  }
   if (customSlugTokens.length > 0) {
     // why: shadcn keys are `--{slug}` / `--{slug}-foreground`; the matching
     // Tailwind v4 utility name is `--color-{slug}`. Drop the leading `--`
     // and prepend `--color-` to bridge between the two namespaces.
     parts.push(
-      '',
       themeInlineBlock(
         customSlugTokens.map((t) => `--color-${t.slice(2)}`),
         (u) => `--${u.slice('--color-'.length)}`,
       ),
+      '',
     )
   }
-  return `${parts.join('\n')}\n`
+  return parts.join('\n')
 }

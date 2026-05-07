@@ -1,5 +1,6 @@
 import type { TokenMap } from './derive'
 import { getDerivedTheme } from './derive-cache'
+import { oklchString } from './oklch'
 import { selectPortable, useSource } from './source'
 
 const STYLE_ELEMENT_ID = 'tonex-tokens'
@@ -56,10 +57,24 @@ export function applyDom(): () => void {
     if (!s._hydrated) return
     try {
       const theme = getDerivedTheme(selectPortable(s))
-      applyDiff(rules['.md'], lastTokens['.md'], theme.md.light)
-      applyDiff(rules['html.dark .md'], lastTokens['html.dark .md'], theme.md.dark)
-      applyDiff(rules['.shadcn'], lastTokens['.shadcn'], theme.shadcn.light)
-      applyDiff(rules['html.dark .shadcn'], lastTokens['html.dark .shadcn'], theme.shadcn.dark)
+      // why: ADR-0021 commitment 4 — DOM-relevant subset only. Core role
+      // tokens + chart merge into the existing 4 scope rules; extended
+      // tokens and palette stay data-only (consumed by inspect UIs via
+      // useResolvedTokens). Per-tick setProperty count drops because the
+      // 22-token extended tier and 78-tone palette never enter the diff.
+      applyDiff(rules['.md'], lastTokens['.md'], { ...theme.md.light, ...theme.md.lightChart })
+      applyDiff(rules['html.dark .md'], lastTokens['html.dark .md'], {
+        ...theme.md.dark,
+        ...theme.md.darkChart,
+      })
+      applyDiff(rules['.shadcn'], lastTokens['.shadcn'], {
+        ...theme.shadcn.light,
+        ...theme.shadcn.lightChart,
+      })
+      applyDiff(rules['html.dark .shadcn'], lastTokens['html.dark .shadcn'], {
+        ...theme.shadcn.dark,
+        ...theme.shadcn.darkChart,
+      })
     } catch (err) {
       // why: annotate the failure with applyDom's identity so a stack trace
       // points back to the spine seam, not a generic React error overlay.
@@ -122,12 +137,16 @@ function ensureStyleElement(): { el: HTMLStyleElement; rules: ScopeRules } {
 // in the rule, so the next tick can diff against truth instead of recomputing
 // from the live CSSOM (cheaper + avoids any browser-side string normalization
 // surprises).
+//
+// Diff happens at argb (number) granularity (ADR-0021); oklchString projects
+// only on actual write. Unchanged tokens skip the projection cost entirely —
+// the hot-path for slider drags where most tokens stay put per tick (#9).
 function applyDiff(rule: CSSStyleRule, last: TokenMap, next: TokenMap): void {
   for (const name of Object.keys(next)) {
-    const value = next[name]
-    if (value !== undefined && last[name] !== value) {
-      rule.style.setProperty(name, value)
-      last[name] = value
+    const argb = next[name]
+    if (argb !== undefined && last[name] !== argb) {
+      rule.style.setProperty(name, oklchString(argb))
+      last[name] = argb
     }
   }
   for (const name of Object.keys(last)) {

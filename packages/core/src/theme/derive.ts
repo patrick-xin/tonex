@@ -8,24 +8,69 @@ import {
 import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
-import { oklchFromArgb, oklchFromHex } from './oklch'
 import { applyPaletteOverrides } from './palette-override'
 import {
   type CustomColorEntry,
+  MD_CHART_TOKEN_NAMES,
+  MD_CORE_TOKEN_NAMES,
+  MD_EXTENDED_TOKEN_NAMES,
+  MD_PALETTE_FAMILY_NAMES,
+  MD_PALETTE_TONE_NAMES,
   MD_TOKEN_NAMES,
   type MdTokenName,
   type PortableTheme,
+  SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   slugifyCustomColorName,
 } from './schema'
 import { applySurfaceDesaturate, applySurfaceTint } from './surface'
 
-// why: emission format is `oklch(L C H)` — shadcn v4 + tailwind v4
-// convention. MCU still operates in argb internally; conversion happens at
-// THIS module's TokenMap boundary so format.ts stays a pure stringifier.
+// why: ADR-0021 commitment 1 — argb is the canonical wire format inside
+// DerivedTheme. Colorspace projection (argb → oklch / hex) is a format-time
+// concern owned by applyDom (oklchString) and exporters (oklchString or
+// hexString depending on ExportOptions.colorFormat). Storing argb here keeps
+// derive's intermediate stages projection-free: surface treatments, palette
+// overrides, and shadcn binding all read/write the same number domain MCU
+// itself uses, eliminating round-trip parses inside the spine.
 
-export type TokenMap = Record<string, string>
+export type TokenMap = Record<string, number>
+
+// why: ADR-0021 commitment 3 — fields keyed by *what each class is for*, not
+// flattened with sidecar Sets. Each field's update frequency, DOM relevance,
+// and consumer set is sharp:
+//
+//   light/dark           — 28 core role tokens + custom-color slugs.
+//                          Mode-aware. DOM-emitted by applyDom.
+//   lightChart/darkChart — 5 chart tokens. Mode-aware. DOM-emitted (merged
+//                          into the same scope rule as core for free use
+//                          inside the editor).
+//   lightExtended/...    — 22 extended role tokens (fixed/dim/inverse/
+//                          surface-tint/shadow/scrim). Mode-aware. Data only
+//                          (consumed by inspect UIs via useResolvedTokens);
+//                          NOT emitted by applyDom — see commitment 4.
+//   palette              — 78 palette tones (13 × 6). Mode/contrast-invariant.
+//                          Data only.
+//
+// shadcn carries only the DOM-emitted surfaces — extended/palette have no
+// shadcn analog and the cross-layer binding surface stays closed at
+// SHADCN_ROLE_NAMES (extending it is its own ADR/slice).
+export interface MdLayer {
+  light: TokenMap
+  dark: TokenMap
+  lightChart: TokenMap
+  darkChart: TokenMap
+  lightExtended: TokenMap
+  darkExtended: TokenMap
+  palette: TokenMap
+}
+
+export interface ShadcnLayer {
+  light: TokenMap
+  dark: TokenMap
+  lightChart: TokenMap
+  darkChart: TokenMap
+}
 
 export interface ResolvedLayer {
   light: TokenMap
@@ -38,10 +83,21 @@ export interface ResolvedLayer {
 // construction. ADR-0017 holds because preview === export both consume the
 // same DerivedTheme; treatment is a transform on `md`, not a parallel field.
 export interface DerivedTheme {
-  md: ResolvedLayer
-  shadcn: ResolvedLayer
+  md: MdLayer
+  shadcn: ShadcnLayer
   warnings: string[]
 }
+
+const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
+const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
+
+// why: arbitrary 5-tone spread per mode (ADR-0021 commitment 2 — "fixed 5-
+// tone mapping"). Tunable; chart UX hasn't pinned exact tones yet. Light-mode
+// tones skew darker so chart-1 shows up against the surface; dark-mode tones
+// skew lighter for the same reason. Mode-aware, contrast-invariant — palette
+// tones don't shift with MCU contrast level.
+const CHART_TONES_LIGHT = [40, 60, 80, 25, 75] as const
+const CHART_TONES_DARK = [80, 60, 40, 95, 25] as const
 
 const mdc = new MaterialDynamicColors()
 
@@ -115,10 +171,12 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
 // why: collapses the prior light/dark dup. Iterates MD_TOKEN_NAMES so every
 // schema entry is forced through the resolver — adding a name without a
 // resolver is a TS error at the table site, not a silent missing token.
+// Returns argb directly (ADR-0021); projection happens at the format/applyDom
+// seam.
 function buildMdLayer(scheme: DynamicScheme): TokenMap {
   const out: TokenMap = {}
   for (const name of MD_TOKEN_NAMES) {
-    out[name] = oklchFromArgb(MD_TOKEN_RESOLVERS[name](scheme))
+    out[name] = MD_TOKEN_RESOLVERS[name](scheme)
   }
   return out
 }
@@ -148,6 +206,18 @@ function bindShadcn(mdLayer: TokenMap, bindings: ShadcnRoleBindings): TokenMap {
 // Default bindings (DEFAULT_SHADCN_ROLE_BINDINGS) come from legacy tonex's
 // MD3_ROLE_MAP. Editing the bindings flows directly to the shadcn layer
 // without touching md, by construction.
+//
+// Pipeline order (ADR-0021 commitment 3):
+//   1. Build flat md layer (50 tokens core+extended, single resolver pass).
+//   2. Apply token overrides (any of the 50, sparse map per mode).
+//   3. Apply surface treatment (touches only core surface family).
+//   4. Compute custom-color groups + merge their md tokens.
+//   5. Bind shadcn from the merged map (allows any md token as a binding
+//      target — extended included).
+//   6. Compute chart (5 tokens per mode from primaryPalette).
+//   7. Compute palette (78 tones, mode-invariant).
+//   8. SPLIT the merged md result into core/extended/custom buckets by name
+//      so each field's consumer set is sharp.
 export function deriveTheme(source: PortableTheme): DerivedTheme {
   const seedHct = Hct.fromInt(argbFromHex(source.seedHex))
   const variant = variants[source.variant]
@@ -209,23 +279,111 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
 
   const customMdLight = buildCustomColorsMd(customGroups, 'light')
   const customMdDark = buildCustomColorsMd(customGroups, 'dark')
-  const mdLight = { ...treatedLight, ...customMdLight }
-  const mdDark = { ...treatedDark, ...customMdDark }
+  const mergedLight = { ...treatedLight, ...customMdLight }
+  const mergedDark = { ...treatedDark, ...customMdDark }
+
+  // why: split happens AT RETURN — all internal pipeline stages operate on
+  // the flat 50-token map so token overrides, treatment, and shadcn binding
+  // logic stay tier-agnostic. Custom slugs (entries outside both static
+  // partitions) flow into the core `light`/`dark` field by design (ADR-0021
+  // commitment 3 — "custom colors continue to merge into md.{light,dark}").
+  const splitLight = splitMdLayer(mergedLight)
+  const splitDark = splitMdLayer(mergedDark)
+
+  const mdLightChart = buildMdChart(lightScheme, 'light')
+  const mdDarkChart = buildMdChart(darkScheme, 'dark')
 
   return {
-    md: { light: mdLight, dark: mdDark },
+    md: {
+      light: splitLight.core,
+      dark: splitDark.core,
+      lightChart: mdLightChart,
+      darkChart: mdDarkChart,
+      lightExtended: splitLight.extended,
+      darkExtended: splitDark.extended,
+      // why: palette is mode/contrast-invariant — pull from either scheme; we
+      // pick lightScheme to keep the dependency direction one-way.
+      palette: buildMdPalette(lightScheme),
+    },
     shadcn: {
       light: {
-        ...bindShadcn(treatedLight, source.shadcnRoleBindings.light),
+        ...bindShadcn(mergedLight, source.shadcnRoleBindings.light),
         ...buildCustomColorsShadcn(customGroups, customMdLight),
       },
       dark: {
-        ...bindShadcn(treatedDark, source.shadcnRoleBindings.dark),
+        ...bindShadcn(mergedDark, source.shadcnRoleBindings.dark),
         ...buildCustomColorsShadcn(customGroups, customMdDark),
       },
+      lightChart: rebrandChart(mdLightChart),
+      darkChart: rebrandChart(mdDarkChart),
     },
     warnings: [],
   }
+}
+
+// why: split a flat md TokenMap into core / extended buckets via the partition
+// Sets. Tokens outside both partitions (custom-color slugs) go into core —
+// custom colors are first-class brand surfaces, not extended ornament.
+function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
+  const core: TokenMap = {}
+  const extended: TokenMap = {}
+  for (const [name, argb] of Object.entries(layer)) {
+    if (MD_EXTENDED_TOKEN_SET.has(name)) extended[name] = argb
+    else core[name] = argb
+  }
+  return { core, extended }
+}
+
+// why: chart tokens are sourced from the scheme's primary palette via a fixed
+// per-mode 5-tone mapping. Palette is the same construct shadcn-rebound
+// surfaces read from, so picking tones from it makes chart series visually
+// coherent with the rest of the theme (same hue/chroma family).
+function buildMdChart(scheme: DynamicScheme, mode: Mode): TokenMap {
+  const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
+  const out: TokenMap = {}
+  MD_CHART_TOKEN_NAMES.forEach((name, i) => {
+    out[name] = scheme.primaryPalette.tone(tones[i])
+  })
+  return out
+}
+
+// why: shadcn's chart names are the same 5 values the md side computes, just
+// renamed (`--color-chart-1` → `--chart-1`). One source of truth, two
+// namespaces — chart character can't drift between layers.
+function rebrandChart(mdChart: TokenMap): TokenMap {
+  const out: TokenMap = {}
+  SHADCN_CHART_TOKEN_NAMES.forEach((shadcnName, i) => {
+    const argb = mdChart[MD_CHART_TOKEN_NAMES[i]]
+    if (argb === undefined) {
+      throw new Error(`[rebrandChart] missing md chart token at index ${i}`)
+    }
+    out[shadcnName] = argb
+  })
+  return out
+}
+
+// why: 78 palette tones (13 tones × 6 palettes). Mode/contrast-invariant —
+// the palette is a tone ramp; mode picks tones from it. We expose the full
+// ramp for inspect UIs (landing showcase, tone-palette swatches) so they can
+// render any tone without re-deriving from the seed.
+const MD_PALETTE_FIELD_BY_NAME: Record<string, keyof DynamicScheme> = {
+  primary: 'primaryPalette',
+  secondary: 'secondaryPalette',
+  tertiary: 'tertiaryPalette',
+  neutral: 'neutralPalette',
+  'neutral-variant': 'neutralVariantPalette',
+  error: 'errorPalette',
+}
+
+function buildMdPalette(scheme: DynamicScheme): TokenMap {
+  const out: TokenMap = {}
+  for (const family of MD_PALETTE_FAMILY_NAMES) {
+    const palette = scheme[MD_PALETTE_FIELD_BY_NAME[family]] as DynamicScheme['primaryPalette']
+    for (const tone of MD_PALETTE_TONE_NAMES) {
+      out[`--md-ref-palette-${family}-${tone}`] = palette.tone(tone)
+    }
+  }
+  return out
 }
 
 interface ResolvedCustomGroup {
@@ -235,16 +393,16 @@ interface ResolvedCustomGroup {
 }
 
 // why: emits 4 md tokens per custom entry from MCU's CustomColorGroup. Tones
-// are MCU's choice (40/100/90/10 light, 80/20/30/90 dark) — we just convert
-// argb → oklch at the boundary so the layer stays in canonical format.
-function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): Record<string, string> {
-  const out: Record<string, string> = {}
+// are MCU's choice (40/100/90/10 light, 80/20/30/90 dark). Argb-canonical
+// per ADR-0021 — projection happens at the format/applyDom seam.
+function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): TokenMap {
+  const out: TokenMap = {}
   for (const { slug, group } of groups) {
     const colors = group[mode]
-    out[`--color-${slug}`] = oklchFromArgb(colors.color)
-    out[`--color-on-${slug}`] = oklchFromArgb(colors.onColor)
-    out[`--color-${slug}-container`] = oklchFromArgb(colors.colorContainer)
-    out[`--color-on-${slug}-container`] = oklchFromArgb(colors.onColorContainer)
+    out[`--color-${slug}`] = colors.color
+    out[`--color-on-${slug}`] = colors.onColor
+    out[`--color-${slug}-container`] = colors.colorContainer
+    out[`--color-on-${slug}-container`] = colors.onColorContainer
   }
   return out
 }
@@ -254,11 +412,8 @@ function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): Record<
 // future sink-side hooks) propagate. Pair selector is per-entry shadcnSource:
 // 'color' → --{slug}/--{slug}-foreground ← --color-{slug}/--color-on-{slug};
 // 'container' → ← --color-{slug}-container/--color-on-{slug}-container.
-function buildCustomColorsShadcn(
-  groups: ResolvedCustomGroup[],
-  mdLayer: Record<string, string>,
-): Record<string, string> {
-  const out: Record<string, string> = {}
+function buildCustomColorsShadcn(groups: ResolvedCustomGroup[], mdLayer: TokenMap): TokenMap {
+  const out: TokenMap = {}
   for (const { entry, slug } of groups) {
     const pair =
       entry.shadcnSource === 'color'
@@ -282,10 +437,10 @@ function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): Tok
 }
 
 // why: generic per-token override map for one mode. Overrides are STORED as
-// hex (user-facing color pickers emit hex); convert at the boundary so the
-// layer stays in canonical oklch. Tokens not present in the override flow
-// through unchanged. Runs LAST in the md pipeline (after MCU build) so
-// override always wins.
+// hex (user-facing color pickers emit hex); convert hex → argb at the boundary
+// so the layer stays in canonical argb (ADR-0021). Tokens not present in the
+// override flow through unchanged. Runs LAST in the md pipeline (after MCU
+// build) so override always wins.
 function applyMd3TokenOverrides(
   layer: TokenMap,
   overrides: Partial<Record<MdTokenName, string>>,
@@ -295,7 +450,7 @@ function applyMd3TokenOverrides(
   const out = { ...layer }
   for (const token of keys) {
     const hex = overrides[token]
-    if (hex !== undefined) out[token] = oklchFromHex(hex)
+    if (hex !== undefined) out[token] = argbFromHex(hex)
   }
   return out
 }

@@ -1,8 +1,18 @@
+import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
 import { hexFromHct } from './hct'
-import { oklchFromHex } from './oklch'
-import { type CustomColorEntry, DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } from './schema'
+import {
+  type CustomColorEntry,
+  DEFAULT_INPUTS,
+  DEFAULT_SHADCN_ROLE_BINDINGS,
+  MD_CHART_TOKEN_NAMES,
+  MD_CORE_TOKEN_NAMES,
+  MD_EXTENDED_TOKEN_NAMES,
+  MD_PALETTE_FAMILY_NAMES,
+  MD_PALETTE_TONE_NAMES,
+  SHADCN_CHART_TOKEN_NAMES,
+} from './schema'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
 // final else clause: (secondHue > 12 && secondHue <= 28) ? 32 : 16. Single-
@@ -10,41 +20,40 @@ import { type CustomColorEntry, DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS } f
 // via Hct so the fixture is deterministic regardless of hex<->HCT rounding.
 const CMF_SECOND_HEX_BUCKET_SHIFT = hexFromHct({ hue: 20, chroma: 60, tone: 50 })
 
-const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
-
-// why: hex inputs (overrides, locks) emit as their oklch projection — assert
-// against the exact projection so any change to the conversion math fails
-// here instead of silently drifting at the CSS surface.
-const RED = oklchFromHex('#ff0000')
-const GREEN = oklchFromHex('#00ff00')
-const ABCDEF = oklchFromHex('#abcdef')
+// why: TokenMap is argb-canonical (ADR-0021). Hex inputs (overrides, locks)
+// land in the layer as their argbFromHex projection — assert against the
+// exact argb value so any change to the boundary parser fails here instead
+// of silently drifting downstream.
+const RED = argbFromHex('#ff0000')
+const GREEN = argbFromHex('#00ff00')
+const ABCDEF = argbFromHex('#abcdef')
 
 describe('deriveTheme', () => {
   it('emits md primary role family for both modes', () => {
     const { md } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [md.light, md.dark]) {
-      expect(mode['--color-primary']).toMatch(OKLCH)
-      expect(mode['--color-on-primary']).toMatch(OKLCH)
-      expect(mode['--color-primary-container']).toMatch(OKLCH)
-      expect(mode['--color-on-primary-container']).toMatch(OKLCH)
+      expect(mode['--color-primary']).toEqual(expect.any(Number))
+      expect(mode['--color-on-primary']).toEqual(expect.any(Number))
+      expect(mode['--color-primary-container']).toEqual(expect.any(Number))
+      expect(mode['--color-on-primary-container']).toEqual(expect.any(Number))
     }
   })
 
   it('emits md surface family for both modes', () => {
     const { md } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [md.light, md.dark]) {
-      expect(mode['--color-surface']).toMatch(OKLCH)
-      expect(mode['--color-surface-container']).toMatch(OKLCH)
-      expect(mode['--color-surface-container-high']).toMatch(OKLCH)
-      expect(mode['--color-on-surface']).toMatch(OKLCH)
+      expect(mode['--color-surface']).toEqual(expect.any(Number))
+      expect(mode['--color-surface-container']).toEqual(expect.any(Number))
+      expect(mode['--color-surface-container-high']).toEqual(expect.any(Number))
+      expect(mode['--color-on-surface']).toEqual(expect.any(Number))
     }
   })
 
   it('emits shadcn primary + primary-foreground for both modes', () => {
     const { shadcn } = deriveTheme(DEFAULT_INPUTS)
     for (const mode of [shadcn.light, shadcn.dark]) {
-      expect(mode['--primary']).toMatch(OKLCH)
-      expect(mode['--primary-foreground']).toMatch(OKLCH)
+      expect(mode['--primary']).toEqual(expect.any(Number))
+      expect(mode['--primary-foreground']).toEqual(expect.any(Number))
     }
   })
 
@@ -503,10 +512,10 @@ describe('deriveTheme', () => {
     it('one entry emits 4 md tokens (light + dark) via slug', () => {
       const { md } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [success] })
       for (const mode of [md.light, md.dark]) {
-        expect(mode['--color-success']).toMatch(OKLCH)
-        expect(mode['--color-on-success']).toMatch(OKLCH)
-        expect(mode['--color-success-container']).toMatch(OKLCH)
-        expect(mode['--color-on-success-container']).toMatch(OKLCH)
+        expect(mode['--color-success']).toEqual(expect.any(Number))
+        expect(mode['--color-on-success']).toEqual(expect.any(Number))
+        expect(mode['--color-success-container']).toEqual(expect.any(Number))
+        expect(mode['--color-on-success-container']).toEqual(expect.any(Number))
       }
       // light vs dark differ — MCU's customColor maps tones differently per mode
       expect(md.light['--color-success']).not.toBe(md.dark['--color-success'])
@@ -533,8 +542,8 @@ describe('deriveTheme', () => {
         ...DEFAULT_INPUTS,
         customColors: [success, warning],
       })
-      expect(md.light['--color-success']).toMatch(OKLCH)
-      expect(md.light['--color-warning']).toMatch(OKLCH)
+      expect(md.light['--color-success']).toEqual(expect.any(Number))
+      expect(md.light['--color-warning']).toEqual(expect.any(Number))
       expect(shadcn.light['--success']).toBe(md.light['--color-success'])
       expect(shadcn.light['--warning']).toBe(md.light['--color-warning-container'])
       expect(md.light['--color-success']).not.toBe(md.light['--color-warning'])
@@ -569,7 +578,7 @@ describe('deriveTheme', () => {
         shadcnSource: 'color',
       }
       const { md, shadcn } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [entry] })
-      expect(md.light['--color-brand-x']).toMatch(OKLCH)
+      expect(md.light['--color-brand-x']).toEqual(expect.any(Number))
       expect(shadcn.light['--brand-x']).toBe(md.light['--color-brand-x'])
     })
   })
@@ -655,6 +664,102 @@ describe('deriveTheme', () => {
       expect(split.md.light['--color-surface']).toBe(baseline.md.light['--color-surface'])
       // dark fully neutralised
       expect(split.md.dark['--color-surface']).not.toBe(baseline.md.dark['--color-surface'])
+    })
+  })
+
+  describe('partition fields (ADR-0021)', () => {
+    it('md.light contains exactly the 28 core role tokens (no extended, no chart)', () => {
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const lightKeys = new Set(Object.keys(md.light))
+      // every core name lands in `light`
+      for (const name of MD_CORE_TOKEN_NAMES) expect(lightKeys.has(name)).toBe(true)
+      // no extended name leaks into `light`
+      for (const name of MD_EXTENDED_TOKEN_NAMES) expect(lightKeys.has(name)).toBe(false)
+      // no chart name leaks into `light`
+      for (const name of MD_CHART_TOKEN_NAMES) expect(lightKeys.has(name)).toBe(false)
+    })
+
+    it('md.lightExtended contains exactly the 22 extended role tokens', () => {
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const extendedKeys = new Set(Object.keys(md.lightExtended))
+      expect(extendedKeys.size).toBe(MD_EXTENDED_TOKEN_NAMES.length)
+      for (const name of MD_EXTENDED_TOKEN_NAMES) expect(extendedKeys.has(name)).toBe(true)
+    })
+
+    it('md.lightChart and md.darkChart each have 5 chart tokens; values diverge across modes', () => {
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      expect(Object.keys(md.lightChart).length).toBe(MD_CHART_TOKEN_NAMES.length)
+      expect(Object.keys(md.darkChart).length).toBe(MD_CHART_TOKEN_NAMES.length)
+      for (const name of MD_CHART_TOKEN_NAMES) {
+        expect(md.lightChart[name]).toEqual(expect.any(Number))
+        expect(md.darkChart[name]).toEqual(expect.any(Number))
+      }
+      // why: light/dark mode chart tones intentionally differ to keep series
+      // visible against the matching surface family. At least one position
+      // shifting is the structural assertion that mode-aware tone selection
+      // is wired (vs both modes reading identical tones).
+      const someDiff = MD_CHART_TOKEN_NAMES.some((n) => md.lightChart[n] !== md.darkChart[n])
+      expect(someDiff).toBe(true)
+    })
+
+    it('md.palette contains 78 tones (13 × 6 families), mode/contrast-invariant', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const expectedCount = MD_PALETTE_FAMILY_NAMES.length * MD_PALETTE_TONE_NAMES.length
+      expect(Object.keys(baseline.md.palette).length).toBe(expectedCount)
+
+      // why: palette is contrast-invariant — the tonal ramp is a function of
+      // seed + variant, not of contrast level. Pinning this lets inspect UIs
+      // cache palette across contrast toggles.
+      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
+      expect(high.md.palette).toEqual(baseline.md.palette)
+    })
+
+    it('shadcn.lightChart mirrors md.lightChart values under the shadcn naming', () => {
+      const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
+      for (let i = 0; i < MD_CHART_TOKEN_NAMES.length; i++) {
+        const mdName = MD_CHART_TOKEN_NAMES[i]
+        const shadcnName = SHADCN_CHART_TOKEN_NAMES[i]
+        expect(shadcn.lightChart[shadcnName]).toBe(md.lightChart[mdName])
+        expect(shadcn.darkChart[shadcnName]).toBe(md.darkChart[mdName])
+      }
+    })
+
+    it('custom-color slugs land in md.light (core), not in lightExtended', () => {
+      // why: ADR-0021 commitment 3 — "custom colors continue to merge into
+      // md.{light,dark}". Locks the partition rule that puts user-defined
+      // brand colors in the core tier rather than the extended sidecar.
+      const success: CustomColorEntry = {
+        id: 'id-success',
+        name: 'Success',
+        hex: '#22c55e',
+        blend: false,
+        shadcnSource: 'color',
+      }
+      const { md } = deriveTheme({ ...DEFAULT_INPUTS, customColors: [success] })
+      expect(md.light['--color-success']).toEqual(expect.any(Number))
+      expect(md.lightExtended['--color-success']).toBeUndefined()
+    })
+
+    it('palette-override changes propagate to md.palette tones for the matching family', () => {
+      // why: end-to-end check — paletteOverride mutates the scheme's
+      // primaryPalette, and md.palette reads tones from the same palette
+      // field. The override must flow through.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const overridden = deriveTheme({
+        ...DEFAULT_INPUTS,
+        paletteOverrides: { primary: '#ff0066' },
+      })
+      // some primary palette tone must shift
+      const someShift = MD_PALETTE_TONE_NAMES.some(
+        (t) =>
+          overridden.md.palette[`--md-ref-palette-primary-${t}`] !==
+          baseline.md.palette[`--md-ref-palette-primary-${t}`],
+      )
+      expect(someShift).toBe(true)
+      // siblings (e.g. neutral) stay put
+      expect(overridden.md.palette['--md-ref-palette-neutral-50']).toBe(
+        baseline.md.palette['--md-ref-palette-neutral-50'],
+      )
     })
   })
 })

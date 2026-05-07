@@ -16,7 +16,10 @@ export function ExportPanels() {
 }
 
 function ExportPanel({ theme, layer }: { theme: DerivedTheme; layer: ExportLayer }) {
-  const css = exportCss(theme, layer)
+  // why: exportCss takes a ContrastBundle (ADR-0021 commitment 5). Single-
+  // contrast wraps as `{ default: theme }`. Default options give today's
+  // single-tier emission shape — slice 4 surfaces filter toggles in the UI.
+  const css = exportCss({ default: theme }, layer)
   const [copied, setCopied] = useState(false)
 
   async function copy() {

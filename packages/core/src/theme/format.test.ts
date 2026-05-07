@@ -7,6 +7,12 @@ import { describe, expect, it } from 'vitest'
 // taken on color logic that derive.ts already owns; preview/export drift
 // becomes possible. This test reads the file as text and fails on any
 // import-from-mcu line. Catches the failure at lint-time, not at runtime.
+//
+// ADR-0021 amendment: TokenMap holds argb (numbers); projection to oklch
+// happens at the format seam via the local oklchString helper. A runtime
+// import of oklchString from sibling oklch.ts is therefore expected — but
+// the rule against pulling color logic from MCU still holds. Anything
+// outside `./oklch` for runtime colorspace work is the smell.
 const FORMAT_SRC = fileURLToPath(new URL('./format.ts', import.meta.url))
 
 describe('format.ts import discipline', () => {
@@ -17,14 +23,19 @@ describe('format.ts import discipline', () => {
     expect(offending).toEqual([])
   })
 
-  it('only imports types from sibling spine files', () => {
-    // why: format.ts may take TYPE-only imports from derive.ts (the layer
-    // shape) but should not pull runtime values from anywhere — the file is
-    // pure string assembly. Anything else is a smell.
+  it('runtime imports stay within sibling spine files (no MCU, no app deps)', () => {
+    // why: post-ADR-0021, format.ts pulls a few runtime values from sibling
+    // spine modules — `oklchString` from ./oklch for argb projection,
+    // `MD_TOKEN_NAMES` from ./schema for emission-order keying. The intent of
+    // this rule is unchanged: format.ts must not pull color logic from MCU
+    // (covered by the prior test) and must not import from app boundaries.
+    // Sibling-spine runtime imports are fine — they're pure data or one-line
+    // projection wrappers.
     const src = readFileSync(FORMAT_SRC, 'utf8')
     const importLines = src.split('\n').filter((l) => /^\s*import\b/.test(l))
-    for (const line of importLines) {
-      expect(line).toMatch(/import\s+type\b/)
+    const runtimeImports = importLines.filter((l) => !/import\s+type\b/.test(l))
+    for (const line of runtimeImports) {
+      expect(line).toMatch(/from\s+'\.\/[a-z][a-z-]*'/)
     }
   })
 })

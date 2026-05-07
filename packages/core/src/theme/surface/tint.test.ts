@@ -3,7 +3,7 @@ import { deriveTheme } from '../derive'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceTint } from './tint'
 
-const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
+// why: layer is argb-canonical (ADR-0021); tokens are numbers, not strings.
 
 const SURFACE_BG = [
   '--color-surface',
@@ -32,7 +32,7 @@ describe('applySurfaceTint', () => {
     const tintedGreen = applySurfaceTint(green, 'light', 1, 'zinc')
     for (const tok of SURFACE_BG) {
       expect(tintedRed[tok]).not.toBe(tintedGreen[tok])
-      expect(tintedRed[tok]).toMatch(OKLCH)
+      expect(typeof tintedRed[tok]).toBe('number')
     }
   })
 

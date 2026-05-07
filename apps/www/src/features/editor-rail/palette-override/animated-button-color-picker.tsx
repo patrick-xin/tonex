@@ -2,7 +2,7 @@
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
 import { useResolvedTokens, useSource } from '@tonex/core'
-import { hexFromOklch } from '@tonex/core/oklch'
+import { hexString, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName, PaletteName } from '@tonex/core/schema'
 import { useTheme } from 'next-themes'
 import { cx } from 'tailwind-variants'
@@ -67,10 +67,12 @@ export function AnimatedButtonColorPicker({
   // palette IS a tone ramp; mode selects tones from it.
   const override = useSource((s) => s.paletteOverrides[palette])
   const previewToken = PALETTE_PREVIEW_TOKEN[palette]
-  // why: derive emits canonical oklch — the swatch can take that string
-  // directly (CSS color() handles oklch natively). Falls back to a neutral
-  // pre-hydration to avoid the SSR null-state flicker on the rail.
-  const swatch = theme?.md[mode][previewToken] ?? '#000000'
+  // why: derive emits argb (ADR-0021); project to oklch at the swatch read
+  // boundary so the inline style consumes a CSS-valid string. Falls back
+  // to a neutral hex pre-hydration to avoid SSR null-state flicker on the
+  // rail.
+  const swatchArgb = theme?.md[mode][previewToken]
+  const swatch = swatchArgb !== undefined ? oklchString(swatchArgb) : '#000000'
   const isOverridden = override !== undefined
 
   const trigger = (
@@ -161,12 +163,12 @@ function Payload({ palette, mode }: { palette: PaletteName; mode: 'light' | 'dar
 
   const isOverridden = override !== undefined
   const previewToken = PALETTE_PREVIEW_TOKEN[palette]
-  // why: picker speaks hex; derive emits oklch. Convert at the read boundary
-  // so the picker stays format-agnostic. Override value (when set) is already
-  // hex — no conversion needed in that branch. Pre-hydration falls back to a
-  // safe hex so HCT decode never sees a non-hex string.
-  const resolvedOklch = theme?.md[mode][previewToken]
-  const value = override ?? (resolvedOklch !== undefined ? hexFromOklch(resolvedOklch) : '#000000')
+  // why: picker speaks hex; derive emits argb (ADR-0021). Convert at the
+  // read boundary so the picker stays format-agnostic. Override value (when
+  // set) is already hex — no conversion needed in that branch. Pre-hydration
+  // falls back to a safe hex so HCT decode never sees a non-hex string.
+  const resolvedArgb = theme?.md[mode][previewToken]
+  const value = override ?? (resolvedArgb !== undefined ? hexString(resolvedArgb) : '#000000')
 
   const handleChange = (hex: string) => {
     setOverride(palette, hex)

@@ -12,6 +12,11 @@
 // engine surface, adding a variant doesn't touch the schema barrel.
 export { applyDom } from './theme/applyDom'
 export {
+  buildContrastBundle,
+  type ContrastBundle,
+  type ExportOptions,
+} from './theme/contrast-bundle'
+export {
   type CustomColorPreview,
   type CustomColorPreviewRoles,
   previewCustomColor,
@@ -19,10 +24,15 @@ export {
 export {
   type DerivedTheme,
   deriveTheme,
+  type MdLayer,
   type ResolvedLayer,
+  type ShadcnLayer,
   type TokenMap,
 } from './theme/derive'
 export { type ExportLayer, exportCss } from './theme/exporters/css'
+export { exportDart } from './theme/exporters/dart'
+export { exportJson } from './theme/exporters/json'
+export { exportTs } from './theme/exporters/ts'
 export { formatCss, formatLayer } from './theme/format'
 export { CHROMA_HUE_LOCK, type HctTriplet, hctFromHex, hexFromHct, maxChroma } from './theme/hct'
 export { sourceColorHexFromImage } from './theme/image'

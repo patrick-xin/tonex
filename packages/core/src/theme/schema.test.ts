@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_INPUTS,
   isValidHex,
+  MD_CORE_TOKEN_NAMES,
+  MD_EXTENDED_TOKEN_NAMES,
+  MD_TOKEN_NAMES,
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
@@ -228,5 +231,24 @@ describe('parsePortableTheme', () => {
   // drifting from the exported constant.
   it('uses SCHEMA_VERSION as the version literal', () => {
     expect(DEFAULT_INPUTS.version).toBe(SCHEMA_VERSION)
+  })
+})
+
+describe('md token partitions (ADR-0021)', () => {
+  it('CORE and EXTENDED partition MD_TOKEN_NAMES exhaustively (28 + 22 = 50)', () => {
+    // why: future md-token additions must land in exactly one tier. Drift
+    // here would silently move a token's tier (or drop it from emission); the
+    // dual count + union check catches both modes.
+    expect(MD_CORE_TOKEN_NAMES.length).toBe(28)
+    expect(MD_EXTENDED_TOKEN_NAMES.length).toBe(22)
+    expect(MD_TOKEN_NAMES.length).toBe(50)
+    const union = new Set<string>([...MD_CORE_TOKEN_NAMES, ...MD_EXTENDED_TOKEN_NAMES])
+    expect(union.size).toBe(MD_TOKEN_NAMES.length)
+    for (const name of MD_TOKEN_NAMES) expect(union.has(name)).toBe(true)
+  })
+
+  it('CORE and EXTENDED do not overlap', () => {
+    const coreSet = new Set<string>(MD_CORE_TOKEN_NAMES)
+    for (const name of MD_EXTENDED_TOKEN_NAMES) expect(coreSet.has(name)).toBe(false)
   })
 })

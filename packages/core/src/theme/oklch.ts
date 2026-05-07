@@ -143,3 +143,17 @@ export function oklchFromHex(hex: string): string {
 export function hexFromOklch(value: string): string {
   return hexFromArgb(argbFromOklch(value))
 }
+
+// why: ADR-0021 commitment 1 — argb-canonical TokenMaps. Colorspace projection
+// is a stringification concern at the export/applyDom seam, not an internal
+// derive responsibility. `oklchString` and `hexString` are the two helpers
+// every emitter calls; adding a third colorspace later (lab, p3) is a one-
+// helper-and-options-flag change. Both wrap existing primitives so the
+// projection path is one function, drift surface is zero.
+export function oklchString(argb: number): string {
+  return oklchFromArgb(argb)
+}
+
+export function hexString(argb: number): string {
+  return hexFromArgb(argb)
+}
