@@ -79,6 +79,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     error: '#ee2244',
   },
   cmfSecondSourceHex: '#aabbcc',
+  chartMode: 'multi',
 }
 
 describe('useSource persistence round-trip', () => {
@@ -130,6 +131,7 @@ describe('useSource persistence round-trip', () => {
     s.actions.setVariant('cmf')
     s.actions.setCmfSecondSourceHex(NONDEFAULT_INPUTS.cmfSecondSourceHex)
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
+    s.actions.setChartMode(NONDEFAULT_INPUTS.chartMode)
 
     // why: persist writes are debounced (issue #9) — drain the pending
     // write so the localStorage assertion below sees the latest state
@@ -263,6 +265,20 @@ describe('useSource persistence round-trip', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v8State, version: 8 }))
     await useSource.persist.rehydrate()
     expect(useSource.getState().cmfSecondSourceHex).toBeNull()
+  })
+
+  it('v9 → v10 migrate: missing chartMode fills to mono', async () => {
+    // why: v9 had no chartMode — rehydrate must fill 'mono' so derive's
+    // chart branch takes the palette-tone path that v9 used inline.
+    // Drift-guard baseline holds because mono routes through the same
+    // CHART_TONES_LIGHT/DARK ladder. ADR-0024.
+    const v9State = {
+      ...DEFAULT_INPUTS,
+      chartMode: undefined as unknown as PortableTheme['chartMode'],
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: v9State, version: 9 }))
+    await useSource.persist.rehydrate()
+    expect(useSource.getState().chartMode).toBe('mono')
   })
 
   it('v7 → v8 migrate: missing paletteOverrides fills to empty map', async () => {

@@ -10,6 +10,7 @@ import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
 import {
+  type ChartMode,
   type CustomColorEntry,
   MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
@@ -92,12 +93,29 @@ const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
 const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
 
 // why: arbitrary 5-tone spread per mode (ADR-0021 commitment 2 — "fixed 5-
-// tone mapping"). Tunable; chart UX hasn't pinned exact tones yet. Light-mode
-// tones skew darker so chart-1 shows up against the surface; dark-mode tones
-// skew lighter for the same reason. Mode-aware, contrast-invariant — palette
-// tones don't shift with MCU contrast level.
-const CHART_TONES_LIGHT = [40, 60, 80, 25, 75] as const
-const CHART_TONES_DARK = [80, 60, 40, 95, 25] as const
+// tone mapping" — refined by ADR-0024 to be the mono branch). Tunable; chart
+// UX hasn't pinned exact tones yet. Light-mode tones skew darker so chart-1
+// shows up against the surface; dark-mode tones skew lighter for the same
+// reason. Mode-aware, contrast-invariant — palette tones don't shift with
+// MCU contrast level.
+const CHART_TONES_LIGHT = [40, 60, 20, 50, 55] as const
+const CHART_TONES_DARK = [80, 50, 90, 60, 45] as const
+
+// why: multi-mode hue-rotation primitives (ADR-0024). Offsets distribute 5
+// chart series around the color wheel: source hue, two triadic partners
+// (±120°), then split-complementary fill (60°/180°). Fixed chroma/tone so
+// hue is the only axis of separation — variant treatment intentionally does
+// NOT participate (hue rotation contradicts variant tonal-spotting).
+const MULTI_HUE_OFFSETS = [0, 120, 240, 60, 180] as const
+const MULTI_CHROMA = 50
+const MULTI_TONE_LIGHT = 50
+const MULTI_TONE_DARK = 60
+// why: a near-achromatic seed (e.g. user picked #808080) has no usable hue,
+// so multi mode falls back to hue 270 (purple) — matches shadcn's default
+// chart palette character. Threshold 5 chroma units is the same MCU uses
+// internally for "essentially gray" comparisons.
+const MULTI_ACHROMATIC_THRESHOLD = 5
+const MULTI_FALLBACK_HUE = 270
 
 const mdc = new MaterialDynamicColors()
 
@@ -214,7 +232,8 @@ function bindShadcn(mdLayer: TokenMap, bindings: ShadcnRoleBindings): TokenMap {
 //   4. Compute custom-color groups + merge their md tokens.
 //   5. Bind shadcn from the merged map (allows any md token as a binding
 //      target — extended included).
-//   6. Compute chart (5 tokens per mode from primaryPalette).
+//   6. Compute chart (5 tokens per mode; mono branch reads primaryPalette,
+//      multi branch synthesizes via Hct.from — see ADR-0024).
 //   7. Compute palette (78 tones, mode-invariant).
 //   8. SPLIT the merged md result into core/extended/custom buckets by name
 //      so each field's consumer set is sharp.
@@ -290,8 +309,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const splitLight = splitMdLayer(mergedLight)
   const splitDark = splitMdLayer(mergedDark)
 
-  const mdLightChart = buildMdChart(lightScheme, 'light')
-  const mdDarkChart = buildMdChart(darkScheme, 'dark')
+  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chartMode)
+  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chartMode)
 
   return {
     md: {
@@ -334,15 +353,35 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
   return { core, extended }
 }
 
-// why: chart tokens are sourced from the scheme's primary palette via a fixed
-// per-mode 5-tone mapping. Palette is the same construct shadcn-rebound
-// surfaces read from, so picking tones from it makes chart series visually
-// coherent with the rest of the theme (same hue/chroma family).
-function buildMdChart(scheme: DynamicScheme, mode: Mode): TokenMap {
-  const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
+// why: chart-color derivation has two shapes by intent (ADR-0024).
+//   mono — reads scheme.primaryPalette at fixed tones. Variant-aware (the
+//          palette already encodes Vibrant / Expressive / Rainbow character).
+//          Respects paletteOverrides because the override mutates the
+//          primaryPalette in place upstream of this function.
+//   multi — synthesizes 5 hue-rotated points via Hct.from() at fixed
+//           chroma+tone. Variant-bypassed by design — hue rotation and
+//           variant tonal-spotting are conflicting goals. Achromatic seed
+//           (chroma < 5) uses fallback hue 270 so a gray seed still produces
+//           a colorful series.
+function buildMdChart(
+  seedHct: Hct,
+  scheme: DynamicScheme,
+  mode: Mode,
+  chartMode: ChartMode,
+): TokenMap {
   const out: TokenMap = {}
+  if (chartMode === 'mono') {
+    const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
+    MD_CHART_TOKEN_NAMES.forEach((name, i) => {
+      out[name] = scheme.primaryPalette.tone(tones[i])
+    })
+    return out
+  }
+  const baseHue = seedHct.chroma < MULTI_ACHROMATIC_THRESHOLD ? MULTI_FALLBACK_HUE : seedHct.hue
+  const tone = mode === 'dark' ? MULTI_TONE_DARK : MULTI_TONE_LIGHT
   MD_CHART_TOKEN_NAMES.forEach((name, i) => {
-    out[name] = scheme.primaryPalette.tone(tones[i])
+    const hue = (baseHue + MULTI_HUE_OFFSETS[i]) % 360
+    out[name] = Hct.from(hue, MULTI_CHROMA, tone).toInt()
   })
   return out
 }

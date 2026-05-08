@@ -51,7 +51,7 @@ import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 // v1 stores only had 2 role bindings; migration spreads defaults under
 // persisted bindings so bindShadcn finds every role.
 // Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 9 as const
+export const SCHEMA_VERSION = 10 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -219,6 +219,15 @@ export const SHADCN_CHART_TOKEN_NAMES = [
   '--chart-5',
 ] as const
 export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
+
+// why: chart-color derivation has two shapes by intent. `mono` reads the
+// scheme's primary palette at fixed tones (variant-aware — Vibrant /
+// Expressive / Rainbow flavor flows through). `multi` synthesizes 5 hue-
+// rotated points via Hct.from() at fixed chroma + tone (variant-bypassed —
+// hue rotation is the whole point). shadcn's default is mono; multi is
+// opt-in for dashboards that want maximum series separation. ADR-0024.
+export const CHART_MODES = ['mono', 'multi'] as const
+export type ChartMode = (typeof CHART_MODES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
@@ -520,6 +529,12 @@ export interface PortableTheme {
   // disables the field). Hex format validated at the setter boundary via
   // isValidHex.
   cmfSecondSourceHex: string | null
+  // why: chart-color derivation axis. 'mono' (default, shadcn convention)
+  // reads the primary palette at fixed tones — variant-aware. 'multi' rotates
+  // hue around the seed at fixed chroma/tone — variant-bypassed by design.
+  // Achromatic seed (chroma < 5) under multi falls back to hue 270 so a gray
+  // seed still produces a colorful series. ADR-0024.
+  chartMode: ChartMode
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -540,6 +555,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,
+  chartMode: 'mono',
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
@@ -550,7 +566,7 @@ export function isValidHex(hex: string): boolean {
 }
 
 // why: ADR-0009 — runtime contract for PortableTheme. Migration ladder lifts
-// persisted shape to v9; this schema validates the v9 result post-rehydrate.
+// persisted shape to v10; this schema validates the v10 result post-rehydrate.
 // Recovery on failure is all-or-nothing reset to DEFAULT_INPUTS, gated in
 // source.ts:onRehydrateStorage. Field-level helpers (isValidHex,
 // validateCustomColorEntry) are reused as refinements so the validation
@@ -629,6 +645,7 @@ export const PortableThemeSchema = v.object({
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
   cmfSecondSourceHex: v.union([HexSchema, v.null()]),
+  chartMode: v.picklist(CHART_MODES),
 })
 
 // why: returns a discriminated result instead of throwing — the caller

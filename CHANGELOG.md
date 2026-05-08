@@ -10,6 +10,13 @@ Slice-organized history. Each entry corresponds to a vertical-tracer increment p
 - Domain-discipline rules graduated to `docs/agents/code-conventions.md` (primitive-shape diff, disable-over-warn).
 - Triage labels aligned between `docs/agents/triage-labels.md` and GitHub.
 
+### Slice 12 — Chart-color emission + chartMode axis
+
+- `fix(core,www)`: chart-color runtime emission gap — `formatLayer` now spreads `lightChart`/`darkChart` into both `.md` and `.shadcn` blocks; `globals.css` `@theme inline` chart entries self-reference; `.md` block aliases shadcn-naming `--chart-N` to `--color-chart-N` so Tailwind utilities (`bg-chart-1`) and Recharts `var(--chart-1)` both resolve at runtime.
+- `feat(core)`: `chartMode: 'mono' | 'multi'` axis on `PortableTheme`, default mono. Mono branch reads `scheme.primaryPalette.tone()` at fixed mode tones (variant-aware, palette-override-aware). Multi branch synthesizes 5 hue-rotated points via `Hct.from()` with offsets `[0, 120, 240, 60, 180]` at fixed chroma 50, mode-tone 50/60; achromatic seed (`chroma < 5`) falls back to hue 270. `SCHEMA_VERSION 9 → 10`; v9→v10 migration fills `'mono'`. Per ADR-0024.
+- `feat(www)`: display-prefs popover gains chart-palette ToggleGroup (mono | multi). Primary editing surface intentionally deferred — this is the temporary surface until chart UX lands.
+- ADR-0024 — chart-color derivation axis (mono vs multi); ADR-0021 amendment notes commitment 2's "fixed 5-tone mapping" is the mono branch under the new axis.
+
 ## Slice 11 — Palette-level overrides + fine-tune UI
 
 - `feat(www)`: palette-override fine-tune UI (`4bf979b`)

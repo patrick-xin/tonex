@@ -73,6 +73,12 @@
   --color-outline: var(--color-outline);
   --color-outline-variant: var(--color-outline-variant);
 
+  --color-chart-1: var(--color-chart-1);
+  --color-chart-2: var(--color-chart-2);
+  --color-chart-3: var(--color-chart-3);
+  --color-chart-4: var(--color-chart-4);
+  --color-chart-5: var(--color-chart-5);
+
   /* shadcn-only utility names not present in md */
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);
@@ -98,6 +104,19 @@
   --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
   --color-sidebar-border: var(--color-sidebar-border);
   --color-sidebar-ring: var(--color-sidebar-ring);
+}
+
+/* why: Recharts ChartConfig idiom uses `color: 'var(--chart-N)'` (shadcn
+   convention). md owns --color-chart-N as canonical; alias the shadcn name
+   inside .md so demos following the shadcn idiom resolve in md scope without
+   rewriting consumer code. Reverse shape of the .shadcn bridge below — md
+   surfaces the shadcn name on top of its canonical token. */
+.md {
+  --chart-1: var(--color-chart-1);
+  --chart-2: var(--color-chart-2);
+  --chart-3: var(--color-chart-3);
+  --chart-4: var(--color-chart-4);
+  --chart-5: var(--color-chart-5);
 }
 
 /* why: shadcn-classic components reference --primary / --foreground / etc.
@@ -188,6 +207,11 @@
   --color-scrim: oklch(0 0 0);
   --color-outline: oklch(0.5835 0.0356 299.2);
   --color-outline-variant: oklch(0.7663 0.0365 301.91);
+  --color-chart-1: oklch(0.4955 0.1305 293.71);
+  --color-chart-2: oklch(0.6669 0.1292 294.67);
+  --color-chart-3: oklch(0.8341 0.0944 297.32);
+  --color-chart-4: oklch(0.3675 0.1335 291.8);
+  --color-chart-5: oklch(0.7945 0.1178 296.36);
 }
 
 html.dark .md {
@@ -241,6 +265,11 @@ html.dark .md {
   --color-scrim: oklch(0 0 0);
   --color-outline: oklch(0.5665 0.0359 299.16);
   --color-outline-variant: oklch(0.4047 0.0355 297.88);
+  --color-chart-1: oklch(0.8341 0.0944 297.32);
+  --color-chart-2: oklch(0.6669 0.1292 294.67);
+  --color-chart-3: oklch(0.4955 0.1305 293.71);
+  --color-chart-4: oklch(0.9603 0.0241 306.97);
+  --color-chart-5: oklch(0.3675 0.1335 291.8);
 }
 
 .shadcn {
@@ -270,6 +299,11 @@ html.dark .md {
   --sidebar-accent-foreground: oklch(0.3203 0.0359 298.11);
   --sidebar-border: oklch(0.5835 0.0356 299.2);
   --sidebar-ring: oklch(0.5835 0.0356 299.2);
+  --chart-1: oklch(0.4955 0.1305 293.71);
+  --chart-2: oklch(0.6669 0.1292 294.67);
+  --chart-3: oklch(0.8341 0.0944 297.32);
+  --chart-4: oklch(0.3675 0.1335 291.8);
+  --chart-5: oklch(0.7945 0.1178 296.36);
 }
 
 html.dark .shadcn {
@@ -299,5 +333,10 @@ html.dark .shadcn {
   --sidebar-accent-foreground: oklch(0.9258 0.0377 302.47);
   --sidebar-border: oklch(0.5665 0.0359 299.16);
   --sidebar-ring: oklch(0.5665 0.0359 299.16);
+  --chart-1: oklch(0.8341 0.0944 297.32);
+  --chart-2: oklch(0.6669 0.1292 294.67);
+  --chart-3: oklch(0.4955 0.1305 293.71);
+  --chart-4: oklch(0.9603 0.0241 306.97);
+  --chart-5: oklch(0.3675 0.1335 291.8);
 }
 /* tonex:tokens:end */

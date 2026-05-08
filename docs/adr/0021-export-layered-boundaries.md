@@ -102,7 +102,7 @@ ADR-0017's "preview === export" extends to visibility: the **inspect surface** t
 `<ExportButton tabs={ExportTab[]} />`. The route layout (per ADR-0019) decides which tabs appear:
 
 - md routes pass `['Tailwind', 'TS', 'JSON', 'Dart']`.
-- shadcn routes pass `['shadcn', 'TS', 'JSON', 'Dart']`.
+- shadcn routes pass `['shadcn']`.
 
 The button is route-agnostic. No path-sniffing inside the dialog, no duplicated component.
 
@@ -127,3 +127,16 @@ Material's official theme builder ships 6 separate files (light/light-mc/light-h
 - `pnpm bake` calls `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` becomes a thin convenience wrapper that constructs `{ default: theme }` and calls `exportCss`. globals.css regenerates with identical text post-refactor (oklch output preserved).
 - Toggle state for the dialog lives as React-local state, not in `useSource` (UI prefs aren't portable theme). Lift to a small UI store only when a second consumer (a production inspect UI) appears.
 - The cmf-vs-2025 spec memo's `lifecycle` field bumps from `until-adr-0021` to whatever number the future shadcn-binding-expansion ADR ends up taking. Trivial bookkeeping.
+
+---
+
+## Amendment 2026-05-08 — chartMode axis (ADR-0024)
+
+Commitment 2 of this ADR described `MD_CHART_TOKEN_NAMES` as "derived from the primary palette via a fixed 5-tone mapping." That description is the **mono** branch under ADR-0024's chartMode axis; it is no longer the only path.
+
+ADR-0024 introduces `chartMode: 'mono' | 'multi'` on `PortableTheme`:
+- **mono** (default) — preserves the primary-palette-derived behavior named here. Variant-aware. Drift-guard baseline holds (default `chartMode: 'mono'` produces byte-identical chart values to pre-axis output).
+- **multi** — synthesizes via `Hct.from()` with hue rotation; bypasses the primary palette by design. See ADR-0024 commitment 2 for why the divergence is permanent.
+
+Token shape (5 tokens, names per `MD_CHART_TOKEN_NAMES` / `SHADCN_CHART_TOKEN_NAMES`) and emission paths (formatCss, exportCss, applyDom) are **unchanged**. The axis acts upstream of stringification — exporters and applyDom consume the same `lightChart` / `darkChart` TokenMap shape regardless of mode.
+

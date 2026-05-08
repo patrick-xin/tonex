@@ -7,6 +7,8 @@
 export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
+  CHART_MODES,
+  type ChartMode,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,

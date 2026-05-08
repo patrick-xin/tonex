@@ -32,19 +32,29 @@ export function formatCss(theme: DerivedTheme): string {
 // rendered swatch and this code disagree on a value, that is exactly the
 // drift mode ADR-0017 exists to surface.
 //
-// md emission merges core + extended in source order (matches today's
-// globals.css). Custom-color slugs land at the tail of `light`/`dark` per
-// deriveTheme's spread order. shadcn has no extended tier; light/dark only.
+// md emission merges core + extended + chart in source order (matches
+// today's globals.css). Custom-color slugs land at the tail of `light`/`dark`
+// per deriveTheme's spread order. Chart appends after the canonical
+// MD_TOKEN_NAMES sequence so first-paint globals.css carries the same
+// tokens applyDom merges into the live rule (commitment 4 in ADR-0021 — the
+// DOM-emitted subset is core + chart). shadcn carries chart on the same
+// principle; emitted under shadcn-naming (--chart-1 …).
 export function formatLayer(theme: DerivedTheme, layer: 'md' | 'shadcn'): string {
   if (layer === 'md') {
     return [
-      formatBlock('.md', mergeMdEmission(theme.md.light, theme.md.lightExtended)),
-      formatBlock('html.dark .md', mergeMdEmission(theme.md.dark, theme.md.darkExtended)),
+      formatBlock('.md', {
+        ...mergeMdEmission(theme.md.light, theme.md.lightExtended),
+        ...theme.md.lightChart,
+      }),
+      formatBlock('html.dark .md', {
+        ...mergeMdEmission(theme.md.dark, theme.md.darkExtended),
+        ...theme.md.darkChart,
+      }),
     ].join('\n\n')
   }
   return [
-    formatBlock('.shadcn', theme.shadcn.light),
-    formatBlock('html.dark .shadcn', theme.shadcn.dark),
+    formatBlock('.shadcn', { ...theme.shadcn.light, ...theme.shadcn.lightChart }),
+    formatBlock('html.dark .shadcn', { ...theme.shadcn.dark, ...theme.shadcn.darkChart }),
   ].join('\n\n')
 }
 

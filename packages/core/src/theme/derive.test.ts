@@ -1,4 +1,4 @@
-import { argbFromHex } from '@tonex/mcu'
+import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from './derive'
 import { hexFromHct } from './hct'
@@ -722,6 +722,50 @@ describe('deriveTheme', () => {
         expect(shadcn.lightChart[shadcnName]).toBe(md.lightChart[mdName])
         expect(shadcn.darkChart[shadcnName]).toBe(md.darkChart[mdName])
       }
+    })
+
+    it('chartMode="multi": 5 chart tokens are distinct hue-rotated values at fixed chroma/tone', () => {
+      // why: ADR-0024 — multi synthesizes via Hct.from(hue, 50, tone). The
+      // 5 hue offsets [0,120,240,60,180] guarantee distinct hues, so the
+      // emitted argb values must all differ. Round-tripping each through
+      // Hct confirms chroma/tone are pinned per-mode (50 light / 60 dark)
+      // and chroma rests at the configured 50 (modulo MCU gamut clipping).
+      const { md } = deriveTheme({ ...DEFAULT_INPUTS, chartMode: 'multi' })
+      const lightArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.lightChart[n] as number)
+      expect(new Set(lightArgbs).size).toBe(5)
+      for (const argb of lightArgbs) {
+        const hct = Hct.fromInt(argb)
+        expect(hct.tone).toBeCloseTo(50, 0)
+      }
+      const darkArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.darkChart[n] as number)
+      for (const argb of darkArgbs) {
+        const hct = Hct.fromInt(argb)
+        expect(hct.tone).toBeCloseTo(60, 0)
+      }
+    })
+
+    it('chartMode="multi": achromatic seed (chroma < 5) falls back to hue 270', () => {
+      // why: ADR-0024 — gray seeds have no usable hue, so multi mode pins
+      // the base to 270 (purple) rather than producing an all-gray chart.
+      // chart-1 lands at the base hue (offset 0); assert it round-trips
+      // close to 270.
+      const grayInputs = { ...DEFAULT_INPUTS, seedHex: '#808080', chartMode: 'multi' as const }
+      const { md } = deriveTheme(grayInputs)
+      const chart1 = md.lightChart['--color-chart-1'] as number
+      const hct = Hct.fromInt(chart1)
+      expect(hct.hue).toBeGreaterThan(265)
+      expect(hct.hue).toBeLessThan(275)
+    })
+
+    it('chartMode="mono" (default) is unchanged from pre-axis behavior — palette-tone derivation', () => {
+      // why: drift-guard. mono is the default; its derivation must remain
+      // the variant-aware primaryPalette.tone() path that v9 had inline.
+      // Explicit chartMode='mono' must equal the default DEFAULT_INPUTS
+      // result token-for-token.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({ ...DEFAULT_INPUTS, chartMode: 'mono' })
+      expect(explicit.md.lightChart).toEqual(baseline.md.lightChart)
+      expect(explicit.md.darkChart).toEqual(baseline.md.darkChart)
     })
 
     it('custom-color slugs land in md.light (core), not in lightExtended', () => {

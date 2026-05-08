@@ -7,6 +7,7 @@ import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
 import {
+  type ChartMode,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
@@ -59,6 +60,7 @@ export interface SourceActions {
   // disabled per cmfSecondSourceDisabledReason — same backstop pattern as
   // setPaletteOverride. Hex format validated; malformed throws at the seam.
   setCmfSecondSourceHex(hex: string | null): void
+  setChartMode(mode: ChartMode): void
   setHydrated(): void
   reset(): void
 }
@@ -225,6 +227,7 @@ export const useSource = create<SourceState>()(
             }
             return { cmfSecondSourceHex: hex }
           }),
+        setChartMode: (chartMode) => set({ chartMode }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },
@@ -337,6 +340,14 @@ export const useSource = create<SourceState>()(
           // field's presence in the persisted shape.
           s.cmfSecondSourceHex = s.cmfSecondSourceHex ?? null
         }
+        if (version < 10) {
+          // why: v9 had no chartMode — fill 'mono' so deriveTheme's chart
+          // branch takes the palette-tone path that v9 used unconditionally.
+          // Drift-guard baseline (globals.css === formatCss(deriveTheme(
+          // DEFAULT_INPUTS))) holds because mono routes through the same
+          // CHART_TONES_LIGHT/DARK ladder v9 had inline. ADR-0024.
+          s.chartMode = s.chartMode ?? 'mono'
+        }
         return s as PortableTheme
       },
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
@@ -344,8 +355,8 @@ export const useSource = create<SourceState>()(
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
       //
       // Validate the rehydrated portable shape against PortableThemeSchema
-      // (ADR-0009). Migration ladder above lifts persisted shape to v9; this
-      // is the v9 contract check. On parse failure (corrupted localStorage,
+      // (ADR-0009). Migration ladder above lifts persisted shape to v10; this
+      // is the v10 contract check. On parse failure (corrupted localStorage,
       // schema bug, partial write) reset to DEFAULT_INPUTS — all-or-nothing
       // recovery, the rare path that's simpler than per-field fallback. If
       // rehydrate itself errored or no state came back, leave the in-memory
