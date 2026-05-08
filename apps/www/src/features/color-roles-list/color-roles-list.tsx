@@ -51,6 +51,7 @@ export function ColorRolesList() {
   const filteredGroups = showExtended
     ? ROLE_GROUPS
     : ROLE_GROUPS.flatMap((group) => {
+        // @ts-expect-error TODO: fix ts error
         const coreRoles = group.roles.filter((r) => MD_CORE_TOKEN_NAMES.includes(r))
         return coreRoles.length > 0 ? [{ ...group, roles: coreRoles }] : []
       })

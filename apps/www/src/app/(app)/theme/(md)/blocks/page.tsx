@@ -6,7 +6,7 @@ import {
   Preferences,
   ProjectQuoteForm,
   ReleaseCatalog,
-} from './_demos'
+} from './_components'
 
 export const metadata: Metadata = {
   title: 'Blocks | Tonex',

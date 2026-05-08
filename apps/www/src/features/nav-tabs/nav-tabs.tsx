@@ -13,6 +13,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
 import { SiteCommandMenu } from '@/features/site-command-menu'
+import { useThemePath } from '@/lib/hooks/use-theme-path'
 import { ResetButton } from '../testbed/reset-button'
 
 // why: ADR-0021 commitment 8 — md route owns its audience tabs. The shadcn
@@ -24,7 +25,8 @@ export function NavTabs() {
   const pathname = usePathname()
   const router = useRouter()
   const [selected, setSelected] = useState<number | null>(null)
-
+  const { isMD3 } = useThemePath()
+  const tabs = isMD3 ? md3Tabs : shadcnTabs
   useHotkeys(
     tabs.map((tab, index) => ({
       hotkey: String(index + 1) as RegisterableHotkey,
@@ -134,9 +136,17 @@ type PreviewTab = {
   href: string
 }
 
-const tabs: PreviewTab[] = [
+const md3Tabs: PreviewTab[] = [
   { label: 'Overview', href: '/theme' },
   { label: 'Color Roles', href: '/theme/color-roles' },
   { label: 'Blocks', href: '/theme/blocks' },
   { label: 'Palettes', href: '/theme/palettes' },
+]
+
+const shadcnTabs: PreviewTab[] = [
+  { label: 'Components', href: '/theme/shadcn' },
+  { label: 'Blocks', href: '/theme/shadcn/blocks' },
+  { label: 'Dashboard', href: '/theme/shadcn/dashboard' },
+  { label: 'Charts', href: '/theme/shadcn/charts' },
+  { label: 'Palettes', href: '/theme/shadcn/palettes' },
 ]

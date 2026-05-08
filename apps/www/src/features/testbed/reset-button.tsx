@@ -1,20 +1,19 @@
 'use client'
 
 import { useSource } from '@tonex/core'
+import { Button } from '@/components/ui/button'
 
 export function ResetButton() {
   const reset = useSource((s) => s.actions.reset)
   return (
-    <button
-      type="button"
+    <Button
       onClick={() => {
         if (typeof window !== 'undefined' && !confirm('Reset every source field to defaults?'))
           return
         reset()
       }}
-      className="text-xs px-3 py-1.5 border rounded self-start"
     >
       reset to defaults
-    </button>
+    </Button>
   )
 }
