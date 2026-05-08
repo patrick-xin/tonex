@@ -46,15 +46,22 @@ export function ColorRolesList() {
         <section key={group.label}>
           <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
           <div className="flex flex-wrap gap-2">
-            {group.roles.map((role) => (
-              <RoleSwatch
-                key={role}
-                role={role}
-                hex={hexByRole[role] ?? '#000000'}
-                warning={warnings.get(role)}
-                overridden={role in overrides}
-              />
-            ))}
+            {group.roles.map((role) => {
+              // why: hexByRole is Partial<Record<MdTokenName, ...>> because the
+              // mdLayer merge above is typed-but-complete — '#000000' fires only
+              // if a token slips out of MD_CORE/EXTENDED_TOKEN_NAMES rotation
+              // (visual sentinel, not a runtime guard).
+              const hex = hexByRole[role] ?? '#000000'
+              return (
+                <RoleSwatch
+                  key={role}
+                  role={role}
+                  hex={hex}
+                  warning={warnings.get(role)}
+                  overridden={role in overrides}
+                />
+              )
+            })}
           </div>
         </section>
       ))}

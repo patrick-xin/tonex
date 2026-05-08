@@ -147,11 +147,12 @@ When in doubt, write it without. If the compiler can't see why memoization is ne
 
 ### `// why:` at framework-specific timing, error fallbacks, and magic conditions
 
-Repo convention is `// why:` only — but the *placement* matters. Three patterns that always deserve a why-line:
+Repo convention is `// why:` only — but the *placement* matters. Four patterns that always deserve a why-line:
 
 1. **Framework timing primitives** — `queueMicrotask`, `useLayoutEffect` (when used for ref sync vs the more common DOM-measurement reason), `flushSync`, `startTransition`. The reader can't tell *why this primitive instead of `useEffect`* without the why.
 2. **Try/catch fallbacks** — what input shape causes the throw, and why the fallback is acceptable rather than crashing.
 3. **Magic-string conditions** that come from a third-party API surface (`reason === 'none'`, etc.) — what does the magic string mean in the library's vocabulary, and why is *that* branch the one we care about.
+4. **Silent fallbacks for typed-but-partial reads** — `?? '#000000'`, `?? []`, `?? defaultValue` on a typed map/array access where the type says optional but the data flow says complete. Two patches in two reviews missed these without prompting; the missing why-line costs the reader a trip to the schema to learn whether the fallback ever fires. Either name the shape that triggers it ("partial-record access on a closed-enum merge — fires only if a token slips out of schema rotation") OR remove the fallback by tightening the type at the source.
 
 JSDoc blocks (`/** … */`) on internal helpers retire — they dilute the why-comment signal CLAUDE.md preserves. Why-lines stay terse, single-purpose, placed adjacent to the line they explain.
 

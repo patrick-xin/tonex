@@ -29,6 +29,9 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
   // here: Popover only opens after mount, parent gated on hydration.
   const mdLayer = theme !== null ? { ...theme.md[mode], ...theme.md[`${mode}Extended`] } : null
   const argb = mdLayer?.[role]
+  // why: '#000000' fallback fires only if mdLayer is null (theme not yet
+  // hydrated when popover renders) or the token slips out of schema rotation —
+  // both are visual-sentinel paths, not states the user should reach.
   const currentHex = argb !== undefined ? hexString(argb) : '#000000'
 
   const { hexInput, handleChange, inputProps } = useHexFieldState(currentHex, (h) =>
