@@ -43,3 +43,16 @@ Most slots are created on demand. The features/ + components/ + app/_providers.t
 - Tempted to add a `<Layer>` context → refuse; route-level segmentation is the layer mechanism (ADR-0019).
 - Doc surface for these rules: `docs/agents/www-structure.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
 - **Known violations at write time** (tracked in tracker, not in this ADR): the codebase has a small number of rule-1, rule-2, and rule-4 violations at the moment this ADR lands. They are filed as cleanup issues; the rules supersede them, not the other way around.
+
+## Amendment 2026-05-08 — rule 5 superseded; rule 6 added (see ADR-0022)
+
+Three slices of real features (editor-rail, export, testbed in active use; md/shadcn rail split + shadcn token-override route on the near horizon) revealed two failure modes in the original rules:
+
+1. **Rule 5 was over-broad.** It correctly bans layer-keyed *workflow* features (don't fork "pick a seed" per layer) but also blocked layer-keyed *surface* features like `features/md-rail/` and `features/shadcn-rail/`, which are legitimate layer-specific composition sites and are needed to keep cross-layer workflows like `token-override` from becoming homeless.
+2. **The locate-test was implicit.** Pattern-gravity is really an agent-locality property, but the rules never made it the falsifiable design metric.
+
+**ADR-0022 supersedes rule 5** by introducing a workflow/surface split — workflow features stay layer-agnostic; surface features may be layer-keyed because they ARE the composition site. **ADR-0022 adds rule 6** — locate-test as the design metric: a prompt that names X must resolve to `features/<X>/` or one primitive in `components/`, otherwise the structure has missed a name.
+
+ADR-0022 also clarifies that route-provided `<LayerContext>` for behavior parameterization is allowed and distinct from the runtime primitive switching banned by ADR-0019.
+
+Rules 1–4 of this ADR stand unchanged. See ADR-0022 for the current rule set and the locate-test worked examples.

@@ -3,7 +3,7 @@
 import type { ExportOptions } from '@tonex/core'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import type { ExportTab } from './export-content-manager'
+import type { ExportTab } from './use-export-content'
 
 // why: ADR-0021 commitment 6 — filter visibility is per-tab. md tabs (Tailwind)
 // surface the full 4 tier filters + colorFormat; shadcn surfaces only the

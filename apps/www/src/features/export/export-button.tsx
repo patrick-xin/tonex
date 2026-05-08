@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { ExportContentDisplay } from './export-content-display'
-import { type ExportTab, useExportContent } from './export-content-manager'
 import { ExportControls } from './export-controls'
 import { ExportFilters } from './export-filters'
+import { type ExportTab, useExportContent } from './use-export-content'
 
 // why: ADR-0021 commitment 8 — route-agnostic. md routes pass
 // `['Tailwind', 'TS', 'JSON', 'Dart']`; shadcn routes pass

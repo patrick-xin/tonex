@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface ExportControlsProps {
@@ -11,13 +11,13 @@ interface ExportControlsProps {
 export function ExportControls({ exportContent, ext }: ExportControlsProps) {
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = async () => {
     await navigator.clipboard.writeText(exportContent)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
-  }, [exportContent])
+  }
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = () => {
     const blob = new Blob([exportContent], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -25,7 +25,7 @@ export function ExportControls({ exportContent, ext }: ExportControlsProps) {
     a.download = `theme.${ext}`
     a.click()
     URL.revokeObjectURL(url)
-  }, [exportContent, ext])
+  }
 
   return (
     <div className="p-2 flex gap-2 items-center justify-end">

@@ -53,3 +53,15 @@ Commitment 1's "two editor routes" framing referred to the **layer split** (md v
 **TBD:** Further `apps/www/src/` structure decisions (additional groups, marketing namespace, docs surface) defer until the UI pressure for them lands. Avoid speculative structure — pattern-gravity per ADR-0014 means the first concrete instance shapes the next ten.
 
 Commitments 2–7 are unchanged.
+
+## Amendment 2026-05-08 — `<LayerContext>` allowed for behavior parameterization (not primitive switching)
+
+ADR-0022 introduces route-provided `<LayerContext>` so workflow features (e.g. `features/token-override/`) can read which layer's tokens they are operating on, when the same workflow is consumed from both `(md)` and `(shadcn)` route subtrees. This is distinct from — and does not loosen — this ADR's commitments 4 and 5.
+
+**Still banned (unchanged):** runtime primitive switching. A component must not pick `components/ui/` vs `components/shadcn/` based on context. Primitive selection remains route-level: md routes import `components/ui/`, shadcn routes import `components/shadcn/`.
+
+**Newly allowed:** behavior parameterization. A workflow feature consuming a route-provided context to know which token list / scheme / scope to operate on is a legitimate use of context. The context carries data, not primitive identity.
+
+Rule of thumb: if removing the context would change *which component renders*, that's the banned pattern. If removing it would change *what data the same component renders*, that's the allowed pattern.
+
+Commitments 1–7 are unchanged.

@@ -1,12 +1,17 @@
-import { useRef } from 'react'
+import { useInsertionEffect, useRef } from 'react'
 
-// Saves the latest handler to a ref so consumers don't have to re-memo it
-// on every render. Adapted from react-colorful (MIT).
+// why: hold the latest handler on a ref so the returned function stays
+// referentially stable across renders. Sync via useInsertionEffect (not
+// during render) so a discarded Concurrent render can't leave a stale
+// handler that the next event handler would call. Adapted from
+// react-colorful (MIT).
 export function useEventCallback<T>(handler?: (value: T) => void): (value: T) => void {
   const callbackRef = useRef(handler)
   const fn = useRef((value: T) => {
     if (callbackRef.current) callbackRef.current(value)
   })
-  callbackRef.current = handler
+  useInsertionEffect(() => {
+    callbackRef.current = handler
+  })
   return fn.current
 }
