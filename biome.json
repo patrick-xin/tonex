@@ -9,7 +9,9 @@
       "!**/.turbo",
       "!**/*.tsbuildinfo",
       "!packages/mcu",
-      "!**/next-env.d.ts"
+      "!**/next-env.d.ts",
+      "!apps/www/src/components/shadcn",
+      "!apps/www/src/app/**/(shadcn)/shadcn/**/_components"
     ]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
