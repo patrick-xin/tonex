@@ -1,0 +1,223 @@
+import type {
+  AutocompleteCollectionProps,
+  AutocompleteEmptyProps,
+  AutocompleteGroupLabelProps,
+  AutocompleteGroupProps,
+  AutocompleteItemProps,
+  AutocompleteListProps,
+  DialogPopupProps,
+  DialogRootProps,
+  DialogTriggerProps,
+  SeparatorProps,
+} from '@base-ui/react'
+import { MagnifyingGlassIcon } from '@phosphor-icons/react'
+import { cn, type VariantProps } from 'tailwind-variants'
+import {
+  Autocomplete,
+  AutocompleteCollection,
+  AutocompleteEmpty,
+  AutocompleteGroup,
+  AutocompleteGroupLabel,
+  AutocompleteInputGroupContent,
+  AutocompleteItem,
+  AutocompleteList,
+  AutocompleteSeparator,
+} from '@/components/ui/autocomplete'
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogClose,
+  DialogPopup,
+  DialogPortal,
+  DialogTrigger,
+  DialogViewport,
+} from '@/components/ui/dialog'
+import type { inputStyles } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+
+function CommandMenu(props: DialogRootProps) {
+  return <Dialog {...props} data-slot="command-menu" />
+}
+
+function CommandMenuTrigger(props: DialogTriggerProps) {
+  return <DialogTrigger data-slot="command-menu-trigger" {...props} />
+}
+
+function CommandMenuContent({ children, className, ...props }: DialogPopupProps) {
+  return (
+    <DialogPortal>
+      <DialogBackdrop />
+      <DialogViewport
+        className={cn(
+          'flex flex-col items-center',
+          // add top padding to move the popup down
+          'pt-[10dvh]',
+        )}
+      >
+        <DialogPopup
+          className={cn(
+            'relative flex flex-col overflow-hidden surface-dialog rounded-md',
+            'w-[min(40rem,calc(100vw-2rem))]',
+            'overlay-outline animate-fade-zoom',
+            className,
+          )}
+          data-slot="command-menu-content"
+          {...props}
+        >
+          <DialogClose className="sr-only">Close command palette</DialogClose>
+          {children}
+        </DialogPopup>
+      </DialogViewport>
+    </DialogPortal>
+  )
+}
+
+function CommandMenuFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      className={cn(
+        'flex justify-between items-center gap-2 text-xs text-on-surface-container h-10 px-4 border-t border-outline-variant',
+        className,
+      )}
+      data-slot="command-menu-footer"
+      {...props}
+    />
+  )
+}
+
+const Command = (({
+  autoHighlight = 'always',
+  inline = true,
+  keepHighlight = true,
+  open = true,
+  ...props
+}: React.ComponentProps<typeof Autocomplete>) => {
+  return (
+    <Autocomplete
+      autoHighlight={autoHighlight}
+      data-slot="command"
+      inline={inline}
+      keepHighlight={keepHighlight}
+      open={open}
+      {...props}
+    />
+  )
+}) as typeof Autocomplete
+
+function CommandInput({
+  className,
+  inputSize = 'lg',
+  addonIcon = <MagnifyingGlassIcon />,
+  ...props
+}: React.ComponentProps<typeof AutocompleteInputGroupContent> & {
+  inputSize?: VariantProps<typeof inputStyles>['inputSize']
+}) {
+  return (
+    <AutocompleteInputGroupContent
+      addonIcon={addonIcon}
+      className={cn('shrink-0 border-b border-outline-variant rounded-none', className)}
+      data-slot="command-input"
+      inputSize={inputSize}
+      {...props}
+    />
+  )
+}
+
+function CommandEmpty({ className, ...props }: AutocompleteEmptyProps) {
+  return <AutocompleteEmpty className={cn('p-6', className)} data-slot="command-empty" {...props} />
+}
+
+function CommandScrollArea({ className, ...props }: React.ComponentProps<typeof ScrollArea>) {
+  return (
+    <ScrollArea
+      className={cn(
+        'h-auto max-h-64 sm:max-h-96',
+        'focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-primary',
+        className,
+      )}
+      data-slot="command-scroll-area"
+      {...props}
+    />
+  )
+}
+
+function CommandList({ className, ...props }: AutocompleteListProps) {
+  return <AutocompleteList className={className} data-slot="command-list" {...props} />
+}
+
+function CommandItem({
+  className,
+  ...props
+}: AutocompleteItemProps & {
+  className?: string
+}) {
+  return (
+    <AutocompleteItem
+      className={cn(
+        'group/command-item font-medium flex items-center py-2 px-4 data-highlighted:before:inset-x-1.5',
+        className,
+      )}
+      data-slot="command-item"
+      {...props}
+    />
+  )
+}
+
+function CommandCollection({ ...props }: AutocompleteCollectionProps) {
+  return <AutocompleteCollection data-slot="command-collection" {...props} />
+}
+
+function CommandGroup({ ...props }: AutocompleteGroupProps) {
+  return <AutocompleteGroup data-slot="command-group" {...props} />
+}
+
+function CommandGroupLabel({ className, ...props }: AutocompleteGroupLabelProps) {
+  return (
+    <AutocompleteGroupLabel
+      className={cn('font-medium pl-4 uppercase text-on-surface-variant select-none', className)}
+      data-slot="command-group-label"
+      {...props}
+    />
+  )
+}
+
+function CommandShortcut({ className, ...props }: React.ComponentProps<'span'>) {
+  return (
+    <span
+      className={cn(
+        'text-muted-foreground group-data-highlighted/command-item:text-foreground ml-auto text-xs tracking-widest',
+        className,
+      )}
+      data-slot="command-shortcut"
+      {...props}
+    />
+  )
+}
+
+function CommandSeparator({ className, ...props }: SeparatorProps) {
+  return (
+    <AutocompleteSeparator
+      className={cn('last:hidden', className)}
+      data-slot="command-separator"
+      {...props}
+    />
+  )
+}
+
+export {
+  Command,
+  CommandCollection,
+  CommandEmpty,
+  CommandGroup,
+  CommandGroupLabel,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandMenu,
+  CommandMenuContent,
+  CommandMenuFooter,
+  CommandMenuTrigger,
+  CommandScrollArea,
+  CommandSeparator,
+  CommandShortcut,
+}

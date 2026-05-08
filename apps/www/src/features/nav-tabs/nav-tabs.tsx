@@ -12,6 +12,8 @@ import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
+import { SiteCommandMenu } from '@/features/site-command-menu'
+import { ResetButton } from '../testbed/reset-button'
 
 // why: ADR-0021 commitment 8 — md route owns its audience tabs. The shadcn
 // route would pass a different tab set; this composition keeps ExportButton
@@ -69,7 +71,7 @@ export function NavTabs() {
   }, [selected])
 
   return (
-    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar  border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
+    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
       <Tabs
         className="sm:w-full"
         value={tabs.find((tab) => tab.href === pathname)?.label || 'Components'}
@@ -107,13 +109,13 @@ export function NavTabs() {
         </TabsList>
       </Tabs>
       <div className="items-center gap-2 hidden sm:flex">
-        SiteCommandMenu
+        <SiteCommandMenu />
         <TooltipProvider>
-          <ExportButton tabs={MD_EXPORT_TABS} />
+          <ExportButton tabs={MD_EXPORT_TABS} icon />
           <DisplayPrefs />
-          HelpDialog ContrastChecker
+          <ResetButton />
         </TooltipProvider>
-        UserActionPanel
+
         <Button
           size="sm"
           variant="link"
