@@ -36,8 +36,9 @@ When porting components or modules from a prior prototype:
 - File imports React + an external UI lib (shadcn, base-ui) and contains mostly JSX → UI, **lift it**.
 - File contains domain logic (color math, palette derivation, store actions, schema definitions) → logic, **rewrite it**.
 - Mixed files (component with embedded logic) → split: lift the JSX, rewrite the logic.
+- **Two near-duplicate components in the legacy → ALWAYS rewrite as one.** A `HorizontalView` + `VerticalView` (or `LightVariant` + `DarkVariant`, etc.) differing only in className/layout props is the same component with a prop. Lifting both bodies verbatim is exactly what the lift-vs-rewrite rule is escaping. Merge first; lift the merged result.
 
-When rewriting logic, read the old file for *behavior reference* only. Don't paste. Write fresh in the new structure with `// why:` comments at non-obvious choices.
+When rewriting logic, read the old file for *behavior reference* only. Don't paste. Write fresh in the new structure with `// why:` comments at non-obvious choices. **The why-line rule applies to ported code as much as new code** — once a line is in this codebase, it's a new line, and the patterns that earn a why-line (framework timing, try/catch fallbacks, magic-string conditions) earn one regardless of whether the line came from the prototype.
 
 ### Before lifting: primitive-shape diff
 

@@ -88,6 +88,7 @@ Rule of thumb: if removing the context changes *which component renders*, it's t
 | "Top nav settings menu" | `features/top-nav/` |
 | "Test surface in www" | `features/testbed/` (or `app/(app)/sink/page.tsx`) |
 | "Add a contribution-history block" | `app/(app)/theme/(md)/components/_blocks/` |
+| "Show all md palettes on the palettes page" | `app/(app)/theme/(md)/palettes/page.tsx` (inline) or sibling `_palettes-view.tsx` |
 | "Tweak source-color picker" | `features/source-color/` |
 | Toast provider, app-wide | `app/_providers.tsx` |
 | Toast provider, feature-scoped | `features/<x>/providers.tsx` |
@@ -110,6 +111,7 @@ A shadcn user sees an md-styled editor with a shadcn-styled canvas. That is inte
 - **Tempted to nest sub-features** → refuse. Split into siblings once the trigger fires.
 - **Tempted to add runtime primitive switching** → refuse. Route-level segmentation is the layer mechanism (ADR-0019).
 - **Tempted to drop a block into `components/`** → refuse. Canvas content is route-colocated under `_<bucket>/`. Promote to a feature only when 2+ pages import it.
+- **Tempted to create `features/<X>/` for content with one route consumer and hardcoded layer-specific naming** → refuse. That's route-private content; colocate at the route (`page.tsx` inline or sibling `_<view>.tsx`) per ADR-0014 rule 4. Discriminator: if the component hardcodes layer-specific names (`MD_PALETTE_FAMILY_NAMES`, MD3-only roles, shadcn-only tokens) AND has one consumer, it's route-content, not a feature. A feature would be layer-agnostic or have ≥2 consumers.
 
 ## Why these rules exist
 

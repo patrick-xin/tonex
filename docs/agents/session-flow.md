@@ -43,6 +43,10 @@ Subagents start cold and cannot see machine-local memory. Their orchestrator is 
 
 Never assume a subagent has prior session context.
 
+## Before reporting done
+
+Run `pnpm biome check <touched-files>` and fix flagged issues. The project enforces single quotes, semicolons-as-needed, trailing commas. Style regressions on touched files (including pre-existing files the agent edited) are the most common avoidable miss — biome catches all of them, so let it.
+
 ## Doc lifecycle (one-line summary)
 
 Each repo doc declares its lifecycle state in a header line at the top:
