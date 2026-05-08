@@ -1,7 +1,9 @@
+import { ColorRolesList } from '@/features/color-roles-list'
+
 export default function RolesPage() {
   return (
-    <div>
-      <h1>Color Roles</h1>
+    <div className="overflow-auto">
+      <ColorRolesList />
     </div>
   )
 }

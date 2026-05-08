@@ -1,0 +1,86 @@
+'use client'
+
+import { useResolvedTokens, useSource } from '@tonex/core'
+import { hexString } from '@tonex/core/oklch'
+import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
+import { Popover, PopoverContent } from '@/components/ui/popover'
+import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { AA_THRESHOLD, contrastRatio, ROLE_CONTRAST_PAIRS } from './contrast-utils'
+import { RoleEditor } from './role-editor'
+import { ROLE_GROUPS } from './role-groups'
+import { popoverHandle, RoleSwatch } from './role-swatch'
+
+const ALL_TOKENS: ReadonlyArray<MdTokenName> = [...MD_CORE_TOKEN_NAMES, ...MD_EXTENDED_TOKEN_NAMES]
+
+export function ColorRolesList() {
+  const theme = useResolvedTokens()
+  const mode = useActiveMode()
+  const allOverrides = useSource((s) => s.md3TokenOverrides)
+
+  // why: two-flag null gate (theme = source._hydrated, mode = next-themes
+  // mounted). Same contract as useResolvedTokens / useActiveMode docs.
+  if (theme === null || mode === null) return null
+
+  // why: theme.md[mode] holds only the 28 core tokens (+ custom-color slugs);
+  // extended tokens live in lightExtended/darkExtended per derive.ts. Inspect
+  // UIs merge the two for a flat 50-token view.
+  const mdLayer = { ...theme.md[mode], ...theme.md[`${mode}Extended`] }
+  const overrides = allOverrides[mode]
+  const hexByRole: Partial<Record<MdTokenName, string>> = {}
+  for (const name of ALL_TOKENS) {
+    hexByRole[name] = hexString(mdLayer[name])
+  }
+
+  const warnings = new Map<MdTokenName, { partner: MdTokenName; ratio: number }>()
+  for (const [fg, bg] of ROLE_CONTRAST_PAIRS) {
+    const fgHex = hexByRole[fg]
+    const bgHex = hexByRole[bg]
+    if (fgHex === undefined || bgHex === undefined) continue
+    const ratio = contrastRatio(fgHex, bgHex)
+    if (ratio < AA_THRESHOLD) warnings.set(fg, { partner: bg, ratio })
+  }
+
+  return (
+    <div className="space-y-6 p-4 sm:p-6">
+      {ROLE_GROUPS.map((group) => (
+        <section key={group.label}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
+          <div className="flex flex-wrap gap-2">
+            {group.roles.map((role) => (
+              <RoleSwatch
+                key={role}
+                role={role}
+                hex={hexByRole[role] ?? '#000000'}
+                warning={warnings.get(role)}
+                overridden={role in overrides}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      {/* placeholder: custom-color role swatches.
+       * customColors live in source; deriveTheme emits 4 md tokens per entry
+       * (--color-{slug}, --color-on-{slug}, --color-{slug}-container,
+       * --color-on-{slug}-container) merged into md.{light,dark}. Per-role
+       * override is NOT supported today — applyMd3TokenOverrides runs BEFORE
+       * custom colors merge in derive.ts, and MdTokenName is a closed enum
+       * that doesn't include slug-keyed tokens. Whole-entry edit lives in
+       * features/custom-colors/. Adding per-role override would require a
+       * core-side primitive (extend setMd3TokenOverride to accept slug tokens
+       * AND apply post-custom-color merge in derive). See
+       * code-conventions.md "primitive-shape diff".
+       */}
+
+      <Popover handle={popoverHandle}>
+        {({ payload: role }) =>
+          role !== undefined ? (
+            <PopoverContent sideOffset={8} align="start" className="sm:min-w-56">
+              <RoleEditor key={role} role={role} mode={mode} />
+            </PopoverContent>
+          ) : null
+        }
+      </Popover>
+    </div>
+  )
+}
