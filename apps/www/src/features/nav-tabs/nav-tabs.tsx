@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
 
 // why: ADR-0021 commitment 8 — md route owns its audience tabs. The shadcn
@@ -109,7 +110,8 @@ export function NavTabs() {
         SiteCommandMenu
         <TooltipProvider>
           <ExportButton tabs={MD_EXPORT_TABS} />
-          SettingsPopover HelpDialog ContrastChecker
+          <DisplayPrefs />
+          HelpDialog ContrastChecker
         </TooltipProvider>
         UserActionPanel
         <Button

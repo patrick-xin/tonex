@@ -5,6 +5,7 @@ import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
 import { Popover, PopoverContent } from '@/components/ui/popover'
 import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { AA_THRESHOLD, contrastRatio, ROLE_CONTRAST_PAIRS } from './contrast-utils'
 import { RoleEditor } from './role-editor'
 import { ROLE_GROUPS } from './role-groups'
@@ -16,6 +17,7 @@ export function ColorRolesList() {
   const theme = useResolvedTokens()
   const mode = useActiveMode()
   const allOverrides = useSource((s) => s.md3TokenOverrides)
+  const showExtended = useUiPrefs((s) => s.showExtended)
 
   // why: two-flag null gate (theme = source._hydrated, mode = next-themes
   // mounted). Same contract as useResolvedTokens / useActiveMode docs.
@@ -40,9 +42,22 @@ export function ColorRolesList() {
     if (ratio < AA_THRESHOLD) warnings.set(fg, { partner: bg, ratio })
   }
 
+  // why: visibility filter for inspect surface; ADR-0023 commitment 1 —
+  // deliberately decoupled from export's includeExtended job parameter because
+  // they answer different questions (display pref vs job parameter). Families
+  // with zero core roles (inverse, utility) drop entirely when showExtended is
+  // false; mixed families (primary/secondary/tertiary/error/surface) lose their
+  // fixed/dim members; outline is core-only so it passes through unchanged.
+  const filteredGroups = showExtended
+    ? ROLE_GROUPS
+    : ROLE_GROUPS.flatMap((group) => {
+        const coreRoles = group.roles.filter((r) => MD_CORE_TOKEN_NAMES.includes(r))
+        return coreRoles.length > 0 ? [{ ...group, roles: coreRoles }] : []
+      })
+
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      {ROLE_GROUPS.map((group) => (
+      {filteredGroups.map((group) => (
         <section key={group.label}>
           <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
           <div className="flex flex-wrap gap-2">
