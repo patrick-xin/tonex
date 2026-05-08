@@ -25,6 +25,26 @@ Adding a schema field doesn't widen the engine surface; adding an engine API doe
 
 When in doubt, lean toward core. Adding to core and importing is easier to maintain than later promoting from www.
 
+## State boundaries — portable theme, display preferences, session state, job parameters
+
+Four state classes with distinct homes (formalized in ADR-0023, building on ADR-0017 and ADR-0021):
+
+- **Portable theme** (`useSource`, `@tonex/core`) — drives `deriveTheme`. Examples: seed, variant, contrast level, palette overrides, custom colors, md3 token overrides, shadcn role bindings. ADR-0017.
+- **Display preferences** (`useUiPrefs`, `apps/www/src/lib/stores/ui-prefs.ts`) — what the user sees in the app, not what the theme produces. Long-lived, sync-eligible when authed. Examples: `showExtended`, inspect `colorFormat`, `showTwColorPicker`, `showContrastWarnings`. Surface in the Display popover (`features/nav-tabs/`).
+- **Session state** (future store, no consumer today) — bounded to a working context, sync-eligible for resume. Examples: theme being edited, panel layouts.
+- **Job parameters** (React-local in their owning feature) — ephemeral to a single action. Examples: `ExportOptions` toggles in the export dialog. **Never lift to a store**, regardless of how many surfaces share the parameter shape.
+
+**The judgment line:**
+
+- *Does it change what `deriveTheme` produces?* → portable theme.
+- *Would two unrelated surfaces share this with the same intent?* → display pref.
+- *Is it scoped to a single user action like a paste/copy?* → job parameter.
+- *Does it bound a working context that survives reload but isn't a pref?* → session state (file the future store when the first consumer appears).
+
+**`useUiPrefs` scope-creep guard:** a pref enters only when a *second consumer materially needs it* — same intent across both. Different intent → two named prefs (ADR-0023 commitment 3), not one with override semantics.
+
+See ADR-0023 for the full taxonomy, persistence contract, and pattern-deviations from `useSource`.
+
 ## Porting from prior prototypes — lift UI, rewrite logic
 
 When porting components or modules from a prior prototype:
