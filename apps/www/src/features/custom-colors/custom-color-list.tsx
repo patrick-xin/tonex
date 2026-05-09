@@ -5,7 +5,6 @@ import {
   CHROMA_HUE_LOCK,
   hctFromHex,
   hexFromHct,
-  type Mode,
   maxChroma,
   previewCustomColor,
   useSource,
@@ -15,7 +14,6 @@ import {
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from '@tonex/core/schema'
-import { useTheme } from 'next-themes'
 import { useCallback, useState } from 'react'
 import { NativeColorInput } from '@/components/shared/native-color-input'
 import { Button } from '@/components/ui/button'
@@ -44,6 +42,7 @@ import {
   hueGradient,
   toneGradient,
 } from '@/features/hct-controls'
+import { useActiveMode } from '@/lib/hooks/use-active-mode'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { NewCustomColor, RolePreviewSwatches } from './new-custom-color'
 
@@ -103,15 +102,21 @@ function CustomColorCard({
   onDelete: () => void
 }) {
   const seedHex = useSource((s) => s.seedHex)
-  const { resolvedTheme } = useTheme()
-  const mode: Mode = resolvedTheme === 'dark' ? 'dark' : 'light'
+  const mode = useActiveMode()
   const preview = previewCustomColor(seedHex, { hex: entry.hex, blend: entry.blend })
-  const roles = [
-    preview[mode].color,
-    preview[mode].onColor,
-    preview[mode].colorContainer,
-    preview[mode].onColorContainer,
-  ]
+  // why: pre-hydration we render transparent placeholders for the 4 swatch
+  // slots — preserves grid layout while not committing to a (wrong) color
+  // before useActiveMode resolves. The grid is `grid-cols-2 gap-0.5 shrink-0`
+  // around 4 `size-3.5 rounded-full` divs, so empty fills keep their footprint.
+  const roles =
+    mode !== null
+      ? [
+          preview[mode].color,
+          preview[mode].onColor,
+          preview[mode].colorContainer,
+          preview[mode].onColorContainer,
+        ]
+      : ['transparent', 'transparent', 'transparent', 'transparent']
 
   return (
     <div className="flex items-center gap-3 p-2 rounded-lg bg-surface-container-high">

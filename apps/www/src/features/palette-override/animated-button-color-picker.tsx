@@ -4,7 +4,6 @@ import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
 import { type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName, PaletteName } from '@tonex/core/schema'
-import { useTheme } from 'next-themes'
 import { cx } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +17,7 @@ import {
   PopoverViewport,
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useActiveMode } from '@/lib/hooks/use-active-mode'
 import { PaletteColorPicker } from './palette-color-picker'
 
 interface AnimatedButtonColorPickerProps {
@@ -60,18 +60,18 @@ export function AnimatedButtonColorPicker({
   disabledReason = null,
   side = 'right',
 }: AnimatedButtonColorPickerProps) {
-  const { resolvedTheme } = useTheme()
-  const mode: Mode = resolvedTheme === 'dark' ? 'dark' : 'light'
+  const mode = useActiveMode()
   const theme = useResolvedTokens()
   // why: paletteOverrides is flat — keyed by palette only, not by mode. A
   // palette IS a tone ramp; mode selects tones from it.
   const override = useSource((s) => s.paletteOverrides[palette])
   const previewToken = PALETTE_PREVIEW_TOKEN[palette]
   // why: derive emits argb (ADR-0021); project to oklch at the swatch read
-  // boundary so the inline style consumes a CSS-valid string. Falls back
-  // to a neutral hex pre-hydration to avoid SSR null-state flicker on the
-  // rail.
-  const swatchArgb = theme?.md[mode][previewToken]
+  // boundary so the inline style consumes a CSS-valid string. Dual fallback
+  // to a neutral hex when either mode === null (pre-hydration, ADR-0015's
+  // two-flag guard) OR theme === undefined (source store not hydrated) so
+  // the rail never paints a wrong-mode swatch on first paint.
+  const swatchArgb = mode !== null ? theme?.md[mode][previewToken] : undefined
   const swatch = swatchArgb !== undefined ? oklchString(swatchArgb) : '#000000'
   const isOverridden = override !== undefined
 
@@ -79,7 +79,7 @@ export function AnimatedButtonColorPicker({
     <PopoverTrigger
       disabled={disabled}
       handle={popoverHandle}
-      payload={() => <Payload palette={palette} mode={mode} />}
+      payload={() => (mode !== null ? <Payload palette={palette} mode={mode} /> : null)}
       render={
         <Button
           size="sm"
