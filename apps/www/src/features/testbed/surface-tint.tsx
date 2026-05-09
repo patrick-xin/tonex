@@ -3,7 +3,7 @@
 import { useSource } from '@tonex/core'
 import { NEUTRAL_PALETTE_NAMES } from '@tonex/core/data'
 import type { SurfaceAlgo } from '@tonex/core/schema'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 
 const ALGOS: ReadonlyArray<{ id: SurfaceAlgo; label: string; hint: string }> = [
   {

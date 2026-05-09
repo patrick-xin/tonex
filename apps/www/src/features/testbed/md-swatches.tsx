@@ -2,7 +2,7 @@
 
 import type { TokenMap } from '@tonex/core'
 import { useResolvedTokens } from '@tonex/core'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 
 // why: sink is the dev surface for verifying that every md token deriveTheme
 // emits actually resolves through the .md scope class. Grouped by family so

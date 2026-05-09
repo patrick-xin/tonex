@@ -17,7 +17,7 @@ import {
   PopoverViewport,
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 import { PaletteColorPicker } from './palette-color-picker'
 
 interface AnimatedButtonColorPickerProps {

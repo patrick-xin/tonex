@@ -19,10 +19,10 @@ import { ExportFilters } from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
 // why: ADR-0021 commitment 8 — route-agnostic. md routes pass
-// `['Tailwind', 'TS', 'JSON', 'Dart']`; shadcn routes pass
-// `['shadcn', 'TS', 'JSON', 'Dart']`. Tab choice is a prop, not internal
-// path-sniffing logic. The fallback default mirrors today's md-route
-// behavior so any caller that hasn't migrated still works.
+// `['Tailwind', 'TS', 'JSON', 'Dart']`; shadcn routes pass `['shadcn']`. Tab
+// choice is a prop, not internal path-sniffing logic. The fallback default
+// mirrors today's md-route behavior so any caller that hasn't migrated still
+// works.
 const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'TS', 'JSON', 'Dart']
 
 // why: ADR-0021 consequences — toggle state is React-local, not zustand.

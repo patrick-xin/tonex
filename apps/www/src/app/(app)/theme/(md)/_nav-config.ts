@@ -1,0 +1,18 @@
+import { Cuboid, Layers, LayoutDashboard, Palette } from 'lucide-react'
+import type { NavConfig } from '@/lib/nav-config'
+
+// why: route-colocated per ADR-0022 commitment 2 (locate-test). "What's in the
+// md nav?" resolves to one file: this one. NavTabs and SiteCommandMenu both
+// derive from it via the layout, so they can't drift.
+export const mdNavConfig: NavConfig = {
+  layer: 'md',
+  tabs: [
+    { label: 'Overview', href: '/theme', icon: LayoutDashboard },
+    { label: 'Color Roles', href: '/theme/color-roles', icon: Layers },
+    { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
+    { label: 'Palettes', href: '/theme/palettes', icon: Palette },
+  ],
+  // why: ADR-0021 commitment 8 — md routes pass these four tabs.
+  exportTabs: ['Tailwind', 'TS', 'JSON', 'Dart'],
+  crossLink: { label: 'Shadcn', href: '/theme/shadcn' },
+}

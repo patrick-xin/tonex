@@ -4,7 +4,7 @@ import { useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
 import { Popover, PopoverContent } from '@/components/ui/popover'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { AA_THRESHOLD, contrastRatio, ROLE_CONTRAST_PAIRS } from './contrast-utils'
 import { RoleEditor } from './role-editor'
@@ -12,6 +12,12 @@ import { ROLE_GROUPS } from './role-groups'
 import { popoverHandle, RoleSwatch } from './role-swatch'
 
 const ALL_TOKENS: ReadonlyArray<MdTokenName> = [...MD_CORE_TOKEN_NAMES, ...MD_EXTENDED_TOKEN_NAMES]
+
+// why: Array.includes on the narrow MD_CORE_TOKEN_NAMES tuple infers its
+// searchElement as MdCoreTokenName, which rejects the wider MdTokenName values
+// in ROLE_GROUPS (e.g. '--color-primary-fixed'). A widened Set sidesteps the
+// inference AND gives O(1) membership over the per-render filter loop.
+const CORE_TOKEN_SET: ReadonlySet<MdTokenName> = new Set(MD_CORE_TOKEN_NAMES)
 
 export function ColorRolesList() {
   const theme = useResolvedTokens()
@@ -51,8 +57,7 @@ export function ColorRolesList() {
   const filteredGroups = showExtended
     ? ROLE_GROUPS
     : ROLE_GROUPS.flatMap((group) => {
-        // @ts-expect-error TODO: fix ts error
-        const coreRoles = group.roles.filter((r) => MD_CORE_TOKEN_NAMES.includes(r))
+        const coreRoles = group.roles.filter((r) => CORE_TOKEN_SET.has(r))
         return coreRoles.length > 0 ? [{ ...group, roles: coreRoles }] : []
       })
 

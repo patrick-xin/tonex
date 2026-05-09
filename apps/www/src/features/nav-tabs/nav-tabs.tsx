@@ -13,20 +13,19 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
 import { SiteCommandMenu } from '@/features/site-command-menu'
-import { useThemePath } from '@/lib/hooks/use-theme-path'
+import type { NavConfig } from '@/lib/nav-config'
 import { ResetButton } from '../testbed/reset-button'
 
-// why: ADR-0021 commitment 8 — md route owns its audience tabs. The shadcn
-// route would pass a different tab set; this composition keeps ExportButton
-// route-agnostic.
-const MD_EXPORT_TABS = ['Tailwind', 'TS', 'JSON', 'Dart'] as const
-
-export function NavTabs() {
+// why: ADR-0021 commitment 8 + ADR-0022 commitment 3 — the route layout owns
+// audience and layer; this component is route-agnostic and takes everything
+// it needs as one config prop. Tabs, export tabs, command-menu shortcuts and
+// the cross-layer link all derive from the same source so they can't drift.
+export function NavTabs({ config }: { config: NavConfig }) {
   const pathname = usePathname()
   const router = useRouter()
   const [selected, setSelected] = useState<number | null>(null)
-  const { isMD3 } = useThemePath()
-  const tabs = isMD3 ? md3Tabs : shadcnTabs
+  const { tabs, exportTabs, crossLink } = config
+
   useHotkeys(
     tabs.map((tab, index) => ({
       hotkey: String(index + 1) as RegisterableHotkey,
@@ -76,7 +75,7 @@ export function NavTabs() {
     <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
       <Tabs
         className="sm:w-full"
-        value={tabs.find((tab) => tab.href === pathname)?.label || 'Components'}
+        value={tabs.find((tab) => tab.href === pathname)?.label || tabs[0]?.label}
       >
         <TabsList className="h-12">
           {tabs.map((tab, index) => (
@@ -111,9 +110,9 @@ export function NavTabs() {
         </TabsList>
       </Tabs>
       <div className="items-center gap-2 hidden sm:flex">
-        <SiteCommandMenu />
+        <SiteCommandMenu pageShortcuts={tabs} />
         <TooltipProvider>
-          <ExportButton tabs={MD_EXPORT_TABS} icon />
+          <ExportButton tabs={exportTabs} icon />
           <DisplayPrefs />
           <ResetButton />
         </TooltipProvider>
@@ -122,31 +121,11 @@ export function NavTabs() {
           size="sm"
           variant="link"
           nativeButton={false}
-          render={<Link href="/theme/shadcn" />}
+          render={<Link href={crossLink.href} />}
         >
-          Shadcn
+          {crossLink.label}
         </Button>
       </div>
     </div>
   )
 }
-
-type PreviewTab = {
-  label: string
-  href: string
-}
-
-const md3Tabs: PreviewTab[] = [
-  { label: 'Overview', href: '/theme' },
-  { label: 'Color Roles', href: '/theme/color-roles' },
-  { label: 'Blocks', href: '/theme/blocks' },
-  { label: 'Palettes', href: '/theme/palettes' },
-]
-
-const shadcnTabs: PreviewTab[] = [
-  { label: 'Components', href: '/theme/shadcn' },
-  { label: 'Blocks', href: '/theme/shadcn/blocks' },
-  { label: 'Dashboard', href: '/theme/shadcn/dashboard' },
-  { label: 'Charts', href: '/theme/shadcn/charts' },
-  { label: 'Palettes', href: '/theme/shadcn/palettes' },
-]

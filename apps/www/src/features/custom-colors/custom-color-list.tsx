@@ -42,7 +42,7 @@ import {
   hueGradient,
   toneGradient,
 } from '@/features/hct-controls'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { NewCustomColor, RolePreviewSwatches } from './new-custom-color'
 

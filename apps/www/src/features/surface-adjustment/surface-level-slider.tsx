@@ -12,7 +12,7 @@ import {
   SliderValue,
   sliderStyles,
 } from '@/components/ui/slider'
-import { useActiveMode } from '@/lib/hooks/use-active-mode'
+import { useActiveMode } from '@/features/theme-mode'
 
 export function SurfaceLevelSlider({
   disabled,

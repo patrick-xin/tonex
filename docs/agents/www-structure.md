@@ -15,7 +15,17 @@
    - **Surface features** (noun/place — "where the user is"): layer-keyed names allowed and encouraged here, because surfaces ARE the layer-specific composition site. Examples: `features/md-rail/`, `features/shadcn-rail/`, `features/top-nav/`, `features/testbed/`. Surface features compose workflow features; they don't carry workflow logic of their own beyond layout and tab switching.
 6. **Locate-test is the design metric** (per ADR-0022). A prompt of the form "do X to Y" must resolve to one folder under `features/<Y>/` or one primitive under `components/`. If neither home exists, **create the named feature folder before writing code** — don't tuck the work inside an unrelated folder.
 
-## Layout (target)
+## Layout
+
+Chrome (rail + top tabs) lives in the per-layer layouts; there is no shared
+`theme/layout.tsx`. Each per-layer layout is a Server Component that provides
+`<LayerContext>` and renders a tiny client wrapper (`_md-nav-tabs.tsx` /
+`_shadcn-nav-tabs.tsx`) which imports its colocated `_nav-config.ts` (typed as
+`NavConfig`) and passes it to `<NavTabs>`. The wrapper exists because
+`NavConfig` carries lucide forwardRef icons which are not serializable across
+the RSC boundary — keeping the config import inside a client module avoids the
+crossing without forcing the layout itself to be `'use client'`. The same
+config object also feeds `<SiteCommandMenu>` so the two surfaces can't drift.
 
 ```
 apps/www/src/
@@ -26,9 +36,10 @@ apps/www/src/
       (root)/page.tsx                 # chooser landing
       sink/page.tsx                   # testbed route; retires after parity
       theme/
-        layout.tsx                    # cross-layer chrome
         (md)/
-          layout.tsx                  # provides <LayerContext value="md">; mounts md-rail
+          layout.tsx                  # Server: <LayerProvider value="md"> + MdRail + <MdNavTabs/>
+          _md-nav-tabs.tsx            # 'use client' — bridges config across RSC boundary
+          _nav-config.ts              # mdNavConfig: tabs, exportTabs, crossLink
           page.tsx                    # /theme — md canvas
           components/
             page.tsx
@@ -39,7 +50,10 @@ apps/www/src/
           palette/page.tsx
         (shadcn)/
           shadcn/
-            layout.tsx                # provides <LayerContext value="shadcn">; mounts shadcn-rail
+            layout.tsx                # Server: <LayerProvider value="shadcn"> + chrome + ShadcnProvider
+            _shadcn-nav-tabs.tsx      # 'use client' — bridges config across RSC boundary
+            _nav-config.ts            # shadcnNavConfig
+            _provider.tsx             # ShadcnProvider (canvas-scoped)
             page.tsx                  # /theme/shadcn — shadcn canvas
             components/{page.tsx,_blocks/}
             blocks/{page.tsx,_blocks/}
@@ -57,7 +71,7 @@ apps/www/src/
     export/
     # Surface features (layer-keyed allowed)
     md-rail/
-    shadcn-rail/
+    shadcn-rail/                      # NOT YET — both layouts mount md-rail until this ships
     top-nav/
     testbed/                          # retiring after parity
   components/
@@ -66,11 +80,14 @@ apps/www/src/
     shared/                           # components that are used by 2+ features
     icons/                            # icons that icon libs are missing
   lib/
-    hooks/                            # cross-feature hooks (e.g. use-active-mode)
+    layer-context.tsx                 # LayerProvider + useLayer (ADR-0019 amendment, ADR-0022 c.3)
+    nav-config.ts                     # NavTab + NavConfig types (consumed by NavTabs + SiteCommandMenu)
+    handles.ts                        # cross-component dialog/popover handles
+    hooks/                            # cross-feature hooks
   styles/
 ```
 
-Most slots are created on demand. The `app/(app)/theme/(md|shadcn)/layout.tsx` files, the `_providers.tsx`, and the `features/`/`components/` core are not.
+Most slots are created on demand. The `app/(app)/theme/(md|shadcn)/layout.tsx` files, their `_nav-config.ts`, the `_providers.tsx`, and the `features/`/`components/` core are not.
 
 ## Layer awareness in workflow features
 
