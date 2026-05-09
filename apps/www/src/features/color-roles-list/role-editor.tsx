@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
-import { type Mode, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { MdTokenName } from '@tonex/core/schema'
 import { NativeColorInput } from '@/components/shared/native-color-input'
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
-import { AA_THRESHOLD, contrastRatio, ROLE_CONTRAST_PAIRS, roleDisplayName } from './contrast-utils'
+import { roleDisplayName } from './contrast-utils'
 
 interface RoleEditorProps {
   role: MdTokenName
@@ -38,16 +38,21 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
     setOverride(mode, role, h),
   )
 
-  const fgPair = ROLE_CONTRAST_PAIRS.find(([fg]) => fg === role)
-  const bgPair = ROLE_CONTRAST_PAIRS.find(([, bg]) => bg === role)
-  const partner = fgPair?.[1] ?? bgPair?.[0] ?? null
-  const partnerArgb = partner !== null ? mdLayer?.[partner] : undefined
-  const partnerHex = partnerArgb !== undefined ? hexString(partnerArgb) : null
-  const ratio =
-    partnerHex !== null && /^#[0-9a-fA-F]{6}$/.test(currentHex)
-      ? contrastRatio(currentHex, partnerHex)
-      : null
-  const passesAA = ratio !== null && ratio >= AA_THRESHOLD
+  // why: same ContrastReport the parent list reads — single memoized walk per
+  // theme reference. Find the md pair that mentions this role in either slot;
+  // the partner is the other slot.
+  const result =
+    theme !== null
+      ? evaluateThemeContrast(theme)[mode].find(
+          (r) => r.pair.layer === 'md' && (r.pair.fg === role || r.pair.bg === role),
+        )
+      : undefined
+  const partner =
+    result === undefined
+      ? null
+      : ((result.pair.fg === role ? result.pair.bg : result.pair.fg) as MdTokenName)
+  const ratio = result?.ratio ?? null
+  const passesAA = result?.passes ?? false
 
   return (
     <div className="flex flex-col gap-3">

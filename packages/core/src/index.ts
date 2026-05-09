@@ -12,6 +12,11 @@
 // engine surface, adding a variant doesn't touch the schema barrel.
 export { applyDom } from './theme/applyDom'
 export {
+  type ContrastReport,
+  evaluateThemeContrast,
+  type PairResult,
+} from './theme/contrast'
+export {
   buildContrastBundle,
   type ContrastBundle,
   type ExportOptions,

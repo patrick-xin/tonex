@@ -335,6 +335,229 @@ export const DEFAULT_SHADCN_ROLE_BINDINGS: {
   dark: DEFAULT_SHADCN_BINDINGS_DARK,
 }
 
+// why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
+// spec semantics (`on-X` always pairs with `X`; `-foreground` always pairs
+// with the unsuffixed root). Layer-tagged so `evaluateThemeContrast` knows
+// which slice of the DerivedTheme to read; intent + threshold pre-baked per
+// commitment 7 so slice contrast-3 can add non-text @ 3.0 without a schema
+// migration. Closed const tuple — adding/removing a row is a code change.
+//
+// `--destructive` does not gain a shadcn pair: shadcn's destructive role is
+// bound through `--color-on-error` at the underlying md level, so a separate
+// shadcn pair would double-count the same surface.
+export interface ContrastPair {
+  fg: MdTokenName | ShadcnRoleName
+  bg: MdTokenName | ShadcnRoleName
+  layer: 'md' | 'shadcn'
+  intent: 'text' | 'non-text'
+  threshold: number
+}
+
+const TEXT_THRESHOLD = 4.5
+
+export const CONTRAST_PAIRS = [
+  // why: 18 md text pairs — every `on-X / X` pair, surface-on-variant against
+  // surface (the actual rendered background per M3), inverse pair, fixed family.
+  {
+    fg: '--color-on-primary',
+    bg: '--color-primary',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-primary-container',
+    bg: '--color-primary-container',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-secondary',
+    bg: '--color-secondary',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-secondary-container',
+    bg: '--color-secondary-container',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-tertiary',
+    bg: '--color-tertiary',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-tertiary-container',
+    bg: '--color-tertiary-container',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-error',
+    bg: '--color-error',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-error-container',
+    bg: '--color-error-container',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-surface',
+    bg: '--color-surface',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-surface-variant',
+    bg: '--color-surface',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-primary-fixed',
+    bg: '--color-primary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-primary-fixed-variant',
+    bg: '--color-primary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-secondary-fixed',
+    bg: '--color-secondary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-secondary-fixed-variant',
+    bg: '--color-secondary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-tertiary-fixed',
+    bg: '--color-tertiary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-on-tertiary-fixed-variant',
+    bg: '--color-tertiary-fixed',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-inverse-on-surface',
+    bg: '--color-inverse-surface',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-inverse-primary',
+    bg: '--color-inverse-surface',
+    layer: 'md',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  // why: 10 shadcn text pairs — every `-foreground` role against its unsuffixed
+  // root. No `--destructive` pair (covered by md `on-error / error`).
+  {
+    fg: '--foreground',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--card-foreground',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--popover-foreground',
+    bg: '--popover',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--primary-foreground',
+    bg: '--primary',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--secondary-foreground',
+    bg: '--secondary',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--accent-foreground',
+    bg: '--accent',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--muted-foreground',
+    bg: '--muted',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--sidebar-foreground',
+    bg: '--sidebar',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--sidebar-primary-foreground',
+    bg: '--sidebar-primary',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--sidebar-accent-foreground',
+    bg: '--sidebar-accent',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+] as const satisfies readonly ContrastPair[]
+
 // why: customColors are first-class dual-layer entries — they emit their
 // own md tokens (4 per entry: --color-{slug}, --color-on-{slug}, --color-
 // {slug}-container, --color-on-{slug}-container) AND their own shadcn

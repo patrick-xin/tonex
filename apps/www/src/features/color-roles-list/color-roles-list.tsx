@@ -1,12 +1,11 @@
 'use client'
 
-import { useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
 import { Popover, PopoverContent } from '@/components/ui/popover'
 import { useActiveMode } from '@/features/theme-mode'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
-import { AA_THRESHOLD, contrastRatio, ROLE_CONTRAST_PAIRS } from './contrast-utils'
 import { RoleEditor } from './role-editor'
 import { ROLE_GROUPS } from './role-groups'
 import { popoverHandle, RoleSwatch } from './role-swatch'
@@ -39,13 +38,17 @@ export function ColorRolesList() {
     hexByRole[name] = hexString(mdLayer[name])
   }
 
+  // why: ContrastReport is keyed off the DerivedTheme reference (issue #20
+  // cache), so this hits the same memoized result that role-editor reads — no
+  // duplicate contrastRatio walk per render.
+  const report = evaluateThemeContrast(theme)
   const warnings = new Map<MdTokenName, { partner: MdTokenName; ratio: number }>()
-  for (const [fg, bg] of ROLE_CONTRAST_PAIRS) {
-    const fgHex = hexByRole[fg]
-    const bgHex = hexByRole[bg]
-    if (fgHex === undefined || bgHex === undefined) continue
-    const ratio = contrastRatio(fgHex, bgHex)
-    if (ratio < AA_THRESHOLD) warnings.set(fg, { partner: bg, ratio })
+  for (const result of report[mode]) {
+    if (result.pair.layer !== 'md' || result.passes) continue
+    warnings.set(result.pair.fg as MdTokenName, {
+      partner: result.pair.bg as MdTokenName,
+      ratio: result.ratio,
+    })
   }
 
   // why: visibility filter for inspect surface; ADR-0023 commitment 1 —
