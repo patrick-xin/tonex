@@ -65,6 +65,27 @@ function trim(n: number, precision: number): string {
   return Number(n.toFixed(precision)).toString()
 }
 
+// why: argb component decompose. Used by relativeLuminance and any consumer
+// that needs raw RGB bytes (contrast tooling, color-distance reports).
+export function argbComponents(argb: number): { r: number; g: number; b: number } {
+  return {
+    r: (argb >> 16) & 0xff,
+    g: (argb >> 8) & 0xff,
+    b: argb & 0xff,
+  }
+}
+
+// why: WCAG 2.x relative luminance. Source-of-truth helper for contrast tooling
+// (ratio = (Lmax + 0.05) / (Lmin + 0.05)). Uses srgbToLinear's gamma-correct
+// path; do not approximate with simple averaging.
+export function relativeLuminance(argb: number): number {
+  const { r, g, b } = argbComponents(argb)
+  const lr = srgbToLinear(r)
+  const lg = srgbToLinear(g)
+  const lb = srgbToLinear(b)
+  return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb
+}
+
 export function oklchFromArgb(argb: number): string {
   const r = (argb >> 16) & 0xff
   const g = (argb >> 8) & 0xff

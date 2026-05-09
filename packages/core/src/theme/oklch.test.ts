@@ -1,6 +1,13 @@
 import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { argbFromOklch, hexFromOklch, oklchFromArgb, oklchFromHex } from './oklch'
+import {
+  argbComponents,
+  argbFromOklch,
+  hexFromOklch,
+  oklchFromArgb,
+  oklchFromHex,
+  relativeLuminance,
+} from './oklch'
 
 const OKLCH = /^oklch\([\d.]+ [\d.]+ [\d.]+\)$/
 
@@ -58,5 +65,50 @@ describe('oklch conversion', () => {
     const a = oklchFromArgb(argbFromHex('#6750a4'))
     const b = oklchFromArgb(argbFromHex('#6750a4'))
     expect(a).toBe(b)
+  })
+})
+
+describe('argbComponents', () => {
+  it('decomposes a known argb into r/g/b bytes', () => {
+    expect(argbComponents(0xff112233)).toEqual({ r: 0x11, g: 0x22, b: 0x33 })
+  })
+
+  it('alpha byte never leaks into rgb output', () => {
+    // why: each channel masks with 0xff, so the high (alpha) byte cannot
+    // bleed into r/g/b. Verify by varying alpha while holding rgb constant.
+    expect(argbComponents(0x00112233)).toEqual(argbComponents(0xff112233))
+  })
+
+  it('round-trips through argbFromHex and manual reassembly', () => {
+    const argb = argbFromHex('#3366aa')
+    const { r, g, b } = argbComponents(argb)
+    const reassembled = ((255 << 24) | (r << 16) | (g << 8) | b) >>> 0
+    expect(reassembled).toBe(argb)
+  })
+})
+
+describe('relativeLuminance', () => {
+  it('white is ~1.0', () => {
+    expect(relativeLuminance(argbFromHex('#ffffff'))).toBeCloseTo(1, 9)
+  })
+
+  it('black is exactly 0', () => {
+    expect(relativeLuminance(argbFromHex('#000000'))).toBe(0)
+  })
+
+  it('mid-gray #808080 ≈ 0.2159', () => {
+    expect(relativeLuminance(argbFromHex('#808080'))).toBeCloseTo(0.2159, 3)
+  })
+
+  it('pure red #ff0000 = 0.2126 (WCAG R coefficient)', () => {
+    expect(relativeLuminance(argbFromHex('#ff0000'))).toBeCloseTo(0.2126, 9)
+  })
+
+  it('pure green #00ff00 = 0.7152 (WCAG G coefficient)', () => {
+    expect(relativeLuminance(argbFromHex('#00ff00'))).toBeCloseTo(0.7152, 9)
+  })
+
+  it('pure blue #0000ff = 0.0722 (WCAG B coefficient)', () => {
+    expect(relativeLuminance(argbFromHex('#0000ff'))).toBeCloseTo(0.0722, 9)
   })
 })

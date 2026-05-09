@@ -7,4 +7,10 @@
 // previews, hex-input pickers) project at the read site. `oklchString` /
 // `hexString` are the boundary helpers; both wrap the same primitives the
 // internal seam uses so projection drift across consumers is impossible.
-export { hexFromOklch, hexString, oklchString } from './theme/oklch'
+export {
+  argbComponents,
+  hexFromOklch,
+  hexString,
+  oklchString,
+  relativeLuminance,
+} from './theme/oklch'
