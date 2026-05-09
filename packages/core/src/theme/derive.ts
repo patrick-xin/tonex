@@ -118,8 +118,6 @@ const MULTI_TONE_DARK = 60
 const MULTI_ACHROMATIC_THRESHOLD = 5
 const MULTI_FALLBACK_HUE = 270
 
-const mdc = new MaterialDynamicColors()
-
 // why: explicit MdTokenName → MCU getter table. Verbose but the mapping is
 // the load-bearing fact this module owes its readers — kebab-cased token
 // names don't trivially round-trip to camelCase getter names without a rule
@@ -127,6 +125,15 @@ const mdc = new MaterialDynamicColors()
 // would hide MCU's actual API surface behind string mangling. Adding an md
 // token: extend MD_TOKEN_NAMES in schema.ts AND add the resolver here.
 // TypeScript's Record<MdTokenName, ...> ensures both move together.
+//
+// why: resolvers take `mdc` as a parameter rather than closing over a module
+// singleton — `MaterialDynamicColors` is constructed fresh per `deriveTheme`
+// call (issue #21). Today's MCU constructor is stateless, but the boundary
+// belongs at derive's seam: when we swap our vendored MCU for the upstream
+// package (ADR-0012), upgrades ship outside our control and any future
+// per-instance memoization would silently leak across calls under a
+// singleton. Construction is a thin façade allocation; the derive cache
+// absorbs repeat calls so only cache misses pay it.
 
 // why: MCU's dim getters return `DynamicColor | undefined` because the 2021 spec
 // declares them optional. Under the live spec stack (2026 → 2025 → 2021), the
@@ -147,57 +154,60 @@ function dimArgb(
   return color.getArgb(scheme)
 }
 
-const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
-  '--color-primary': (s) => mdc.primary().getArgb(s),
-  '--color-on-primary': (s) => mdc.onPrimary().getArgb(s),
-  '--color-primary-container': (s) => mdc.primaryContainer().getArgb(s),
-  '--color-on-primary-container': (s) => mdc.onPrimaryContainer().getArgb(s),
-  '--color-primary-fixed': (s) => mdc.primaryFixed().getArgb(s),
-  '--color-primary-fixed-dim': (s) => mdc.primaryFixedDim().getArgb(s),
-  '--color-on-primary-fixed': (s) => mdc.onPrimaryFixed().getArgb(s),
-  '--color-on-primary-fixed-variant': (s) => mdc.onPrimaryFixedVariant().getArgb(s),
-  '--color-primary-dim': (s) => dimArgb(() => mdc.primaryDim(), s, '--color-primary-dim'),
-  '--color-secondary': (s) => mdc.secondary().getArgb(s),
-  '--color-on-secondary': (s) => mdc.onSecondary().getArgb(s),
-  '--color-secondary-container': (s) => mdc.secondaryContainer().getArgb(s),
-  '--color-on-secondary-container': (s) => mdc.onSecondaryContainer().getArgb(s),
-  '--color-secondary-fixed': (s) => mdc.secondaryFixed().getArgb(s),
-  '--color-secondary-fixed-dim': (s) => mdc.secondaryFixedDim().getArgb(s),
-  '--color-on-secondary-fixed': (s) => mdc.onSecondaryFixed().getArgb(s),
-  '--color-on-secondary-fixed-variant': (s) => mdc.onSecondaryFixedVariant().getArgb(s),
-  '--color-secondary-dim': (s) => dimArgb(() => mdc.secondaryDim(), s, '--color-secondary-dim'),
-  '--color-tertiary': (s) => mdc.tertiary().getArgb(s),
-  '--color-on-tertiary': (s) => mdc.onTertiary().getArgb(s),
-  '--color-tertiary-container': (s) => mdc.tertiaryContainer().getArgb(s),
-  '--color-on-tertiary-container': (s) => mdc.onTertiaryContainer().getArgb(s),
-  '--color-tertiary-fixed': (s) => mdc.tertiaryFixed().getArgb(s),
-  '--color-tertiary-fixed-dim': (s) => mdc.tertiaryFixedDim().getArgb(s),
-  '--color-on-tertiary-fixed': (s) => mdc.onTertiaryFixed().getArgb(s),
-  '--color-on-tertiary-fixed-variant': (s) => mdc.onTertiaryFixedVariant().getArgb(s),
-  '--color-tertiary-dim': (s) => dimArgb(() => mdc.tertiaryDim(), s, '--color-tertiary-dim'),
-  '--color-error': (s) => mdc.error().getArgb(s),
-  '--color-on-error': (s) => mdc.onError().getArgb(s),
-  '--color-error-container': (s) => mdc.errorContainer().getArgb(s),
-  '--color-on-error-container': (s) => mdc.onErrorContainer().getArgb(s),
-  '--color-error-dim': (s) => dimArgb(() => mdc.errorDim(), s, '--color-error-dim'),
-  '--color-surface': (s) => mdc.surface().getArgb(s),
-  '--color-on-surface': (s) => mdc.onSurface().getArgb(s),
-  '--color-on-surface-variant': (s) => mdc.onSurfaceVariant().getArgb(s),
-  '--color-surface-dim': (s) => mdc.surfaceDim().getArgb(s),
-  '--color-surface-bright': (s) => mdc.surfaceBright().getArgb(s),
-  '--color-surface-container-lowest': (s) => mdc.surfaceContainerLowest().getArgb(s),
-  '--color-surface-container-low': (s) => mdc.surfaceContainerLow().getArgb(s),
-  '--color-surface-container': (s) => mdc.surfaceContainer().getArgb(s),
-  '--color-surface-container-high': (s) => mdc.surfaceContainerHigh().getArgb(s),
-  '--color-surface-container-highest': (s) => mdc.surfaceContainerHighest().getArgb(s),
-  '--color-surface-tint': (s) => mdc.surfaceTint().getArgb(s),
-  '--color-inverse-surface': (s) => mdc.inverseSurface().getArgb(s),
-  '--color-inverse-on-surface': (s) => mdc.inverseOnSurface().getArgb(s),
-  '--color-inverse-primary': (s) => mdc.inversePrimary().getArgb(s),
-  '--color-shadow': (s) => mdc.shadow().getArgb(s),
-  '--color-scrim': (s) => mdc.scrim().getArgb(s),
-  '--color-outline': (s) => mdc.outline().getArgb(s),
-  '--color-outline-variant': (s) => mdc.outlineVariant().getArgb(s),
+type MdTokenResolver = (s: DynamicScheme, mdc: MaterialDynamicColors) => number
+
+const MD_TOKEN_RESOLVERS: Record<MdTokenName, MdTokenResolver> = {
+  '--color-primary': (s, mdc) => mdc.primary().getArgb(s),
+  '--color-on-primary': (s, mdc) => mdc.onPrimary().getArgb(s),
+  '--color-primary-container': (s, mdc) => mdc.primaryContainer().getArgb(s),
+  '--color-on-primary-container': (s, mdc) => mdc.onPrimaryContainer().getArgb(s),
+  '--color-primary-fixed': (s, mdc) => mdc.primaryFixed().getArgb(s),
+  '--color-primary-fixed-dim': (s, mdc) => mdc.primaryFixedDim().getArgb(s),
+  '--color-on-primary-fixed': (s, mdc) => mdc.onPrimaryFixed().getArgb(s),
+  '--color-on-primary-fixed-variant': (s, mdc) => mdc.onPrimaryFixedVariant().getArgb(s),
+  '--color-primary-dim': (s, mdc) => dimArgb(() => mdc.primaryDim(), s, '--color-primary-dim'),
+  '--color-secondary': (s, mdc) => mdc.secondary().getArgb(s),
+  '--color-on-secondary': (s, mdc) => mdc.onSecondary().getArgb(s),
+  '--color-secondary-container': (s, mdc) => mdc.secondaryContainer().getArgb(s),
+  '--color-on-secondary-container': (s, mdc) => mdc.onSecondaryContainer().getArgb(s),
+  '--color-secondary-fixed': (s, mdc) => mdc.secondaryFixed().getArgb(s),
+  '--color-secondary-fixed-dim': (s, mdc) => mdc.secondaryFixedDim().getArgb(s),
+  '--color-on-secondary-fixed': (s, mdc) => mdc.onSecondaryFixed().getArgb(s),
+  '--color-on-secondary-fixed-variant': (s, mdc) => mdc.onSecondaryFixedVariant().getArgb(s),
+  '--color-secondary-dim': (s, mdc) =>
+    dimArgb(() => mdc.secondaryDim(), s, '--color-secondary-dim'),
+  '--color-tertiary': (s, mdc) => mdc.tertiary().getArgb(s),
+  '--color-on-tertiary': (s, mdc) => mdc.onTertiary().getArgb(s),
+  '--color-tertiary-container': (s, mdc) => mdc.tertiaryContainer().getArgb(s),
+  '--color-on-tertiary-container': (s, mdc) => mdc.onTertiaryContainer().getArgb(s),
+  '--color-tertiary-fixed': (s, mdc) => mdc.tertiaryFixed().getArgb(s),
+  '--color-tertiary-fixed-dim': (s, mdc) => mdc.tertiaryFixedDim().getArgb(s),
+  '--color-on-tertiary-fixed': (s, mdc) => mdc.onTertiaryFixed().getArgb(s),
+  '--color-on-tertiary-fixed-variant': (s, mdc) => mdc.onTertiaryFixedVariant().getArgb(s),
+  '--color-tertiary-dim': (s, mdc) => dimArgb(() => mdc.tertiaryDim(), s, '--color-tertiary-dim'),
+  '--color-error': (s, mdc) => mdc.error().getArgb(s),
+  '--color-on-error': (s, mdc) => mdc.onError().getArgb(s),
+  '--color-error-container': (s, mdc) => mdc.errorContainer().getArgb(s),
+  '--color-on-error-container': (s, mdc) => mdc.onErrorContainer().getArgb(s),
+  '--color-error-dim': (s, mdc) => dimArgb(() => mdc.errorDim(), s, '--color-error-dim'),
+  '--color-surface': (s, mdc) => mdc.surface().getArgb(s),
+  '--color-on-surface': (s, mdc) => mdc.onSurface().getArgb(s),
+  '--color-on-surface-variant': (s, mdc) => mdc.onSurfaceVariant().getArgb(s),
+  '--color-surface-dim': (s, mdc) => mdc.surfaceDim().getArgb(s),
+  '--color-surface-bright': (s, mdc) => mdc.surfaceBright().getArgb(s),
+  '--color-surface-container-lowest': (s, mdc) => mdc.surfaceContainerLowest().getArgb(s),
+  '--color-surface-container-low': (s, mdc) => mdc.surfaceContainerLow().getArgb(s),
+  '--color-surface-container': (s, mdc) => mdc.surfaceContainer().getArgb(s),
+  '--color-surface-container-high': (s, mdc) => mdc.surfaceContainerHigh().getArgb(s),
+  '--color-surface-container-highest': (s, mdc) => mdc.surfaceContainerHighest().getArgb(s),
+  '--color-surface-tint': (s, mdc) => mdc.surfaceTint().getArgb(s),
+  '--color-inverse-surface': (s, mdc) => mdc.inverseSurface().getArgb(s),
+  '--color-inverse-on-surface': (s, mdc) => mdc.inverseOnSurface().getArgb(s),
+  '--color-inverse-primary': (s, mdc) => mdc.inversePrimary().getArgb(s),
+  '--color-shadow': (s, mdc) => mdc.shadow().getArgb(s),
+  '--color-scrim': (s, mdc) => mdc.scrim().getArgb(s),
+  '--color-outline': (s, mdc) => mdc.outline().getArgb(s),
+  '--color-outline-variant': (s, mdc) => mdc.outlineVariant().getArgb(s),
 }
 
 // why: collapses the prior light/dark dup. Iterates MD_TOKEN_NAMES so every
@@ -205,10 +215,10 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
 // resolver is a TS error at the table site, not a silent missing token.
 // Returns argb directly (ADR-0021); projection happens at the format/applyDom
 // seam.
-function buildMdLayer(scheme: DynamicScheme): TokenMap {
+function buildMdLayer(scheme: DynamicScheme, mdc: MaterialDynamicColors): TokenMap {
   const out: TokenMap = {}
   for (const name of MD_TOKEN_NAMES) {
-    out[name] = MD_TOKEN_RESOLVERS[name](scheme)
+    out[name] = MD_TOKEN_RESOLVERS[name](scheme, mdc)
   }
   return out
 }
@@ -268,6 +278,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const lightScheme = variant.build(seedHct, false, source.contrastLevel, secondHct)
   const darkScheme = variant.build(seedHct, true, source.contrastLevel, secondHct)
 
+  const mdc = new MaterialDynamicColors()
+
   // why: palette-level override runs FIRST — mutates the scheme's tonal
   // palette fields in place so every md token derived from MCU sees the
   // overridden source. MCU's variant-specific tone choices (e.g. monochrome's
@@ -280,10 +292,13 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   // Token override is the surgical pin and runs LAST so user pins always
   // win over both MCU and the palette regen.
   const mdLightBase = applyMd3TokenOverrides(
-    buildMdLayer(lightScheme),
+    buildMdLayer(lightScheme, mdc),
     source.md3TokenOverrides.light,
   )
-  const mdDarkBase = applyMd3TokenOverrides(buildMdLayer(darkScheme), source.md3TokenOverrides.dark)
+  const mdDarkBase = applyMd3TokenOverrides(
+    buildMdLayer(darkScheme, mdc),
+    source.md3TokenOverrides.dark,
+  )
 
   // why: treatment runs BEFORE shadcn binds so any binding pointed at a
   // surface token reflects the treated value automatically. Default
