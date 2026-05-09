@@ -29,3 +29,19 @@ The flip-via-action rule (point 2) is load-bearing for a different reason: `_hyd
   - Grep for raw `_hydrated` reads outside `packages/core/src/theme/source.ts` and `useResolvedTokens.ts` — bypass candidate.
 - "Remove the null check, it's annoying" — refuse. The annoyance is the guard working. Render proper placeholders instead.
 - **Known violations at write time** (real bugs, not just convention slip): two `editor-rail/` components read `useTheme().resolvedTheme` raw and silently coerce undefined → `'light'` — produces an incorrect swatch on first paint for users with dark system theme. Tracked as cleanup issues; the rule supersedes them.
+
+## Amendment 2026-05-09
+
+The allowlist moved with the workflow-feature consolidation (ADR-0022 rule 5). `next-themes` is now imported by exactly one folder, `features/theme-mode/`, and the canonical resolved-theme hook moved there from `lib/hooks/use-active-mode.ts`.
+
+Updated allowlist (the only files allowed to import from `next-themes`):
+
+- `apps/www/src/features/theme-mode/use-active-mode.ts` — the canonical `useTheme().resolvedTheme` reader. Now also exports `useSetMode`, a thin wrapper around `setTheme` for event-handler callers (the carve-out the original Consequence section already permitted; this just gives it a named home so callers don't import `useTheme()` directly).
+- `apps/www/src/features/theme-mode/theme-mode-provider.tsx` — mounts `<NextThemesProvider>` and the `D`-key hotkey. Imports `ThemeProvider` only; does not call `useTheme()`.
+
+Removed from the allowlist:
+
+- `apps/www/src/app/_providers.tsx` — no longer imports `next-themes`. It mounts `ThemeModeProvider` from `features/theme-mode/` instead.
+- `apps/www/src/lib/hooks/use-active-mode.ts` — file deleted; moved to the theme-mode feature folder.
+
+The five numbered Decision points stand verbatim. Commitment 4 still binds: any component reading `'light' | 'dark'` MUST go through `useActiveMode`. Components that need to set the mode in event handlers go through the new `useSetMode`. The drift-sentinel hook in `.claude/settings.json` updates to match.

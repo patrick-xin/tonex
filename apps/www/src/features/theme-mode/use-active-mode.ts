@@ -22,3 +22,12 @@ export function useActiveMode(): Mode | null {
   if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') return null
   return resolvedTheme
 }
+
+// why: ADR-0015 permits next-themes' `setTheme` in event handlers (keypress,
+// click) where SSR mismatch is structurally impossible. Co-locating the
+// wrapper here keeps next-themes a dep of this one file and gives the
+// carve-out a named home — callers don't import `useTheme` directly.
+export function useSetMode(): (mode: Mode) => void {
+  const { setTheme } = useTheme()
+  return (mode) => setTheme(mode)
+}
