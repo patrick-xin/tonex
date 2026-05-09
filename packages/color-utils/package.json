@@ -1,14 +1,10 @@
 {
-  "name": "@tonex/core",
+  "name": "@tonex/color-utils",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/schema.ts",
-    "./oklch": "./src/oklch.ts",
-    "./data": "./src/data.ts",
-    "./variants": "./src/variants/index.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -16,19 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tonex/color-utils": "workspace:*",
     "@tonex/mcu": "workspace:*",
-    "valibot": "^1.4.0",
-    "zustand": "^5.0.12"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0"
+    "culori": "^4.0.2"
   },
   "devDependencies": {
     "@tonex/typescript-config": "workspace:*",
-    "@types/react": "^19.0.0",
-    "jsdom": "^29.1.1",
-    "react": "^19.0.0",
+    "@types/culori": "^4.0.1",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
