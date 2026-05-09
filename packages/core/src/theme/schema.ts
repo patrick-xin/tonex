@@ -3,56 +3,13 @@ import * as v from 'valibot'
 import { DEFAULT_VARIANT, type VariantName, variants } from '../variants'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 
-// why: bumped to 9 — cmfSecondSourceHex added. Optional second source color
-// for the CMF variant; SchemeCmf accepts Hct[] and uses the second entry as
-// `secondarySourceColorHct`, which feeds the tertiaryPalette (full reassign
-// with second hue+chroma) AND the errorPalette (hue picked via a lookup
-// over both source hues). Threaded into VariantStrategy.build as an optional
-// 4th param; only the cmf strategy reads it. null default = single-source
-// build (MCU's documented fallback: second = first), byte-identical to v8.
-// Disabled when variant !== 'cmf' (see cmf-second-source.ts); setter and
-// engine both consult that selector. Migration v8→v9 fills null.
-// v8: paletteOverrides added. Per-palette hex overrides for
-// MCU's six tonal palettes (primary, secondary, tertiary, neutral,
-// neutralVariant, error). Override applies post-construction by replacing
-// the palette field on the DynamicScheme; MCU's variant-specific tone
-// choices flow through unchanged so the family-regen is correct for every
-// scheme (not just tonalSpot). Flat hex map (not mode-keyed): a palette is
-// a tone ramp, the scheme picks tones from it per mode. Empty default
-// keeps drift-guard byte-identical. Migration v7→v8 fills `{}`. Closes the
-// "family-regen" gap left open when primaryHexLock was pruned in v6 — same
-// product need, generalized to all six palettes, lifted from the legacy
-// generator's validated implementation.
-// v7: surfaceTintLevel and surfaceDesaturateLevel migrated from flat number
-// to { light, dark } so a user can edit one mode's level without mutating
-// the other. Aligns surfaces with the per-mode shape already used by
-// md3TokenOverrides and shadcnRoleBindings. surfaceAlgo and surfacePaletteName
-// stay flat: algo is an "open question" per the originating issue (defer
-// mode-keying until real usage pressure); palette is a tint *source*, not a
-// per-mode value. Migration v6→v7 lifts the flat number into both modes
-// (unshipped values stay byte-equal post-migrate).
-// v6 (slice 10): primaryHexLock pruned. The half-feature pinned --color-
-// primary to a hex and regenerated the family from a TonalPalette;
-// md3TokenOverrides covers the pin use case and the family-regen story is
-// deferred until a real product need surfaces. Migration v5→v6 deletes the
-// persisted field.
-// v5 (slice 7): applySurfaceTint generalized from hardcoded zinc to any of
-// NEUTRAL_PALETTE_NAMES. New field surfacePaletteName picks the base
-// palette; v4→v5 migration fills 'zinc' so existing users see identical
-// output (zinc was the prior hardcoded base).
-// v4 (slice 6): md3PrimaryContainerOverride (single-token, mode-keyed)
-// generalized to md3TokenOverrides (per-token map per mode). Migration
-// lifts the persisted hex into md3TokenOverrides[mode][--color-primary-
-// container] and drops the old field.
-// v3 (slice 3): customColors[] field added to PortableTheme. Persisted v2
-// stores have no customColors key; zustand persist shallow-merges, so
-// rehydrate would leave the field undefined and any iteration site
-// (deriveTheme buildCustomColorsMd) would NPE. Migration fills [].
-// v2 (slice 2): md token set expanded 8→28, shadcn roles 2→26 — persisted
-// v1 stores only had 2 role bindings; migration spreads defaults under
-// persisted bindings so bindShadcn finds every role.
-// Future bumps: increment AND extend the migrate function in source.ts.
-export const SCHEMA_VERSION = 10 as const
+// why: SCHEMA_VERSION pins the persisted PortableTheme shape contract per
+// ADR-0009. v1 baseline — this branch starts the migration ladder fresh
+// (no v0 users to preserve). Future bumps: increment SCHEMA_VERSION AND
+// add a forward-migration branch in source.ts:migrate. Schema describes
+// the *current* shape only; on parse failure the rehydrate handler resets
+// to DEFAULT_INPUTS (ADR-0009 c.4).
+export const SCHEMA_VERSION = 1 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.

@@ -10,7 +10,6 @@ import {
   type ChartMode,
   type CustomColorEntry,
   DEFAULT_INPUTS,
-  DEFAULT_SHADCN_ROLE_BINDINGS,
   isValidHex,
   type MdTokenName,
   type PaletteName,
@@ -250,106 +249,11 @@ export const useSource = create<SourceState>()(
       // portable vs ephemeral." Persistence drift is no longer a separate
       // maintenance surface.
       partialize: selectPortable,
-      // why: forward migration ladder per ADR-0009. v1 → v2 expanded the
-      // shadcn role surface from 2 keys to 26; zustand persist replaces the
-      // bindings field wholesale on rehydrate, so v1 state would leave 24
-      // role keys undefined and bindShadcn would throw at the first lookup.
-      // Spread defaults under persisted bindings — preserves any user edits
-      // to the two roles v1 had while filling the rest from current defaults.
-      // Returning a partial PortableTheme is fine; zustand spreads it over
-      // initial state, so unmentioned fields keep their in-memory defaults.
-      migrate: (persistedState, version) => {
-        const s = persistedState as Partial<PortableTheme>
-        if (version < 2) {
-          s.shadcnRoleBindings = {
-            light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, ...s.shadcnRoleBindings?.light },
-            dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, ...s.shadcnRoleBindings?.dark },
-          }
-        }
-        if (version < 3) {
-          // why: v2 had no customColors field — fill empty so deriveTheme's
-          // iteration doesn't NPE. Empty array preserves every existing
-          // user's exact rendered output (zero extra emission).
-          s.customColors = s.customColors ?? []
-        }
-        if (version < 4) {
-          // why: v3 stored md3PrimaryContainerOverride: { light, dark }.
-          // Slice 6 generalized this to md3TokenOverrides — a per-token map
-          // per mode. Lift any non-null v3 hex into the new map under
-          // --color-primary-container, then delete the legacy field so it
-          // doesn't leak past rehydrate (same field on the in-memory state
-          // would shadow the new shape).
-          const legacy = (
-            s as { md3PrimaryContainerOverride?: { light: string | null; dark: string | null } }
-          ).md3PrimaryContainerOverride
-          const lifted: {
-            light: Partial<Record<MdTokenName, string>>
-            dark: Partial<Record<MdTokenName, string>>
-          } = {
-            light: {},
-            dark: {},
-          }
-          if (legacy?.light != null) lifted.light['--color-primary-container'] = legacy.light
-          if (legacy?.dark != null) lifted.dark['--color-primary-container'] = legacy.dark
-          s.md3TokenOverrides = lifted
-          delete (s as { md3PrimaryContainerOverride?: unknown }).md3PrimaryContainerOverride
-        }
-        if (version < 5) {
-          // why: v4 had no surfacePaletteName — applySurfaceTint was hardcoded
-          // to zinc. Fill 'zinc' so post-rehydrate output is bytewise identical
-          // to v4 for any user. Without this, the field is undefined and the
-          // tint algorithm's palette lookup NPEs.
-          s.surfacePaletteName = s.surfacePaletteName ?? 'zinc'
-        }
-        if (version < 6) {
-          // why: slice-10 audit pruned primaryHexLock — see SCHEMA_VERSION
-          // header. md3TokenOverrides still covers the pin-a-hex case for
-          // --color-primary; the family-regen story is deferred. Drop the
-          // field so it doesn't shadow the new shape on rehydrate.
-          delete (s as { primaryHexLock?: unknown }).primaryHexLock
-        }
-        if (version < 7) {
-          // why: lift flat number → { light, dark }. Same level on both modes
-          // means post-migrate output is byte-identical to v6. Undefined
-          // (legacy unset) falls back to DEFAULT_INPUTS via zustand's spread
-          // over initial state, so we only act when the legacy number is real.
-          const legacyTint = (s as { surfaceTintLevel?: number | { light: number; dark: number } })
-            .surfaceTintLevel
-          if (typeof legacyTint === 'number') {
-            s.surfaceTintLevel = { light: legacyTint, dark: legacyTint }
-          }
-          const legacyDesat = (
-            s as { surfaceDesaturateLevel?: number | { light: number; dark: number } }
-          ).surfaceDesaturateLevel
-          if (typeof legacyDesat === 'number') {
-            s.surfaceDesaturateLevel = { light: legacyDesat, dark: legacyDesat }
-          }
-        }
-        if (version < 8) {
-          // why: v7 had no paletteOverrides — fill empty so deriveTheme's
-          // iteration over PALETTE_NAMES finds a defined object. Empty map
-          // preserves every existing user's exact rendered output (zero
-          // mutations applied to the scheme).
-          s.paletteOverrides = s.paletteOverrides ?? {}
-        }
-        if (version < 9) {
-          // why: v8 had no cmfSecondSourceHex — fill null so deriveTheme's
-          // optional-second-source branch evaluates to undefined and the
-          // cmf strategy takes the single-source path (byte-identical to
-          // v8). Explicit null (not undefined) so consumers can rely on the
-          // field's presence in the persisted shape.
-          s.cmfSecondSourceHex = s.cmfSecondSourceHex ?? null
-        }
-        if (version < 10) {
-          // why: v9 had no chartMode — fill 'mono' so deriveTheme's chart
-          // branch takes the palette-tone path that v9 used unconditionally.
-          // Drift-guard baseline (globals.css === formatCss(deriveTheme(
-          // DEFAULT_INPUTS))) holds because mono routes through the same
-          // CHART_TONES_LIGHT/DARK ladder v9 had inline. ADR-0024.
-          s.chartMode = s.chartMode ?? 'mono'
-        }
-        return s as PortableTheme
-      },
+      // why: v1 baseline — no prior versions to migrate from. Future bumps add
+      // forward-migration branches here per ADR-0009. On parse-failure the
+      // rehydrate handler below resets to DEFAULT_INPUTS, so callers never see
+      // a malformed PortableTheme.
+      migrate: (persistedState, _version) => persistedState as PortableTheme,
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
