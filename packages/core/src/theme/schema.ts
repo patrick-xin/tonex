@@ -1,3 +1,4 @@
+import type { DynamicScheme } from '@tonex/mcu'
 import * as v from 'valibot'
 import { DEFAULT_VARIANT, type VariantName, variants } from '../variants'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
@@ -239,15 +240,38 @@ export type ChartMode = (typeof CHART_MODES)[number]
 export const MD_PALETTE_TONE_NAMES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100] as const
 export type MdPaletteToneName = (typeof MD_PALETTE_TONE_NAMES)[number]
 
-export const MD_PALETTE_FAMILY_NAMES = [
-  'primary',
-  'secondary',
-  'tertiary',
-  'neutral',
-  'neutral-variant',
-  'error',
-] as const
-export type MdPaletteFamilyName = (typeof MD_PALETTE_FAMILY_NAMES)[number]
+// why: single canonical table for the six MCU palette families. Each row binds
+// the camelCase override key (PaletteName, used by paletteOverrides storage),
+// the kebab emission slug (MdPaletteFamilyName, ADR-0021 c.2 — kebab is
+// required at the M3 token boundary), and the MCU DynamicScheme field name
+// (used by both palette-override/apply.ts and buildMdPalette in derive.ts).
+// Adding a new family is a one-row TS-checked addition; previous codebase
+// carried two hand-typed lookup tables that could drift.
+export const PALETTE_FAMILIES = [
+  { paletteName: 'primary', emissionName: 'primary', schemeField: 'primaryPalette' },
+  { paletteName: 'secondary', emissionName: 'secondary', schemeField: 'secondaryPalette' },
+  { paletteName: 'tertiary', emissionName: 'tertiary', schemeField: 'tertiaryPalette' },
+  { paletteName: 'neutral', emissionName: 'neutral', schemeField: 'neutralPalette' },
+  {
+    paletteName: 'neutralVariant',
+    emissionName: 'neutral-variant',
+    schemeField: 'neutralVariantPalette',
+  },
+  { paletteName: 'error', emissionName: 'error', schemeField: 'errorPalette' },
+] as const satisfies readonly {
+  paletteName: string
+  emissionName: string
+  schemeField: keyof DynamicScheme
+}[]
+
+// why: derived from PALETTE_FAMILIES. The literal union of emission slugs is
+// preserved via the indexed-access type below; the runtime array is cast back
+// to the narrow readonly type so picklist-style consumers keep their literal
+// narrowing.
+export type MdPaletteFamilyName = (typeof PALETTE_FAMILIES)[number]['emissionName']
+export const MD_PALETTE_FAMILY_NAMES = PALETTE_FAMILIES.map(
+  (p) => p.emissionName,
+) as readonly MdPaletteFamilyName[]
 
 // why: cross-product the family × tone tuples once at module scope. Adding a
 // new tone or family flows through this array (and into derive's emission
@@ -419,24 +443,13 @@ export function validateCustomColorEntry(
   return null
 }
 
-// why: canonical list of MCU's six tonal palettes. Each entry corresponds
-// to a `*Palette` field on DynamicScheme that drives a family of md tokens
-// (primary → primary/onPrimary/primary-container/on-primary-container; the
-// neutral pair drives surface + outline). Order matches MCU's emission
-// order in the spec — primary first, error last. Used as the value-domain
-// of paletteOverrides AND as the iteration source in apply.ts so adding /
-// removing a palette is a one-line edit. Adding a new MCU palette: extend
-// this tuple AND add a mutation case in palette-override/apply.ts (both
-// must move together; the type system enforces it via the Record type).
-export const PALETTE_NAMES = [
-  'primary',
-  'secondary',
-  'tertiary',
-  'neutral',
-  'neutralVariant',
-  'error',
-] as const
-export type PaletteName = (typeof PALETTE_NAMES)[number]
+// why: canonical list of MCU's six tonal palettes. Derived from
+// PALETTE_FAMILIES (defined above) — that table is the single source binding
+// camelCase override key ↔ kebab emission slug ↔ DynamicScheme field. Used
+// as the value-domain of paletteOverrides. Adding a new MCU palette: extend
+// PALETTE_FAMILIES (TS-checked at all consumers).
+export type PaletteName = (typeof PALETTE_FAMILIES)[number]['paletteName']
+export const PALETTE_NAMES = PALETTE_FAMILIES.map((p) => p.paletteName) as readonly PaletteName[]
 
 // why: which surface treatment deriveTheme applies post-md-emit. Mutually
 // exclusive — composing tint and desaturate isn't a product feature. There is

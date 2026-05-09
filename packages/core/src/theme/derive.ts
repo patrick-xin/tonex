@@ -16,10 +16,10 @@ import {
   MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
-  MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
   MD_TOKEN_NAMES,
   type MdTokenName,
+  PALETTE_FAMILIES,
   type PortableTheme,
   SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
@@ -418,22 +418,14 @@ function rebrandChart(mdChart: TokenMap): TokenMap {
 // why: 78 palette tones (13 tones × 6 palettes). Mode/contrast-invariant —
 // the palette is a tone ramp; mode picks tones from it. We expose the full
 // ramp for inspect UIs (landing showcase, tone-palette swatches) so they can
-// render any tone without re-deriving from the seed.
-const MD_PALETTE_FIELD_BY_NAME: Record<string, keyof DynamicScheme> = {
-  primary: 'primaryPalette',
-  secondary: 'secondaryPalette',
-  tertiary: 'tertiaryPalette',
-  neutral: 'neutralPalette',
-  'neutral-variant': 'neutralVariantPalette',
-  error: 'errorPalette',
-}
-
+// render any tone without re-deriving from the seed. Iterates PALETTE_FAMILIES
+// so the kebab emission slug and DynamicScheme field stay in lockstep.
 function buildMdPalette(scheme: DynamicScheme): TokenMap {
   const out: TokenMap = {}
-  for (const family of MD_PALETTE_FAMILY_NAMES) {
-    const palette = scheme[MD_PALETTE_FIELD_BY_NAME[family]] as DynamicScheme['primaryPalette']
+  for (const { emissionName, schemeField } of PALETTE_FAMILIES) {
+    const palette = scheme[schemeField] as DynamicScheme['primaryPalette']
     for (const tone of MD_PALETTE_TONE_NAMES) {
-      out[`--md-ref-palette-${family}-${tone}`] = palette.tone(tone)
+      out[`--md-ref-palette-${emissionName}-${tone}`] = palette.tone(tone)
     }
   }
   return out

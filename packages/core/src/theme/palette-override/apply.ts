@@ -4,7 +4,7 @@ import {
   type TonalPalette,
   TonalPalette as TonalPaletteClass,
 } from '@tonex/mcu'
-import { PALETTE_NAMES, type PaletteName, type PortableTheme } from '../schema'
+import { PALETTE_FAMILIES, type PortableTheme } from '../schema'
 import { paletteOverrideDisabledReason } from './disabled-reason'
 
 // why: MCU's DynamicScheme exposes its six tonal palettes as fields
@@ -23,15 +23,6 @@ type MutableScheme = {
   neutralPalette: TonalPalette
   neutralVariantPalette: TonalPalette
   errorPalette: TonalPalette
-}
-
-const PALETTE_FIELD: Record<PaletteName, keyof MutableScheme> = {
-  primary: 'primaryPalette',
-  secondary: 'secondaryPalette',
-  tertiary: 'tertiaryPalette',
-  neutral: 'neutralPalette',
-  neutralVariant: 'neutralVariantPalette',
-  error: 'errorPalette',
 }
 
 // why: applies paletteOverrides in place to BOTH light + dark schemes. Same
@@ -54,12 +45,12 @@ export function applyPaletteOverrides(
   dark: DynamicScheme,
   source: PortableTheme,
 ): void {
-  for (const palette of PALETTE_NAMES) {
-    const hex = source.paletteOverrides[palette]
+  for (const { paletteName, schemeField } of PALETTE_FAMILIES) {
+    const hex = source.paletteOverrides[paletteName]
     if (hex === undefined) continue
-    if (paletteOverrideDisabledReason(palette, source) !== null) continue
+    if (paletteOverrideDisabledReason(paletteName, source) !== null) continue
     const tonalPalette = TonalPaletteClass.fromInt(argbFromHex(hex))
-    const field = PALETTE_FIELD[palette]
+    const field = schemeField as keyof MutableScheme
     ;(light as unknown as MutableScheme)[field] = tonalPalette
     ;(dark as unknown as MutableScheme)[field] = tonalPalette
   }

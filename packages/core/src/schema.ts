@@ -27,6 +27,7 @@ export {
   type MdPaletteTokenName,
   type MdPaletteToneName,
   type MdTokenName,
+  PALETTE_FAMILIES,
   PALETTE_NAMES,
   type PaletteName,
   type PortableTheme,
