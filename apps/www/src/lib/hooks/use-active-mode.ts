@@ -1,5 +1,6 @@
 'use client'
 
+import type { Mode } from '@tonex/core'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
@@ -11,9 +12,9 @@ import { useEffect, useState } from 'react'
 // a silent hydration mismatch that <html suppressHydrationWarning> does
 // NOT cover for subtree text content.
 //
-// Returns 'light' | 'dark' | null. Consumers MUST handle null by rendering
+// Returns Mode | null. Consumers MUST handle null by rendering
 // placeholders, identical contract to useResolvedTokens.
-export function useActiveMode(): 'light' | 'dark' | null {
+export function useActiveMode(): Mode | null {
   const [mounted, setMounted] = useState(false)
   const { resolvedTheme } = useTheme()
   useEffect(() => setMounted(true), [])

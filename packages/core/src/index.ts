@@ -36,7 +36,7 @@ export { exportTs } from './theme/exporters/ts'
 export { formatCss, formatLayer } from './theme/format'
 export { CHROMA_HUE_LOCK, type HctTriplet, hctFromHex, hexFromHct, maxChroma } from './theme/hct'
 export { sourceColorHexFromImage } from './theme/image'
-export type { Mode } from './theme/mode'
+export { MODES, type Mode } from './theme/mode'
 export {
   flushPersist,
   type SourceActions,

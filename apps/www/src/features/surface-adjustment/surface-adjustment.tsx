@@ -1,12 +1,10 @@
 'use client'
 
 import { useSource } from '@tonex/core'
-import type { SurfaceAlgo } from '@tonex/core/schema'
+import { SURFACE_ALGOS, type SurfaceAlgo } from '@tonex/core/schema'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { SurfaceLevelSlider } from './surface-level-slider'
 import { SurfacePaletteSelect } from './surface-palette-select'
-
-const ALGOS: ReadonlyArray<SurfaceAlgo> = ['tint', 'desaturate']
 
 export const SurfaceAdjustment = ({
   triggerRef,
@@ -28,7 +26,7 @@ export const SurfaceAdjustment = ({
             setSurfaceAlgo(value[0] as SurfaceAlgo)
           }}
         >
-          {ALGOS.map((v) => (
+          {SURFACE_ALGOS.map((v) => (
             <ToggleGroupItem className="h-6 capitalize" key={v} value={v}>
               {v}
             </ToggleGroupItem>

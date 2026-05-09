@@ -5,6 +5,7 @@ import {
   CHROMA_HUE_LOCK,
   hctFromHex,
   hexFromHct,
+  type Mode,
   maxChroma,
   previewCustomColor,
   useSource,
@@ -103,7 +104,7 @@ function CustomColorCard({
 }) {
   const seedHex = useSource((s) => s.seedHex)
   const { resolvedTheme } = useTheme()
-  const mode: 'light' | 'dark' = resolvedTheme === 'dark' ? 'dark' : 'light'
+  const mode: Mode = resolvedTheme === 'dark' ? 'dark' : 'light'
   const preview = previewCustomColor(seedHex, { hex: entry.hex, blend: entry.blend })
   const roles = [
     preview[mode].color,

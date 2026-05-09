@@ -6,3 +6,10 @@
 // `{ light, dark }` for overrides + bindings is in schema.ts; this file is
 // just the union itself.
 export type Mode = 'light' | 'dark'
+
+// why: runtime tuple for iteration sites that need to enumerate both modes
+// (UI per-mode renders, validators, persistence migrations). Living alongside
+// `Mode` keeps the type and value declarations in lockstep — adding a third
+// mode (impossible per ADR-0013, but the structural pattern stands) flows
+// through this one tuple instead of N inline `['light', 'dark']` literals.
+export const MODES = ['light', 'dark'] as const satisfies readonly Mode[]

@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
-import { useResolvedTokens, useSource } from '@tonex/core'
+import { type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName, PaletteName } from '@tonex/core/schema'
 import { useTheme } from 'next-themes'
@@ -61,7 +61,7 @@ export function AnimatedButtonColorPicker({
   side = 'right',
 }: AnimatedButtonColorPickerProps) {
   const { resolvedTheme } = useTheme()
-  const mode: 'light' | 'dark' = resolvedTheme === 'dark' ? 'dark' : 'light'
+  const mode: Mode = resolvedTheme === 'dark' ? 'dark' : 'light'
   const theme = useResolvedTokens()
   // why: paletteOverrides is flat — keyed by palette only, not by mode. A
   // palette IS a tone ramp; mode selects tones from it.
@@ -165,7 +165,7 @@ export function AnimatedButtonColorPicker({
   )
 }
 
-function Payload({ palette, mode }: { palette: PaletteName; mode: 'light' | 'dark' }) {
+function Payload({ palette, mode }: { palette: PaletteName; mode: Mode }) {
   const theme = useResolvedTokens()
   const override = useSource((s) => s.paletteOverrides[palette])
   const setOverride = useSource((s) => s.actions.setPaletteOverride)

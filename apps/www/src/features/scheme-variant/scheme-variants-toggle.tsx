@@ -1,11 +1,14 @@
 'use client'
 
 import { useSource } from '@tonex/core'
-import { type VariantGroup, type VariantName, variants } from '@tonex/core/variants'
+import {
+  VARIANT_GROUPS_ORDERED,
+  type VariantGroup,
+  type VariantName,
+  variants,
+} from '@tonex/core/variants'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CmfSecondSourcePicker } from './cmf-second-source-picker'
-
-const SCHEME_VARIANT_GROUPS: VariantGroup[] = ['cmf', 'standard', 'expressive', 'subdued']
 
 const GROUP_LABELS: Record<VariantGroup, string> = {
   cmf: 'CMF',
@@ -35,7 +38,7 @@ export function SchemeVariantsToggle() {
 
   return (
     <div className="flex flex-col gap-3">
-      {SCHEME_VARIANT_GROUPS.map((group) => {
+      {VARIANT_GROUPS_ORDERED.map((group) => {
         const items = VARIANT_NAMES.filter((v) => variants[v].group === group)
         return (
           <div key={group} className="space-y-1">

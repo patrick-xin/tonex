@@ -1,13 +1,13 @@
 'use client'
 
 import { useSource } from '@tonex/core'
-import { type VariantGroup, type VariantName, variants } from '@tonex/core/variants'
+import {
+  VARIANT_GROUPS_ORDERED,
+  type VariantGroup,
+  type VariantName,
+  variants,
+} from '@tonex/core/variants'
 
-// why: render order for <optgroup>. Locking it here (rather than alphabetic
-// over keys) gives a stable reading flow: cmf first (current default + 2025
-// scheme), then standard, expressive, subdued. The order is UI-only — the
-// registry stays unordered.
-const GROUP_ORDER: VariantGroup[] = ['cmf', 'standard', 'expressive', 'subdued']
 const GROUP_LABEL: Record<VariantGroup, string> = {
   cmf: 'CMF',
   standard: 'Standard',
@@ -38,7 +38,7 @@ export function VariantPicker() {
         className="font-mono text-xs px-2 py-1 border rounded bg-surface"
         aria-label="mcu variant"
       >
-        {GROUP_ORDER.map((group) => (
+        {VARIANT_GROUPS_ORDERED.map((group) => (
           <optgroup key={group} label={GROUP_LABEL[group]}>
             {grouped[group].map((name) => (
               <option key={name} value={name}>
