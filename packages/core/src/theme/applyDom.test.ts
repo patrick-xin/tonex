@@ -182,6 +182,78 @@ describe('applyDom (jsdom integration)', () => {
     expect(readTokensFromStyle().md.light['--color-success']).toBeUndefined()
   })
 
+  // why: in steady-state slider drags the token set is stable — only argb
+  // values change. The deletion walk over `Object.keys(last)` per scope per
+  // tick is wasted work; applyDiff short-circuits when key counts prove no
+  // key disappeared. Pin: removeProperty must not fire across N stable ticks.
+  // Issue #25.
+  it('does not call removeProperty during steady-state value-only updates', () => {
+    useSource.setState({ _hydrated: true, seedHex: '#6750a4' })
+    unsubscribe = applyDom()
+
+    const el = document.getElementById(STYLE_ID)
+    if (!(el instanceof HTMLStyleElement)) throw new Error('expected style element')
+    const sheet = el.sheet
+    if (sheet === null) throw new Error('style element has no sheet')
+
+    let removeCalls = 0
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (!(r instanceof CSSStyleRule)) continue
+      const original = r.style.removeProperty.bind(r.style)
+      r.style.removeProperty = (name: string) => {
+        removeCalls += 1
+        return original(name)
+      }
+    }
+
+    // why: drive 60 slider-style ticks where only the seed (and thus argb
+    // values) shifts — the key set is stable across the whole sweep.
+    for (let i = 0; i < 60; i++) {
+      const v = (i * 4).toString(16).padStart(2, '0')
+      useSource.getState().actions.setSeedHex(`#${v}50a4`)
+    }
+
+    expect(removeCalls).toBe(0)
+  })
+
+  // why: paired with the steady-state pin — when the key set actually shrinks
+  // (custom-color removal), the deletion walk must still run. Pins that the
+  // key-count shortcut never swallows real removals. Issue #25.
+  it('still calls removeProperty when a custom color is removed', () => {
+    const success = {
+      id: 'id-success',
+      name: 'Success',
+      hex: '#22c55e',
+      blend: false,
+      shadcnSource: 'color' as const,
+    }
+    useSource.setState({ _hydrated: true, customColors: [success] })
+    unsubscribe = applyDom()
+    expect(readTokensFromStyle().md.light['--color-success']).toBeDefined()
+
+    const el = document.getElementById(STYLE_ID)
+    if (!(el instanceof HTMLStyleElement)) throw new Error('expected style element')
+    const sheet = el.sheet
+    if (sheet === null) throw new Error('style element has no sheet')
+
+    const removedNames: string[] = []
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (!(r instanceof CSSStyleRule)) continue
+      const original = r.style.removeProperty.bind(r.style)
+      r.style.removeProperty = (name: string) => {
+        removedNames.push(name)
+        return original(name)
+      }
+    }
+
+    useSource.getState().actions.removeCustomColor('id-success')
+
+    expect(removedNames).toContain('--color-success')
+    expect(readTokensFromStyle().md.light['--color-success']).toBeUndefined()
+  })
+
   // why: drift-guard at the spine seam — applyDom's effective tokens must
   // equal deriveTheme(source) output for ANY source, not just DEFAULT_INPUTS.
   // The www-side globals-drift test only covers DEFAULT_INPUTS; this closes

@@ -142,12 +142,22 @@ function ensureStyleElement(): { el: HTMLStyleElement; rules: ScopeRules } {
 // only on actual write. Unchanged tokens skip the projection cost entirely —
 // the hot-path for slider drags where most tokens stay put per tick (#9).
 function applyDiff(rule: CSSStyleRule, last: TokenMap, next: TokenMap): void {
+  const lastKeyCount = Object.keys(last).length
   for (const name of Object.keys(next)) {
     const argb = next[name]
     if (argb !== undefined && last[name] !== argb) {
       rule.style.setProperty(name, oklchString(argb))
       last[name] = argb
     }
+  }
+  // why: if `last`'s key count stayed put AND matches `next`'s key count, no
+  // key from the previous frame disappeared — skip the deletion walk. Both
+  // checks are needed: the first detects "we added a key from `next` that
+  // wasn't in `last`," the second detects "the input set didn't shrink."
+  // Custom-color add/remove is the only path that changes the key set; those
+  // hit the slow path when key count diverges.
+  if (Object.keys(last).length === lastKeyCount && lastKeyCount === Object.keys(next).length) {
+    return
   }
   for (const name of Object.keys(last)) {
     if (!(name in next)) {
