@@ -209,9 +209,9 @@
   --color-outline-variant: oklch(0.7663 0.0365 301.91);
   --color-chart-1: oklch(0.4955 0.1305 293.71);
   --color-chart-2: oklch(0.6669 0.1292 294.67);
-  --color-chart-3: oklch(0.8341 0.0944 297.32);
-  --color-chart-4: oklch(0.3675 0.1335 291.8);
-  --color-chart-5: oklch(0.7945 0.1178 296.36);
+  --color-chart-3: oklch(0.3251 0.1353 291.15);
+  --color-chart-4: oklch(0.5808 0.1298 294.32);
+  --color-chart-5: oklch(0.6242 0.1295 294.52);
 }
 
 html.dark .md {
@@ -266,10 +266,10 @@ html.dark .md {
   --color-outline: oklch(0.5665 0.0359 299.16);
   --color-outline-variant: oklch(0.4047 0.0355 297.88);
   --color-chart-1: oklch(0.8341 0.0944 297.32);
-  --color-chart-2: oklch(0.6669 0.1292 294.67);
-  --color-chart-3: oklch(0.4955 0.1305 293.71);
-  --color-chart-4: oklch(0.9603 0.0241 306.97);
-  --color-chart-5: oklch(0.3675 0.1335 291.8);
+  --color-chart-2: oklch(0.5808 0.1298 294.32);
+  --color-chart-3: oklch(0.9175 0.0474 301.53);
+  --color-chart-4: oklch(0.6669 0.1292 294.67);
+  --color-chart-5: oklch(0.5368 0.1302 294.04);
 }
 
 .shadcn {
@@ -301,9 +301,9 @@ html.dark .md {
   --sidebar-ring: oklch(0.5835 0.0356 299.2);
   --chart-1: oklch(0.4955 0.1305 293.71);
   --chart-2: oklch(0.6669 0.1292 294.67);
-  --chart-3: oklch(0.8341 0.0944 297.32);
-  --chart-4: oklch(0.3675 0.1335 291.8);
-  --chart-5: oklch(0.7945 0.1178 296.36);
+  --chart-3: oklch(0.3251 0.1353 291.15);
+  --chart-4: oklch(0.5808 0.1298 294.32);
+  --chart-5: oklch(0.6242 0.1295 294.52);
 }
 
 html.dark .shadcn {
@@ -334,9 +334,9 @@ html.dark .shadcn {
   --sidebar-border: oklch(0.5665 0.0359 299.16);
   --sidebar-ring: oklch(0.5665 0.0359 299.16);
   --chart-1: oklch(0.8341 0.0944 297.32);
-  --chart-2: oklch(0.6669 0.1292 294.67);
-  --chart-3: oklch(0.4955 0.1305 293.71);
-  --chart-4: oklch(0.9603 0.0241 306.97);
-  --chart-5: oklch(0.3675 0.1335 291.8);
+  --chart-2: oklch(0.5808 0.1298 294.32);
+  --chart-3: oklch(0.9175 0.0474 301.53);
+  --chart-4: oklch(0.6669 0.1292 294.67);
+  --chart-5: oklch(0.5368 0.1302 294.04);
 }
 /* tonex:tokens:end */
