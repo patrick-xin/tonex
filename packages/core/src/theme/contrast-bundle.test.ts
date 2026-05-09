@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { __resetContrastBundleCache, buildContrastBundle } from './contrast-bundle'
+import { buildContrastBundle } from './contrast-bundle'
 import { deriveTheme } from './derive'
+import { __resetDeriveCache, getDerivedTheme } from './derive-cache'
 import { DEFAULT_INPUTS } from './schema'
 
 afterEach(() => {
-  __resetContrastBundleCache()
+  __resetDeriveCache()
 })
 
 describe('buildContrastBundle', () => {
@@ -99,23 +100,38 @@ describe('buildContrastBundle', () => {
     expect(bundle.high?.md.light['--color-success']).toBeDefined()
   })
 
-  it('caches: same (source, opts) returns the same bundle reference', () => {
+  // why: tier values come from the unified derive cache (issue #20). Same
+  // source → same DerivedTheme reference per tier, even though the bundle
+  // wrapper is a fresh object each call. The wrapper is incidental; the
+  // load-bearing memoization is at the tier level.
+  it('caches: same (source, opts) returns the same DerivedTheme references per tier', () => {
     const a = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: false })
     const b = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: false })
-    expect(a).toBe(b)
+    expect(b.default).toBe(a.default)
   })
 
-  it('cache invalidates when includeContrastVariants flips', () => {
-    const single = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: false })
-    const multi = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: true })
-    expect(single).not.toBe(multi)
-    expect(multi.medium).toBeDefined()
+  it('caches: multi-contrast tiers share references across calls', () => {
+    const a = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: true })
+    const b = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: true })
+    expect(b.default).toBe(a.default)
+    expect(b.medium).toBe(a.medium)
+    expect(b.high).toBe(a.high)
+  })
+
+  // why: issue #20 acceptance — buildContrastBundle and getDerivedTheme hit
+  // the same underlying cache for the default tier. Without unification,
+  // toggling includeContrastVariants would re-derive even though
+  // useResolvedTokens already cached the same source.
+  it('shares default-tier cache with getDerivedTheme', () => {
+    const bundle = buildContrastBundle(DEFAULT_INPUTS, { includeContrastVariants: true })
+    expect(getDerivedTheme(DEFAULT_INPUTS)).toBe(bundle.default)
   })
 
   it('cache survives non-contrast flag changes (other ExportOptions are not bundle-shape)', () => {
     // why: colorFormat / includeChart / includeExtended only affect
     // exportCss's stringification, not which DerivedThemes the bundle
-    // carries. Flipping them shouldn't trigger a re-derive.
+    // carries. Flipping them shouldn't trigger a re-derive — the underlying
+    // cache key is (source, contrastLevel), independent of these flags.
     const a = buildContrastBundle(DEFAULT_INPUTS, {
       includeContrastVariants: true,
       colorFormat: 'oklch',
@@ -126,6 +142,8 @@ describe('buildContrastBundle', () => {
       includeChart: true,
       includeExtended: false,
     })
-    expect(a).toBe(b)
+    expect(b.default).toBe(a.default)
+    expect(b.medium).toBe(a.medium)
+    expect(b.high).toBe(a.high)
   })
 })

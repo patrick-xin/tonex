@@ -49,9 +49,11 @@ export function useExportContent({
 }): ExportContent {
   const hydrated = useSource((s) => s._hydrated)
   // why: useShallow + selectPortable mirrors useResolvedTokens — one stable
-  // PortableTheme reference per source change. buildContrastBundle's cache
-  // keys on this reference + the relevant options bits, so toggling format-
-  // only flags doesn't re-derive the (potentially 3×) tier set.
+  // PortableTheme reference per source change. buildContrastBundle routes
+  // through the unified derive cache (issue #20), keyed on (source,
+  // contrastLevel), so toggling format-only flags doesn't re-derive the
+  // (potentially 3×) tier set and the default tier shares its slot with
+  // useResolvedTokens / applyDom.
   const portable = useSource(useShallow(selectPortable))
   const seedHex = useSource((s) => s.seedHex)
   const variant = useSource((s) => s.variant)

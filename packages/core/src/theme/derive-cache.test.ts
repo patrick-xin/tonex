@@ -70,10 +70,46 @@ describe('getDerivedTheme', () => {
     const b1 = getDerivedTheme({ ...DEFAULT_INPUTS, seedHex: '#ff0000' })
     const a2 = getDerivedTheme(DEFAULT_INPUTS)
     expect(a1).not.toBe(b1)
-    // why: cache is single-cell, so going A → B → A causes A to be recomputed.
-    // That's intentional: streaming writes touch one source at a time, so a
-    // single cell captures the per-tick win without LRU complexity. Pin the
-    // shape so a future LRU rewrite is a deliberate change, not silent drift.
-    expect(a2).not.toBe(a1)
+    // why: cache holds up to MAX_CACHE_SIZE=6 entries (issue #20), so A → B
+    // → A returns the original A reference — both fit in the working set.
+    // The forcing value of this assertion is that contrast-bundle's three
+    // tiers + a parallel useResolvedTokens consumer don't evict each other.
+    expect(a2).toBe(a1)
+  })
+
+  // why: contrast bundle composition (issue #20). Distinct contrastLevel
+  // arguments map to distinct cache slots against the same source. Without
+  // this, buildContrastBundle's medium/high tiers would alias the default.
+  it('keys on contrastLevel — same source at different tiers does not collide', () => {
+    const a = getDerivedTheme(DEFAULT_INPUTS)
+    const medium = getDerivedTheme(DEFAULT_INPUTS, 0.5)
+    const high = getDerivedTheme(DEFAULT_INPUTS, 1.0)
+    expect(a).not.toBe(medium)
+    expect(medium).not.toBe(high)
+    // re-fetch each tier — all three slots remain hot
+    expect(getDerivedTheme(DEFAULT_INPUTS)).toBe(a)
+    expect(getDerivedTheme(DEFAULT_INPUTS, 0.5)).toBe(medium)
+    expect(getDerivedTheme(DEFAULT_INPUTS, 1.0)).toBe(high)
+  })
+
+  // why: cache eviction is FIFO at MAX_CACHE_SIZE=6 entries. Pinning the
+  // policy: filling the cache and then re-querying the oldest entry forces a
+  // re-derive (a new object reference). If someone bumps the cap or switches
+  // to LRU, this test fails and the change becomes deliberate.
+  it('drops oldest entry past cap (FIFO at 6 slots)', () => {
+    const sources = [
+      DEFAULT_INPUTS,
+      { ...DEFAULT_INPUTS, seedHex: '#ff0000' },
+      { ...DEFAULT_INPUTS, seedHex: '#00ff00' },
+      { ...DEFAULT_INPUTS, seedHex: '#0000ff' },
+      { ...DEFAULT_INPUTS, seedHex: '#ffff00' },
+      { ...DEFAULT_INPUTS, seedHex: '#ff00ff' },
+    ]
+    const first = getDerivedTheme(sources[0])
+    for (let i = 1; i < sources.length; i++) getDerivedTheme(sources[i])
+    // 7th distinct source evicts sources[0]
+    getDerivedTheme({ ...DEFAULT_INPUTS, seedHex: '#00ffff' })
+    const firstAgain = getDerivedTheme(sources[0])
+    expect(firstAgain).not.toBe(first)
   })
 })

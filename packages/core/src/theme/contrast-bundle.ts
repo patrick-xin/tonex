@@ -1,4 +1,5 @@
-import { type DerivedTheme, deriveTheme } from './derive'
+import type { DerivedTheme } from './derive'
+import { getDerivedTheme } from './derive-cache'
 import type { PortableTheme } from './schema'
 
 // why: ADR-0021 commitment 5 — class-scoped contrast variants emit as one
@@ -44,52 +45,22 @@ export interface ExportOptions {
   includeContrastVariants?: boolean
 }
 
-// why: single-slot cache keyed on `(source, opts)`. Toggling
-// `includeContrastVariants` off then on with the same source hits the cache
-// (toggling doesn't re-derive the default tier — the cached bundle just
-// gets re-emitted by exportCss). New source → cache miss → 1× or 3× derive.
-let cachedSource: PortableTheme | null = null
-let cachedOpts: ExportOptions | null = null
-let cachedBundle: ContrastBundle | null = null
-
+// why: tier values come from the unified derive cache (issue #20). Each
+// `getDerivedTheme(source, level)` call is keyed on the (source-identity,
+// contrastLevel) pair, so toggling `includeContrastVariants` off and back on
+// with the same source returns the same DerivedTheme references — and the
+// default tier shares the same cache slot as `useResolvedTokens` /
+// `applyDom`. Bundle wrapper allocation is cheap; the load-bearing work
+// (deriveTheme) is what gets memoized.
 export function buildContrastBundle(
   source: PortableTheme,
   opts: ExportOptions = {},
 ): ContrastBundle {
-  if (cachedBundle !== null && cachedSource === source && optsEqual(cachedOpts, opts)) {
-    return cachedBundle
+  const defaultTheme = getDerivedTheme(source)
+  if (!opts.includeContrastVariants) return { default: defaultTheme }
+  return {
+    default: defaultTheme,
+    medium: getDerivedTheme(source, CANONICAL_MEDIUM_CONTRAST),
+    high: getDerivedTheme(source, CANONICAL_HIGH_CONTRAST),
   }
-
-  const defaultTheme = deriveTheme(source)
-  const bundle: ContrastBundle = opts.includeContrastVariants
-    ? {
-        default: defaultTheme,
-        medium: deriveTheme({ ...source, contrastLevel: CANONICAL_MEDIUM_CONTRAST }),
-        high: deriveTheme({ ...source, contrastLevel: CANONICAL_HIGH_CONTRAST }),
-      }
-    : { default: defaultTheme }
-
-  cachedSource = source
-  cachedOpts = opts
-  cachedBundle = bundle
-  return bundle
-}
-
-// why: cache equivalence on the only field this module reads. Other
-// ExportOptions fields (colorFormat, includeChart, etc.) are exporter-side;
-// flipping them shouldn't invalidate the bundle since the underlying
-// DerivedTheme is the same. Keeping the comparison narrow lets the bundle
-// cache stay hot across format-only toggles.
-function optsEqual(a: ExportOptions | null, b: ExportOptions): boolean {
-  if (a === null) return false
-  return Boolean(a.includeContrastVariants) === Boolean(b.includeContrastVariants)
-}
-
-// why: test-only seam. Cache is implicit module state; tests need to reset
-// between cases when fixtures overlap. Double-underscore prefix keeps it
-// out of the public re-export.
-export function __resetContrastBundleCache(): void {
-  cachedSource = null
-  cachedOpts = null
-  cachedBundle = null
 }
