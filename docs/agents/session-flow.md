@@ -34,6 +34,7 @@ Before writing or editing code, read in this order:
 - **`docs/agents/issue-tracker.md`** — how issues are organized.
 - **`docs/agents/triage-labels.md`** — label vocabulary for triage.
 - **`docs/agents/domain.md`** — how to consume domain docs across the codebase.
+- **`docs/agents/core-surface.md`** — what `@tonex/core` exposes, by subpath. Read before importing from `@tonex/core` in www; saves a round-trip into core's source.
 
 ## For subagents
 

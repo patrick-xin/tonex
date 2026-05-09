@@ -13,3 +13,7 @@ NOTES.md
 
 # Per-developer IDE settings
 .vscode/
+
+# Local knowledge-graph snapshots (graphify) — not committed; kept as
+# point-in-time references for "what changed" comparisons across sessions.
+graphify-out/

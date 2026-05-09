@@ -11,6 +11,7 @@
 // production UI ships, /  diverges from /sink and testbed survives as the
 // dev-only surface.
 
+import { ShadcnSoftBorder } from '@/features/shadcn-soft-border'
 import { ContrastLevel } from './contrast-level'
 import { CustomColors } from './custom-colors'
 import { ExportPanels } from './export-panels'
@@ -38,12 +39,14 @@ export function Testbed() {
       <VariantPicker />
       <ContrastLevel />
       <PrimaryContainerOverride />
-      <ShadcnBindings />
+
       <SurfaceTint />
       <CustomColors />
 
       <MdSwatches />
+      <ShadcnSoftBorder />
       <ShadcnPreview />
+      <ShadcnBindings />
 
       <PrimitivesDemo />
 
