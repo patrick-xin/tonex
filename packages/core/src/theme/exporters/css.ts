@@ -1,7 +1,8 @@
 import type { ContrastBundle, ExportOptions } from '../contrast-bundle'
 import type { DerivedTheme, TokenMap } from '../derive'
+import { mergeMdEmission } from '../format'
 import { hexString, oklchString } from '../oklch'
-import { MD_TOKEN_NAMES, SHADCN_ROLE_NAMES } from '../schema'
+import { SHADCN_ROLE_NAMES } from '../schema'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +
@@ -69,23 +70,6 @@ function block(selector: string, tokens: TokenMap, fmt: 'oklch' | 'hex'): string
 function themeInlineBlock(utilityNames: string[], sourceFor: (name: string) => string): string {
   const decls = utilityNames.map((u) => `  ${u}: var(${sourceFor(u)});`).join('\n')
   return `@theme inline {\n${decls}\n}`
-}
-
-// why: re-key core emission against MD_TOKEN_NAMES so the family-grouped
-// order matches today's globals.css. Custom-color slugs append at the tail
-// in insertion order (matches deriveTheme's spread order).
-function mergeMdEmission(core: TokenMap, extended: TokenMap | null): TokenMap {
-  const out: TokenMap = {}
-  for (const name of MD_TOKEN_NAMES) {
-    const argb = core[name] ?? extended?.[name]
-    if (argb !== undefined && (core[name] !== undefined || extended !== null)) {
-      out[name] = argb
-    }
-  }
-  for (const [name, argb] of Object.entries(core)) {
-    if (!(name in out)) out[name] = argb
-  }
-  return out
 }
 
 // why: enumerate tiers present in the bundle in canonical order. Default

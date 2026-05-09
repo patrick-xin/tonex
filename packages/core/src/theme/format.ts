@@ -64,10 +64,14 @@ export function formatLayer(theme: DerivedTheme, layer: 'md' | 'shadcn'): string
 // spread gives core-then-extended order, which differs from today's
 // interleaved order. To preserve byte-identical bytes, re-key the emission
 // against MD_TOKEN_NAMES so output matches today's family-grouped layout.
-function mergeMdEmission(core: TokenMap, extended: TokenMap): TokenMap {
+//
+// Shared by the bake (formatLayer above, always passes a TokenMap) and the
+// exporter (exporters/css.ts, passes null when includeExtended is off so
+// extended tokens drop out of the merged result).
+export function mergeMdEmission(core: TokenMap, extended: TokenMap | null): TokenMap {
   const out: TokenMap = {}
   for (const name of MD_TOKEN_NAMES) {
-    const argb = core[name] ?? extended[name]
+    const argb = core[name] ?? extended?.[name]
     if (argb !== undefined) out[name] = argb
   }
   // why: custom-color slugs are NOT in MD_TOKEN_NAMES; append them in
