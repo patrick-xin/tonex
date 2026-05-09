@@ -126,6 +126,74 @@ describe('applyDom (jsdom integration)', () => {
     expect(written.shadcn.light['--primary']).toBeDefined()
   })
 
+  // why: remount must reuse the existing scaffold instead of rewriting
+  // textContent — a textContent write reparses the sheet and replaces the
+  // CSSStyleRule instances, breaking the per-token setProperty hot path
+  // (ADR-0017 amendment 2026-05-06 / issue #9). Identity check on a captured
+  // rule reference is the cleanest proof: same object after remount means
+  // no reparse happened.
+  it('remount reuses existing scaffold (no textContent rewrite)', () => {
+    useSource.setState({ _hydrated: true })
+    unsubscribe = applyDom()
+
+    const el = document.getElementById(STYLE_ID)
+    if (!(el instanceof HTMLStyleElement)) throw new Error('expected style element')
+    const sheet = el.sheet
+    if (sheet === null) throw new Error('style element has no sheet')
+
+    let firstMdRule: CSSStyleRule | undefined
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (r instanceof CSSStyleRule && r.selectorText === '.md') {
+        firstMdRule = r
+        break
+      }
+    }
+    if (firstMdRule === undefined) throw new Error('expected .md rule on first mount')
+
+    unsubscribe()
+    unsubscribe = applyDom()
+
+    let secondMdRule: CSSStyleRule | undefined
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (r instanceof CSSStyleRule && r.selectorText === '.md') {
+        secondMdRule = r
+        break
+      }
+    }
+    expect(secondMdRule).toBe(firstMdRule)
+  })
+
+  // why: if the scaffold is corrupted (hot-reload surfacing stale text, or any
+  // external mutation), ensureStyleElement must rebuild it. Pin the partial-
+  // scaffold path so the reuse fast-path can never silently swallow a missing
+  // selector.
+  it('partial scaffold triggers rebuild', () => {
+    useSource.setState({ _hydrated: true })
+    unsubscribe = applyDom()
+    unsubscribe()
+    unsubscribe = undefined
+
+    const el = document.getElementById(STYLE_ID)
+    if (!(el instanceof HTMLStyleElement)) throw new Error('expected style element')
+    el.textContent = '.md {}'
+
+    unsubscribe = applyDom()
+
+    const sheet = el.sheet
+    if (sheet === null) throw new Error('style element has no sheet')
+    const present = new Set<string>()
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (r instanceof CSSStyleRule) present.add(r.selectorText)
+    }
+    expect(present.has('.md')).toBe(true)
+    expect(present.has('html.dark .md')).toBe(true)
+    expect(present.has('.shadcn')).toBe(true)
+    expect(present.has('html.dark .shadcn')).toBe(true)
+  })
+
   it('uses a single style element across updates', () => {
     useSource.setState({ _hydrated: true })
     unsubscribe = applyDom()

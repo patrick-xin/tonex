@@ -88,10 +88,11 @@ export function applyDom(): () => void {
 }
 
 // why: scaffold an empty rule per scope, locate them by selectorText (robust
-// to insertion-order quirks across browsers / jsdom). textContent is set
-// EXACTLY ONCE — the empty `{}` bodies — so subsequent renders never trigger
-// a full CSS re-parse. From here on, the four CSSStyleRule references are
-// stable and per-token setProperty mutates their declarations directly.
+// to insertion-order quirks across browsers / jsdom). textContent is written
+// only on cold mount or when the existing scaffold is missing/partial — the
+// remount path reuses the existing rules, so per-token setProperty stays the
+// hot path and a full CSS reparse never happens (ADR-0017 amendment
+// 2026-05-06 / issue #9).
 function ensureStyleElement(): { el: HTMLStyleElement; rules: ScopeRules } {
   const existing = document.getElementById(STYLE_ELEMENT_ID)
   let el: HTMLStyleElement
@@ -104,24 +105,36 @@ function ensureStyleElement(): { el: HTMLStyleElement; rules: ScopeRules } {
     // the app shell. CSS source order means runtime updates win the cascade.
     document.head.appendChild(el)
   }
-  // why: idempotent scaffold — if a hot-reload surfaces an existing element
-  // with stale text, reset it to the empty rules. The rule objects we
-  // captured below would otherwise diverge from what the browser parsed.
-  el.textContent = SCOPE_SELECTORS.map((s) => `${s} {}`).join('\n')
 
-  const sheet = el.sheet
-  if (sheet === null) {
-    throw new Error('[applyDom] style element has no CSSStyleSheet — DOM not ready')
-  }
   const found: Partial<ScopeRules> = {}
-  for (let i = 0; i < sheet.cssRules.length; i++) {
-    const r = sheet.cssRules[i]
-    if (
-      r instanceof CSSStyleRule &&
-      (SCOPE_SELECTORS as readonly string[]).includes(r.selectorText)
-    ) {
-      found[r.selectorText as ScopeSelector] = r
+  const collect = () => {
+    const sheet = el.sheet
+    if (sheet === null) return
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      const r = sheet.cssRules[i]
+      if (
+        r instanceof CSSStyleRule &&
+        (SCOPE_SELECTORS as readonly string[]).includes(r.selectorText)
+      ) {
+        found[r.selectorText as ScopeSelector] = r
+      }
     }
+  }
+
+  // why: detect existing scaffold. Reuse if all four rules are present (typical
+  // remount path — keeps the per-token setProperty hot-path stable, no full CSS
+  // reparse). Reset only if missing or partial (cold mount + hot-reload-with-
+  // stale-text path — also covers the brand-new <style> case where el.sheet
+  // is null until textContent is written).
+  collect()
+  const allFound = SCOPE_SELECTORS.every((sel) => found[sel] !== undefined)
+  if (!allFound) {
+    el.textContent = SCOPE_SELECTORS.map((s) => `${s} {}`).join('\n')
+    collect()
+  }
+
+  if (el.sheet === null) {
+    throw new Error('[applyDom] style element has no CSSStyleSheet — DOM not ready')
   }
   for (const sel of SCOPE_SELECTORS) {
     if (found[sel] === undefined) {
