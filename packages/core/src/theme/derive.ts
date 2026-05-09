@@ -1,5 +1,6 @@
 import {
   argbFromHex,
+  type DynamicColor,
   type DynamicScheme,
   Hct,
   MaterialDynamicColors,
@@ -126,13 +127,26 @@ const mdc = new MaterialDynamicColors()
 // would hide MCU's actual API surface behind string mangling. Adding an md
 // token: extend MD_TOKEN_NAMES in schema.ts AND add the resolver here.
 // TypeScript's Record<MdTokenName, ...> ensures both move together.
-// why: dim getters are typed `DynamicColor | undefined` but at runtime under
-// MCU's current spec stack (MaterialDynamicColors.colorSpec === 2026 → 2025 →
-// 2021) they always return a real DynamicColor — the 2025 layer defines them
-// directly without `extendSpecVersion`, so the 2021 base's `undefined` is
-// shadowed for any scheme regardless of specVersion. The non-null assertion
-// captures this invariant. If MCU ever pulls dim back into 2021, this throws
-// at the boundary instead of leaking undefined into oklchFromArgb.
+
+// why: MCU's dim getters return `DynamicColor | undefined` because the 2021 spec
+// declares them optional. Under the live spec stack (2026 → 2025 → 2021), the
+// 2025 layer defines them directly without `extendSpecVersion`, so they always
+// return a real DynamicColor for any scheme regardless of specVersion.
+// Centralizing the assertion: one site that throws with a readable message if
+// MCU's spec dispatch ever changes, instead of four NPEs on `.getArgb` of
+// undefined buried in resolver lines.
+function dimArgb(
+  getter: () => DynamicColor | undefined,
+  scheme: DynamicScheme,
+  label: string,
+): number {
+  const color = getter()
+  if (color === undefined) {
+    throw new Error(`[derive] MCU returned undefined for ${label} — spec stack may have changed`)
+  }
+  return color.getArgb(scheme)
+}
+
 const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-primary': (s) => mdc.primary().getArgb(s),
   '--color-on-primary': (s) => mdc.onPrimary().getArgb(s),
@@ -142,7 +156,7 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-primary-fixed-dim': (s) => mdc.primaryFixedDim().getArgb(s),
   '--color-on-primary-fixed': (s) => mdc.onPrimaryFixed().getArgb(s),
   '--color-on-primary-fixed-variant': (s) => mdc.onPrimaryFixedVariant().getArgb(s),
-  '--color-primary-dim': (s) => mdc.primaryDim()!.getArgb(s),
+  '--color-primary-dim': (s) => dimArgb(() => mdc.primaryDim(), s, '--color-primary-dim'),
   '--color-secondary': (s) => mdc.secondary().getArgb(s),
   '--color-on-secondary': (s) => mdc.onSecondary().getArgb(s),
   '--color-secondary-container': (s) => mdc.secondaryContainer().getArgb(s),
@@ -151,7 +165,7 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-secondary-fixed-dim': (s) => mdc.secondaryFixedDim().getArgb(s),
   '--color-on-secondary-fixed': (s) => mdc.onSecondaryFixed().getArgb(s),
   '--color-on-secondary-fixed-variant': (s) => mdc.onSecondaryFixedVariant().getArgb(s),
-  '--color-secondary-dim': (s) => mdc.secondaryDim()!.getArgb(s),
+  '--color-secondary-dim': (s) => dimArgb(() => mdc.secondaryDim(), s, '--color-secondary-dim'),
   '--color-tertiary': (s) => mdc.tertiary().getArgb(s),
   '--color-on-tertiary': (s) => mdc.onTertiary().getArgb(s),
   '--color-tertiary-container': (s) => mdc.tertiaryContainer().getArgb(s),
@@ -160,12 +174,12 @@ const MD_TOKEN_RESOLVERS: Record<MdTokenName, (s: DynamicScheme) => number> = {
   '--color-tertiary-fixed-dim': (s) => mdc.tertiaryFixedDim().getArgb(s),
   '--color-on-tertiary-fixed': (s) => mdc.onTertiaryFixed().getArgb(s),
   '--color-on-tertiary-fixed-variant': (s) => mdc.onTertiaryFixedVariant().getArgb(s),
-  '--color-tertiary-dim': (s) => mdc.tertiaryDim()!.getArgb(s),
+  '--color-tertiary-dim': (s) => dimArgb(() => mdc.tertiaryDim(), s, '--color-tertiary-dim'),
   '--color-error': (s) => mdc.error().getArgb(s),
   '--color-on-error': (s) => mdc.onError().getArgb(s),
   '--color-error-container': (s) => mdc.errorContainer().getArgb(s),
   '--color-on-error-container': (s) => mdc.onErrorContainer().getArgb(s),
-  '--color-error-dim': (s) => mdc.errorDim()!.getArgb(s),
+  '--color-error-dim': (s) => dimArgb(() => mdc.errorDim(), s, '--color-error-dim'),
   '--color-surface': (s) => mdc.surface().getArgb(s),
   '--color-on-surface': (s) => mdc.onSurface().getArgb(s),
   '--color-on-surface-variant': (s) => mdc.onSurfaceVariant().getArgb(s),
