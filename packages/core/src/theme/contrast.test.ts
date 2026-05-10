@@ -4,36 +4,39 @@ import { deriveTheme } from './derive'
 import { CONTRAST_PAIRS, DEFAULT_INPUTS } from './schema'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
-  it('reports both modes with 28 pair results each at slice landing', () => {
+  it('reports both modes with 35 pair results each post slice contrast-3', () => {
     const theme = deriveTheme(DEFAULT_INPUTS)
     const report = evaluateThemeContrast(theme)
-    expect(CONTRAST_PAIRS).toHaveLength(28)
-    expect(report.light).toHaveLength(28)
-    expect(report.dark).toHaveLength(28)
+    expect(CONTRAST_PAIRS).toHaveLength(35)
+    expect(report.light).toHaveLength(35)
+    expect(report.dark).toHaveLength(35)
   })
 
-  it('layer split is 18 md + 10 shadcn', () => {
+  it('layer split is 20 md + 15 shadcn', () => {
     const md = CONTRAST_PAIRS.filter((p) => p.layer === 'md')
     const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn')
-    expect(md).toHaveLength(18)
-    expect(shadcn).toHaveLength(10)
+    expect(md).toHaveLength(20)
+    expect(shadcn).toHaveLength(15)
   })
 
-  it('every pair is text @ 4.5 at slice 1 — non-text/3.0 lands in slice contrast-3', () => {
-    // why: ADR-0025 commitment 7 — intent + threshold ship from day one to
-    // avoid a schema migration in slice contrast-3. Pinning both fields here
-    // is the forcing function for that commitment.
-    for (const pair of CONTRAST_PAIRS) {
-      expect(pair.intent).toBe('text')
-      expect(pair.threshold).toBe(4.5)
-    }
+  it('intent split is 28 text @ 4.5 + 7 non-text @ 3.0', () => {
+    // why: ADR-0025 commitment 7 — slice contrast-3 adds non-text pairs at
+    // 3:1 (WCAG 1.4.11). intent + threshold are coupled — text always 4.5,
+    // non-text always 3.0. Pinning the exact counts catches drift on either
+    // axis.
+    const text = CONTRAST_PAIRS.filter((p) => p.intent === 'text')
+    const nonText = CONTRAST_PAIRS.filter((p) => p.intent === 'non-text')
+    expect(text).toHaveLength(28)
+    expect(nonText).toHaveLength(7)
+    for (const pair of text) expect(pair.threshold).toBe(4.5)
+    for (const pair of nonText) expect(pair.threshold).toBe(3)
   })
 
-  it('shadcn list is closed at the 10 foreground/root pairs (no destructive)', () => {
+  it('shadcn text list is closed at the 10 foreground/root pairs (no destructive)', () => {
     // why: ADR-0025 commitment 6 — destructive's partner is bound via
     // --color-on-error at the md level, so a shadcn destructive pair would
     // double-count. Pinning the exact set catches additions and omissions.
-    const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn')
+    const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn' && p.intent === 'text')
     const actual = new Set(shadcn.map((p) => `${p.fg}/${p.bg}`))
     expect(actual).toEqual(
       new Set([
@@ -47,6 +50,26 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
         '--sidebar-foreground/--sidebar',
         '--sidebar-primary-foreground/--sidebar-primary',
         '--sidebar-accent-foreground/--sidebar-accent',
+      ]),
+    )
+  })
+
+  it('non-text pairs cover outline (md) + border/input/ring + sidebar edges (shadcn)', () => {
+    // why: ADR-0025 commitment 7 — closed list of non-text pairs at 3:1.
+    // Per-role bg picks the most loaded render context: --border on root,
+    // --input/--ring on cards (form surfaces), sidebar edges scoped to
+    // --sidebar. md outline + outline-variant against --color-surface.
+    const nonText = CONTRAST_PAIRS.filter((p) => p.intent === 'non-text')
+    const actual = new Set(nonText.map((p) => `${p.layer}:${p.fg}/${p.bg}`))
+    expect(actual).toEqual(
+      new Set([
+        'md:--color-outline/--color-surface',
+        'md:--color-outline-variant/--color-surface',
+        'shadcn:--border/--background',
+        'shadcn:--input/--card',
+        'shadcn:--ring/--card',
+        'shadcn:--sidebar-border/--sidebar',
+        'shadcn:--sidebar-ring/--sidebar',
       ]),
     )
   })
