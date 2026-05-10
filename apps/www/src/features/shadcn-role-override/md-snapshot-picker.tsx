@@ -4,9 +4,18 @@ import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { type Mode, useResolvedTokens } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
-import { matchSorter } from 'match-sorter'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MdIcon } from '@/components/icons/md'
+import {
+  Autocomplete,
+  AutocompleteEmpty,
+  AutocompleteGroup,
+  AutocompleteGroupLabel,
+  AutocompleteInputGroupContent,
+  AutocompleteItem,
+  AutocompleteList,
+  AutocompleteRow,
+} from '@/components/ui/autocomplete'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,
@@ -18,7 +27,6 @@ import {
   ComboboxItemContent,
   ComboboxList,
 } from '@/components/ui/combobox'
-import { Input } from '@/components/ui/input'
 import {
   createPopoverHandle,
   Popover,
@@ -34,6 +42,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { fuzzyMatches } from './fuzzy-filter'
 import { MD_TOKEN_ITEM_GROUPS, type MdTokenItem } from './md-token-groups'
 
 interface MdSnapshotPickerProps {
@@ -100,8 +109,6 @@ interface RoleGroup {
   items: ReadonlyArray<MdTokenItem>
 }
 
-const ROLE_GROUPS: ReadonlyArray<RoleGroup> = MD_TOKEN_ITEM_GROUPS
-
 function RolesPanel({ mode, onSnapshot }: { mode: Mode; onSnapshot: (hex: string) => void }) {
   const theme = useResolvedTokens()
   const [query, setQuery] = useState('')
@@ -110,21 +117,24 @@ function RolesPanel({ mode, onSnapshot }: { mode: Mode; onSnapshot: (hex: string
   // snapshot-on-click matches what the user sees in the swatch row.
   const merged = theme === null ? null : { ...theme.md[mode], ...theme.md[`${mode}Extended`] }
 
+  // why: pre-filter externally with the shared subsequence helper. Drops
+  // empty groups so users don't see family headers with no items.
+  const filteredGroups = useMemo<ReadonlyArray<RoleGroup>>(() => {
+    const q = query.trim()
+    if (q === '') return MD_TOKEN_ITEM_GROUPS
+    return MD_TOKEN_ITEM_GROUPS.map((g) => ({
+      label: g.label,
+      items: g.items.filter((it) => fuzzyMatches(it.label, q) || fuzzyMatches(it.token, q)),
+    })).filter((g) => g.items.length > 0)
+  }, [query])
+
   return (
     <Combobox<MdTokenItem>
-      items={ROLE_GROUPS}
+      items={filteredGroups}
+      autoHighlight
       inputValue={query}
       onInputValueChange={setQuery}
       itemToStringLabel={(item) => item?.label ?? ''}
-      filter={(item, q) =>
-        !q ||
-        matchSorter([item], q, {
-          keys: [
-            { key: 'label', threshold: matchSorter.rankings.ACRONYM },
-            { key: 'token', threshold: matchSorter.rankings.ACRONYM },
-          ],
-        }).length > 0
-      }
       onValueChange={(item) => {
         if (item === null || merged === null) return
         const argb = merged[item.token]
@@ -171,69 +181,114 @@ function RolesPanel({ mode, onSnapshot }: { mode: Mode; onSnapshot: (hex: string
   )
 }
 
-const tonesTooltipHandle = createTooltipHandle<{ family: string; tone: number; hex: string }>()
+interface ToneItem {
+  family: string
+  tone: number
+  hex: string
+  label: string
+}
+
+interface ToneGroup {
+  label: string
+  items: ReadonlyArray<ToneItem>
+}
+
+const TONE_GRID_COLUMNS = 7
+
+function chunk<T>(arr: ReadonlyArray<T>, size: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
+
+const tonesTooltipHandle = createTooltipHandle<ToneItem>()
 
 function TonesPanel({ onSnapshot }: { onSnapshot: (hex: string) => void }) {
   const theme = useResolvedTokens()
   const [query, setQuery] = useState('')
 
-  // why: search is a *highlight* affordance (dim non-matches in place) rather
-  // than a reflow — the at-a-glance grid is the whole reason tones is a
-  // separate tab from the roles list. Empty query = full opacity everywhere.
-  const trimmed = query.trim().toLowerCase()
-  const matches = (label: string) => trimmed === '' || label.toLowerCase().includes(trimmed)
+  // why: tone groups are theme-derived (78 entries: 6 families × 13 tones).
+  // Memoize so identity is stable across query changes — only the filter
+  // recomputes per keystroke, not the hex resolution.
+  const allGroups = useMemo<ReadonlyArray<ToneGroup>>(() => {
+    if (theme === null) return []
+    return MD_PALETTE_FAMILY_NAMES.map((family) => ({
+      label: family,
+      items: MD_PALETTE_TONE_NAMES.map((tone) => {
+        const argb = theme.md.palette[`--md-ref-palette-${family}-${tone}`]
+        return {
+          family,
+          tone,
+          hex: argb !== undefined ? hexString(argb) : '#000000',
+          label: `${family}-${tone}`,
+        }
+      }),
+    }))
+  }, [theme])
+
+  const filteredGroups = useMemo<ReadonlyArray<ToneGroup>>(() => {
+    const q = query.trim()
+    if (q === '') return allGroups
+    return allGroups
+      .map((g) => ({
+        label: g.label,
+        items: g.items.filter((it) => fuzzyMatches(it.label, q)),
+      }))
+      .filter((g) => g.items.length > 0)
+  }, [allGroups, query])
 
   if (theme === null) return null
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <div className="px-2 py-1 border-b border-b-outline-variant">
-        <Input
-          autoComplete="off"
-          inputSize="sm"
-          placeholder="Search tones (e.g. primary 60)…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          spellCheck={false}
-          className="text-xs"
-        />
-      </div>
+    <Autocomplete
+      grid
+      items={filteredGroups}
+      value={query}
+      onValueChange={(value, details) => {
+        // why: item-press fires when a swatch is clicked — don't echo the
+        // item's stringified value into the search input, mirroring the
+        // legacy emoji picker example.
+        if (details.reason !== 'item-press') setQuery(value)
+      }}
+    >
+      <AutocompleteInputGroupContent
+        autoFocus
+        embedded
+        addonIcon={<MagnifyingGlassIcon />}
+        placeholder="Search tones (e.g. primary 60)…"
+        className="min-h-0 py-1"
+      />
       <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
+        <AutocompleteEmpty>No tone found.</AutocompleteEmpty>
         <TooltipProvider>
-          <div className="space-y-3 p-2">
-            {MD_PALETTE_FAMILY_NAMES.map((family) => (
-              <div key={family}>
-                <p className="text-[10px] uppercase font-bold text-on-surface-variant/70 tracking-wider mb-2">
-                  {family}
-                </p>
-                <div className="grid grid-cols-7 gap-1">
-                  {MD_PALETTE_TONE_NAMES.map((tone) => {
-                    const argb = theme.md.palette[`--md-ref-palette-${family}-${tone}`]
-                    if (argb === undefined) return null
-                    const hex = hexString(argb)
-                    const label = `${family}-${tone}`
-                    const dim = !matches(label)
-                    return (
-                      <TooltipTrigger
-                        handle={tonesTooltipHandle}
-                        payload={{ family, tone, hex }}
-                        key={tone}
-                        onClick={() => onSnapshot(hex)}
-                        className={`group relative outline-none transition-opacity ${
-                          dim ? 'opacity-25' : 'opacity-100'
-                        }`}
-                      >
-                        <div
-                          className="size-7 rounded-sm ring-1 ring-outline-variant/30 cursor-pointer"
-                          style={{ backgroundColor: hex }}
+          <AutocompleteList>
+            {(group: ToneGroup) => (
+              <AutocompleteGroup key={group.label} items={group.items}>
+                <AutocompleteGroupLabel>{group.label}</AutocompleteGroupLabel>
+                <div className="p-2" role="presentation">
+                  {chunk(group.items, TONE_GRID_COLUMNS).map((row) => (
+                    <AutocompleteRow key={row[0]?.label} className="grid grid-cols-7 gap-1 w-full">
+                      {row.map((item) => (
+                        <TooltipTrigger
+                          key={item.label}
+                          handle={tonesTooltipHandle}
+                          payload={item}
+                          render={
+                            <AutocompleteItem
+                              value={item}
+                              onClick={() => onSnapshot(item.hex)}
+                              className="p-0 size-7 rounded-sm cursor-pointer ring-1 ring-outline-variant/30 data-highlighted:ring-2 data-highlighted:ring-primary"
+                              style={{ backgroundColor: item.hex }}
+                            />
+                          }
                         />
-                      </TooltipTrigger>
-                    )
-                  })}
+                      ))}
+                    </AutocompleteRow>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              </AutocompleteGroup>
+            )}
+          </AutocompleteList>
         </TooltipProvider>
         <Tooltip handle={tonesTooltipHandle}>
           {({ payload }) => (
@@ -246,6 +301,6 @@ function TonesPanel({ onSnapshot }: { onSnapshot: (hex: string) => void }) {
           )}
         </Tooltip>
       </ScrollArea>
-    </div>
+    </Autocomplete>
   )
 }
