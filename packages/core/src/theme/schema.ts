@@ -674,6 +674,18 @@ export interface PortableTheme {
   // slice-7 mappings will diverge across modes (e.g. light primary →
   // primary-container, dark primary → primary for contrast). ADR-0017.
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
+  // why: ADR-0026 — literal pin on a shadcn role, sibling to bindings.
+  // Bindings are symbolic (role → md token, tracks MCU); overrides are
+  // literal (role → hex, detached from MCU). Per-mode partial map mirrors
+  // md3TokenOverrides modulo the key domain; an entry's presence means
+  // "user pinned this role for this mode." Override beats binding AND
+  // md3TokenOverrides per c.4 — invoked at the more-specific surface.
+  // Empty default keeps drift-guard byte-identical: bindShadcn takes the
+  // binding branch for every role.
+  shadcnRoleOverrides: {
+    light: Partial<Record<ShadcnRoleName, string>>
+    dark: Partial<Record<ShadcnRoleName, string>>
+  }
   // why: surface treatment is a post-derive transform applied inside
   // deriveTheme so applyDom AND formatCss reflect it identically — preview
   // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
@@ -741,6 +753,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   seedHexLock: false,
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
+  shadcnRoleOverrides: { light: {}, dark: {} },
   surfaceAlgo: 'desaturate',
   surfacePaletteName: 'zinc',
   surfaceTintLevel: { light: 0, dark: 0 },
@@ -815,6 +828,11 @@ const ShadcnRoleBindingsSchema = v.pipe(
 
 const PaletteOverridesSchema = v.record(v.picklist(PALETTE_NAMES), HexSchema)
 
+// why: ADR-0026 c.3 — per-mode partial map of shadcn role → hex. Empty
+// default. v.record constrains keys to SHADCN_ROLE_NAMES and values to
+// hex; partiality is correct because user pins are sparse.
+const ShadcnRoleOverridesPerModeSchema = v.record(v.picklist(SHADCN_ROLE_NAMES), HexSchema)
+
 const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
 
 export const PortableThemeSchema = v.object({
@@ -830,6 +848,10 @@ export const PortableThemeSchema = v.object({
   shadcnRoleBindings: v.object({
     light: ShadcnRoleBindingsSchema,
     dark: ShadcnRoleBindingsSchema,
+  }),
+  shadcnRoleOverrides: v.object({
+    light: ShadcnRoleOverridesPerModeSchema,
+    dark: ShadcnRoleOverridesPerModeSchema,
   }),
   surfaceAlgo: v.picklist(SURFACE_ALGOS),
   surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),

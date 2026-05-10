@@ -476,6 +476,73 @@ describe('deriveTheme', () => {
     })
   })
 
+  // why: ADR-0026 slice override-1 R3 — resolution precedence per c.4:
+  //   1. shadcnRoleOverrides[mode][role]              ← literal pin
+  //   2. shadcnRoleBindings[mode][role] → md (post-md3-override)
+  //   3. MCU
+  // Override must beat both binding and md-layer override; absent override,
+  // binding still flows md3TokenOverrides through; absent both, MCU lands.
+  describe('shadcnRoleOverrides', () => {
+    it('empty default produces no behavioral change vs absent override', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnRoleOverrides: { light: {}, dark: {} },
+      })
+      expect(explicit).toEqual(baseline)
+    })
+
+    it('override beats binding — pinned role takes the literal hex', () => {
+      const { shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnRoleOverrides: { light: { '--ring': '#ff0000' }, dark: {} },
+      })
+      expect(shadcn.light['--ring']).toBe(RED)
+    })
+
+    it('override beats md3TokenOverrides on the bound token', () => {
+      // why: c.4 — override is the more-specific surface (shadcn role) and
+      // dominates the more-general md-layer pin even when both target the
+      // same effective slot. md3 pin moves the underlying md token, override
+      // pins the shadcn role; override wins.
+      const { md, shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        md3TokenOverrides: { light: { '--color-outline': '#00ff00' }, dark: {} },
+        shadcnRoleOverrides: { light: { '--ring': '#ff0000' }, dark: {} },
+      })
+      // md token reflects the md3 pin
+      expect(md.light['--color-outline']).toBe(GREEN)
+      // shadcn role reflects the override (not the md3-pinned bound value)
+      expect(shadcn.light['--ring']).toBe(RED)
+    })
+
+    it('without override, binding still respects md3TokenOverrides', () => {
+      // why: with no shadcn override, the binding path takes the md3-pinned
+      // value through the bound token. Confirms the override branch is
+      // additive — not replacing the md3 propagation contract.
+      const { shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        md3TokenOverrides: { light: { '--color-outline': '#00ff00' }, dark: {} },
+      })
+      // --ring binds to --color-outline by default
+      expect(shadcn.light['--ring']).toBe(GREEN)
+    })
+
+    it('without either override, role lands on the MCU-derived bound value', () => {
+      const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
+      expect(shadcn.light['--ring']).toBe(md.light['--color-outline'])
+    })
+
+    it('per-mode independence — light pinned, dark follows binding', () => {
+      const { md, shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnRoleOverrides: { light: { '--ring': '#ff0000' }, dark: {} },
+      })
+      expect(shadcn.light['--ring']).toBe(RED)
+      expect(shadcn.dark['--ring']).toBe(md.dark['--color-outline'])
+    })
+  })
+
   describe('contrastLevel', () => {
     it('non-zero contrast shifts md tokens away from baseline', () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)

@@ -219,6 +219,42 @@ describe('parsePortableTheme', () => {
     expect(parsePortableTheme(42).ok).toBe(false)
   })
 
+  // why: ADR-0026 slice override-1 R1 — shadcnRoleOverrides parallels
+  // md3TokenOverrides: per-mode partial map of role → hex. Empty default,
+  // sparse entries, hex-validated values, role-keyed (closed enum). Each
+  // rejection mutates one field to isolate the failing constraint.
+  it('shadcnRoleOverrides defaults to empty per-mode maps', () => {
+    expect(DEFAULT_INPUTS.shadcnRoleOverrides).toEqual({ light: {}, dark: {} })
+    expect(parsePortableTheme(DEFAULT_INPUTS).ok).toBe(true)
+  })
+
+  it('accepts sparse shadcnRoleOverrides entries on either mode', () => {
+    const ok = {
+      ...DEFAULT_INPUTS,
+      shadcnRoleOverrides: {
+        light: { '--ring': '#abcdef' },
+        dark: { '--background': '#112233', '--ring': '#445566' },
+      },
+    } as PortableTheme
+    expect(parsePortableTheme(ok).ok).toBe(true)
+  })
+
+  it('rejects shadcnRoleOverrides with malformed hex', () => {
+    const bad = {
+      ...DEFAULT_INPUTS,
+      shadcnRoleOverrides: { light: { '--ring': 'not-hex' }, dark: {} },
+    } as unknown as PortableTheme
+    expect(parsePortableTheme(bad).ok).toBe(false)
+  })
+
+  it('rejects shadcnRoleOverrides under unknown role key', () => {
+    const bad = {
+      ...DEFAULT_INPUTS,
+      shadcnRoleOverrides: { light: { '--not-a-role': '#abcdef' }, dark: {} },
+    } as unknown as PortableTheme
+    expect(parsePortableTheme(bad).ok).toBe(false)
+  })
+
   it('cmfSecondSourceHex accepts null OR a valid hex', () => {
     expect(parsePortableTheme({ ...DEFAULT_INPUTS, cmfSecondSourceHex: null }).ok).toBe(true)
     expect(parsePortableTheme({ ...DEFAULT_INPUTS, cmfSecondSourceHex: '#ff8800' }).ok).toBe(true)
