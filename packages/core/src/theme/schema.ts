@@ -354,6 +354,11 @@ export interface ContrastPair {
 }
 
 const TEXT_THRESHOLD = 4.5
+// why: WCAG 1.4.11 Non-text Contrast — 3:1 against adjacent colors for UI
+// component boundaries (borders, focus rings, outlines). Lower than text
+// 4.5:1 because the legibility burden is lower for shape recognition than
+// glyph reading.
+const NON_TEXT_THRESHOLD = 3
 
 export const CONTRAST_PAIRS = [
   // why: 18 md text pairs — every `on-X / X` pair, surface-on-variant against
@@ -555,6 +560,62 @@ export const CONTRAST_PAIRS = [
     layer: 'shadcn',
     intent: 'text',
     threshold: TEXT_THRESHOLD,
+  },
+  // why: 7 non-text pairs at 3:1 (WCAG 1.4.11) — slice contrast-3.
+  // md outline + outline-variant against --color-surface (M3 spec: outline
+  // is the edge token, outline-variant is decorative dividers; both sit on
+  // the surface). shadcn picks per-role bg by most loaded render context:
+  // --border on root background (universal border), --input/--ring on
+  // --card (form fields most often live in card-class containers — dialog,
+  // popover, card itself), sidebar-border/sidebar-ring scoped to --sidebar.
+  {
+    fg: '--color-outline',
+    bg: '--color-surface',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--border',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--input',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--ring',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--sidebar-border',
+    bg: '--sidebar',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--sidebar-ring',
+    bg: '--sidebar',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
   },
 ] as const satisfies readonly ContrastPair[]
 
