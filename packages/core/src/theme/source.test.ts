@@ -65,6 +65,10 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     dark: { '--color-primary-container': '#112233' },
   },
   shadcnRoleBindings: { light: NONDEFAULT_BINDINGS_LIGHT, dark: NONDEFAULT_BINDINGS_DARK },
+  shadcnRoleOverrides: {
+    light: { '--ring': '#abcdef', '--background': '#112233' },
+    dark: { '--ring': '#445566' },
+  },
   surfaceAlgo: 'tint',
   surfacePaletteName: 'slate',
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
@@ -109,6 +113,11 @@ describe('useSource persistence round-trip', () => {
     for (const mode of ['light', 'dark'] as const) {
       for (const role of SHADCN_ROLE_NAMES) {
         s.actions.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
+      }
+    }
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [role, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnRoleOverrides[mode])) {
+        s.actions.setShadcnRoleOverride(mode, role as (typeof SHADCN_ROLE_NAMES)[number], hex)
       }
     }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
@@ -384,6 +393,47 @@ describe('useSource persistence round-trip', () => {
       s.actions.setVariant('tonalSpot')
       s.actions.setCmfSecondSourceHex(null)
       expect(useSource.getState().cmfSecondSourceHex).toBe('#ff8800')
+    })
+  })
+
+  // why: ADR-0026 slice override-1 R2 — setShadcnRoleOverride mirrors
+  // setMd3TokenOverride's seam: hex sets the entry, null deletes it,
+  // malformed hex throws at the boundary so a bad value never reaches derive.
+  // Per-mode writes leave the other mode untouched.
+  describe('setShadcnRoleOverride', () => {
+    it('writes hex under the addressed (mode, role)', () => {
+      const s = useSource.getState()
+      s.actions.setShadcnRoleOverride('light', '--ring', '#abcdef')
+      expect(useSource.getState().shadcnRoleOverrides.light['--ring']).toBe('#abcdef')
+      expect(useSource.getState().shadcnRoleOverrides.dark).toEqual({})
+    })
+
+    it('null deletes the entry (not stores null)', () => {
+      const s = useSource.getState()
+      s.actions.setShadcnRoleOverride('light', '--ring', '#abcdef')
+      s.actions.setShadcnRoleOverride('light', '--ring', null)
+      expect(useSource.getState().shadcnRoleOverrides.light).not.toHaveProperty('--ring')
+    })
+
+    it('throws on malformed hex', () => {
+      const s = useSource.getState()
+      expect(() => s.actions.setShadcnRoleOverride('light', '--ring', 'not-hex')).toThrow(
+        /invalid hex/,
+      )
+      expect(() => s.actions.setShadcnRoleOverride('light', '--ring', '#abc')).toThrow(
+        /invalid hex/,
+      )
+    })
+
+    it('per-mode writes — light does not affect dark', () => {
+      const s = useSource.getState()
+      s.actions.setShadcnRoleOverride('light', '--ring', '#abcdef')
+      s.actions.setShadcnRoleOverride('dark', '--ring', '#445566')
+      expect(useSource.getState().shadcnRoleOverrides.light['--ring']).toBe('#abcdef')
+      expect(useSource.getState().shadcnRoleOverrides.dark['--ring']).toBe('#445566')
+      s.actions.setShadcnRoleOverride('light', '--ring', null)
+      expect(useSource.getState().shadcnRoleOverrides.light).not.toHaveProperty('--ring')
+      expect(useSource.getState().shadcnRoleOverrides.dark['--ring']).toBe('#445566')
     })
   })
 

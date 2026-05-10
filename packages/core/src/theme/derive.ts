@@ -24,6 +24,7 @@ import {
   SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
+  type ShadcnRoleName,
   slugifyCustomColorName,
 } from './schema'
 import { applySurfaceDesaturate, applySurfaceTint } from './surface'
@@ -226,9 +227,26 @@ function buildMdLayer(scheme: DynamicScheme, mdc: MaterialDynamicColors): TokenM
 // why: bindings are data, not code — the mapping rule is a runtime lookup
 // against md emitted tokens. Mode-keyed because the default map already has
 // cross-mode asymmetry (card, popover, sidebar-foreground). ADR-0017.
-function bindShadcn(mdLayer: TokenMap, bindings: ShadcnRoleBindings): TokenMap {
+//
+// why: ADR-0026 c.4/c.5 — `overrides` is a sparse hex map per (mode, role).
+// When set, the literal hex wins over the binding-resolved md value.
+// Resolved inside derive so every consumer (applyDom, exporters) sees the
+// post-override value through the existing DerivedTheme shape (ADR-0017).
+// Empty map takes the binding branch for every role — drift-guard baseline
+// stays byte-identical when shadcnRoleOverrides defaults to `{ light: {},
+// dark: {} }`.
+function bindShadcn(
+  mdLayer: TokenMap,
+  bindings: ShadcnRoleBindings,
+  overrides: Partial<Record<ShadcnRoleName, string>>,
+): TokenMap {
   const out: TokenMap = {}
   for (const role of SHADCN_ROLE_NAMES) {
+    const overrideHex = overrides[role]
+    if (overrideHex !== undefined) {
+      out[role] = argbFromHex(overrideHex)
+      continue
+    }
     const mdToken = bindings[role]
     const value = mdLayer[mdToken]
     if (value === undefined) {
@@ -355,11 +373,15 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
     },
     shadcn: {
       light: {
-        ...bindShadcn(mergedLight, source.shadcnRoleBindings.light),
+        ...bindShadcn(
+          mergedLight,
+          source.shadcnRoleBindings.light,
+          source.shadcnRoleOverrides.light,
+        ),
         ...buildCustomColorsShadcn(customGroups, customMdLight),
       },
       dark: {
-        ...bindShadcn(mergedDark, source.shadcnRoleBindings.dark),
+        ...bindShadcn(mergedDark, source.shadcnRoleBindings.dark, source.shadcnRoleOverrides.dark),
         ...buildCustomColorsShadcn(customGroups, customMdDark),
       },
       lightChart: rebrandChart(mdLightChart),

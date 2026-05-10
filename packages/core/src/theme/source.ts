@@ -39,6 +39,12 @@ export interface SourceActions {
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
+  // why: ADR-0026 — literal pin on a shadcn role. hex sets the entry; null
+  // deletes so the role falls back to its binding-resolved value. Mirrors
+  // setMd3TokenOverride's per-mode shape so override editors share one
+  // mental model. Hex format validated at the seam; malformed throws so a
+  // bad value never reaches derive.
+  setShadcnRoleOverride(mode: Mode, role: ShadcnRoleName, hex: string | null): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfacePaletteName(name: NeutralPaletteName): void
   setSurfaceTintLevel(mode: Mode, level: number): void
@@ -167,6 +173,17 @@ export const useSource = create<SourceState>()(
               [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
             },
           })),
+        setShadcnRoleOverride: (mode, role, hex) =>
+          set((s) => {
+            const next = { ...s.shadcnRoleOverrides[mode] }
+            if (hex === null) {
+              delete next[role]
+            } else {
+              if (!isValidHex(hex)) throw new Error(`[setShadcnRoleOverride] invalid hex "${hex}"`)
+              next[role] = hex
+            }
+            return { shadcnRoleOverrides: { ...s.shadcnRoleOverrides, [mode]: next } }
+          }),
         setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
         setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
         // why: per-mode write — only the addressed mode's level moves. Mirrors
