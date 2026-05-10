@@ -4,12 +4,12 @@ import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { ShadcnRoleName } from '@tonex/core/schema'
-import { NativeColorInput } from '@/components/shared/native-color-input'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
+import { ColorPicker } from '../color-picker'
 import { shadcnRoleDisplayName } from './contrast-utils'
 import { MdSnapshotPicker } from './md-snapshot-picker'
 
@@ -74,10 +74,10 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <NativeColorInput
-          className="size-8"
-          currentHex={currentHex}
-          onColorChange={(h) => setOverride(mode, role, h)}
+        <ColorPicker
+          align="start"
+          value={currentHex}
+          onChange={(h) => setOverride(mode, role, h)}
         />
         <Input
           autoFocus
@@ -94,8 +94,6 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
         <TwColorPicker currentColor={currentHex} onSelect={(h) => setOverride(mode, role, h)} />
         <MdSnapshotPicker mode={mode} onSnapshot={(h) => setOverride(mode, role, h)} />
       </div>
-
-      <div className="h-8 rounded-md" style={{ backgroundColor: currentHex }} />
 
       {ratio !== null && partner !== null && (
         <div className="flex items-center justify-between text-xs font-medium">
