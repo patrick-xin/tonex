@@ -9,6 +9,8 @@ export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
   CHART_MODES,
   type ChartMode,
+  CONTRAST_PAIRS,
+  type ContrastPair,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
