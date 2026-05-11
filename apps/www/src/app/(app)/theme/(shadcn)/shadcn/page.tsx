@@ -1,13 +1,10 @@
-import { ExportButton } from '@/features/export/export-button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShadcnComponentsDemo } from './_components'
-
-const SHADCN_EXPORT_TABS = ['shadcn'] as const
 
 export default function ShadcnPage() {
   return (
-    <section className="flex flex-col gap-4">
+    <ScrollArea noScrollBar gradientScrollFade>
       <ShadcnComponentsDemo />
-      <ExportButton tabs={SHADCN_EXPORT_TABS} />
-    </section>
+    </ScrollArea>
   )
 }

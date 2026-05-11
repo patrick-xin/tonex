@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ShadcnBlocksPage() {
   return (
-    <ScrollArea noScrollBar gradientScrollFade className="p-1 overscroll-contain">
+    <ScrollArea noScrollBar gradientScrollFade>
       <BlocksDemo />
     </ScrollArea>
   )

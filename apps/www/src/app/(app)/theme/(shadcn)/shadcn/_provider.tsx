@@ -23,7 +23,7 @@ export const ShadcnProvider = ({ children }: { children: React.ReactNode }) => {
     <ShadcnContext.Provider value={ref}>
       <div
         ref={ref}
-        className="shadcn bg-background text-foreground size-full overflow-auto border-border outline-ring/50"
+        className="shadcn bg-background text-foreground size-full overflow-auto border-border outline-ring/50 p-2"
       >
         {children}
         <Toaster />

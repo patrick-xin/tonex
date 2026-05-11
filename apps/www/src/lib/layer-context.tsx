@@ -11,7 +11,11 @@ export type Layer = 'md' | 'shadcn'
 const LayerContext = createContext<Layer | null>(null)
 
 export function LayerProvider({ value, children }: { value: Layer; children: React.ReactNode }) {
-  return <LayerContext.Provider value={value}>{children}</LayerContext.Provider>
+  return (
+    <LayerContext.Provider value={value}>
+      <div className="flex min-h-screen size-full overflow-hidden relative">{children}</div>
+    </LayerContext.Provider>
+  )
 }
 
 export function useLayer(): Layer {

@@ -14,6 +14,7 @@ import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
 import { SiteCommandMenu } from '@/features/site-command-menu'
 import type { NavConfig } from '@/lib/nav-config'
+import { ContrastChecker } from '../contrast-checker'
 import { ResetButton } from '../testbed/reset-button'
 
 // why: ADR-0021 commitment 8 + ADR-0022 commitment 3 — the route layout owns
@@ -74,7 +75,7 @@ export function NavTabs({ config }: { config: NavConfig }) {
   return (
     <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
       <Tabs
-        className="sm:w-full"
+        className="sm:w-5/6"
         value={tabs.find((tab) => tab.href === pathname)?.label || tabs[0]?.label}
       >
         <TabsList className="h-12">
@@ -114,9 +115,9 @@ export function NavTabs({ config }: { config: NavConfig }) {
         <TooltipProvider>
           <ExportButton tabs={exportTabs} icon />
           <DisplayPrefs />
+          <ContrastChecker layer={config.layer} />
           <ResetButton />
         </TooltipProvider>
-
         <Button
           size="sm"
           variant="link"
