@@ -2,7 +2,7 @@
 
 import { EyeIcon } from '@phosphor-icons/react'
 import { useSource } from '@tonex/core'
-import { CHART_MODES, type ChartMode } from '@tonex/core/schema'
+import { CHART_SCHEMES, type ChartScheme } from '@tonex/core/schema'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -14,8 +14,8 @@ import { useUiPrefs } from '@/lib/stores/ui-prefs'
 export function DisplayPrefs() {
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
-  const chartMode = useSource((s) => s.chartMode)
-  const setChartMode = useSource((s) => s.actions.setChartMode)
+  const chartScheme = useSource((s) => s.chart.scheme)
+  const setChartScheme = useSource((s) => s.actions.setChartScheme)
 
   return (
     <Popover>
@@ -51,15 +51,15 @@ export function DisplayPrefs() {
           <ToggleGroup
             variant="outline"
             size="xs"
-            value={[chartMode]}
+            value={[chartScheme]}
             onValueChange={(value) => {
               if (value.length === 0) return
-              setChartMode(value[0] as ChartMode)
+              setChartScheme(value[0] as ChartScheme)
             }}
           >
-            {CHART_MODES.map((m) => (
-              <ToggleGroupItem className="h-6 capitalize" key={m} value={m}>
-                {m}
+            {CHART_SCHEMES.map((s) => (
+              <ToggleGroupItem className="h-6 capitalize" key={s} value={s}>
+                {s}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>

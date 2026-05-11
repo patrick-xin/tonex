@@ -178,14 +178,16 @@ export const SHADCN_CHART_TOKEN_NAMES = [
 ] as const
 export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
 
-// why: chart-color derivation has two shapes by intent. `mono` reads the
-// scheme's primary palette at fixed tones (variant-aware — Vibrant /
-// Expressive / Rainbow flavor flows through). `multi` synthesizes 5 hue-
-// rotated points via Hct.from() at fixed chroma + tone (variant-bypassed —
-// hue rotation is the whole point). shadcn's default is mono; multi is
-// opt-in for dashboards that want maximum series separation. ADR-0024.
-export const CHART_MODES = ['mono', 'multi'] as const
-export type ChartMode = (typeof CHART_MODES)[number]
+// why: chart-color derivation has two shapes by intent (ADR-0024, renamed
+// in ADR-0027 c.2 to align with data-viz vocabulary). `sequential` reads
+// the scheme's primary palette at fixed tones (variant-aware — Vibrant /
+// Expressive / Rainbow flavor flows through; was `mono`). `categorical`
+// synthesizes 5 hue-rotated points via Hct.from() at fixed chroma + tone
+// (variant-bypassed — hue rotation is the whole point; was `multi`).
+// `diverging` is reserved per ADR-0027 c.2 but lands in a future slice —
+// picklist starts at two values. shadcn's default is sequential.
+export const CHART_SCHEMES = ['categorical', 'sequential'] as const
+export type ChartScheme = (typeof CHART_SCHEMES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
@@ -754,6 +756,16 @@ export interface PortableTheme {
     light: Partial<Record<ShadcnRoleName, string>>
     dark: Partial<Record<ShadcnRoleName, string>>
   }
+  // why: ADR-0027 c.4 — literal pin on a shadcn chart token, sibling to
+  // shadcnRoleOverrides on the chart-token domain. Per-mode partial map
+  // keyed on SHADCN_CHART_TOKEN_NAMES. Override is terminal and scheme-
+  // agnostic: pinned values win post-rebrandChart regardless of
+  // chart.scheme. Empty default keeps drift-guard byte-identical (chart
+  // emission unchanged when both modes have zero entries).
+  shadcnChartOverrides: {
+    light: Partial<Record<ShadcnChartTokenName, string>>
+    dark: Partial<Record<ShadcnChartTokenName, string>>
+  }
   // why: surface treatment is a post-derive transform applied inside
   // deriveTheme so applyDom AND formatCss reflect it identically — preview
   // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
@@ -802,12 +814,16 @@ export interface PortableTheme {
   // disables the field). Hex format validated at the setter boundary via
   // isValidHex.
   cmfSecondSourceHex: string | null
-  // why: chart-color derivation axis. 'mono' (default, shadcn convention)
-  // reads the primary palette at fixed tones — variant-aware. 'multi' rotates
-  // hue around the seed at fixed chroma/tone — variant-bypassed by design.
-  // Achromatic seed (chroma < 5) under multi falls back to hue 270 so a gray
-  // seed still produces a colorful series. ADR-0024.
-  chartMode: ChartMode
+  // why: chart-palette namespace (ADR-0027 c.1). Object shape reserves the
+  // surface for future derivation axes (seedPalette, count, tones, chroma,
+  // hueSpread) added one slice at a time. Today: `scheme` only.
+  // - sequential (default, shadcn convention) — primary palette at fixed
+  //   tones; variant-aware.
+  // - categorical — hue-rotated synthesis via Hct.from() at fixed
+  //   chroma/tone; variant-bypassed. Achromatic seed (chroma < 5) falls
+  //   back to hue 270 so a gray seed still produces a colorful series.
+  // ADR-0024 introduced the axis; ADR-0027 reshaped the namespace.
+  chart: { scheme: ChartScheme }
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -822,6 +838,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   shadcnRoleOverrides: { light: {}, dark: {} },
+  shadcnChartOverrides: { light: {}, dark: {} },
   surfaceAlgo: 'desaturate',
   surfacePaletteName: 'zinc',
   surfaceTintLevel: { light: 0, dark: 0 },
@@ -829,7 +846,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,
-  chartMode: 'mono',
+  chart: { scheme: 'sequential' },
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
@@ -901,6 +918,12 @@ const PaletteOverridesSchema = v.record(v.picklist(PALETTE_NAMES), HexSchema)
 // hex; partiality is correct because user pins are sparse.
 const ShadcnRoleOverridesPerModeSchema = v.record(v.picklist(SHADCN_ROLE_NAMES), HexSchema)
 
+// why: ADR-0027 c.4 — per-mode partial map of shadcn chart token → hex.
+// Mirrors role-override shape modulo the key domain. v.record constrains
+// keys to SHADCN_CHART_TOKEN_NAMES and values to hex; pin sparsity is
+// the expected default state.
+const ShadcnChartOverridesPerModeSchema = v.record(v.picklist(SHADCN_CHART_TOKEN_NAMES), HexSchema)
+
 const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
 
 export const PortableThemeSchema = v.object({
@@ -921,6 +944,10 @@ export const PortableThemeSchema = v.object({
     light: ShadcnRoleOverridesPerModeSchema,
     dark: ShadcnRoleOverridesPerModeSchema,
   }),
+  shadcnChartOverrides: v.object({
+    light: ShadcnChartOverridesPerModeSchema,
+    dark: ShadcnChartOverridesPerModeSchema,
+  }),
   surfaceAlgo: v.picklist(SURFACE_ALGOS),
   surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),
   surfaceTintLevel: ModeKeyedNumberSchema,
@@ -928,7 +955,7 @@ export const PortableThemeSchema = v.object({
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
   cmfSecondSourceHex: v.union([HexSchema, v.null()]),
-  chartMode: v.picklist(CHART_MODES),
+  chart: v.object({ scheme: v.picklist(CHART_SCHEMES) }),
 })
 
 // why: returns a discriminated result instead of throwing — the caller

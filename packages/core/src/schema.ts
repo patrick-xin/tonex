@@ -7,8 +7,8 @@
 export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
-  CHART_MODES,
-  type ChartMode,
+  CHART_SCHEMES,
+  type ChartScheme,
   CONTRAST_PAIRS,
   type ContrastPair,
   type CustomColorEntry,

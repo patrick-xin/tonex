@@ -10,6 +10,7 @@ import {
   type PortableTheme,
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
+  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'
@@ -69,6 +70,10 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     light: { '--ring': '#abcdef', '--background': '#112233' },
     dark: { '--ring': '#445566' },
   },
+  shadcnChartOverrides: {
+    light: { '--chart-1': '#abc123', '--chart-5': '#deadbe' },
+    dark: { '--chart-2': '#445566' },
+  },
   surfaceAlgo: 'tint',
   surfacePaletteName: 'slate',
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
@@ -83,7 +88,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     error: '#ee2244',
   },
   cmfSecondSourceHex: '#aabbcc',
-  chartMode: 'multi',
+  chart: { scheme: 'categorical' },
 }
 
 describe('useSource persistence round-trip', () => {
@@ -120,6 +125,11 @@ describe('useSource persistence round-trip', () => {
         s.actions.setShadcnRoleOverride(mode, role as (typeof SHADCN_ROLE_NAMES)[number], hex)
       }
     }
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnChartOverrides[mode])) {
+        s.actions.setShadcnChartOverride(mode, token as ShadcnChartTokenName, hex)
+      }
+    }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
     for (const mode of ['light', 'dark'] as const) {
@@ -140,7 +150,7 @@ describe('useSource persistence round-trip', () => {
     s.actions.setVariant('cmf')
     s.actions.setCmfSecondSourceHex(NONDEFAULT_INPUTS.cmfSecondSourceHex)
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
-    s.actions.setChartMode(NONDEFAULT_INPUTS.chartMode)
+    s.actions.setChartScheme(NONDEFAULT_INPUTS.chart.scheme)
 
     // why: persist writes are debounced (issue #9) — drain the pending
     // write so the localStorage assertion below sees the latest state

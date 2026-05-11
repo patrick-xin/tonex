@@ -7,7 +7,7 @@ import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
 import {
-  type ChartMode,
+  type ChartScheme,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   isValidHex,
@@ -16,6 +16,7 @@ import {
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
+  type ShadcnChartTokenName,
   type ShadcnRoleName,
   STORAGE_KEY,
   type SurfaceAlgo,
@@ -45,6 +46,7 @@ export interface SourceActions {
   // mental model. Hex format validated at the seam; malformed throws so a
   // bad value never reaches derive.
   setShadcnRoleOverride(mode: Mode, role: ShadcnRoleName, hex: string | null): void
+  setShadcnChartOverride(mode: Mode, token: ShadcnChartTokenName, hex: string | null): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfacePaletteName(name: NeutralPaletteName): void
   setSurfaceTintLevel(mode: Mode, level: number): void
@@ -65,7 +67,7 @@ export interface SourceActions {
   // disabled per cmfSecondSourceDisabledReason — same backstop pattern as
   // setPaletteOverride. Hex format validated; malformed throws at the seam.
   setCmfSecondSourceHex(hex: string | null): void
-  setChartMode(mode: ChartMode): void
+  setChartScheme(scheme: ChartScheme): void
   setHydrated(): void
   reset(): void
 }
@@ -193,6 +195,17 @@ export const useSource = create<SourceState>()(
             }
             return { shadcnRoleOverrides: { ...s.shadcnRoleOverrides, [mode]: next } }
           }),
+        setShadcnChartOverride: (mode, token, hex) =>
+          set((s) => {
+            const next = { ...s.shadcnChartOverrides[mode] }
+            if (hex === null) {
+              delete next[token]
+            } else {
+              if (!isValidHex(hex)) throw new Error(`[setShadcnChartOverride] invalid hex "${hex}"`)
+              next[token] = hex
+            }
+            return { shadcnChartOverrides: { ...s.shadcnChartOverrides, [mode]: next } }
+          }),
         setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
         setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
         // why: per-mode write — only the addressed mode's level moves. Mirrors
@@ -252,7 +265,7 @@ export const useSource = create<SourceState>()(
             }
             return { cmfSecondSourceHex: hex }
           }),
-        setChartMode: (chartMode) => set({ chartMode }),
+        setChartScheme: (scheme) => set({ chart: { scheme } }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },
