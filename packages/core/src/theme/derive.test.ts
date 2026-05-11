@@ -791,13 +791,14 @@ describe('deriveTheme', () => {
       }
     })
 
-    it('chartMode="multi": 5 chart tokens are distinct hue-rotated values at fixed chroma/tone', () => {
-      // why: ADR-0024 — multi synthesizes via Hct.from(hue, 50, tone). The
-      // 5 hue offsets [0,120,240,60,180] guarantee distinct hues, so the
-      // emitted argb values must all differ. Round-tripping each through
-      // Hct confirms chroma/tone are pinned per-mode (50 light / 60 dark)
-      // and chroma rests at the configured 50 (modulo MCU gamut clipping).
-      const { md } = deriveTheme({ ...DEFAULT_INPUTS, chartMode: 'multi' })
+    it('chart.scheme="categorical": 5 chart tokens are distinct hue-rotated values at fixed chroma/tone', () => {
+      // why: ADR-0024 (renamed to "categorical" per ADR-0027 c.2) — the scheme
+      // synthesizes via Hct.from(hue, 50, tone). The 5 hue offsets
+      // [0,120,240,60,180] guarantee distinct hues, so the emitted argb values
+      // must all differ. Round-tripping each through Hct confirms chroma/tone
+      // are pinned per-mode (50 light / 60 dark) and chroma rests at the
+      // configured 50 (modulo MCU gamut clipping).
+      const { md } = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } })
       const lightArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.lightChart[n] as number)
       expect(new Set(lightArgbs).size).toBe(5)
       for (const argb of lightArgbs) {
@@ -811,12 +812,16 @@ describe('deriveTheme', () => {
       }
     })
 
-    it('chartMode="multi": achromatic seed (chroma < 5) falls back to hue 270', () => {
-      // why: ADR-0024 — gray seeds have no usable hue, so multi mode pins
+    it('chart.scheme="categorical": achromatic seed (chroma < 5) falls back to hue 270', () => {
+      // why: ADR-0024 — gray seeds have no usable hue, so categorical pins
       // the base to 270 (purple) rather than producing an all-gray chart.
       // chart-1 lands at the base hue (offset 0); assert it round-trips
       // close to 270.
-      const grayInputs = { ...DEFAULT_INPUTS, seedHex: '#808080', chartMode: 'multi' as const }
+      const grayInputs = {
+        ...DEFAULT_INPUTS,
+        seedHex: '#808080',
+        chart: { scheme: 'categorical' as const },
+      }
       const { md } = deriveTheme(grayInputs)
       const chart1 = md.lightChart['--color-chart-1'] as number
       const hct = Hct.fromInt(chart1)
@@ -824,13 +829,14 @@ describe('deriveTheme', () => {
       expect(hct.hue).toBeLessThan(275)
     })
 
-    it('chartMode="mono" (default) is unchanged from pre-axis behavior — palette-tone derivation', () => {
-      // why: drift-guard. mono is the default; its derivation must remain
-      // the variant-aware primaryPalette.tone() path that v9 had inline.
-      // Explicit chartMode='mono' must equal the default DEFAULT_INPUTS
+    it('chart.scheme="sequential" (default) is unchanged from pre-axis behavior — palette-tone derivation', () => {
+      // why: drift-guard. sequential is the default (ADR-0027 c.2, renamed
+      // from "mono"); its derivation must remain the variant-aware
+      // primaryPalette.tone() path that v9 had inline. Explicit
+      // chart.scheme='sequential' must equal the default DEFAULT_INPUTS
       // result token-for-token.
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const explicit = deriveTheme({ ...DEFAULT_INPUTS, chartMode: 'mono' })
+      const explicit = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'sequential' } })
       expect(explicit.md.lightChart).toEqual(baseline.md.lightChart)
       expect(explicit.md.darkChart).toEqual(baseline.md.darkChart)
     })

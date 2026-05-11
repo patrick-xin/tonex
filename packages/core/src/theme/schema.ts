@@ -178,14 +178,16 @@ export const SHADCN_CHART_TOKEN_NAMES = [
 ] as const
 export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
 
-// why: chart-color derivation has two shapes by intent. `mono` reads the
-// scheme's primary palette at fixed tones (variant-aware — Vibrant /
-// Expressive / Rainbow flavor flows through). `multi` synthesizes 5 hue-
-// rotated points via Hct.from() at fixed chroma + tone (variant-bypassed —
-// hue rotation is the whole point). shadcn's default is mono; multi is
-// opt-in for dashboards that want maximum series separation. ADR-0024.
-export const CHART_MODES = ['mono', 'multi'] as const
-export type ChartMode = (typeof CHART_MODES)[number]
+// why: chart-color derivation has two shapes by intent (ADR-0024, renamed
+// in ADR-0027 c.2 to align with data-viz vocabulary). `sequential` reads
+// the scheme's primary palette at fixed tones (variant-aware — Vibrant /
+// Expressive / Rainbow flavor flows through; was `mono`). `categorical`
+// synthesizes 5 hue-rotated points via Hct.from() at fixed chroma + tone
+// (variant-bypassed — hue rotation is the whole point; was `multi`).
+// `diverging` is reserved per ADR-0027 c.2 but lands in a future slice —
+// picklist starts at two values. shadcn's default is sequential.
+export const CHART_SCHEMES = ['categorical', 'sequential'] as const
+export type ChartScheme = (typeof CHART_SCHEMES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
@@ -802,12 +804,16 @@ export interface PortableTheme {
   // disables the field). Hex format validated at the setter boundary via
   // isValidHex.
   cmfSecondSourceHex: string | null
-  // why: chart-color derivation axis. 'mono' (default, shadcn convention)
-  // reads the primary palette at fixed tones — variant-aware. 'multi' rotates
-  // hue around the seed at fixed chroma/tone — variant-bypassed by design.
-  // Achromatic seed (chroma < 5) under multi falls back to hue 270 so a gray
-  // seed still produces a colorful series. ADR-0024.
-  chartMode: ChartMode
+  // why: chart-palette namespace (ADR-0027 c.1). Object shape reserves the
+  // surface for future derivation axes (seedPalette, count, tones, chroma,
+  // hueSpread) added one slice at a time. Today: `scheme` only.
+  // - sequential (default, shadcn convention) — primary palette at fixed
+  //   tones; variant-aware.
+  // - categorical — hue-rotated synthesis via Hct.from() at fixed
+  //   chroma/tone; variant-bypassed. Achromatic seed (chroma < 5) falls
+  //   back to hue 270 so a gray seed still produces a colorful series.
+  // ADR-0024 introduced the axis; ADR-0027 reshaped the namespace.
+  chart: { scheme: ChartScheme }
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -829,7 +835,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,
-  chartMode: 'mono',
+  chart: { scheme: 'sequential' },
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
@@ -928,7 +934,7 @@ export const PortableThemeSchema = v.object({
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
   cmfSecondSourceHex: v.union([HexSchema, v.null()]),
-  chartMode: v.picklist(CHART_MODES),
+  chart: v.object({ scheme: v.picklist(CHART_SCHEMES) }),
 })
 
 // why: returns a discriminated result instead of throwing — the caller

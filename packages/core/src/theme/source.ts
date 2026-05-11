@@ -7,7 +7,7 @@ import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
 import {
-  type ChartMode,
+  type ChartScheme,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   isValidHex,
@@ -65,7 +65,7 @@ export interface SourceActions {
   // disabled per cmfSecondSourceDisabledReason — same backstop pattern as
   // setPaletteOverride. Hex format validated; malformed throws at the seam.
   setCmfSecondSourceHex(hex: string | null): void
-  setChartMode(mode: ChartMode): void
+  setChartScheme(scheme: ChartScheme): void
   setHydrated(): void
   reset(): void
 }
@@ -252,7 +252,7 @@ export const useSource = create<SourceState>()(
             }
             return { cmfSecondSourceHex: hex }
           }),
-        setChartMode: (chartMode) => set({ chartMode }),
+        setChartScheme: (scheme) => set({ chart: { scheme } }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },

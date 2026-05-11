@@ -277,6 +277,19 @@ describe('parsePortableTheme', () => {
     ).toBe(false)
   })
 
+  // why: chart axis is a nested object under `chart` (ADR-0027 c.1). Picklist
+  // starts at categorical + sequential per c.2; diverging is reserved in the
+  // trajectory but lives in a future slice — schema must reject it now so
+  // premature adoption can't slip through a stale persisted blob or test fixture.
+  it('chart.scheme picklist is categorical and sequential only', () => {
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } }).ok).toBe(
+      true,
+    )
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'sequential' } }).ok).toBe(true)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'diverging' } }).ok).toBe(false)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'foo' } }).ok).toBe(false)
+  })
+
   // why: SCHEMA_VERSION reference — guards against the literal in the schema
   // drifting from the exported constant.
   it('uses SCHEMA_VERSION as the version literal', () => {

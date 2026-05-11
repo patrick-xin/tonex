@@ -83,7 +83,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     error: '#ee2244',
   },
   cmfSecondSourceHex: '#aabbcc',
-  chartMode: 'multi',
+  chart: { scheme: 'categorical' },
 }
 
 describe('useSource persistence round-trip', () => {
@@ -140,7 +140,7 @@ describe('useSource persistence round-trip', () => {
     s.actions.setVariant('cmf')
     s.actions.setCmfSecondSourceHex(NONDEFAULT_INPUTS.cmfSecondSourceHex)
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
-    s.actions.setChartMode(NONDEFAULT_INPUTS.chartMode)
+    s.actions.setChartScheme(NONDEFAULT_INPUTS.chart.scheme)
 
     // why: persist writes are debounced (issue #9) — drain the pending
     // write so the localStorage assertion below sees the latest state

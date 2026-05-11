@@ -11,7 +11,7 @@ import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
 import {
-  type ChartMode,
+  type ChartScheme,
   type CustomColorEntry,
   MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
@@ -356,8 +356,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const splitLight = splitMdLayer(mergedLight)
   const splitDark = splitMdLayer(mergedDark)
 
-  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chartMode)
-  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chartMode)
+  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chart.scheme)
+  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chart.scheme)
 
   return {
     md: {
@@ -418,10 +418,10 @@ function buildMdChart(
   seedHct: Hct,
   scheme: DynamicScheme,
   mode: Mode,
-  chartMode: ChartMode,
+  chartScheme: ChartScheme,
 ): TokenMap {
   const out: TokenMap = {}
-  if (chartMode === 'mono') {
+  if (chartScheme === 'sequential') {
     const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
     MD_CHART_TOKEN_NAMES.forEach((name, i) => {
       out[name] = scheme.primaryPalette.tone(tones[i])
