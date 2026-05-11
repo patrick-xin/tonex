@@ -37,16 +37,46 @@ export function evaluateThemeContrast(theme: DerivedTheme): ContrastReport {
   // "data-only inspect" consumers and needs the merged view.
   const mdLight = { ...theme.md.light, ...theme.md.lightExtended }
   const mdDark = { ...theme.md.dark, ...theme.md.darkExtended }
+  // why: ADR-0027 c.5 — chart pairs read the chart fg from the layer's
+  // *Chart map (kept separate by emission policy) and the partner from the
+  // layer's main map. Merging once per (layer, mode) here keeps evaluatePair's
+  // signature uniform (one TokenMap that contains both sides) and the report
+  // shape unchanged.
+  const mdChartLight = { ...mdLight, ...theme.md.lightChart }
+  const mdChartDark = { ...mdDark, ...theme.md.darkChart }
+  const shadcnChartLight = { ...theme.shadcn.light, ...theme.shadcn.lightChart }
+  const shadcnChartDark = { ...theme.shadcn.dark, ...theme.shadcn.darkChart }
   const report: ContrastReport = {
     light: CONTRAST_PAIRS.map((pair) =>
-      evaluatePair(pair, pair.layer === 'md' ? mdLight : theme.shadcn.light, 'light'),
+      evaluatePair(
+        pair,
+        layerMapFor(pair, mdLight, mdChartLight, theme.shadcn.light, shadcnChartLight),
+        'light',
+      ),
     ),
     dark: CONTRAST_PAIRS.map((pair) =>
-      evaluatePair(pair, pair.layer === 'md' ? mdDark : theme.shadcn.dark, 'dark'),
+      evaluatePair(
+        pair,
+        layerMapFor(pair, mdDark, mdChartDark, theme.shadcn.dark, shadcnChartDark),
+        'dark',
+      ),
     ),
   }
   reportCache.set(theme, report)
   return report
+}
+
+function layerMapFor(
+  pair: ContrastPair,
+  md: TokenMap,
+  mdChart: TokenMap,
+  shadcn: TokenMap,
+  shadcnChart: TokenMap,
+): TokenMap {
+  if (pair.layer === 'md') return md
+  if (pair.layer === 'md-chart') return mdChart
+  if (pair.layer === 'shadcn') return shadcn
+  return shadcnChart
 }
 
 function evaluatePair(pair: ContrastPair, layer: TokenMap, mode: Mode): PairResult {

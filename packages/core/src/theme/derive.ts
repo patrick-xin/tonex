@@ -95,24 +95,32 @@ export interface DerivedTheme {
 const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
 const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
 
-// why: arbitrary 5-tone spread per mode (ADR-0021 commitment 2 — "fixed 5-
-// tone mapping" — refined by ADR-0024 to be the mono branch). Tunable; chart
-// UX hasn't pinned exact tones yet. Light-mode tones skew darker so chart-1
-// shows up against the surface; dark-mode tones skew lighter for the same
-// reason. Mode-aware, contrast-invariant — palette tones don't shift with
-// MCU contrast level.
-const CHART_TONES_LIGHT = [40, 60, 20, 50, 55] as const
-const CHART_TONES_DARK = [80, 50, 90, 60, 45] as const
+// why: 5-tone spread per mode (ADR-0021 commitment 2; ADR-0024 mono branch
+// becomes ADR-0027 sequential scheme). Slice contrast-4 (ADR-0027 c.5) tuned
+// these tones to satisfy the contrast contract: every chart token hits 3:1
+// against `--color-surface`, `--color-surface-container` (md side), and the
+// shadcn-rebranded `--background`, `--card` partners. The binding constraint
+// is shadcn `--card` — surface-treatment shifts it inward toward chart hues
+// (light tone ~87 tinted, dark tone ~17 tinted) so chart tones live in
+// [~20-50] light / [~55-90] dark to keep 3:1 headroom. A future ADR may
+// replace these constants with an algorithmic contrast-aware tone walk in
+// `buildMdChart` so the guarantee extends across all variants/schemes by
+// construction; for now, the contrast.test.ts guard catches drift.
+const CHART_TONES_LIGHT = [40, 50, 20, 30, 45] as const
+const CHART_TONES_DARK = [80, 65, 90, 70, 60] as const
 
-// why: multi-mode hue-rotation primitives (ADR-0024). Offsets distribute 5
-// chart series around the color wheel: source hue, two triadic partners
-// (±120°), then split-complementary fill (60°/180°). Fixed chroma/tone so
-// hue is the only axis of separation — variant treatment intentionally does
-// NOT participate (hue rotation contradicts variant tonal-spotting).
+// why: categorical scheme — hue-rotated primitives (ADR-0024, renamed to
+// `categorical` in ADR-0027 c.2). Offsets distribute 5 chart series around
+// the color wheel: source hue, two triadic partners (±120°), then split-
+// complementary fill (60°/180°). Fixed chroma/tone so hue is the only axis
+// of separation — variant treatment intentionally does NOT participate
+// (hue rotation contradicts variant tonal-spotting). Tone values shifted in
+// slice contrast-4: light 50→45, dark 60→65, both for 3:1 headroom against
+// shadcn `--card` partner per ADR-0027 c.5.
 const MULTI_HUE_OFFSETS = [0, 120, 240, 60, 180] as const
 const MULTI_CHROMA = 50
-const MULTI_TONE_LIGHT = 50
-const MULTI_TONE_DARK = 60
+const MULTI_TONE_LIGHT = 45
+const MULTI_TONE_DARK = 65
 // why: a near-achromatic seed (e.g. user picked #808080) has no usable hue,
 // so multi mode falls back to hue 270 (purple) — matches shadcn's default
 // chart palette character. Threshold 5 chroma units is the same MCU uses
