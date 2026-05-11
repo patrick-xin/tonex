@@ -73,12 +73,12 @@ export function NavTabs({ config }: { config: NavConfig }) {
   }, [selected])
 
   return (
-    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
+    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)] h-12">
       <Tabs
-        className="sm:w-5/6"
+        className="w-full sm:w-5/6"
         value={tabs.find((tab) => tab.href === pathname)?.label || tabs[0]?.label}
       >
-        <TabsList className="h-12">
+        <TabsList>
           {tabs.map((tab, index) => (
             <TabsTab
               className="w-28 data-active:text-on-surface flex-1"
@@ -107,7 +107,7 @@ export function NavTabs({ config }: { config: NavConfig }) {
               </div>
             </TabsTab>
           ))}
-          <TabsIndicator className="bg-primary-container bottom-0 sm:-bottom-[6px] left-0 h-2 translate-x-(--active-tab-left) translate-y-0" />
+          <TabsIndicator className="bg-primary-container -bottom-[12px] sm:-bottom-[13px] left-0 h-2 translate-x-(--active-tab-left) translate-y-0" />
         </TabsList>
       </Tabs>
       <div className="items-center gap-2 hidden sm:flex">
