@@ -255,6 +255,20 @@ describe('parsePortableTheme', () => {
     expect(parsePortableTheme(bad).ok).toBe(false)
   })
 
+  // why: issue #33 — schema-level range pin. Setter clamps actively;
+  // schema rejects so any path that bypasses the setter (rehydration of
+  // a stale persisted blob, programmatic state injection) cannot land
+  // an inert out-of-range value.
+  it('contrastLevel must be within [0, 1]', () => {
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 0 }).ok).toBe(true)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 }).ok).toBe(true)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 }).ok).toBe(true)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: -0.01 }).ok).toBe(false)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: -1 }).ok).toBe(false)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 1.01 }).ok).toBe(false)
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 2 }).ok).toBe(false)
+  })
+
   it('cmfSecondSourceHex accepts null OR a valid hex', () => {
     expect(parsePortableTheme({ ...DEFAULT_INPUTS, cmfSecondSourceHex: null }).ok).toBe(true)
     expect(parsePortableTheme({ ...DEFAULT_INPUTS, cmfSecondSourceHex: '#ff8800' }).ok).toBe(true)

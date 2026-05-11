@@ -153,7 +153,16 @@ export const useSource = create<SourceState>()(
             return { seedHex: hexFromHct({ ...current, tone }) }
           }),
         setVariant: (variant) => set({ variant }),
-        setContrastLevel: (contrastLevel) => set({ contrastLevel }),
+        // why: clamp at the seam (issue #33). MCU's 2025/2026 spec curves
+        // make any value outside [0, 1] inert (`low === normal` in every
+        // ContrastCurve; `> 1` saturates at `high`) — accepting them would
+        // let source state drift from the effective theme and pollute the
+        // export header. One clamp here covers every call site (testbed
+        // slider, future contrast dialog, programmatic callers); UI inputs
+        // still set their own min/max for the slider UX, but no consumer
+        // needs to re-derive the contract.
+        setContrastLevel: (contrastLevel) =>
+          set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)) }),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
         // why: hex sets the override for one (mode, token); null deletes the
         // entry so the token returns to MCU. Mode and token are typed so any

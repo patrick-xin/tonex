@@ -714,8 +714,11 @@ export interface PortableTheme {
   seedHex: string
   variant: VariantName
   // why: MCU contrastLevel input — fed straight into variant.build(). Range
-  // -1..1 per MCU spec; 0 is the baseline. Drives tone offsets across all
-  // dynamic colors, so changing it shifts every md token in lockstep.
+  // [0, 1]: 0 is the baseline, 1 is maximum contrast. MCU's spec range is
+  // [-1, 1] but the 2025/2026 spec curves (which we use) treat any value
+  // < 0 as identical to 0 (every ContrastCurve has `low === normal`) and
+  // > 1 saturates at `high`. Schema rejects out-of-range; setter clamps
+  // (issue #33).
   contrastLevel: number
   // why: source-input gate, not a per-token snapshot. When true, setSeedHex
   // becomes a no-op — pathways that mutate the seed (hex input, HCT slider,
@@ -904,7 +907,7 @@ export const PortableThemeSchema = v.object({
   version: v.literal(SCHEMA_VERSION),
   seedHex: HexSchema,
   variant: v.picklist(VARIANT_NAMES),
-  contrastLevel: v.number(),
+  contrastLevel: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
   seedHexLock: v.boolean(),
   md3TokenOverrides: v.object({
     light: Md3TokenOverridesPerModeSchema,
