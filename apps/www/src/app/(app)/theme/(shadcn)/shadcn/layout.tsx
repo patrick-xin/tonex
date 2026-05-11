@@ -10,12 +10,10 @@ import { ShadcnNavTabs } from './_shadcn-nav-tabs'
 export default function ShadcnLayout({ children }: { children: React.ReactNode }) {
   return (
     <LayerProvider value="shadcn">
-      <div className="flex min-h-0 size-full gap-2 overflow-hidden relative">
-        <ShadcnRail />
-        <div className="flex-1 flex flex-col h-[calc(100dvh-80px)] xl:h-[calc(100dvh-16px)] overflow-hidden">
-          <ShadcnNavTabs />
-          <ShadcnProvider>{children}</ShadcnProvider>
-        </div>
+      <ShadcnRail />
+      <div className="flex-1 flex flex-col h-[calc(100dvh-80px)] xl:h-screen overflow-hidden px-2">
+        <ShadcnNavTabs />
+        <ShadcnProvider>{children}</ShadcnProvider>
       </div>
     </LayerProvider>
   )
