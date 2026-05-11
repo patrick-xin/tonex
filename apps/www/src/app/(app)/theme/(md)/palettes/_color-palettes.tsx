@@ -26,7 +26,7 @@ function parsePaletteMap(palette: TokenMap): PaletteMap {
   for (const family of MD_PALETTE_FAMILY_NAMES) {
     result[family] = {}
     for (const tone of MD_PALETTE_TONE_NAMES) {
-      const argb = palette[`--md-ref-palette-${family}-${tone}`]
+      const argb = palette[`--color-${family}-${tone}`]
       if (argb !== undefined) result[family][tone] = hexFromArgb(argb)
     }
   }

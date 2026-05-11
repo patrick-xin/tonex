@@ -863,13 +863,13 @@ describe('deriveTheme', () => {
       // some primary palette tone must shift
       const someShift = MD_PALETTE_TONE_NAMES.some(
         (t) =>
-          overridden.md.palette[`--md-ref-palette-primary-${t}`] !==
-          baseline.md.palette[`--md-ref-palette-primary-${t}`],
+          overridden.md.palette[`--color-primary-${t}`] !==
+          baseline.md.palette[`--color-primary-${t}`],
       )
       expect(someShift).toBe(true)
       // siblings (e.g. neutral) stay put
-      expect(overridden.md.palette['--md-ref-palette-neutral-50']).toBe(
-        baseline.md.palette['--md-ref-palette-neutral-50'],
+      expect(overridden.md.palette['--color-neutral-50']).toBe(
+        baseline.md.palette['--color-neutral-50'],
       )
     })
   })

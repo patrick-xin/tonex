@@ -462,7 +462,7 @@ function buildMdPalette(scheme: DynamicScheme): TokenMap {
   for (const { emissionName, schemeField } of PALETTE_FAMILIES) {
     const palette = scheme[schemeField] as DynamicScheme['primaryPalette']
     for (const tone of MD_PALETTE_TONE_NAMES) {
-      out[`--md-ref-palette-${emissionName}-${tone}`] = palette.tone(tone)
+      out[`--color-${emissionName}-${tone}`] = palette.tone(tone)
     }
   }
   return out

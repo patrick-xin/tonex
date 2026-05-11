@@ -190,10 +190,14 @@ export type ChartMode = (typeof CHART_MODES)[number]
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
 // ramp; the scheme picks tones from it per mode). 13 tones × 6 palettes = 78.
-// Naming follows Material 3's `--md-ref-palette-{palette}-{tone}` so users
-// recognise the convention. Consumed by inspect UIs (landing showcase, tone-
-// palette swatches, per-token override editor) via useResolvedTokens(); never
-// emitted to DOM by applyDom (data-only per commitment 4).
+// Naming follows the project-wide `--color-{family}-{tone}` convention so
+// palette tones live in the same namespace as role tokens (Tailwind v4
+// `bg-primary-50` once they're registered in `@theme inline`). Numeric tone
+// suffix (`-50`, `-100`) disambiguates from M3 role tokens (`--color-primary-
+// container`, etc.) — no collision. Consumed by inspect UIs (landing
+// showcase, tone-palette swatches, per-token override editor) via
+// useResolvedTokens(); never emitted to DOM by applyDom (data-only per
+// commitment 4).
 export const MD_PALETTE_TONE_NAMES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100] as const
 export type MdPaletteToneName = (typeof MD_PALETTE_TONE_NAMES)[number]
 
@@ -235,9 +239,9 @@ export const MD_PALETTE_FAMILY_NAMES = PALETTE_FAMILIES.map(
 // loop) without an explicit name list. The `as const` widens to the full 78-
 // element tuple type so MdPaletteTokenName is the exact union.
 export const MD_PALETTE_TOKEN_NAMES: readonly string[] = MD_PALETTE_FAMILY_NAMES.flatMap((family) =>
-  MD_PALETTE_TONE_NAMES.map((tone) => `--md-ref-palette-${family}-${tone}` as const),
+  MD_PALETTE_TONE_NAMES.map((tone) => `--color-${family}-${tone}` as const),
 )
-export type MdPaletteTokenName = `--md-ref-palette-${MdPaletteFamilyName}-${MdPaletteToneName}`
+export type MdPaletteTokenName = `--color-${MdPaletteFamilyName}-${MdPaletteToneName}`
 
 // why: shadcn-classic role surface. Listed as a const tuple (sibling to
 // MD_TOKEN_NAMES) so iteration sites read from one canonical source. Adding
