@@ -35,6 +35,7 @@ function ShadcnRailContent() {
 
   return mode === 'controls' ? (
     <m.div
+      className="flex flex-col flex-1 min-h-0"
       initial={{
         opacity: 0,
       }}
@@ -81,6 +82,7 @@ function ShadcnRailContent() {
   ) : (
     <AnimatePresence>
       <m.div
+        className="flex flex-col flex-1 min-h-0"
         initial={{
           opacity: 0,
         }}
@@ -88,7 +90,7 @@ function ShadcnRailContent() {
           opacity: 1,
         }}
       >
-        <div className="flex items-center gap-2 py-2">
+        <div className="flex-none flex items-center gap-2 py-2">
           <Button variant="ghost" size="icon-sm" onClick={() => setMode('controls')} title="Back">
             <ArrowLeftIcon />
           </Button>
@@ -137,7 +139,7 @@ export function ShadcnRailDrawer() {
         style={{ '--top-margin': `${DRAWER_TOP_MARGIN_REM}rem` } as React.CSSProperties}
       >
         <DrawerDragHandle className="my-4" />
-        <div className="min-h-0 flex-1 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+        <div className="min-h-0 flex-1 flex flex-col px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
           <ShadcnRailContent />
         </div>
       </SnapDrawerContent>
