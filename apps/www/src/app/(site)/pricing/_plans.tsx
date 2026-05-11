@@ -3,17 +3,25 @@ import { Button } from '@/components/ui/button'
 
 const PLANS = [
   {
-    name: 'Free',
+    name: 'Free forever',
     price: '$0',
-    blurb: 'Everything you need while tonex is in preview.',
+    blurb: 'Everything you need to design and export themes. No credit card.',
     cta: 'Open the editor',
+    href: '/theme',
+  },
+  {
+    name: 'Pro',
+    price: '$8/mo',
+    blurb: 'For teams who want shared palettes, history, and priority support.',
+    cta: 'Coming soon',
+    href: '/theme',
   },
 ] as const
 
 export function Plans() {
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-20">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="mx-auto max-w-4xl px-6 pb-20">
+      <div className="grid gap-6 sm:grid-cols-2">
         {PLANS.map((plan) => (
           <article
             key={plan.name}
@@ -23,7 +31,7 @@ export function Plans() {
             <p className="mt-2 text-3xl font-semibold tracking-tight">{plan.price}</p>
             <p className="mt-3 text-sm text-on-surface-variant">{plan.blurb}</p>
             <div className="mt-6">
-              <Button variant="primary" nativeButton={false} render={<Link href="/theme" />}>
+              <Button variant="primary" nativeButton={false} render={<Link href={plan.href} />}>
                 {plan.cta}
               </Button>
             </div>
