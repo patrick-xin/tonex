@@ -2,7 +2,9 @@ import { cn } from 'tailwind-variants'
 import type { EvaluatedPair } from './types'
 
 // why: sidebar match runs before ring so `--sidebar-ring` hits the sidebar
-// mock, not the focus-ring mock (legacy had this order inverted).
+// mock, not the focus-ring mock (legacy had this order inverted). Chart
+// runs first because chart fg's are series fills, not strokes — the
+// default outline preview would misrepresent them as borders.
 function PairPreview({ pair }: { pair: EvaluatedPair }) {
   if (pair.pair.intent === 'text') {
     return (
@@ -14,6 +16,16 @@ function PairPreview({ pair }: { pair: EvaluatedPair }) {
   }
 
   const fg = pair.pair.fg
+
+  if (fg.includes('chart')) {
+    return (
+      <div className="flex items-end gap-1.5 h-10" aria-hidden>
+        <div className="w-3 h-5 rounded-sm" style={{ background: pair.fgHex }} />
+        <div className="w-3 h-9 rounded-sm" style={{ background: pair.fgHex }} />
+        <div className="w-3 h-6 rounded-sm" style={{ background: pair.fgHex }} />
+      </div>
+    )
+  }
 
   if (fg.includes('sidebar')) {
     return (

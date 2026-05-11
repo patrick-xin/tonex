@@ -37,7 +37,14 @@ interface BodyProps {
 
 function Body({ theme, mode, level, setLevel, layer }: BodyProps) {
   const report = evaluateThemeContrast(theme)
-  const all = report[mode].filter((r) => r.pair.layer === layer).map((r) => applyLevel(r, level))
+  // why: each route owns one layer's pairs AND its chart sibling. md route
+  // surfaces `md` + `md-chart`; shadcn route surfaces `shadcn` + `shadcn-chart`.
+  // Chart pairs land in their own 'Chart' family chip via grouping.familyOf
+  // so they don't fold into Surface/Card. ADR-0027 c.5.
+  const chartLayer = `${layer}-chart` as const
+  const all = report[mode]
+    .filter((r) => r.pair.layer === layer || r.pair.layer === chartLayer)
+    .map((r) => applyLevel(r, level))
   const decorative = all.filter((p) => isDecorative(p.pair))
   const functional = all.filter((p) => !isDecorative(p.pair))
   const issues = functional.filter((p) => !p.effectivePasses)
@@ -87,8 +94,8 @@ function Body({ theme, mode, level, setLevel, layer }: BodyProps) {
       </DialogHeader>
       <ScrollArea className="flex-1 min-h-0" gradientScrollFade noScrollBar>
         <div className="space-y-10">
-          <SectionGroup pairs={issues} statusLabel="Failing" level={level} />
-          <SectionGroup pairs={passed} statusLabel="Passing" level={level} />
+          <SectionGroup pairs={issues} statusLabel="Failing" level={level} layer={layer} />
+          <SectionGroup pairs={passed} statusLabel="Passing" level={level} layer={layer} />
           <DecorativeSection pairs={decorative} />
         </div>
       </ScrollArea>

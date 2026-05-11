@@ -1,16 +1,17 @@
 import { cx } from 'tailwind-variants'
-import { familyOf } from './grouping'
+import { familyOf, familyOrder } from './grouping'
 import { PairCard } from './pair-card'
-import type { EvaluatedPair, Level } from './types'
+import type { EvaluatedPair, Layer, Level } from './types'
 
 interface CategorySectionProps {
   pairs: EvaluatedPair[]
   intent: 'text' | 'non-text'
   title: string
   target: string
+  layer: Layer
 }
 
-function CategorySection({ pairs, intent, title, target }: CategorySectionProps) {
+function CategorySection({ pairs, intent, title, target, layer }: CategorySectionProps) {
   const filtered = pairs.filter((p) => p.pair.intent === intent)
   if (filtered.length === 0) return null
 
@@ -22,6 +23,15 @@ function CategorySection({ pairs, intent, title, target }: CategorySectionProps)
     groups.set(key, arr)
   }
 
+  // why: stable display order independent of CONTRAST_PAIRS declaration order.
+  // Unknown families (shouldn't happen given familyOf is total) trail.
+  const order = familyOrder(layer)
+  const ordered = Array.from(groups.entries()).sort(([a], [b]) => {
+    const ai = order.indexOf(a)
+    const bi = order.indexOf(b)
+    return (ai === -1 ? order.length : ai) - (bi === -1 ? order.length : bi)
+  })
+
   return (
     <div className="space-y-4">
       <div>
@@ -29,7 +39,7 @@ function CategorySection({ pairs, intent, title, target }: CategorySectionProps)
         <span className="text-xs font-medium text-on-surface-variant">Target: {target}</span>
       </div>
       <div className="space-y-8">
-        {Array.from(groups.entries()).map(([group, groupItems]) => (
+        {ordered.map(([group, groupItems]) => (
           <div key={group} className="space-y-3">
             <h4 className="font-medium text-sm">{group}</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -67,9 +77,10 @@ interface SectionGroupProps {
   pairs: EvaluatedPair[]
   statusLabel: 'Failing' | 'Passing'
   level: Level
+  layer: Layer
 }
 
-export function SectionGroup({ pairs, statusLabel, level }: SectionGroupProps) {
+export function SectionGroup({ pairs, statusLabel, level, layer }: SectionGroupProps) {
   if (pairs.length === 0) return null
   return (
     <div className="space-y-2">
@@ -87,12 +98,14 @@ export function SectionGroup({ pairs, statusLabel, level }: SectionGroupProps) {
           intent="text"
           title="Text Readability"
           target={level === 'aaa' ? '7.0:1' : '4.5:1'}
+          layer={layer}
         />
         <CategorySection
           pairs={pairs}
           intent="non-text"
           title="UI Components"
           target={level === 'aaa' ? '4.5:1' : '3.0:1'}
+          layer={layer}
         />
       </div>
     </div>
