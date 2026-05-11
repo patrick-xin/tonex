@@ -352,9 +352,9 @@ export const DEFAULT_SHADCN_ROLE_BINDINGS: {
 // bound through `--color-on-error` at the underlying md level, so a separate
 // shadcn pair would double-count the same surface.
 export interface ContrastPair {
-  fg: MdTokenName | ShadcnRoleName
-  bg: MdTokenName | ShadcnRoleName
-  layer: 'md' | 'shadcn'
+  fg: MdTokenName | MdChartTokenName | ShadcnRoleName | ShadcnChartTokenName
+  bg: MdTokenName | MdChartTokenName | ShadcnRoleName | ShadcnChartTokenName
+  layer: 'md' | 'md-chart' | 'shadcn' | 'shadcn-chart'
   intent: 'text' | 'non-text'
   threshold: number
 }
@@ -620,6 +620,162 @@ export const CONTRAST_PAIRS = [
     fg: '--sidebar-ring',
     bg: '--sidebar',
     layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  // why: 20 chart non-text pairs at 3:1 (WCAG 1.4.11) — slice contrast-4
+  // (ADR-0027 c.5) treats chart palette as a first-class derivation surface
+  // with the same contrast guarantees as borders/focus rings. MD3 and shadcn
+  // layers carry parallel sets: 10 md-chart (--color-chart-N vs surface +
+  // surface-container) + 10 shadcn-chart (--chart-N vs --background + --card).
+  // The two layers share chart values (shadcn rebrands md), so passing one
+  // implies passing the other under default bindings — both are kept explicit
+  // so a future binding drift (shadcn --card → different md token) surfaces
+  // immediately. Chart-vs-chart distinguishability is a different concern
+  // (perceptual distance, not WCAG 1.4.11) and not in scope here.
+  //
+  // Layer tags: 'md-chart' reads theme.md.lightChart / darkChart for fg with
+  // theme.md.light / lightExtended for partners. 'shadcn-chart' reads
+  // theme.shadcn.lightChart / darkChart for fg with theme.shadcn.light / dark
+  // for partners. Keeping the chart tokens out of the layer namespace's main
+  // TokenMap matches DerivedTheme's emission-policy partition (ADR-0021 c.2).
+  {
+    fg: '--color-chart-1',
+    bg: '--color-surface',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-2',
+    bg: '--color-surface',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-3',
+    bg: '--color-surface',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-4',
+    bg: '--color-surface',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-5',
+    bg: '--color-surface',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-1',
+    bg: '--color-surface-container',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-2',
+    bg: '--color-surface-container',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-3',
+    bg: '--color-surface-container',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-4',
+    bg: '--color-surface-container',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-chart-5',
+    bg: '--color-surface-container',
+    layer: 'md-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-1',
+    bg: '--background',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-2',
+    bg: '--background',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-3',
+    bg: '--background',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-4',
+    bg: '--background',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-5',
+    bg: '--background',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-1',
+    bg: '--card',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-2',
+    bg: '--card',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-3',
+    bg: '--card',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-4',
+    bg: '--card',
+    layer: 'shadcn-chart',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--chart-5',
+    bg: '--card',
+    layer: 'shadcn-chart',
     intent: 'non-text',
     threshold: NON_TEXT_THRESHOLD,
   },

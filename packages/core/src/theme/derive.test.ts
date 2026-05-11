@@ -796,19 +796,19 @@ describe('deriveTheme', () => {
       // synthesizes via Hct.from(hue, 50, tone). The 5 hue offsets
       // [0,120,240,60,180] guarantee distinct hues, so the emitted argb values
       // must all differ. Round-tripping each through Hct confirms chroma/tone
-      // are pinned per-mode (50 light / 60 dark) and chroma rests at the
-      // configured 50 (modulo MCU gamut clipping).
+      // are pinned per-mode (45 light / 65 dark, post slice contrast-4) and
+      // chroma rests at the configured 50 (modulo MCU gamut clipping).
       const { md } = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } })
       const lightArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.lightChart[n] as number)
       expect(new Set(lightArgbs).size).toBe(5)
       for (const argb of lightArgbs) {
         const hct = Hct.fromInt(argb)
-        expect(hct.tone).toBeCloseTo(50, 0)
+        expect(hct.tone).toBeCloseTo(45, 0)
       }
       const darkArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.darkChart[n] as number)
       for (const argb of darkArgbs) {
         const hct = Hct.fromInt(argb)
-        expect(hct.tone).toBeCloseTo(60, 0)
+        expect(hct.tone).toBeCloseTo(65, 0)
       }
     })
 
