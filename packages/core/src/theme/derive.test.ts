@@ -841,6 +841,46 @@ describe('deriveTheme', () => {
       expect(explicit.md.darkChart).toEqual(baseline.md.darkChart)
     })
 
+    // why: ADR-0027 c.4 — chart overrides are terminal pins applied
+    // post-rebrandChart on the shadcn-named tokens (--chart-N). Per-mode
+    // sparse map; entries win over the scheme-derived value byte-identically
+    // (argbFromHex of the pinned hex). MD layer is untouched — pins live on
+    // the shadcn surface only, mirroring how shadcnRoleOverrides scope to
+    // shadcn-named roles.
+    it('shadcnChartOverrides pin wins on the shadcn layer; md.lightChart unaffected', () => {
+      const pinned = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnChartOverrides: {
+          light: { '--chart-1': '#ff0000', '--chart-3': '#00ff00' },
+          dark: { '--chart-2': '#abcdef' },
+        },
+      })
+      expect(pinned.shadcn.lightChart['--chart-1']).toBe(RED)
+      expect(pinned.shadcn.lightChart['--chart-3']).toBe(GREEN)
+      expect(pinned.shadcn.darkChart['--chart-2']).toBe(ABCDEF)
+      // unpinned shadcn-layer chart tokens still track derivation
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      expect(pinned.shadcn.lightChart['--chart-2']).toBe(baseline.shadcn.lightChart['--chart-2'])
+      expect(pinned.shadcn.darkChart['--chart-1']).toBe(baseline.shadcn.darkChart['--chart-1'])
+      // md layer is not affected by shadcn-layer pins
+      expect(pinned.md.lightChart).toEqual(baseline.md.lightChart)
+      expect(pinned.md.darkChart).toEqual(baseline.md.darkChart)
+    })
+
+    it('shadcnChartOverrides empty map is byte-identical to DEFAULT_INPUTS chart emission', () => {
+      // why: drift-guard. The default empty `{ light: {}, dark: {} }` must
+      // produce the same chart layer as DEFAULT_INPUTS would absent the
+      // field — the empty branch in applyShadcnChartOverrides must not
+      // mutate values, only pass through.
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnChartOverrides: { light: {}, dark: {} },
+      })
+      expect(explicit.shadcn.lightChart).toEqual(baseline.shadcn.lightChart)
+      expect(explicit.shadcn.darkChart).toEqual(baseline.shadcn.darkChart)
+    })
+
     it('custom-color slugs land in md.light (core), not in lightExtended', () => {
       // why: ADR-0021 commitment 3 — "custom colors continue to merge into
       // md.{light,dark}". Locks the partition rule that puts user-defined

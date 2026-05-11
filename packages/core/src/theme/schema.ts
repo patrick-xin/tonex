@@ -756,6 +756,16 @@ export interface PortableTheme {
     light: Partial<Record<ShadcnRoleName, string>>
     dark: Partial<Record<ShadcnRoleName, string>>
   }
+  // why: ADR-0027 c.4 — literal pin on a shadcn chart token, sibling to
+  // shadcnRoleOverrides on the chart-token domain. Per-mode partial map
+  // keyed on SHADCN_CHART_TOKEN_NAMES. Override is terminal and scheme-
+  // agnostic: pinned values win post-rebrandChart regardless of
+  // chart.scheme. Empty default keeps drift-guard byte-identical (chart
+  // emission unchanged when both modes have zero entries).
+  shadcnChartOverrides: {
+    light: Partial<Record<ShadcnChartTokenName, string>>
+    dark: Partial<Record<ShadcnChartTokenName, string>>
+  }
   // why: surface treatment is a post-derive transform applied inside
   // deriveTheme so applyDom AND formatCss reflect it identically — preview
   // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
@@ -828,6 +838,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
   shadcnRoleOverrides: { light: {}, dark: {} },
+  shadcnChartOverrides: { light: {}, dark: {} },
   surfaceAlgo: 'desaturate',
   surfacePaletteName: 'zinc',
   surfaceTintLevel: { light: 0, dark: 0 },
@@ -907,6 +918,12 @@ const PaletteOverridesSchema = v.record(v.picklist(PALETTE_NAMES), HexSchema)
 // hex; partiality is correct because user pins are sparse.
 const ShadcnRoleOverridesPerModeSchema = v.record(v.picklist(SHADCN_ROLE_NAMES), HexSchema)
 
+// why: ADR-0027 c.4 — per-mode partial map of shadcn chart token → hex.
+// Mirrors role-override shape modulo the key domain. v.record constrains
+// keys to SHADCN_CHART_TOKEN_NAMES and values to hex; pin sparsity is
+// the expected default state.
+const ShadcnChartOverridesPerModeSchema = v.record(v.picklist(SHADCN_CHART_TOKEN_NAMES), HexSchema)
+
 const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
 
 export const PortableThemeSchema = v.object({
@@ -926,6 +943,10 @@ export const PortableThemeSchema = v.object({
   shadcnRoleOverrides: v.object({
     light: ShadcnRoleOverridesPerModeSchema,
     dark: ShadcnRoleOverridesPerModeSchema,
+  }),
+  shadcnChartOverrides: v.object({
+    light: ShadcnChartOverridesPerModeSchema,
+    dark: ShadcnChartOverridesPerModeSchema,
   }),
   surfaceAlgo: v.picklist(SURFACE_ALGOS),
   surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),

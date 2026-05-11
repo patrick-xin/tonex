@@ -16,6 +16,7 @@ import {
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
+  type ShadcnChartTokenName,
   type ShadcnRoleName,
   STORAGE_KEY,
   type SurfaceAlgo,
@@ -45,6 +46,7 @@ export interface SourceActions {
   // mental model. Hex format validated at the seam; malformed throws so a
   // bad value never reaches derive.
   setShadcnRoleOverride(mode: Mode, role: ShadcnRoleName, hex: string | null): void
+  setShadcnChartOverride(mode: Mode, token: ShadcnChartTokenName, hex: string | null): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfacePaletteName(name: NeutralPaletteName): void
   setSurfaceTintLevel(mode: Mode, level: number): void
@@ -192,6 +194,17 @@ export const useSource = create<SourceState>()(
               next[role] = hex
             }
             return { shadcnRoleOverrides: { ...s.shadcnRoleOverrides, [mode]: next } }
+          }),
+        setShadcnChartOverride: (mode, token, hex) =>
+          set((s) => {
+            const next = { ...s.shadcnChartOverrides[mode] }
+            if (hex === null) {
+              delete next[token]
+            } else {
+              if (!isValidHex(hex)) throw new Error(`[setShadcnChartOverride] invalid hex "${hex}"`)
+              next[token] = hex
+            }
+            return { shadcnChartOverrides: { ...s.shadcnChartOverrides, [mode]: next } }
           }),
         setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
         setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),

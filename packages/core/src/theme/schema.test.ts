@@ -255,6 +255,42 @@ describe('parsePortableTheme', () => {
     expect(parsePortableTheme(bad).ok).toBe(false)
   })
 
+  // why: ADR-0027 c.6 slice chart-2 — chart override layer mirrors role
+  // override schema modulo the key domain (SHADCN_CHART_TOKEN_NAMES vs
+  // SHADCN_ROLE_NAMES). Same validation surface, same sparse-default
+  // shape, same rejection modes.
+  it('shadcnChartOverrides defaults to empty per-mode maps', () => {
+    expect(DEFAULT_INPUTS.shadcnChartOverrides).toEqual({ light: {}, dark: {} })
+    expect(parsePortableTheme(DEFAULT_INPUTS).ok).toBe(true)
+  })
+
+  it('accepts sparse shadcnChartOverrides entries on either mode', () => {
+    const ok = {
+      ...DEFAULT_INPUTS,
+      shadcnChartOverrides: {
+        light: { '--chart-1': '#abcdef' },
+        dark: { '--chart-2': '#112233', '--chart-5': '#445566' },
+      },
+    } as PortableTheme
+    expect(parsePortableTheme(ok).ok).toBe(true)
+  })
+
+  it('rejects shadcnChartOverrides with malformed hex', () => {
+    const bad = {
+      ...DEFAULT_INPUTS,
+      shadcnChartOverrides: { light: { '--chart-1': 'not-hex' }, dark: {} },
+    } as unknown as PortableTheme
+    expect(parsePortableTheme(bad).ok).toBe(false)
+  })
+
+  it('rejects shadcnChartOverrides under unknown chart token key', () => {
+    const bad = {
+      ...DEFAULT_INPUTS,
+      shadcnChartOverrides: { light: { '--chart-99': '#abcdef' }, dark: {} },
+    } as unknown as PortableTheme
+    expect(parsePortableTheme(bad).ok).toBe(false)
+  })
+
   // why: issue #33 — schema-level range pin. Setter clamps actively;
   // schema rejects so any path that bypasses the setter (rehydration of
   // a stale persisted blob, programmatic state injection) cannot land

@@ -10,6 +10,7 @@ import {
   type PortableTheme,
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
+  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'
@@ -69,6 +70,10 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     light: { '--ring': '#abcdef', '--background': '#112233' },
     dark: { '--ring': '#445566' },
   },
+  shadcnChartOverrides: {
+    light: { '--chart-1': '#abc123', '--chart-5': '#deadbe' },
+    dark: { '--chart-2': '#445566' },
+  },
   surfaceAlgo: 'tint',
   surfacePaletteName: 'slate',
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
@@ -118,6 +123,11 @@ describe('useSource persistence round-trip', () => {
     for (const mode of ['light', 'dark'] as const) {
       for (const [role, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnRoleOverrides[mode])) {
         s.actions.setShadcnRoleOverride(mode, role as (typeof SHADCN_ROLE_NAMES)[number], hex)
+      }
+    }
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnChartOverrides[mode])) {
+        s.actions.setShadcnChartOverride(mode, token as ShadcnChartTokenName, hex)
       }
     }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
