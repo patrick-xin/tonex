@@ -190,10 +190,14 @@ export type ChartMode = (typeof CHART_MODES)[number]
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
 // ramp; the scheme picks tones from it per mode). 13 tones × 6 palettes = 78.
-// Naming follows Material 3's `--md-ref-palette-{palette}-{tone}` so users
-// recognise the convention. Consumed by inspect UIs (landing showcase, tone-
-// palette swatches, per-token override editor) via useResolvedTokens(); never
-// emitted to DOM by applyDom (data-only per commitment 4).
+// Naming follows the project-wide `--color-{family}-{tone}` convention so
+// palette tones live in the same namespace as role tokens (Tailwind v4
+// `bg-primary-50` once they're registered in `@theme inline`). Numeric tone
+// suffix (`-50`, `-100`) disambiguates from M3 role tokens (`--color-primary-
+// container`, etc.) — no collision. Consumed by inspect UIs (landing
+// showcase, tone-palette swatches, per-token override editor) via
+// useResolvedTokens(); never emitted to DOM by applyDom (data-only per
+// commitment 4).
 export const MD_PALETTE_TONE_NAMES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100] as const
 export type MdPaletteToneName = (typeof MD_PALETTE_TONE_NAMES)[number]
 
@@ -235,9 +239,9 @@ export const MD_PALETTE_FAMILY_NAMES = PALETTE_FAMILIES.map(
 // loop) without an explicit name list. The `as const` widens to the full 78-
 // element tuple type so MdPaletteTokenName is the exact union.
 export const MD_PALETTE_TOKEN_NAMES: readonly string[] = MD_PALETTE_FAMILY_NAMES.flatMap((family) =>
-  MD_PALETTE_TONE_NAMES.map((tone) => `--md-ref-palette-${family}-${tone}` as const),
+  MD_PALETTE_TONE_NAMES.map((tone) => `--color-${family}-${tone}` as const),
 )
-export type MdPaletteTokenName = `--md-ref-palette-${MdPaletteFamilyName}-${MdPaletteToneName}`
+export type MdPaletteTokenName = `--color-${MdPaletteFamilyName}-${MdPaletteToneName}`
 
 // why: shadcn-classic role surface. Listed as a const tuple (sibling to
 // MD_TOKEN_NAMES) so iteration sites read from one canonical source. Adding
@@ -710,8 +714,11 @@ export interface PortableTheme {
   seedHex: string
   variant: VariantName
   // why: MCU contrastLevel input — fed straight into variant.build(). Range
-  // -1..1 per MCU spec; 0 is the baseline. Drives tone offsets across all
-  // dynamic colors, so changing it shifts every md token in lockstep.
+  // [0, 1]: 0 is the baseline, 1 is maximum contrast. MCU's spec range is
+  // [-1, 1] but the 2025/2026 spec curves (which we use) treat any value
+  // < 0 as identical to 0 (every ContrastCurve has `low === normal`) and
+  // > 1 saturates at `high`. Schema rejects out-of-range; setter clamps
+  // (issue #33).
   contrastLevel: number
   // why: source-input gate, not a per-token snapshot. When true, setSeedHex
   // becomes a no-op — pathways that mutate the seed (hex input, HCT slider,
@@ -900,7 +907,7 @@ export const PortableThemeSchema = v.object({
   version: v.literal(SCHEMA_VERSION),
   seedHex: HexSchema,
   variant: v.picklist(VARIANT_NAMES),
-  contrastLevel: v.number(),
+  contrastLevel: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
   seedHexLock: v.boolean(),
   md3TokenOverrides: v.object({
     light: Md3TokenOverridesPerModeSchema,

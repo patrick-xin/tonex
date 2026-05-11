@@ -69,7 +69,7 @@ export function MdSnapshotPicker({ mode, onSnapshot }: MdSnapshotPickerProps) {
       : MD_PALETTE_FAMILY_NAMES.map((family) => ({
           label: `${family} tones`,
           items: MD_PALETTE_TONE_NAMES.map((tone) => {
-            const argb = theme.md.palette[`--md-ref-palette-${family}-${tone}`]
+            const argb = theme.md.palette[`--color-${family}-${tone}`]
             return {
               kind: 'tone' as const,
               key: `tone:${family}-${tone}`,

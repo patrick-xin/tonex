@@ -437,6 +437,44 @@ describe('useSource persistence round-trip', () => {
     })
   })
 
+  // why: issue #33 — MCU 2025/2026 spec curves treat any contrastLevel < 0
+  // as identical to 0 (every ContrastCurve has `low === normal`) and >1
+  // saturates at `high`. Setter clamps so source state never holds an inert
+  // value that would mislead the export header or any third-party caller.
+  // PortableThemeSchema enforces the same range so a stale persisted value
+  // outside [0, 1] cannot rehydrate (rehydrate falls back to DEFAULT_INPUTS).
+  describe('setContrastLevel clamps to [0, 1]', () => {
+    it('negative values clamp to 0', () => {
+      const s = useSource.getState()
+      s.actions.setContrastLevel(-0.5)
+      expect(useSource.getState().contrastLevel).toBe(0)
+      s.actions.setContrastLevel(-1)
+      expect(useSource.getState().contrastLevel).toBe(0)
+      s.actions.setContrastLevel(-1000)
+      expect(useSource.getState().contrastLevel).toBe(0)
+    })
+
+    it('values > 1 clamp to 1', () => {
+      const s = useSource.getState()
+      s.actions.setContrastLevel(1.5)
+      expect(useSource.getState().contrastLevel).toBe(1)
+      s.actions.setContrastLevel(2)
+      expect(useSource.getState().contrastLevel).toBe(1)
+      s.actions.setContrastLevel(1000)
+      expect(useSource.getState().contrastLevel).toBe(1)
+    })
+
+    it('values in [0, 1] pass through unchanged', () => {
+      const s = useSource.getState()
+      s.actions.setContrastLevel(0)
+      expect(useSource.getState().contrastLevel).toBe(0)
+      s.actions.setContrastLevel(0.5)
+      expect(useSource.getState().contrastLevel).toBe(0.5)
+      s.actions.setContrastLevel(1)
+      expect(useSource.getState().contrastLevel).toBe(1)
+    })
+  })
+
   it('setSeedHex no-ops when seedHexLock is true', () => {
     const s = useSource.getState()
     s.actions.setSeedHex('#aabbcc')

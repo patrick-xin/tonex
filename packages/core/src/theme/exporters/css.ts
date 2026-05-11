@@ -6,7 +6,12 @@ import { SHADCN_ROLE_NAMES } from '../schema'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +
-//    :root + .dark) — md users adopt our token namespace wholesale.
+//    :root + .dark) — md users adopt our token namespace wholesale. Selectors
+//    are root-level so the file drops into the consumer project with no
+//    `class="md"` wrapper required. Editor-app internal globals.css (via
+//    `formatCss` / `pnpm bake`) keeps `.md` / `html.dark .md` because it
+//    coexists with `.shadcn` in the same document — `exportCss` is for
+//    downstream users and that constraint doesn't apply.
 //  - 'shadcn': :root + .dark only; the user's shadcn project already owns
 //    the @import / @custom-variant / shadcn @theme inline. We extend
 //    @theme inline only for custom-color slugs the user defined here, since
@@ -23,9 +28,9 @@ import { SHADCN_ROLE_NAMES } from '../schema'
 //
 // Bundle-shaped per ADR-0021 commitment 5 — single-contrast wraps the theme
 // as `{ default: theme }`; multi-contrast bundles add `medium`/`high` tiers
-// that emit as class-scoped `html.contrast-medium .md` / `html.contrast-high
-// .md` rule blocks. Iteration is bundle-driven so emission auto-includes
-// any tier the bundle carries.
+// that emit as class-scoped `.contrast-medium` / `.contrast-high` rule
+// blocks (composed with `.dark` for the dark axis). Iteration is bundle-
+// driven so emission auto-includes any tier the bundle carries.
 //
 // Slice 4: ExportOptions filters wired here. Defaults reflect the lean
 // dialog output (extended/palette/chart all off, oklch). Filter combinations
@@ -36,22 +41,35 @@ export type ExportLayer = 'md' | 'shadcn'
 
 const SHADCN_ROLE_SET: ReadonlySet<string> = new Set(SHADCN_ROLE_NAMES)
 
-// why: contrast tier → CSS class-axis prefix. Default tier emits without a
-// contrast class; medium/high tiers add `html.contrast-medium` /
-// `html.contrast-high` to the existing `.dark` axis. ADR-0013 establishes
-// `<html class="dark">` as our mode axis; contrast classes layer on top.
-const CONTRAST_CLASS_PREFIX = {
+// why: md export uses paste-ready root selectors. Default tier is `:root` /
+// `.dark`; contrast tiers stack class-wise on the dark axis so the tier
+// class can land on any container (`.contrast-medium` on its own; the
+// `.dark.contrast-medium` form for dark-mode rows). `@custom-variant dark
+// (&:is(.dark *))` in the boilerplate keeps the dark cascade working under
+// any of these selectors.
+const MD_SELECTOR = {
+  default: { light: ':root', dark: '.dark' },
+  medium: { light: '.contrast-medium', dark: '.dark.contrast-medium' },
+  high: { light: '.contrast-high', dark: '.dark.contrast-high' },
+} as const
+
+// why: shadcn export keeps the class-scoped pattern (`.shadcn` /
+// `html.dark .shadcn`) — the shadcn audience already owns root `:root` /
+// `.dark` blocks from shadcn-cli's `globals.css`, so re-emitting root
+// blocks would clash with the user's existing setup. Class scope is the
+// safe extension surface for shadcn paste.
+const CONTRAST_CLASS_PREFIX_SHADCN = {
   default: '',
   medium: 'html.contrast-medium ',
   high: 'html.contrast-high ',
 } as const
-const CONTRAST_CLASS_PREFIX_DARK = {
+const CONTRAST_CLASS_PREFIX_SHADCN_DARK = {
   default: 'html.dark ',
   medium: 'html.contrast-medium.dark ',
   high: 'html.contrast-high.dark ',
 } as const
 
-type ContrastTier = keyof typeof CONTRAST_CLASS_PREFIX
+type ContrastTier = keyof typeof MD_SELECTOR
 
 // why: colorspace projection at the seam (ADR-0021 commitment 1). Adding a
 // third colorspace later (lab, p3) is one branch here plus one helper in
@@ -130,14 +148,19 @@ function buildShadcnRuleTokens(
   return { ...core, ...chart }
 }
 
-// why: @theme inline lists every Tailwind utility name. Adding tokens via
-// flags (extended, chart) extends the list; palette tokens are reference
-// data (`--md-ref-palette-*`) — never registered as utilities. Custom-color
-// slugs always emit because they're brand surfaces, not opt-in ornament.
+// why: @theme inline lists every Tailwind utility name. Toggling extended,
+// chart, or palette extends the list — each flag adds its tokens both to
+// the @theme block (registers the utility) and to the corresponding rule
+// block (provides the value). Palette tokens (`--color-{family}-{tone}`)
+// register here so `bg-primary-50` / `text-error-100` etc. resolve as
+// Tailwind utilities; the value flows in via the mode/contrast-invariant
+// :root declaration. Custom-color slugs always emit because they're brand
+// surfaces, not opt-in ornament.
 function mdUtilityNames(theme: DerivedTheme, opts: ResolvedOptions): string[] {
   const set = new Set<string>(Object.keys(theme.md.light))
   if (opts.includeExtended) for (const k of Object.keys(theme.md.lightExtended)) set.add(k)
   if (opts.includeChart) for (const k of Object.keys(theme.md.lightChart)) set.add(k)
+  if (opts.includePalette) for (const k of Object.keys(theme.md.palette)) set.add(k)
   return Array.from(set)
 }
 
@@ -163,9 +186,9 @@ export function exportCss(
       const lightTokens = buildMdRuleTokens(theme, 'light', tier, opts)
       const darkTokens = buildMdRuleTokens(theme, 'dark', tier, opts)
       lines.push(
-        block(`${CONTRAST_CLASS_PREFIX[tier]}.md`, lightTokens, opts.colorFormat),
+        block(MD_SELECTOR[tier].light, lightTokens, opts.colorFormat),
         '',
-        block(`${CONTRAST_CLASS_PREFIX_DARK[tier]}.md`, darkTokens, opts.colorFormat),
+        block(MD_SELECTOR[tier].dark, darkTokens, opts.colorFormat),
         '',
       )
     }
@@ -181,13 +204,13 @@ export function exportCss(
   for (const [tier, theme] of tiers) {
     parts.push(
       block(
-        `${CONTRAST_CLASS_PREFIX[tier]}.shadcn`,
+        `${CONTRAST_CLASS_PREFIX_SHADCN[tier]}.shadcn`,
         buildShadcnRuleTokens(theme, 'light', opts),
         opts.colorFormat,
       ),
       '',
       block(
-        `${CONTRAST_CLASS_PREFIX_DARK[tier]}.shadcn`,
+        `${CONTRAST_CLASS_PREFIX_SHADCN_DARK[tier]}.shadcn`,
         buildShadcnRuleTokens(theme, 'dark', opts),
         opts.colorFormat,
       ),
