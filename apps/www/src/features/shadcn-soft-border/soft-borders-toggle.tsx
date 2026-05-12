@@ -28,7 +28,7 @@ export function SoftBordersToggle() {
           size="sm"
           checked={enabled}
           onCheckedChange={setEnabled}
-          aria-label="enable soft border"
+          aria-label="Toggle soft borders"
         />
       </FieldLabel>
       <FieldDescription className="max-w-5/6">
