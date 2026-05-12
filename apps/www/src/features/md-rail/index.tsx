@@ -24,10 +24,10 @@ function MdRailContent() {
   return (
     <>
       <SourceColorTabs />
-      <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
+      <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme variant" height={0}>
         <SchemeVariantsToggle />
       </AnimatedCollapsible>
-      <AnimatedCollapsible defaultOpen variant="ghost" title="Fine Tune Palette" height={0}>
+      <AnimatedCollapsible defaultOpen variant="ghost" title="Fine-tune palette" height={0}>
         <FineTuneColors />
       </AnimatedCollapsible>
       <CustomColorList />

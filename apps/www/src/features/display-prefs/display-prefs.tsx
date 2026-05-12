@@ -24,17 +24,17 @@ export function DisplayPrefs() {
           render={
             <PopoverTrigger
               render={
-                <Button variant="secondary" size="icon-sm" aria-label="Display Preferences" />
+                <Button variant="secondary" size="icon-sm" aria-label="Display preferences" />
               }
             >
               <EyeIcon />
             </PopoverTrigger>
           }
         />
-        <TooltipContent>Display Preferences</TooltipContent>
+        <TooltipContent>Display preferences</TooltipContent>
       </Tooltip>
       <PopoverContent align="end" className="w-60">
-        <p className="text-xs text-on-surface-variant mb-3 font-medium">Display</p>
+        <p className="text-xs text-on-surface-variant mb-3 font-medium">Display preferences</p>
         <div className="flex items-center gap-2 mb-3">
           <Switch
             id="display-show-extended"
