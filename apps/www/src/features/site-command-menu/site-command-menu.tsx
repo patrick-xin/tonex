@@ -80,7 +80,7 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
   const { isDark, toggle: toggleTheme } = useThemeToggle()
   const toggleLock = () => setSeedHexLock(!seedHexLock)
 
-  useHotkey('⌘+K', () => setIsOpen((prev) => !prev), {
+  useHotkey('Mod+K', () => setIsOpen((prev) => !prev), {
     conflictBehavior: 'replace',
   })
 

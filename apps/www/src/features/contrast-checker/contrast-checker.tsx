@@ -109,7 +109,7 @@ function Body({ theme, mode, level, setLevel, layer }: BodyProps) {
 // hotkey is registered per-instance; only one mounts per page so no
 // duplicate-binding risk. Current mode only via useActiveMode.
 export function ContrastChecker({ layer }: { layer: Layer }) {
-  useHotkey('⌘+C', () => checkContrastDialogHandle.open(null), {
+  useHotkey('Mod+C', () => checkContrastDialogHandle.open(null), {
     ignoreInputs: true,
     requireReset: true,
     meta: { name: 'Check contrast', description: 'Press ⌘+C to audit contrast' },

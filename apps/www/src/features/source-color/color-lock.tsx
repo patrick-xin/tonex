@@ -13,7 +13,7 @@ export const ColorLock = () => {
 
   const toggle = () => setSeedHexLock(!seedHexLock)
 
-  useHotkey('⌘+L', toggle, {
+  useHotkey('Mod+L', toggle, {
     ignoreInputs: true,
     requireReset: false,
     conflictBehavior: 'replace',
