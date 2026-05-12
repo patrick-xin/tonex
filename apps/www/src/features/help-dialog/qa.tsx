@@ -25,7 +25,7 @@ export const QA = () => {
                 expected format. Best for dropping into existing shadcn projects.
               </li>
               <li>
-                <span className="font-medium">md3 preset</span> — Direct MD3 semantic roles. More
+                <span className="font-medium">MD3 preset</span> — Direct MD3 semantic roles. More
                 expressive, but looks different from stock shadcn.
               </li>
             </ul>

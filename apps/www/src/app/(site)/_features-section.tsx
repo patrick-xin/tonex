@@ -9,7 +9,7 @@ const FEATURES = [
   },
   {
     title: 'shadcn-ready',
-    body: 'Generates shadcn role bindings alongside the md theme — no second pass.',
+    body: 'Generates shadcn role bindings alongside the MD3 theme — no second pass.',
   },
 ] as const
 
