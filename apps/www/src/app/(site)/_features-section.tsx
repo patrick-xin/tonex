@@ -2,7 +2,7 @@
 
 import { type TokenMap, useResolvedTokens } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
-import { type MotionValue, m as motion, useScroll, useTransform } from 'motion/react'
+import { type MotionValue, m as motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useRef } from 'react'
 import { useActiveMode } from '@/features/theme-mode'
 
@@ -73,6 +73,9 @@ function StackedFeature({
   const family = PALETTE_MAP[section.id]
   const bg = paletteColor(theme.md.palette, family, isDark ? 40 : 80)
   const fg = paletteColor(theme.md.palette, family, isDark ? 90 : 20)
+  const mutedFg = paletteColor(theme.md.palette, family, isDark ? 70 : 50)
+  const decorFg = `color-mix(in oklch, ${fg} 6%, ${bg})`
+  const stripTones = isDark ? [60, 70, 80, 90] : [10, 30, 50, 70]
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">
@@ -87,16 +90,17 @@ function StackedFeature({
         className="w-full h-[70vh] rounded-md flex flex-col md:flex-row items-center overflow-hidden relative"
       >
         <div className="flex-1 p-4 sm:p-16 flex flex-col justify-center gap-6">
-          <div className="opacity-40 font-mono text-sm uppercase tracking-tighter">
+          <div style={{ color: mutedFg }} className="font-mono text-sm uppercase tracking-[0.18em]">
             Feature {section.id}
           </div>
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{section.title}</h2>
-          <p className="text-lg md:text-xl opacity-80 leading-relaxed max-w-sm">
-            {section.description}
-          </p>
+          <p className="text-lg md:text-xl leading-relaxed max-w-sm">{section.description}</p>
         </div>
         <div className="hidden md:flex flex-1 h-full bg-surface-tint/5 items-center justify-center relative">
-          <div className="text-[20rem] font-black absolute right-6 -top-20 opacity-5 select-none">
+          <div
+            style={{ color: decorFg }}
+            className="text-[20rem] font-black absolute right-6 -top-20 select-none"
+          >
             {section.id}
           </div>
           <div
@@ -105,6 +109,15 @@ function StackedFeature({
               background: `linear-gradient(to top, ${bg} 0%, transparent 70%), linear-gradient(to left, ${bg} 0%, transparent 50%)`,
             }}
           />
+          <div className="relative z-10 flex flex-col gap-2">
+            {stripTones.map((tone) => (
+              <div
+                key={tone}
+                className="size-20 rounded-lg shadow-md"
+                style={{ backgroundColor: paletteColor(theme.md.palette, family, tone) }}
+              />
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>
@@ -112,25 +125,31 @@ function StackedFeature({
 }
 
 export function FeaturesSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLElement>(null)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
+  const smoothProgress = useSpring(scrollYProgress, {
+    damping: 30,
+    stiffness: 120,
+    mass: 0.4,
+  })
+
   return (
     <section
       ref={containerRef}
-      className="relative h-[260vh] sm:h-[450vh] sm:px-12 lg:px-16 xl:px-24"
+      className="relative h-[260vh] px-4 sm:h-[450vh] sm:px-12 lg:px-16 xl:px-24"
     >
-      <div className="sticky top-20 sm:top-0 h-[80vh] sm:h-screen overflow-hidden">
+      <div className="sticky top-14 h-[calc(100dvh-3.5rem)] overflow-hidden">
         {ANIMATION_SECTIONS.map((section, index) => (
           <StackedFeature
             key={section.id}
             section={section}
             index={index}
-            progress={scrollYProgress}
+            progress={smoothProgress}
           />
         ))}
       </div>

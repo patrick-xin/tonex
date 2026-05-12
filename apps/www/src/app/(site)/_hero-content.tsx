@@ -1,30 +1,68 @@
+'use client'
+
 import { ArrowRight } from 'lucide-react'
+import { m as motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { ShadcnIcon } from '@/components/icons/shadcn'
 import { Button } from '@/components/ui/button'
 
+const container: Variants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+}
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
 export function HeroContent() {
   return (
-    <div className="flex flex-col items-start justify-center animate-rise">
-      <span className="landing-kicker mb-8 animate-rise-small">2026 spec · Open source</span>
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col items-start justify-center"
+    >
+      <motion.span
+        variants={item}
+        className="mb-8 text-xs font-mono uppercase tracking-[0.18em] text-on-surface-variant"
+      >
+        2026 spec · Open source
+      </motion.span>
 
-      <h1 className="text-[clamp(54px,6vw,104px)] font-semibold leading-[0.92] tracking-[-0.045em] text-on-surface mb-8">
+      <motion.h1
+        variants={item}
+        className="text-[clamp(40px,6vw,104px)] font-semibold leading-[0.92] tracking-[-0.045em] text-on-surface mb-8"
+      >
         The MD3 engine.
         <br />
         <span className="inline bg-linear-to-r from-primary via-secondary to-tertiary bg-clip-text text-transparent pb-1">
           With dials.
         </span>
-      </h1>
+      </motion.h1>
 
-      <p className="text-[17px] text-on-surface-variant leading-normal max-w-[54ch] mb-10 text-pretty tracking-[-0.005em]">
+      <motion.p
+        variants={item}
+        className="text-[17px] text-on-surface-variant leading-normal max-w-[54ch] mb-10 text-pretty tracking-[-0.005em]"
+      >
         Real HCT math, not an approximation. Per-role pins layered on top. Contrast audited across
         every token pair the page uses.{' '}
         <strong className="text-on-surface font-medium">
           shadcn tokens emit alongside the MD3 theme — no second pass.
         </strong>
-      </p>
+      </motion.p>
 
-      <div className="flex items-center gap-4">
+      <motion.div variants={item} className="flex flex-wrap items-center gap-4">
         <Button
           nativeButton={false}
           render={<Link href="/theme" />}
@@ -44,13 +82,16 @@ export function HeroContent() {
           shadcn mode
           <ShadcnIcon className="ml-2 size-5" />
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="mt-10 flex items-center gap-4 text-xs font-mono text-on-surface/80 flex-wrap">
+      <motion.div
+        variants={item}
+        className="mt-10 flex flex-wrap items-center gap-4 text-sm font-mono text-on-surface-variant"
+      >
         <span>No signup</span>
-        <div className="size-1 rounded-full bg-outline mt-0.5" />
+        <div className="size-1 rounded-full bg-outline" />
         <span>MIT licensed</span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

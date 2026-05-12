@@ -3,7 +3,7 @@ import { HeroVisual } from './_hero-visual'
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col px-4 md:px-12 lg:px-16">
+    <section className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col overflow-hidden px-4 md:px-12 lg:px-16">
       <div className="flex flex-1 min-h-0 items-center">
         <div className="grid w-full h-full grid-cols-1 gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16 items-center lg:items-stretch">
           <HeroContent />
