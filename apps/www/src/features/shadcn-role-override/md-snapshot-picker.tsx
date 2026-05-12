@@ -134,7 +134,7 @@ export function MdSnapshotPicker({ mode, onSnapshot }: MdSnapshotPickerProps) {
           placeholder="Search roles or tones…"
           className="min-h-0 py-1"
         />
-        <ComboboxEmpty>No match.</ComboboxEmpty>
+        <ComboboxEmpty>No tokens found.</ComboboxEmpty>
         <ComboboxList className="flex-1 min-h-0 overflow-hidden p-0">
           <VirtualizedMdList
             groups={groups}

@@ -150,7 +150,7 @@ function BindingRow({
             addonIcon={<MagnifyingGlassIcon />}
             placeholder="Search md tokens…"
           />
-          <ComboboxEmpty>No match.</ComboboxEmpty>
+          <ComboboxEmpty>No tokens found.</ComboboxEmpty>
           <ComboboxList className="flex-1 min-h-0 overflow-auto">
             {(item) => (
               <ComboboxItemContent indicatorPlacement="end" key={item.token} value={item}>
