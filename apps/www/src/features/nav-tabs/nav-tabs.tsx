@@ -15,6 +15,7 @@ import { Settings } from '@/features/settings'
 import { SiteCommandMenu } from '@/features/site-command-menu'
 import type { NavConfig } from '@/lib/nav-config'
 import { ContrastChecker } from '../contrast-checker'
+import { HelpDialog } from '../help-dialog'
 import { ResetButton } from '../testbed/reset-button'
 
 // why: ADR-0021 commitment 8 + ADR-0022 commitment 3 — the route layout owns
@@ -114,9 +115,10 @@ export function NavTabs({ config }: { config: NavConfig }) {
         <SiteCommandMenu pageShortcuts={tabs} />
         <TooltipProvider>
           <ExportButton tabs={exportTabs} icon />
-          <Settings />
+          <Settings layer={config.layer} />
           <ContrastChecker layer={config.layer} />
           <ResetButton />
+          <HelpDialog />
         </TooltipProvider>
         <Button
           size="sm"

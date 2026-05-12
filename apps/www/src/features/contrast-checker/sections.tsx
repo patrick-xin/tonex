@@ -1,7 +1,8 @@
 import { cx } from 'tailwind-variants'
+import type { Layer } from '@/lib/layer-context'
 import { familyOf, familyOrder } from './grouping'
 import { PairCard } from './pair-card'
-import type { EvaluatedPair, Layer, Level } from './types'
+import type { EvaluatedPair, Level } from './types'
 
 interface CategorySectionProps {
   pairs: EvaluatedPair[]

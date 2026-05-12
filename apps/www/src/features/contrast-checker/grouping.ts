@@ -1,5 +1,5 @@
 import type { ContrastPair } from '@tonex/core/schema'
-import type { Layer } from './types'
+import type { Layer } from '@/lib/layer-context'
 
 // why: pair.bg is the surface family signal. Order matters — `--sidebar*`
 // must claim its members before the non-prefixed sidebar siblings (e.g.

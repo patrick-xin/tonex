@@ -21,11 +21,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useActiveMode } from '@/features/theme-mode'
 import { checkContrastDialogHandle } from '@/lib/handles'
+import type { Layer } from '@/lib/layer-context'
 import { ContrastLevelSlider } from '../contrast-level'
 import { applyLevel } from './apply-level'
 import { isDecorative } from './decorative'
 import { DecorativeSection, SectionGroup } from './sections'
-import type { Layer, Level } from './types'
+import type { Level } from './types'
 
 interface BodyProps {
   theme: NonNullable<ReturnType<typeof useResolvedTokens>>
@@ -105,14 +106,14 @@ function Body({ theme, mode, level, setLevel, layer }: BodyProps) {
 
 // why: route-colocated. Mounted inside MdNavTabs / ShadcnNavTabs so each
 // route group gets its own checker — md users never see shadcn pairs and
-// vice versa. Layer is fixed by the host route, not user-toggled. Mod+C
+// vice versa. Layer is fixed by the host route, not user-toggled. Mod+A
 // hotkey is registered per-instance; only one mounts per page so no
 // duplicate-binding risk. Current mode only via useActiveMode.
 export function ContrastChecker({ layer }: { layer: Layer }) {
-  useHotkey('Mod+C', () => checkContrastDialogHandle.open(null), {
+  useHotkey('Mod+A', () => checkContrastDialogHandle.open(null), {
     ignoreInputs: true,
     requireReset: true,
-    meta: { name: 'Check contrast', description: 'Press ⌘+C to audit contrast' },
+    meta: { name: 'Check contrast', description: 'Press ⌘+A to audit contrast' },
   })
 
   const styles = dialogContentStyles({ layout: 'scrollable' })

@@ -1,6 +1,6 @@
 'use client'
 
-import { Label } from '@/components/ui/label'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
@@ -9,11 +9,12 @@ export function TwPickerEnableToggle() {
   const setEnabled = useUiPrefs((s) => s.actions.setTwPickerEnabled)
 
   return (
-    <div className="flex items-center gap-2">
-      <Switch id="tw-picker-enable" size="sm" checked={enabled} onCheckedChange={setEnabled} />
-      <Label htmlFor="tw-picker-enable" className="text-xs cursor-pointer select-none">
-        Tailwind picker
-      </Label>
-    </div>
+    <Field name="tailwind-picker-enable" className="gap-1">
+      <FieldLabel className="items-center justify-between w-full">
+        Tailwind color picker
+        <Switch size="sm" checked={enabled} onCheckedChange={setEnabled} />
+      </FieldLabel>
+      <FieldDescription className="max-w-5/6">Enable tailwind color picker.</FieldDescription>
+    </Field>
   )
 }
