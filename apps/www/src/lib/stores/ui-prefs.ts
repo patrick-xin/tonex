@@ -6,12 +6,14 @@ export const UI_PREFS_SCHEMA_VERSION = 1
 
 interface UiPrefs {
   showExtended: boolean
+  twPickerEnabled: boolean
 }
 
-const DEFAULT_UI_PREFS: UiPrefs = { showExtended: false }
+const DEFAULT_UI_PREFS: UiPrefs = { showExtended: false, twPickerEnabled: true }
 
 interface UiPrefsActions {
   setShowExtended(next: boolean): void
+  setTwPickerEnabled(next: boolean): void
   setHydrated(): void
   reset(): void
 }
@@ -45,6 +47,7 @@ export const useUiPrefs = create<UiPrefsState>()(
       _hydrated: false,
       actions: {
         setShowExtended: (next) => set({ showExtended: next }),
+        setTwPickerEnabled: (next) => set({ twPickerEnabled: next }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_UI_PREFS }),
       },
