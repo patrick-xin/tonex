@@ -43,7 +43,7 @@ export function SurfaceLevelSlider({
     algo === 'desaturate'
       ? (next: number) => setDesatLevel(resolvedMode, next)
       : (next: number) => setTintLevel(resolvedMode, next)
-  const defaultLabel = algo === 'desaturate' ? 'Desaturate Level' : 'Tint Level'
+  const defaultLabel = algo === 'desaturate' ? 'Desaturate level' : 'Tint level'
 
   return (
     <SliderRoot
