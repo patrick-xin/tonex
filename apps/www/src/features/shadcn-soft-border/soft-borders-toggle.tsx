@@ -19,8 +19,8 @@ export function SoftBordersToggle() {
               <HelpCircle className="w-4 h-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
-              Uses softer colors for borders and inputs. This can reduce accessibility—keep an eye
-              on the contrast checker to ensure your UI remains usable.
+              Uses softer colors for borders and inputs. This can reduce accessibility — keep an eye
+              on the contrast checker to ensure your UI stays usable.
             </TooltipContent>
           </Tooltip>
         </div>
