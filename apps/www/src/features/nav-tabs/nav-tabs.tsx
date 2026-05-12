@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { DisplayPrefs } from '@/features/display-prefs'
 import { ExportButton } from '@/features/export'
+import { Settings } from '@/features/settings'
 import { SiteCommandMenu } from '@/features/site-command-menu'
 import type { NavConfig } from '@/lib/nav-config'
 import { ContrastChecker } from '../contrast-checker'
@@ -114,7 +114,7 @@ export function NavTabs({ config }: { config: NavConfig }) {
         <SiteCommandMenu pageShortcuts={tabs} />
         <TooltipProvider>
           <ExportButton tabs={exportTabs} icon />
-          <DisplayPrefs />
+          <Settings />
           <ContrastChecker layer={config.layer} />
           <ResetButton />
         </TooltipProvider>

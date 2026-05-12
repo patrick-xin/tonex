@@ -1,6 +1,6 @@
 'use client'
 
-import { EyeIcon } from '@phosphor-icons/react'
+import { GearSixIcon } from '@phosphor-icons/react'
 import { useSource } from '@tonex/core'
 import { CHART_SCHEMES, type ChartScheme } from '@tonex/core/schema'
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { TwPickerEnableToggle } from '@/features/tw-color-picker'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
-export function DisplayPrefs() {
+export function Settings() {
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
   const chartScheme = useSource((s) => s.chart.scheme)
@@ -23,28 +24,29 @@ export function DisplayPrefs() {
         <TooltipTrigger
           render={
             <PopoverTrigger
-              render={
-                <Button variant="secondary" size="icon-sm" aria-label="Display preferences" />
-              }
+              render={<Button variant="secondary" size="icon-sm" aria-label="Settings" />}
             >
-              <EyeIcon />
+              <GearSixIcon />
             </PopoverTrigger>
           }
         />
-        <TooltipContent>Display preferences</TooltipContent>
+        <TooltipContent>Settings</TooltipContent>
       </Tooltip>
       <PopoverContent align="end" className="w-60">
-        <p className="text-xs text-on-surface-variant mb-3 font-medium">Display preferences</p>
+        <p className="text-xs text-on-surface-variant mb-3 font-medium">Settings</p>
         <div className="flex items-center gap-2 mb-3">
           <Switch
-            id="display-show-extended"
+            id="settings-show-extended"
             size="sm"
             checked={showExtended}
             onCheckedChange={setShowExtended}
           />
-          <Label htmlFor="display-show-extended" className="text-xs cursor-pointer select-none">
+          <Label htmlFor="settings-show-extended" className="text-xs cursor-pointer select-none">
             Show extended tokens
           </Label>
+        </div>
+        <div className="mb-3">
+          <TwPickerEnableToggle />
         </div>
         <div className="flex items-center justify-between gap-2">
           <Label className="text-xs select-none">Chart palette</Label>

@@ -11,7 +11,7 @@ Applies to **Tonex's own product surfaces only.** shadcn sample components and d
 ### In scope (apply rules)
 
 - **Rails:** MD3 rail + shadcn rail. Specifically: Source Color, Scheme Variant, Contrast Level, Surface Adjustment, Fine Tune Palette, Custom Colors, Color Roles List, Shadcn Role Override, Shadcn Bindings, Soft Borders, rail-mode switcher.
-- **Dialogs / popovers:** Export, Contrast Checker, NewCustomColor, EditCustomColor, Display Preferences, HelpDialog.
+- **Dialogs / popovers:** Export, Contrast Checker, NewCustomColor, EditCustomColor, Settings, HelpDialog.
 - **Chrome:** SiteCommandMenu, NavTabs, Reset button, the `"Copied"` toast emitted on swatch click.
 - **Landing surfaces:** `/`, `/about`, `/pricing`, site header, site footer.
 - **Tab page titles + tab-page-specific controls** (Palettes tab Horizontal/Vertical, Tone sort).
@@ -56,7 +56,7 @@ Applies to **Tonex's own product surfaces only.** shadcn sample components and d
 
 **Section headings — sentence case.**
 
-✓ `Source color` · `Scheme variant` · `Surface adjustment` · `Fine-tune palette` · `Custom colors` · `Role overrides` · `Role bindings` · `Contrast audit` · `Display preferences` · `Export theme`
+✓ `Source color` · `Scheme variant` · `Surface adjustment` · `Fine-tune palette` · `Custom colors` · `Role overrides` · `Role bindings` · `Contrast audit` · `Export theme`
 
 **Control labels — split rule:**
 
@@ -176,7 +176,7 @@ Two surfaces, two rules. **The display rule does not apply to hotkey-library spe
 
 ### Tooltip / Aria-label
 - Verb-led when describing an action: `Unlock color`, `Lock current color`, `Reset palette`
-- Descriptive noun phrase when labelling state/context: `CMF second source color`, `Display preferences`
+- Descriptive noun phrase when labelling state/context: `CMF second source color`, `Settings`
 - No period unless multi-sentence
 - Aria-labels should match tooltip text where both exist for the same control
 
@@ -239,9 +239,11 @@ CC: apply these renames across in-scope surfaces. Group changes by file in commi
 | `apps/www/src/features/custom-colors/custom-color-list.tsx:68` | `Custom Colors` | `Custom colors` |
 | `apps/www/src/features/custom-colors/new-custom-color.tsx:145` | `Add Custom Color` | `Add custom color` |
 | `apps/www/src/features/custom-colors/custom-color-list.tsx:229` | `Edit Custom Color` | `Edit custom color` |
-| `apps/www/src/features/display-prefs/display-prefs.tsx:27` | `Display Preferences` (aria-label) | `Display preferences` |
-| `apps/www/src/features/display-prefs/display-prefs.tsx:34` | `Display Preferences` (tooltip) | `Display preferences` |
-| `apps/www/src/features/display-prefs/display-prefs.tsx:37` | `Display` (popover heading) | `Display preferences` (matches trigger label) |
+| `apps/www/src/features/settings/settings.tsx` (aria-label) | — | `Settings` |
+| `apps/www/src/features/settings/settings.tsx` (tooltip) | — | `Settings` |
+| `apps/www/src/features/settings/settings.tsx` (popover heading) | — | `Settings` |
+
+Note: the display-prefs feature was renamed to `features/settings/` after this rules pass. The old rows pointed at file:line locations that no longer exist; canonical strings updated to match the new feature's labels.
 
 ### 6.2 Control label casing fixes
 
