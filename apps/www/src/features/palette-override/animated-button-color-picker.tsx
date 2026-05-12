@@ -205,7 +205,7 @@ function ResetOverrideButton({ onReset }: { onReset: () => void }) {
           </Button>
         }
       />
-      <TooltipContent variant="inverse">Reset to MCU</TooltipContent>
+      <TooltipContent variant="inverse">Reset palette</TooltipContent>
     </Tooltip>
   )
 }

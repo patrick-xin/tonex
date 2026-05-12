@@ -63,7 +63,7 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
             variant="ghost"
             size="icon-xs"
             onClick={() => setOverride(mode, role, null)}
-            title="Reset to MCU"
+            title="Reset role"
           >
             <ArrowCounterClockwiseIcon />
           </Button>

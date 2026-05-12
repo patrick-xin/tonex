@@ -113,7 +113,7 @@ function BindingRow({
           {role}
         </div>
         {isCustom && (
-          <Button variant="ghost" size="icon-xs" onClick={onReset} title="Reset to default">
+          <Button variant="ghost" size="icon-xs" onClick={onReset} title="Reset binding">
             <ArrowCounterClockwiseIcon />
           </Button>
         )}

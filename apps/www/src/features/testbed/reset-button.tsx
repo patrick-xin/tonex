@@ -14,7 +14,7 @@ export function ResetButton() {
         reset()
       }}
     >
-      reset to defaults
+      Reset to defaults
     </Button>
   )
 }

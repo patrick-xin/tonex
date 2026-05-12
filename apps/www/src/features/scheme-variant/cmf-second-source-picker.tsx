@@ -92,7 +92,7 @@ export function CmfSecondSourcePicker() {
                   </Button>
                 }
               />
-              <TooltipContent variant="inverse">Reset to MCU default</TooltipContent>
+              <TooltipContent variant="inverse">Reset</TooltipContent>
             </Tooltip>
           )}
         </div>

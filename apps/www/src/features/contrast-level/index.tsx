@@ -37,7 +37,7 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
             variant="ghost"
             size="icon-xs"
             onClick={() => setContrastLevel(0)}
-            aria-label="Reset contrast to standard"
+            aria-label="Reset contrast"
             className={isDirty ? '' : 'opacity-0 pointer-events-none'}
           >
             <RotateCcwIcon />
