@@ -32,7 +32,7 @@ export function SoftBordersToggle() {
         />
       </FieldLabel>
       <FieldDescription className="max-w-5/6">
-        Replicates subtle border aesthetic of shadcn/ui.
+        Replicates the subtle border aesthetic of shadcn/ui.
       </FieldDescription>
     </Field>
   )
