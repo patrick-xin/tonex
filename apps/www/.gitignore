@@ -42,3 +42,6 @@ next-env.d.ts
 
 # fumadocs
 .source
+
+# agent reference material, not for the repo
+landing-copy.md
