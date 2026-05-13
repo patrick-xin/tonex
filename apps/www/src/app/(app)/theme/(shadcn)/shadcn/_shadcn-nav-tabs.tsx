@@ -1,6 +1,7 @@
 'use client'
 
 import { NavTabs } from '@/features/nav-tabs'
+import { ShadcnPresetPicker } from '@/features/shadcn-preset-picker'
 import { shadcnNavConfig } from './_nav-config'
 
 // why: NavConfig carries lucide forwardRef icons which are not serializable
@@ -12,5 +13,5 @@ import { shadcnNavConfig } from './_nav-config'
 // route group hosts its own `layer="shadcn"` instance — md pairs are noise
 // for shadcn users and vice versa.
 export function ShadcnNavTabs() {
-  return <NavTabs config={shadcnNavConfig} />
+  return <NavTabs config={shadcnNavConfig} extras={<ShadcnPresetPicker />} />
 }

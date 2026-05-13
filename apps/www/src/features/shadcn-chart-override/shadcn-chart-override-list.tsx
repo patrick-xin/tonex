@@ -33,7 +33,7 @@ export function ShadcnChartOverrideList() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 py-6 m-px">
       <section>
         <p className="text-sm font-semibold uppercase tracking-wider mb-2">Chart</p>
         <div className="flex flex-wrap gap-2">

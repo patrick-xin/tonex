@@ -33,7 +33,7 @@ export function ShadcnComponentsDemo() {
   }, [])
 
   return (
-    <div className="max-w-7xl columns-1 gap-6 md:columns-2 lg:columns-3">
+    <div className="max-w-7xl columns-1 gap-6 md:columns-2 lg:columns-3 m-px">
       {/* Buttons */}
       <Card className="mb-6 break-inside-avoid rounded-xl flex flex-col p-6 gap-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">

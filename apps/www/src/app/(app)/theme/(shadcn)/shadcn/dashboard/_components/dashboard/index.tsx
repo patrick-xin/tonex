@@ -8,7 +8,7 @@ import { SiteHeader } from './site-header'
 
 export default function ShadcnDashboard() {
   return (
-    <div className="relative h-full">
+    <div className="relative h-full m-px">
       <SidebarProvider className="h-full min-h-full">
         <AppSidebar variant="inset" />
         <SidebarInset className="overflow-y-auto">

@@ -5,7 +5,7 @@ import { useHotkeys } from '@tanstack/react-hotkeys'
 import { AnimatePresence, m } from 'motion/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
@@ -21,7 +21,7 @@ import { ResetButton } from '../testbed/reset-button'
 // audience and layer; this component is route-agnostic and takes everything
 // it needs as one config prop. Tabs, export tabs, command-menu shortcuts and
 // the cross-layer link all derive from the same source so they can't drift.
-export function NavTabs({ config }: { config: NavConfig }) {
+export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [selected, setSelected] = useState<number | null>(null)
@@ -111,6 +111,7 @@ export function NavTabs({ config }: { config: NavConfig }) {
         </TabsList>
       </Tabs>
       <div className="items-center gap-2 hidden sm:flex">
+        {extras}
         <SiteCommandMenu pageShortcuts={tabs} />
         <TooltipProvider>
           <ExportButton tabs={exportTabs} icon />
