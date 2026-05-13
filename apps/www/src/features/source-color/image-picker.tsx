@@ -62,8 +62,8 @@ export function ImagePicker({ className }: { className?: string }) {
         ) : (
           <span className="text-on-surface-variant text-center px-2 max-w-5/6 mx-auto text-xs">
             {seedHexLock
-              ? 'Current color is locked, unlock to pick an image'
-              : 'Pick an image, prefer transparent background if you want to use logo'}
+              ? 'Current color is locked. Unlock to pick an image.'
+              : "Pick an image. Prefer a transparent background if you're using a logo."}
           </span>
         )}
         {loading && (

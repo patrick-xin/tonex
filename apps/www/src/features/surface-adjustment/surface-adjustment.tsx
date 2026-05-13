@@ -16,7 +16,7 @@ export const SurfaceAdjustment = ({
   return (
     <div className="p-2 space-y-3" ref={triggerRef}>
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-on-surface">Surface Adjustment</div>
+        <div className="text-sm font-medium text-on-surface">Surface adjustment</div>
         <ToggleGroup
           variant="outline"
           size="xs"

@@ -54,7 +54,7 @@ export function ColorPalettes() {
 
   return (
     <div className="w-full">
-      <div className="flex gap-2 mb-4 justify-end">
+      <div className="flex flex-wrap gap-2 mb-4 justify-end">
         <ToggleGroup
           variant="outline"
           size="xs"

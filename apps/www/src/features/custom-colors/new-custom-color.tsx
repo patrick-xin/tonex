@@ -142,7 +142,7 @@ export function NewCustomColor({
       />
       <DialogContent showCloseButton>
         <DialogHeader>
-          <DialogTitle>Add Custom Color</DialogTitle>
+          <DialogTitle>Add custom color</DialogTitle>
           <DialogDescription>
             Pick a color and name it. The system generates 4 accessible roles automatically.
           </DialogDescription>

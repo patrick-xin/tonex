@@ -1,4 +1,3 @@
-import { Cta } from './_cta'
 import { FeaturesSection } from './_features-section'
 import { Hero } from './_hero'
 
@@ -7,7 +6,6 @@ export default function LandingPage() {
     <>
       <Hero />
       <FeaturesSection />
-      <Cta />
     </>
   )
 }

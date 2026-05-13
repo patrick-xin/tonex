@@ -11,19 +11,21 @@ import {
 describe('useUiPrefs', () => {
   beforeEach(() => {
     localStorage.clear()
-    useUiPrefs.setState({ showExtended: false, _hydrated: false })
+    useUiPrefs.setState({ showExtended: false, twPickerEnabled: true, _hydrated: false })
   })
 
   afterEach(() => {
     localStorage.clear()
-    useUiPrefs.setState({ showExtended: false, _hydrated: false })
+    useUiPrefs.setState({ showExtended: false, twPickerEnabled: true, _hydrated: false })
   })
 
-  it('default state: showExtended false, _hydrated false, actions defined', () => {
+  it('default state: showExtended false, twPickerEnabled true, _hydrated false, actions defined', () => {
     const s = useUiPrefs.getState()
     expect(s.showExtended).toBe(false)
+    expect(s.twPickerEnabled).toBe(true)
     expect(s._hydrated).toBe(false)
     expect(typeof s.actions.setShowExtended).toBe('function')
+    expect(typeof s.actions.setTwPickerEnabled).toBe('function')
     expect(typeof s.actions.reset).toBe('function')
   })
 
@@ -38,38 +40,68 @@ describe('useUiPrefs', () => {
     expect(useUiPrefs.getState().showExtended).toBe(false)
   })
 
-  it('reset() restores showExtended to false', () => {
+  it('setTwPickerEnabled(false) updates twPickerEnabled', () => {
+    useUiPrefs.getState().actions.setTwPickerEnabled(false)
+    expect(useUiPrefs.getState().twPickerEnabled).toBe(false)
+  })
+
+  it('setTwPickerEnabled(true) after false restores twPickerEnabled', () => {
+    useUiPrefs.getState().actions.setTwPickerEnabled(false)
+    useUiPrefs.getState().actions.setTwPickerEnabled(true)
+    expect(useUiPrefs.getState().twPickerEnabled).toBe(true)
+  })
+
+  it('reset() restores showExtended to false and twPickerEnabled to true', () => {
     useUiPrefs.getState().actions.setShowExtended(true)
+    useUiPrefs.getState().actions.setTwPickerEnabled(false)
     useUiPrefs.getState().actions.reset()
     expect(useUiPrefs.getState().showExtended).toBe(false)
+    expect(useUiPrefs.getState().twPickerEnabled).toBe(true)
   })
 
   it('selectUiPrefs returns only pref fields — no _hydrated, no actions', () => {
     useUiPrefs.getState().actions.setShowExtended(true)
+    useUiPrefs.getState().actions.setTwPickerEnabled(false)
     const prefs = selectUiPrefs(useUiPrefs.getState())
-    expect(prefs).toEqual({ showExtended: true })
+    expect(prefs).toEqual({ showExtended: true, twPickerEnabled: false })
     expect('_hydrated' in prefs).toBe(false)
     expect('actions' in prefs).toBe(false)
   })
 
   it('partialize excludes _hydrated and actions from persisted state', () => {
     useUiPrefs.getState().actions.setShowExtended(true)
+    useUiPrefs.getState().actions.setTwPickerEnabled(false)
     const stored = localStorage.getItem(UI_PREFS_STORAGE_KEY)
     if (stored === null) throw new Error('expected localStorage to contain persisted state')
     const raw = JSON.parse(stored) as { state: Record<string, unknown>; version: number }
     expect(raw.version).toBe(UI_PREFS_SCHEMA_VERSION)
     expect(raw.state.showExtended).toBe(true)
+    expect(raw.state.twPickerEnabled).toBe(false)
     expect('_hydrated' in raw.state).toBe(false)
     expect('actions' in raw.state).toBe(false)
   })
 
-  it('rehydrate round-trips showExtended', async () => {
+  it('rehydrate round-trips showExtended and twPickerEnabled', async () => {
+    localStorage.setItem(
+      UI_PREFS_STORAGE_KEY,
+      JSON.stringify({
+        state: { showExtended: true, twPickerEnabled: false },
+        version: UI_PREFS_SCHEMA_VERSION,
+      }),
+    )
+    await useUiPrefs.persist.rehydrate()
+    expect(useUiPrefs.getState().showExtended).toBe(true)
+    expect(useUiPrefs.getState().twPickerEnabled).toBe(false)
+    expect(useUiPrefs.getState()._hydrated).toBe(true)
+  })
+
+  it('rehydrate from older persisted state without twPickerEnabled falls back to default true', async () => {
     localStorage.setItem(
       UI_PREFS_STORAGE_KEY,
       JSON.stringify({ state: { showExtended: true }, version: UI_PREFS_SCHEMA_VERSION }),
     )
     await useUiPrefs.persist.rehydrate()
     expect(useUiPrefs.getState().showExtended).toBe(true)
-    expect(useUiPrefs.getState()._hydrated).toBe(true)
+    expect(useUiPrefs.getState().twPickerEnabled).toBe(true)
   })
 })

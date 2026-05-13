@@ -6,6 +6,7 @@ dist
 .DS_Store
 coverage
 .claude/settings.local.json
+.claude/worktrees/
 
 # Private docs — vision/positioning, strategic notes not for public repo
 docs/private/

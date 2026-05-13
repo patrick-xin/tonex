@@ -19,8 +19,8 @@ export function SoftBordersToggle() {
               <HelpCircle className="w-4 h-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
-              Uses softer colors for borders and inputs. This can reduce accessibility—keep an eye
-              on the contrast checker to ensure your UI remains usable.
+              Uses softer colors for borders and inputs. This can reduce accessibility — keep an eye
+              on the contrast checker to ensure your UI stays usable.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -28,11 +28,11 @@ export function SoftBordersToggle() {
           size="sm"
           checked={enabled}
           onCheckedChange={setEnabled}
-          aria-label="enable soft border"
+          aria-label="Toggle soft borders"
         />
       </FieldLabel>
       <FieldDescription className="max-w-5/6">
-        Replicates subtle border aesthetic of shadcn/ui.
+        Replicates the subtle border aesthetic of shadcn/ui.
       </FieldDescription>
     </Field>
   )

@@ -3,6 +3,8 @@
 import { useSource } from '@tonex/core'
 import { RotateCcwIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Fieldset, FieldsetLegend } from '@/components/ui/fieldset'
 import {
   SliderControl,
   SliderIndicator,
@@ -26,40 +28,46 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
   const isDirty = contrastLevel !== 0
 
   return (
-    <div className="w-full space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium text-on-surface">Contrast</span>
-        <div className="flex items-center gap-0.5">
-          <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
-            {contrastLevel.toFixed(2)}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={() => setContrastLevel(0)}
-            aria-label="Reset contrast to standard"
-            className={isDirty ? '' : 'opacity-0 pointer-events-none'}
+    <div className="w-full space-y-3">
+      <Field name="contrast-level">
+        <Fieldset className="gap-2">
+          <div className="flex justify-between">
+            <FieldsetLegend className="text-sm">Contrast level</FieldsetLegend>
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setContrastLevel(0)}
+                aria-label="Reset contrast"
+                className={isDirty ? '' : 'opacity-0 pointer-events-none'}
+              >
+                <RotateCcwIcon />
+              </Button>
+              <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
+                {contrastLevel.toFixed(2)}
+              </span>
+            </div>
+          </div>
+          <SliderRoot
+            thumbAlignment="edge-client-only"
+            className={root()}
+            min={0}
+            max={1}
+            step={0.05}
+            value={contrastLevel}
+            onValueChange={(v) => setContrastLevel(Number(v))}
           >
-            <RotateCcwIcon />
-          </Button>
-        </div>
-      </div>
-      <SliderRoot
-        className={root()}
-        min={0}
-        max={1}
-        step={0.05}
-        value={contrastLevel}
-        onValueChange={(v) => setContrastLevel(Number(v))}
-      >
-        <SliderControl className={control()}>
-          <SliderTrack className={track()}>
-            <SliderIndicator className={indicator()} />
-            <SliderThumb className={thumb()} />
-          </SliderTrack>
-        </SliderControl>
-      </SliderRoot>
-      <div className="flex justify-between text-[10px] text-on-surface-variant px-0.5">
+            <SliderControl className={control()}>
+              <SliderTrack className={track()}>
+                <SliderIndicator className={indicator()} />
+                <SliderThumb className={thumb()} />
+              </SliderTrack>
+            </SliderControl>
+          </SliderRoot>
+        </Fieldset>
+      </Field>
+
+      <div className="flex justify-between text-xs text-on-surface-variant mt-1">
         <span>Standard</span>
         <span>Maximum</span>
       </div>

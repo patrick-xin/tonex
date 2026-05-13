@@ -187,7 +187,7 @@ export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
 // (variant-bypassed — hue rotation is the whole point; was `multi`).
 // `diverging` is reserved per ADR-0027 c.2 but lands in a future slice —
 // picklist starts at two values. shadcn's default is sequential.
-export const CHART_SCHEMES = ['categorical', 'sequential'] as const
+export const CHART_SCHEMES = ['sequential', 'categorical'] as const
 export type ChartScheme = (typeof CHART_SCHEMES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for

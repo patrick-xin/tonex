@@ -15,6 +15,7 @@ import {
 } from '@/features/hct-controls'
 import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
+import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
 interface PaletteColorPickerProps {
   value: string
@@ -30,6 +31,7 @@ interface PaletteColorPickerProps {
 export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps) {
   const hexInputId = useId()
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
+  const twPickerEnabled = useUiPrefs((s) => s.twPickerEnabled)
 
   const parsed = hctFromHex(value)
   // why: when chroma drops below the perception lock threshold, MCU's
@@ -74,7 +76,7 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
             placeholder="#000000"
           />
         </Label>
-        <TwColorPicker currentColor={value} onSelect={onChange} />
+        {twPickerEnabled && <TwColorPicker currentColor={value} onSelect={onChange} />}
       </div>
       <HctSlider
         label="Hue"
