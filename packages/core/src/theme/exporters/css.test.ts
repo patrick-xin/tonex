@@ -131,27 +131,42 @@ describe('exportCss(bundle, "shadcn")', () => {
   const theme = deriveTheme(DEFAULT_INPUTS)
   const out = exportCss({ default: theme }, 'shadcn')
 
-  it('omits Tailwind boilerplate (shadcn users already have it)', () => {
+  it('omits Tailwind boilerplate by default (shadcn users already have it)', () => {
     expect(out).not.toContain('@import "tailwindcss"')
     expect(out).not.toContain('@custom-variant dark')
   })
 
-  it('.shadcn block values match theme.shadcn.light token-for-token', () => {
-    const root = parseBlock(out, '.shadcn')
+  it(':root block values match theme.shadcn.light token-for-token', () => {
+    const root = parseBlock(out, ':root')
     expect(root).toEqual(projectLayer(theme.shadcn.light))
   })
 
-  it('html.dark .shadcn block values match theme.shadcn.dark token-for-token', () => {
-    const dark = parseBlock(out, 'html.dark .shadcn')
+  it('.dark block values match theme.shadcn.dark token-for-token', () => {
+    const dark = parseBlock(out, '.dark')
     expect(dark).toEqual(projectLayer(theme.shadcn.dark))
   })
 
   it('omits @theme inline when customColors is empty', () => {
-    // why: a fresh shadcn project already has its own @theme inline block
-    // bridging --primary → --color-primary etc. Re-emitting it would
-    // duplicate the user's existing config. Only custom-color slugs need a
-    // bridge from us, since shadcn-cli wouldn't have generated those.
     expect(out).not.toMatch(/@theme inline/)
+  })
+})
+
+describe('exportCss(bundle, "shadcn") with includeHeader: true', () => {
+  // why: opt-in bootstrap for green-field shadcn projects. Prepends the
+  // Tailwind v4 incantation (import + @custom-variant dark) so a fresh
+  // globals.css works out of the box; existing shadcn projects keep the
+  // toggle off and paste only :root/.dark.
+  const theme = deriveTheme(DEFAULT_INPUTS)
+  const out = exportCss({ default: theme }, 'shadcn', { includeHeader: true })
+
+  it('prepends @import "tailwindcss" and @custom-variant dark', () => {
+    expect(out).toContain('@import "tailwindcss";')
+    expect(out).toContain('@custom-variant dark (&:is(.dark *));')
+  })
+
+  it(':root + .dark blocks still emit (header is additive)', () => {
+    expect(parseBlock(out, ':root')).toEqual(projectLayer(theme.shadcn.light))
+    expect(parseBlock(out, '.dark')).toEqual(projectLayer(theme.shadcn.dark))
   })
 })
 
@@ -159,9 +174,9 @@ describe('exportCss(bundle, "shadcn") with customColors', () => {
   const theme = deriveTheme(withCustomColor)
   const out = exportCss({ default: theme }, 'shadcn')
 
-  it('includes the custom slug values in .shadcn and html.dark .shadcn', () => {
-    const root = parseBlock(out, '.shadcn')
-    const dark = parseBlock(out, 'html.dark .shadcn')
+  it('includes the custom slug values in :root and .dark', () => {
+    const root = parseBlock(out, ':root')
+    const dark = parseBlock(out, '.dark')
     expect(root['--brand']).toBeDefined()
     expect(root['--brand-foreground']).toBeDefined()
     expect(dark['--brand']).toBeDefined()
@@ -231,14 +246,15 @@ describe('exportCss with multi-contrast bundle', () => {
     expect(high).toEqual(projectLayer(highTheme.md.light))
   })
 
-  it('shadcn emits 6 contrast-aware rule blocks', () => {
+  it('shadcn ignores contrast tiers — only :root + .dark emit even when bundle carries medium/high', () => {
+    // why: shadcn audience doesn't use contrast variants. exportCss collapses
+    // any bundle to the default tier on the shadcn path; the contrast filter
+    // is not exposed in the dialog (filter-side guard).
     const out = exportCss(bundle, 'shadcn')
-    expect(out).toMatch(/\.shadcn\s*\{/)
-    expect(out).toMatch(/html\.dark \.shadcn\s*\{/)
-    expect(out).toMatch(/html\.contrast-medium \.shadcn\s*\{/)
-    expect(out).toMatch(/html\.contrast-medium\.dark \.shadcn\s*\{/)
-    expect(out).toMatch(/html\.contrast-high \.shadcn\s*\{/)
-    expect(out).toMatch(/html\.contrast-high\.dark \.shadcn\s*\{/)
+    expect(out).toMatch(/:root\s*\{/)
+    expect(out).toMatch(/\.dark\s*\{/)
+    expect(out).not.toMatch(/contrast-medium/)
+    expect(out).not.toMatch(/contrast-high/)
   })
 })
 
@@ -279,7 +295,7 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
 
     it('on: shadcn emits chart with shadcn naming', () => {
       const out = exportCss(bundle, 'shadcn', { includeChart: true })
-      const root = parseBlock(out, '.shadcn')
+      const root = parseBlock(out, ':root')
       expect(root['--chart-1']).toBeDefined()
       expect(root['--chart-5']).toBeDefined()
     })
