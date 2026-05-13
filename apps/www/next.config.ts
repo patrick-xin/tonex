@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 const config: NextConfig = {
   cacheComponents: true,
   reactCompiler: true,
-  allowedDevOrigins: ['192.168.0.102'],
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(','),
 }
 
 export default config
