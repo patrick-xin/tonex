@@ -1,6 +1,7 @@
 import type { DynamicScheme } from '@tonex/mcu'
 import * as v from 'valibot'
 import { DEFAULT_VARIANT, type VariantName, variants } from '../variants'
+import { SHADCN_PRESETS } from './shadcn-presets'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 
 // why: SCHEMA_VERSION pins the persisted PortableTheme shape contract per
@@ -284,62 +285,16 @@ export type ShadcnRoleName = (typeof SHADCN_ROLE_NAMES)[number]
 
 export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 
-// why: default light bindings — lifted from legacy tonex's MD3_ROLE_MAP.
-// Structurally significant pairings:
-//   - card → surface-dim (light) / surface-bright (dark) — cards float
-//     darker than surface in light mode, lighter in dark mode.
-//   - popover → surface (light) / surface-container (dark) — same intent.
-//   - sidebar-foreground → on-surface (light) / on-surface-variant (dark) —
-//     softer text on dark sidebars.
-// border = input = ring = outline by design — outline is M3's edge token
-// and shadcn's three edge roles all want the same value at default.
-const DEFAULT_SHADCN_BINDINGS_LIGHT: ShadcnRoleBindings = {
-  '--background': '--color-surface',
-  '--foreground': '--color-on-surface',
-  '--card': '--color-surface-dim',
-  '--card-foreground': '--color-on-surface',
-  '--popover': '--color-surface',
-  '--popover-foreground': '--color-on-surface',
-  '--primary': '--color-primary-container',
-  '--primary-foreground': '--color-on-primary-container',
-  '--secondary': '--color-secondary-container',
-  '--secondary-foreground': '--color-on-secondary-container',
-  '--muted': '--color-surface-container-high',
-  '--muted-foreground': '--color-on-surface-variant',
-  '--accent': '--color-surface-container-high',
-  '--accent-foreground': '--color-on-surface',
-  '--destructive': '--color-error',
-  '--border': '--color-outline',
-  '--input': '--color-outline',
-  '--ring': '--color-outline',
-  '--sidebar': '--color-surface-container-low',
-  '--sidebar-foreground': '--color-on-surface',
-  '--sidebar-primary': '--color-primary',
-  '--sidebar-primary-foreground': '--color-on-primary',
-  '--sidebar-accent': '--color-surface-container-highest',
-  '--sidebar-accent-foreground': '--color-on-surface',
-  '--sidebar-border': '--color-outline',
-  '--sidebar-ring': '--color-outline',
-}
-
-// why: dark mode diverges from light only on the three asymmetric pairings
-// above. Spread + override keeps the delta visible at a glance and prevents
-// the two maps from silently drifting on edits — adding a key to LIGHT
-// flows through DARK automatically.
-const DEFAULT_SHADCN_BINDINGS_DARK: ShadcnRoleBindings = {
-  ...DEFAULT_SHADCN_BINDINGS_LIGHT,
-  '--card': '--color-surface-bright',
-  '--popover': '--color-surface-container',
-  '--sidebar-foreground': '--color-on-surface-variant',
-}
-
+// why: re-exported from SHADCN_PRESETS.default.shadcnRoleBindings so the
+// default binding map has a single source of truth — the `default` preset.
+// Pre-launch this thin re-export keeps callers (drift-guard tests, UI reset
+// buttons, applyDom tests) working without import churn while the SSOT
+// migrates into the preset library. Asymmetric primary, branded ring, and
+// container-style card/popover all flow from the preset definition.
 export const DEFAULT_SHADCN_ROLE_BINDINGS: {
   light: ShadcnRoleBindings
   dark: ShadcnRoleBindings
-} = {
-  light: DEFAULT_SHADCN_BINDINGS_LIGHT,
-  dark: DEFAULT_SHADCN_BINDINGS_DARK,
-}
+} = SHADCN_PRESETS.default.shadcnRoleBindings
 
 // why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
 // spec semantics (`on-X` always pairs with `X`; `-foreground` always pairs
@@ -988,17 +943,17 @@ export interface PortableTheme {
 export const DEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seedHex: '#6750a4',
-  variant: DEFAULT_VARIANT,
+  variant: SHADCN_PRESETS.default.variant,
   contrastLevel: 0,
   seedHexLock: false,
   md3TokenOverrides: { light: {}, dark: {} },
-  shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
+  shadcnRoleBindings: SHADCN_PRESETS.default.shadcnRoleBindings,
   shadcnRoleOverrides: { light: {}, dark: {} },
   shadcnChartOverrides: { light: {}, dark: {} },
-  surfaceAlgo: 'desaturate',
-  surfacePaletteName: 'zinc',
-  surfaceTintLevel: { light: 0, dark: 0 },
-  surfaceDesaturateLevel: { light: 0, dark: 0 },
+  surfaceAlgo: SHADCN_PRESETS.default.surfaceAlgo,
+  surfacePaletteName: SHADCN_PRESETS.default.surfacePaletteName,
+  surfaceTintLevel: SHADCN_PRESETS.default.surfaceTintLevel,
+  surfaceDesaturateLevel: SHADCN_PRESETS.default.surfaceDesaturateLevel,
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,

@@ -21,7 +21,7 @@ import { SocialLinks } from './social-links'
 export function BlocksDemo() {
   const ref = useShadcn()
   return (
-    <div className="flex min-w-max gap-6">
+    <div className="flex min-w-max gap-6 m-px">
       <div className="flex w-[360px] flex-col gap-6">
         <ContributionHistory />
         <SavingsProgress />

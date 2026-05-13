@@ -10,6 +10,15 @@ Slice-organized history. Each entry corresponds to a vertical-tracer increment p
 - Domain-discipline rules graduated to `docs/agents/code-conventions.md` (primitive-shape diff, disable-over-warn).
 - Triage labels aligned between `docs/agents/triage-labels.md` and GitHub.
 
+### Slice preset-1 — Shadcn aesthetic presets (closes #36)
+
+- `feat(core)`: `SHADCN_PRESETS` library — 7 curated aesthetic bundles (`default`, `stark`, `soft`, `warm`, `playful`, `monotone`, `tech`). Each holds the 6 structural fields a preset can pin: `variant`, `surfaceAlgo`, `surfacePaletteName`, `surfaceTintLevel`, `surfaceDesaturateLevel`, `shadcnRoleBindings`. Per ADR-0026, presets touch bindings only — no override fields.
+- `feat(core)`: `DEFAULT_INPUTS` and `DEFAULT_SHADCN_ROLE_BINDINGS` now derive from `SHADCN_PRESETS.default` — single source of truth. New Default uses cmf variant + desaturate surface + `--primary` → `--color-primary-container` (light) / `--color-primary` (dark, link-safe asymmetric).
+- `feat(core)`: `findActivePreset(theme)` predicate — deep equality across the 6 fields, returns preset name or `null` for diverged state. `setShadcnPreset(name)` action on the source store applies a bundle atomically.
+- `feat(www)`: `ShadcnPresetPicker` popover in the shadcn nav-tabs row — 7 chips, active recipe filled-highlighted, click applies via `setShadcnPreset`. Mounted through a new `extras` slot on `NavTabs`.
+- `feat(www)`: `/theme/shadcn/tuner` dev sink — mounts the 3-tab curator rail (bindings / overrides / changes) via pathname-based rail switcher in the shadcn layout. Persists post-slice as the editing surface for future preset library iterations.
+- `refactor(www)`: tuner curator surface drops `advisoryOverrides` — ADR-0026 makes presets bundle-only, so the override-traceability artifact had no destination in core and is no longer captured.
+
 ### Slice 12 — Chart-color emission + chartMode axis
 
 - `fix(core,www)`: chart-color runtime emission gap — `formatLayer` now spreads `lightChart`/`darkChart` into both `.md` and `.shadcn` blocks; `globals.css` `@theme inline` chart entries self-reference; `.md` block aliases shadcn-naming `--chart-N` to `--color-chart-N` so Tailwind utilities (`bg-chart-1`) and Recharts `var(--chart-1)` both resolve at runtime.

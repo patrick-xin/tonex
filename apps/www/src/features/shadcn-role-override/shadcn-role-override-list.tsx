@@ -47,7 +47,7 @@ export function ShadcnRoleOverrideList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-px">
       {ROLE_GROUPS.map((group) => (
         <section key={group.label}>
           <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
