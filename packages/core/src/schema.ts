@@ -48,3 +48,9 @@ export {
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from './theme/schema'
+export {
+  findActivePreset,
+  SHADCN_PRESETS,
+  type ShadcnPreset,
+  type ShadcnPresetName,
+} from './theme/shadcn-presets'

@@ -58,7 +58,20 @@ describe('deriveTheme', () => {
   })
 
   it('shadcn primary mirrors md primary-container; foreground mirrors md on-primary-container', () => {
-    const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
+    // why: tests the binding-chain mechanism, not the default snapshot — bindings
+    // are pinned explicitly so the assertion holds regardless of how the `default`
+    // preset happens to bind primary in either mode.
+    const containerBindings = {
+      '--primary': '--color-primary-container',
+      '--primary-foreground': '--color-on-primary-container',
+    } as const
+    const { md, shadcn } = deriveTheme({
+      ...DEFAULT_INPUTS,
+      shadcnRoleBindings: {
+        light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, ...containerBindings },
+        dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, ...containerBindings },
+      },
+    })
     expect(shadcn.light['--primary']).toBe(md.light['--color-primary-container'])
     expect(shadcn.light['--primary-foreground']).toBe(md.light['--color-on-primary-container'])
     expect(shadcn.dark['--primary']).toBe(md.dark['--color-primary-container'])
@@ -180,14 +193,24 @@ describe('deriveTheme', () => {
     })
 
     it('override propagates to shadcn primary via cross-layer mapping', () => {
-      // why: shadcn.--primary mirrors md.--color-primary-container. Mutation
-      // pressure on md primary-container must flow through to shadcn primary
-      // — this is the no-drift contract under editing pressure (ADR-0017).
+      // why: shadcn.--primary mirrors md.--color-primary-container when bound
+      // to it. Mutation pressure on md primary-container must flow through to
+      // shadcn primary — this is the no-drift contract under editing pressure
+      // (ADR-0017). Bindings pinned to primary-container so the mechanism is
+      // tested independently of which token the default preset binds in dark.
+      const containerBindings = {
+        '--primary': '--color-primary-container',
+        '--primary-foreground': '--color-on-primary-container',
+      } as const
       const overridden = deriveTheme({
         ...DEFAULT_INPUTS,
         md3TokenOverrides: {
           light: { '--color-primary-container': '#ff0000' },
           dark: { '--color-primary-container': '#00ff00' },
+        },
+        shadcnRoleBindings: {
+          light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, ...containerBindings },
+          dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, ...containerBindings },
         },
       })
       expect(overridden.shadcn.light['--primary']).toBe(RED)
@@ -418,9 +441,12 @@ describe('deriveTheme', () => {
       // why: locks the default behavior so changing the data shape can't
       // silently drift the visible mapping — DEFAULT_SHADCN_ROLE_BINDINGS
       // is the migration contract for any consumer who upgrades schema.
+      // Asymmetric primary (light→container, dark→primary) is intentional and
+      // ships as the `default` preset under ADR-0026; this guard catches
+      // unintended movement of either side of the asymmetry.
       const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
       expect(shadcn.light['--primary']).toBe(md.light['--color-primary-container'])
-      expect(shadcn.dark['--primary']).toBe(md.dark['--color-primary-container'])
+      expect(shadcn.dark['--primary']).toBe(md.dark['--color-primary'])
     })
 
     it('rebinding shadcn primary to md primary updates only that role', () => {
@@ -519,24 +545,44 @@ describe('deriveTheme', () => {
     it('without override, binding still respects md3TokenOverrides', () => {
       // why: with no shadcn override, the binding path takes the md3-pinned
       // value through the bound token. Confirms the override branch is
-      // additive — not replacing the md3 propagation contract.
+      // additive — not replacing the md3 propagation contract. --ring pinned
+      // to --color-outline so the mechanism is tested independently of the
+      // default preset's binding (which now uses --color-primary).
       const { shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         md3TokenOverrides: { light: { '--color-outline': '#00ff00' }, dark: {} },
+        shadcnRoleBindings: {
+          light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, '--ring': '--color-outline' },
+          dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, '--ring': '--color-outline' },
+        },
       })
-      // --ring binds to --color-outline by default
       expect(shadcn.light['--ring']).toBe(GREEN)
     })
 
     it('without either override, role lands on the MCU-derived bound value', () => {
-      const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
+      // why: --ring pinned to --color-outline so the bound-value contract is
+      // tested independently of which token the default binds --ring to.
+      const { md, shadcn } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        shadcnRoleBindings: {
+          light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, '--ring': '--color-outline' },
+          dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, '--ring': '--color-outline' },
+        },
+      })
       expect(shadcn.light['--ring']).toBe(md.light['--color-outline'])
     })
 
     it('per-mode independence — light pinned, dark follows binding', () => {
+      // why: --ring pinned to --color-outline (both modes) so the dark-follows-
+      // binding assertion holds regardless of the default preset's --ring
+      // binding choice.
       const { md, shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         shadcnRoleOverrides: { light: { '--ring': '#ff0000' }, dark: {} },
+        shadcnRoleBindings: {
+          light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, '--ring': '--color-outline' },
+          dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, '--ring': '--color-outline' },
+        },
       })
       expect(shadcn.light['--ring']).toBe(RED)
       expect(shadcn.dark['--ring']).toBe(md.dark['--color-outline'])
@@ -652,7 +698,13 @@ describe('deriveTheme', () => {
 
   describe('surfaceAlgo', () => {
     it("'desaturate' at level 0 leaves md surface family untouched (identity)", () => {
-      const baseline = deriveTheme(DEFAULT_INPUTS)
+      // why: baseline pins level=0 explicitly — DEFAULT_INPUTS now ships with
+      // light=0.3 desaturate as part of the `default` preset, so it's not a
+      // true neutral reference anymore.
+      const baseline = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceDesaturateLevel: { light: 0, dark: 0 },
+      })
       const explicit = deriveTheme({
         ...DEFAULT_INPUTS,
         surfaceAlgo: 'desaturate',
@@ -721,7 +773,13 @@ describe('deriveTheme', () => {
     })
 
     it('per-mode levels — desaturate diverges across modes independently', () => {
-      const baseline = deriveTheme(DEFAULT_INPUTS)
+      // why: baseline pins both modes to level=0 — the `default` preset ships
+      // with light=0.3, so DEFAULT_INPUTS alone wouldn't be a neutral reference
+      // for the "light untouched" assertion.
+      const baseline = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceDesaturateLevel: { light: 0, dark: 0 },
+      })
       const split = deriveTheme({
         ...DEFAULT_INPUTS,
         surfaceAlgo: 'desaturate',

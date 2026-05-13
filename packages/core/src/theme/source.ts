@@ -23,6 +23,7 @@ import {
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from './schema'
+import { SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
 import type { NeutralPaletteName } from './surface'
 
 export interface SourceActions {
@@ -40,6 +41,14 @@ export interface SourceActions {
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
+  // why: composite action — applies one preset's variant + surface fields +
+  // 26-role bindings (both modes) in a single atomic store update. Does NOT
+  // touch seedHex, contrastLevel, shadcnRoleOverrides, shadcnChartOverrides,
+  // customColors, or paletteOverrides — those are orthogonal user-owned
+  // axes (ADR-0026: overrides sit on top of bindings, not inside the preset).
+  // Consumers that want overrides cleared on preset switch call
+  // setShadcnRoleOverride(mode, role, null) per entry alongside.
+  setShadcnPreset(name: ShadcnPresetName): void
   // why: ADR-0026 — literal pin on a shadcn role. hex sets the entry; null
   // deletes so the role falls back to its binding-resolved value. Mirrors
   // setMd3TokenOverride's per-mode shape so override editors share one
@@ -184,6 +193,20 @@ export const useSource = create<SourceState>()(
               [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
             },
           })),
+        setShadcnPreset: (name) => {
+          const preset = SHADCN_PRESETS[name]
+          set({
+            variant: preset.variant,
+            surfaceAlgo: preset.surfaceAlgo,
+            surfacePaletteName: preset.surfacePaletteName,
+            surfaceTintLevel: { ...preset.surfaceTintLevel },
+            surfaceDesaturateLevel: { ...preset.surfaceDesaturateLevel },
+            shadcnRoleBindings: {
+              light: { ...preset.shadcnRoleBindings.light },
+              dark: { ...preset.shadcnRoleBindings.dark },
+            },
+          })
+        },
         setShadcnRoleOverride: (mode, role, hex) =>
           set((s) => {
             const next = { ...s.shadcnRoleOverrides[mode] }
