@@ -41,8 +41,9 @@ export function familyOf(pair: ContrastPair): string {
 }
 
 // why: explicit display order so the family chip placement doesn't drift
-// when CONTRAST_PAIRS is reordered upstream. Chart lands last in each
-// layer (separate cohort, larger group, non-text only). 'Other' is a
+// when CONTRAST_PAIRS is reordered upstream. Sidebar trails the core token
+// families (scoped surface, evaluated only against --sidebar) and Chart
+// lands last (separate cohort, larger group, non-text only). 'Other' is a
 // safety bucket and always trails.
 const FAMILY_ORDER_MD = [
   'Inverse',
@@ -57,7 +58,6 @@ const FAMILY_ORDER_MD = [
 ] as const
 
 const FAMILY_ORDER_SHADCN = [
-  'Sidebar',
   'Surface',
   'Card',
   'Popover',
@@ -66,6 +66,7 @@ const FAMILY_ORDER_SHADCN = [
   'Muted',
   'Accent',
   'Destructive',
+  'Sidebar',
   'Chart',
   'Other',
 ] as const
