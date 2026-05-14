@@ -44,7 +44,8 @@ import {
 } from '@/features/hct-controls'
 import { useActiveMode } from '@/features/theme-mode'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
-import { NewCustomColor, RolePreviewSwatches } from './new-custom-color'
+import { useLayer } from '@/lib/layer-context'
+import { NewCustomColor, RolePreviewSwatches, ShadcnSourcePicker } from './new-custom-color'
 
 export function CustomColorList() {
   const customColors = useSource((s) => s.customColors)
@@ -166,10 +167,12 @@ function EditCustomColorDialog({
   const seedHex = useSource((s) => s.seedHex)
   const customColors = useSource((s) => s.customColors)
   const updateCustomColor = useSource((s) => s.actions.updateCustomColor)
+  const layer = useLayer()
 
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description ?? '')
   const [blend, setBlend] = useState(entry.blend)
+  const [shadcnSource, setShadcnSource] = useState(entry.shadcnSource)
 
   const initial = hctFromHex(entry.hex)
   const [hue, setHue] = useState(initial.hue)
@@ -213,6 +216,7 @@ function EditCustomColorDialog({
         description: description.trim() || undefined,
         hex: colorHex,
         blend,
+        shadcnSource,
       })
       onOpenChange(false)
     } catch (err) {
@@ -316,7 +320,15 @@ function EditCustomColorDialog({
             </Label>
           </div>
 
-          <RolePreviewSwatches roles={preview.light} />
+          {layer === 'md' && <RolePreviewSwatches roles={preview.light} />}
+
+          {layer === 'shadcn' && (
+            <ShadcnSourcePicker
+              value={shadcnSource}
+              onValueChange={setShadcnSource}
+              roles={preview.light}
+            />
+          )}
 
           {(error ?? draftError) !== null && (
             <p className="text-xs text-error">{error ?? draftError}</p>
