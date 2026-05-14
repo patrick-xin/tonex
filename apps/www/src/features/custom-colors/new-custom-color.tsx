@@ -16,6 +16,7 @@ import {
   validateCustomColorEntry,
 } from '@tonex/core/schema'
 import { useCallback, useState } from 'react'
+import { cn } from 'tailwind-variants'
 import { NativeColorInput } from '@/components/shared/native-color-input'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioRoot } from '@/components/ui/radio'
 import { Switch } from '@/components/ui/switch'
 import {
   ChromaSlider,
@@ -39,6 +41,7 @@ import {
   toneGradient,
 } from '@/features/hct-controls'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
+import { useLayer } from '@/lib/layer-context'
 
 // why: shift seed hue by 120° for a complementary starting color. Pure on
 // core's hex↔HCT helpers — no MCU import in www.
@@ -57,6 +60,7 @@ export function NewCustomColor({
   const seedHex = useSource((s) => s.seedHex)
   const customColors = useSource((s) => s.customColors)
   const addCustomColor = useSource((s) => s.actions.addCustomColor)
+  const layer = useLayer()
 
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -65,6 +69,7 @@ export function NewCustomColor({
   const [chroma, setChroma] = useState(48)
   const [tone, setTone] = useState(40)
   const [blend, setBlend] = useState(true)
+  const [shadcnSource, setShadcnSource] = useState<'color' | 'container'>('color')
   const [error, setError] = useState<string | null>(null)
 
   const colorHex = hexFromHct({ hue, chroma, tone })
@@ -72,6 +77,10 @@ export function NewCustomColor({
   const hueG = hueGradient()
   const chromaG = chromaGradient(hue, tone, gamutLimit)
   const toneG = toneGradient(hue, chroma)
+  // why: light-mode preview of the 4 generated md roles — feeds both the role
+  // swatches and the shadcn-pair picker. The dialog is a quick-add path; the
+  // CustomColorList row swatch is what resolves against the active theme mode.
+  const preview = previewCustomColor(seedHex, { hex: colorHex, blend })
 
   const setFromHex = useCallback((hex: string) => {
     const t = hctFromHex(hex)
@@ -91,6 +100,7 @@ export function NewCustomColor({
       setName('')
       setDescription('')
       setBlend(true)
+      setShadcnSource('color')
       setError(null)
       const startHex = complementaryHex(seedHex)
       setFromHex(startHex)
@@ -105,19 +115,27 @@ export function NewCustomColor({
     { name, hex: colorHex },
     new Set(customColors.map((e) => slugifyCustomColorName(e.name))),
   )
+  // why: gate the draft error TEXT on a non-empty name — the dialog opens with
+  // an empty name, and showing "name must contain…" before the user has typed
+  // reads as a failure they caused. The Add button still keys off draftError
+  // directly, so an empty name keeps it disabled; only the red text waits. A
+  // caught `error` from addCustomColor always shows.
+  const visibleError = error ?? (name.trim() ? draftError : null)
 
   const handleAdd = () => {
     const trimmed = name.trim()
     if (!trimmed) return
-    // why: shadcnSource defaults to 'color' silently — md-only UI for now.
-    // Editing the field is deferred until the shadcn surface is exposed.
+    // why: shadcnSource is user-chosen on the shadcn route via ShadcnSourcePicker;
+    // on the md route the picker is hidden and the 'color' default carries — md
+    // emits all 4 custom tokens regardless, shadcnSource only selects which md
+    // pair feeds the shadcn --{slug} token.
     const entry: CustomColorEntry = {
       id: crypto.randomUUID(),
       name: trimmed,
       description: description.trim() || undefined,
       hex: colorHex,
       blend,
-      shadcnSource: 'color',
+      shadcnSource,
     }
     try {
       addCustomColor(entry)
@@ -223,7 +241,7 @@ export function NewCustomColor({
             />
           </div>
 
-          <RolePreview seedHex={seedHex} hex={colorHex} blend={blend} />
+          {layer === 'md' && <RolePreviewSwatches roles={preview.light} />}
 
           <div className="border-t border-outline-variant/40 pt-4">
             <Label
@@ -240,9 +258,15 @@ export function NewCustomColor({
             </Label>
           </div>
 
-          {(error ?? draftError) !== null && (
-            <p className="text-xs text-error">{error ?? draftError}</p>
+          {layer === 'shadcn' && (
+            <ShadcnSourcePicker
+              value={shadcnSource}
+              onValueChange={setShadcnSource}
+              roles={preview.light}
+            />
           )}
+
+          {visibleError !== null && <p className="text-xs text-error">{visibleError}</p>}
         </div>
 
         <DialogFooter>
@@ -254,14 +278,6 @@ export function NewCustomColor({
       </DialogContent>
     </Dialog>
   )
-}
-
-// why: live preview of the 4 generated md roles via core's previewCustomColor.
-// Light-mode only here — the dialog is a quick add path; the row swatch in
-// CustomColorList resolves mode against the active theme.
-function RolePreview({ seedHex, hex, blend }: { seedHex: string; hex: string; blend: boolean }) {
-  const preview = previewCustomColor(seedHex, { hex, blend })
-  return <RolePreviewSwatches roles={preview.light} />
 }
 
 export function RolePreviewSwatches({ roles }: { roles: CustomColorPreviewRoles }) {
@@ -289,5 +305,82 @@ export function RolePreviewSwatches({ roles }: { roles: CustomColorPreviewRoles 
         </div>
       ))}
     </div>
+  )
+}
+
+// why: shadcn-route-only control — picks which generated md pair feeds the
+// custom color's shadcn token (--{slug} / --{slug}-foreground). deriveTheme's
+// buildCustomColorsShadcn reads entry.shadcnSource to make exactly this
+// selection: 'color' → the vivid color/on-color pair, 'container' → the soft
+// container pair. The md route hides this — md emits all 4 tokens regardless.
+// Shared by the add (NewCustomColor) and edit (EditCustomColorDialog) dialogs.
+export function ShadcnSourcePicker({
+  value,
+  onValueChange,
+  roles,
+}: {
+  value: 'color' | 'container'
+  onValueChange: (value: 'color' | 'container') => void
+  roles: CustomColorPreviewRoles
+}) {
+  return (
+    <div className="border-t border-outline-variant/40 pt-4 space-y-2">
+      <RadioGroup
+        value={value}
+        onValueChange={(v) => onValueChange(v as 'color' | 'container')}
+        className="grid-cols-2"
+      >
+        <SourceCard
+          value="color"
+          selected={value === 'color'}
+          bg={roles.color}
+          fg={roles.onColor}
+        />
+        <SourceCard
+          value="container"
+          selected={value === 'container'}
+          bg={roles.colorContainer}
+          fg={roles.onColorContainer}
+        />
+      </RadioGroup>
+    </div>
+  )
+}
+
+function SourceCard({
+  value,
+  selected,
+  bg,
+  fg,
+}: {
+  value: 'color' | 'container'
+  selected: boolean
+  bg: string
+  fg: string
+}) {
+  return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: the nested Radio (a Base UI <button>, a labelable control) is the associated control
+    <label
+      className={cn(
+        'flex flex-col gap-2 rounded-lg border p-2 cursor-pointer transition-colors',
+        selected
+          ? 'border-outline-variant bg-primary/8'
+          : 'border-outline-variant/60 hover:border-outline-variant',
+      )}
+    >
+      <RadioRoot value={value} />
+      <div className="flex gap-2">
+        <div className="h-9 flex-1 flex items-end p-1.5 rounded-md" style={{ backgroundColor: bg }}>
+          <span className="text-[10px] font-medium leading-none" style={{ color: fg }}>
+            bg: {bg}
+          </span>
+        </div>
+        <div className="h-9 flex-1 flex items-end p-1.5 rounded-md" style={{ backgroundColor: fg }}>
+          <span className="text-[10px] font-medium leading-none" style={{ color: bg }}>
+            fg: {fg}
+          </span>
+        </div>
+      </div>
+    </label>
   )
 }
