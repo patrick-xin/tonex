@@ -35,8 +35,10 @@ const FAMILY_ORDER: ReadonlyArray<FamilyKey> = [
 ]
 
 // why: branch order matters — `--color-inverse-primary` contains both 'inverse'
-// and 'primary'; the inverse-prefix check must run first.
-function familyOf(token: MdTokenName): FamilyKey {
+// and 'primary'; the inverse-prefix check must run first. Param is `string`
+// (not `MdTokenName`) so the contrast-checker can classify pair.fg through the
+// same rules — see `mdFamilyLabel`.
+function familyOf(token: string): FamilyKey {
   if (token.startsWith('--color-inverse-')) return 'inverse'
   if (token === '--color-shadow' || token === '--color-scrim') return 'utility'
   if (token.includes('primary')) return 'primary'
@@ -47,6 +49,15 @@ function familyOf(token: MdTokenName): FamilyKey {
   if (token.includes('surface')) return 'surface'
   return 'utility'
 }
+
+// why: shared with the contrast-checker md grouping so the inspect role list
+// and the contrast table classify md tokens into the same families. The
+// contrast table groups by pair.fg (the role under test).
+export function mdFamilyLabel(token: string): string {
+  return FAMILY_LABEL[familyOf(token)]
+}
+
+export const MD_FAMILY_ORDER: readonly string[] = FAMILY_ORDER.map((k) => FAMILY_LABEL[k])
 
 export interface RoleGroup {
   label: string

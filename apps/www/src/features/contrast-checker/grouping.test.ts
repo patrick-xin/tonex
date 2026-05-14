@@ -41,7 +41,7 @@ describe('familyOf', () => {
     expect(familyOf(onCard)).toBe('Chart')
   })
 
-  it('still groups md pairs by bg family', () => {
+  it('groups md pairs by fg family via the color-roles-list classifier', () => {
     const pair: ContrastPair = {
       fg: '--color-on-primary',
       bg: '--color-primary',
@@ -50,6 +50,17 @@ describe('familyOf', () => {
       threshold: 4.5,
     }
     expect(familyOf(pair)).toBe('Primary')
+  })
+
+  it('classifies md pairs by fg, not bg, when the two differ', () => {
+    const pair: ContrastPair = {
+      fg: '--color-on-surface',
+      bg: '--color-primary',
+      layer: 'md',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    expect(familyOf(pair)).toBe('Surface')
   })
 
   it('still groups shadcn pairs by bg family', () => {

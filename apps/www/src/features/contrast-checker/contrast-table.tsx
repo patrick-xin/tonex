@@ -30,7 +30,7 @@ function TokenCell({ name, hex }: { name: string; hex: string }) {
         style={{ background: hex }}
       />
       <div>
-        <div className="text-xs font-mono">{name.replace(/^--/, '')}</div>
+        <div className="text-xs font-mono">{name.replace(/^--(color-)?/, '')}</div>
         <div className="text-[10px] text-on-surface-variant font-mono">{hex}</div>
       </div>
     </div>
