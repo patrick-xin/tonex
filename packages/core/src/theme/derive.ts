@@ -7,6 +7,11 @@ import {
   customColor as mdCustomColor,
 } from '@tonex/mcu'
 import { variants } from '../variants'
+import {
+  buildMdChartSequentialSamples,
+  PROMINENT_EDGE_DARK_DEFAULT,
+  PROMINENT_EDGE_LIGHT_DEFAULT,
+} from './chart-sequential'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
@@ -94,20 +99,6 @@ export interface DerivedTheme {
 
 const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
 const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
-
-// why: 5-tone spread per mode (ADR-0021 commitment 2; ADR-0024 mono branch
-// becomes ADR-0027 sequential scheme). Slice contrast-4 (ADR-0027 c.5) tuned
-// these tones to satisfy the contrast contract: every chart token hits 3:1
-// against `--color-surface`, `--color-surface-container` (md side), and the
-// shadcn-rebranded `--background`, `--card` partners. The binding constraint
-// is shadcn `--card` — surface-treatment shifts it inward toward chart hues
-// (light tone ~87 tinted, dark tone ~17 tinted) so chart tones live in
-// [~20-50] light / [~55-90] dark to keep 3:1 headroom. A future ADR may
-// replace these constants with an algorithmic contrast-aware tone walk in
-// `buildMdChart` so the guarantee extends across all variants/schemes by
-// construction; for now, the contrast.test.ts guard catches drift.
-const CHART_TONES_LIGHT = [40, 50, 20, 30, 45] as const
-const CHART_TONES_DARK = [80, 65, 90, 70, 60] as const
 
 // why: categorical scheme — hue-rotated primitives (ADR-0024, renamed to
 // `categorical` in ADR-0027 c.2). Offsets distribute 5 chart series around
@@ -365,8 +356,33 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const splitLight = splitMdLayer(mergedLight)
   const splitDark = splitMdLayer(mergedDark)
 
-  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chart.scheme)
-  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chart.scheme)
+  // why: the algorithmic sequential branch bisects against the md surface
+  // family for the 3:1 floor. Under default shadcn bindings `--background` ≡
+  // `--color-surface` and `--card` ≡ `--color-surface-container`, so passing
+  // the md-side partners is sufficient for the contrast-pair contract today;
+  // non-default bindings are at the user's discretion via chart overrides.
+  const lightChartPartners: readonly number[] = [
+    splitLight.core['--color-surface'] as number,
+    splitLight.core['--color-surface-container'] as number,
+  ]
+  const darkChartPartners: readonly number[] = [
+    splitDark.core['--color-surface'] as number,
+    splitDark.core['--color-surface-container'] as number,
+  ]
+  const mdLightChart = buildMdChart(
+    seedHct,
+    lightScheme,
+    'light',
+    source.chart.scheme,
+    lightChartPartners,
+  )
+  const mdDarkChart = buildMdChart(
+    seedHct,
+    darkScheme,
+    'dark',
+    source.chart.scheme,
+    darkChartPartners,
+  )
 
   return {
     md: {
@@ -419,27 +435,43 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
   return { core, extended }
 }
 
-// why: chart-color derivation has two shapes by intent (ADR-0024).
-//   mono — reads scheme.primaryPalette at fixed tones. Variant-aware (the
-//          palette already encodes Vibrant / Expressive / Rainbow character).
-//          Respects paletteOverrides because the override mutates the
-//          primaryPalette in place upstream of this function.
-//   multi — synthesizes 5 hue-rotated points via Hct.from() at fixed
-//           chroma+tone. Variant-bypassed by design — hue rotation and
-//           variant tonal-spotting are conflicting goals. Achromatic seed
-//           (chroma < 5) uses fallback hue 270 so a gray seed still produces
-//           a colorful series.
+// why: chart-color derivation has two shapes by intent (ADR-0024 / ADR-0027).
+//   sequential — algorithmic monotonic walk in the seed's primaryPalette: L*
+//                spaced evenly between a binary-searched safe edge (3:1 floor
+//                against partners) and a brand-presentation prominent edge.
+//                Variant-aware (palette encodes Vibrant / Expressive / Rainbow
+//                chroma character). Respects paletteOverrides because the
+//                override mutates the primaryPalette in place upstream. Math
+//                lives in `chart-sequential.ts`; this branch is the production
+//                call with single-hue defaults (slice 2 promotion, ADR-0027
+//                c.3). Partners arg is the per-mode md surface family argbs
+//                the algorithm bisects against.
+//   categorical — synthesizes 5 hue-rotated points via Hct.from() at fixed
+//                 chroma+tone. Variant-bypassed by design — hue rotation and
+//                 variant tonal-spotting are conflicting goals. Achromatic
+//                 seed (chroma < 5) uses fallback hue 270 so a gray seed
+//                 still produces a colorful series.
 function buildMdChart(
   seedHct: Hct,
   scheme: DynamicScheme,
   mode: Mode,
   chartScheme: ChartScheme,
+  partners: readonly number[],
 ): TokenMap {
   const out: TokenMap = {}
   if (chartScheme === 'sequential') {
-    const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
+    const { argbs } = buildMdChartSequentialSamples(
+      scheme.primaryPalette,
+      mode,
+      partners,
+      mode === 'light' ? PROMINENT_EDGE_LIGHT_DEFAULT : PROMINENT_EDGE_DARK_DEFAULT,
+      0,
+      'chart-1',
+      MD_CHART_TOKEN_NAMES.length,
+      Array(MD_CHART_TOKEN_NAMES.length).fill(null),
+    )
     MD_CHART_TOKEN_NAMES.forEach((name, i) => {
-      out[name] = scheme.primaryPalette.tone(tones[i])
+      out[name] = argbs[i] as number
     })
     return out
   }

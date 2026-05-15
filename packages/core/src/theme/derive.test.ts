@@ -887,16 +887,54 @@ describe('deriveTheme', () => {
       expect(hct.hue).toBeLessThan(275)
     })
 
-    it('chart.scheme="sequential" (default) is unchanged from pre-axis behavior — palette-tone derivation', () => {
-      // why: drift-guard. sequential is the default (ADR-0027 c.2, renamed
-      // from "mono"); its derivation must remain the variant-aware
-      // primaryPalette.tone() path that v9 had inline. Explicit
-      // chart.scheme='sequential' must equal the default DEFAULT_INPUTS
-      // result token-for-token.
+    it('chart.scheme="sequential" (default): explicit override matches DEFAULT_INPUTS token-for-token', () => {
+      // why: drift-guard. sequential is the default (ADR-0027 c.2); explicit
+      // chart.scheme='sequential' MUST equal the default DEFAULT_INPUTS result
+      // token-for-token. The algorithmic walk (ADR-0027 c.3, slice 2
+      // promotion) replaces the legacy hand-picked tones, but default-vs-
+      // explicit identity holds because both paths call the same code.
       const baseline = deriveTheme(DEFAULT_INPUTS)
       const explicit = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'sequential' } })
       expect(explicit.md.lightChart).toEqual(baseline.md.lightChart)
       expect(explicit.md.darkChart).toEqual(baseline.md.darkChart)
+    })
+
+    it('chart.scheme="sequential": L* descends monotonically chart-1 → chart-N (chart-1 is the lightest)', () => {
+      // why: ADR-0027 c.3 — algorithmic sequential walks tone from a safe
+      // edge (just inside 3:1 against the binding partner) toward a brand-
+      // presentation prominent edge. chart-1 lives at the safe edge (lightest
+      // in both modes — ColorBrewer convention), so the L* sequence is
+      // strictly descending. Locks the convention against accidental flips.
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const lightTones = MD_CHART_TOKEN_NAMES.map(
+        (n) => Hct.fromInt(md.lightChart[n] as number).tone,
+      )
+      const darkTones = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.darkChart[n] as number).tone)
+      for (let i = 1; i < lightTones.length; i++) {
+        expect(lightTones[i]).toBeLessThan(lightTones[i - 1] as number)
+      }
+      for (let i = 1; i < darkTones.length; i++) {
+        expect(darkTones[i]).toBeLessThan(darkTones[i - 1] as number)
+      }
+    })
+
+    it('chart.scheme="sequential": all 5 chart tokens share the seed primary-palette hue (single-hue)', () => {
+      // why: ADR-0027 c.3 — single-hue sequential keeps the brand hue across
+      // chart-1..N; lightness alone encodes the ordered axis. Multi-hue
+      // sequential (a future slice) will relax this by rotating hue per slot.
+      // <3° tolerance covers the small gamut-mapping shift palette.tone()
+      // applies at high-chroma corners of sRGB.
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const lightHues = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.lightChart[n] as number).hue)
+      const darkHues = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.darkChart[n] as number).hue)
+      const refLight = lightHues[0] as number
+      const refDark = darkHues[0] as number
+      for (const h of lightHues) {
+        expect(Math.abs(h - refLight)).toBeLessThan(3)
+      }
+      for (const h of darkHues) {
+        expect(Math.abs(h - refDark)).toBeLessThan(3)
+      }
     })
 
     // why: ADR-0027 c.4 — chart overrides are terminal pins applied
