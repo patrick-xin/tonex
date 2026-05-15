@@ -1,6 +1,13 @@
 'use client'
 
-import { hctFromHex, hexFromHct, maxChroma, previewCustomColor, useSource } from '@tonex/core'
+import {
+  hctFromHex,
+  hexFromHct,
+  maxChroma,
+  previewCustomColor,
+  selectSeedHex,
+  useSource,
+} from '@tonex/core'
 import { validateCustomColorEntry } from '@tonex/core/schema'
 import { useCallback, useState } from 'react'
 import { chromaGradient, hueGradient, toneGradient } from '@/features/hct-controls'
@@ -21,7 +28,7 @@ export interface CustomColorFormInitial {
 // body renders the JSX given a hook result. Caller passes `existingSlugs` so
 // add-time can validate against ALL entries while edit-time excludes self.
 export function useCustomColorForm(initial: CustomColorFormInitial, existingSlugs: Set<string>) {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
 
   const [name, setName] = useState(initial.name)
   const [description, setDescription] = useState(initial.description)

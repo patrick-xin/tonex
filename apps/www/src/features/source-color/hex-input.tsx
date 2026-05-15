@@ -1,12 +1,12 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { selectSeedHex, useSource } from '@tonex/core'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
 export function HexInput({ hideLabel = false }: { hideLabel?: boolean }) {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
 

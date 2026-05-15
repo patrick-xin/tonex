@@ -5,34 +5,37 @@ import { useMemo } from 'react'
 import { ChromaSlider } from './chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from './gradients'
 import { HctSlider } from './hct-slider'
-import { useHctFromHex } from './use-hct-from-hex'
 
-// why: HCT decomposition is held in the hook's local state with a round-trip
-// cache so commits at the hue 0/360 boundary (where MCU's hctFromHex collapses
-// 360 → 0 by spec) don't snap the slider thumb. The store remains hex-only —
-// the hook writes via setSeedHex; the per-axis store actions (setSeedHue etc.)
-// are still exported for programmatic callers but no UI path uses them. The
-// seedHexLock check lives on setSeedHex in core, so the lock still gates UI
-// writes through this hook.
+// why: ADR-0028 — HCT is the canonical persisted seed; sliders read seed
+// fields directly from the store and write each axis via the per-axis
+// setter. The prior hex-canonical world routed every gesture through
+// useHctFromHex, which held a local HCT cache to dodge hctFromHex
+// collapsing 360 → 0 at the hue boundary; once HCT lives in the store the
+// cache is redundant — the store IS that cache. seedHexLock gates every
+// setter at the store seam, so locking disables all axes structurally;
+// the UI also disables the inputs cosmetically.
 export function HctControlSliders() {
-  const seedHex = useSource((s) => s.seedHex)
+  const seed = useSource((s) => s.seed)
   const seedHexLock = useSource((s) => s.seedHexLock)
-  const setSeedHex = useSource((s) => s.actions.setSeedHex)
+  const setSeedHue = useSource((s) => s.actions.setSeedHue)
+  const setSeedChroma = useSource((s) => s.actions.setSeedChroma)
+  const setSeedTone = useSource((s) => s.actions.setSeedTone)
 
-  const [{ hue, chroma, tone }, updateHct] = useHctFromHex(seedHex, setSeedHex)
+  const { hue, chroma, tone } = seed
   const gamutLimit = useMemo(() => maxChroma(hue, tone), [hue, tone])
 
   // why: hue gradient is hue+chroma+tone-independent — the wheel is the
-  // wheel. Memoize at module scope would also work; useMemo with [] keeps
-  // the lifecycle predictable inside React DevTools.
+  // wheel. useMemo with [] keeps the lifecycle predictable inside DevTools.
   const hueG = useMemo(() => hueGradient(), [])
   const chromaG = useMemo(() => chromaGradient(hue, tone, gamutLimit), [hue, tone, gamutLimit])
   const toneG = useMemo(() => toneGradient(hue, chroma), [hue, chroma])
 
   // why: hue carries no perceptual signal below CHROMA_HUE_LOCK chroma —
   // the color is achromatic, so dragging hue produces no visible change.
-  // Disable the slider rather than let users grind it for nothing. seedHexLock
-  // disables all three (seed is fully locked).
+  // Disable the slider rather than let users grind it for nothing. Note
+  // ADR-0028 makes this lock visually-true: the underlying seed.hue is
+  // preserved verbatim across chroma touches in this regime, so the user's
+  // hue choice survives lock-and-release.
   const hueDisabled = seedHexLock || chroma < CHROMA_HUE_LOCK
 
   return (
@@ -42,7 +45,7 @@ export function HctControlSliders() {
         value={hue}
         max={360}
         gradient={hueG}
-        onValueChange={(h) => updateHct({ hue: h })}
+        onValueChange={setSeedHue}
         disabled={hueDisabled}
       />
       <ChromaSlider
@@ -50,7 +53,7 @@ export function HctControlSliders() {
         value={chroma}
         gamutLimit={gamutLimit}
         gradient={chromaG}
-        onValueChange={(c) => updateHct({ chroma: c })}
+        onValueChange={setSeedChroma}
       />
       <HctSlider
         disabled={seedHexLock}
@@ -58,7 +61,7 @@ export function HctControlSliders() {
         value={tone}
         max={100}
         gradient={toneG}
-        onValueChange={(t) => updateHct({ tone: t })}
+        onValueChange={setSeedTone}
       />
     </div>
   )

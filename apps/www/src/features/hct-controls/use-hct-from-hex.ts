@@ -60,6 +60,14 @@ function hctClose(a: HctTriplet, b: HctTriplet): boolean {
 // chroma down and back up doesn't whip the hue thumb. The prior `lockedHue`
 // ref shimmy in palette-color-picker existed to paper over exactly this case
 // and becomes redundant once HCT is held locally.
+//
+// Scope post-ADR-0028: the canonical seed sliders no longer use this hook —
+// HCT lives in the store directly, so the hex ↔ HCT cache that motivates
+// the local state is redundant for that path (hct-control-sliders reads
+// `s.seed` and writes via per-axis setters). This hook remains the right
+// shape for hex-canonical pickers (palette-override, custom-color pins)
+// where the parent owns a hex string and the slider needs to project HCT
+// for the user without losing the wraparound information mid-drag.
 export function useHctFromHex(
   hex: string,
   onChange: (next: string) => void,

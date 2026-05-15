@@ -1,7 +1,7 @@
 'use client'
 
 import { PlusIcon } from '@phosphor-icons/react'
-import { hctFromHex, hexFromHct, useSource } from '@tonex/core'
+import { hctFromHex, hexFromHct, selectSeedHex, useSource } from '@tonex/core'
 import { type CustomColorEntry, slugifyCustomColorName } from '@tonex/core/schema'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -49,7 +49,7 @@ export function NewCustomColor({
   icon?: boolean
   iconSize?: 'icon-sm' | 'icon-xs'
 }) {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const customColors = useSource((s) => s.customColors)
   const addCustomColor = useSource((s) => s.actions.addCustomColor)
   const layer = useLayer()
