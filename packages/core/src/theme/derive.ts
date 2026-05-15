@@ -6,8 +6,7 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
-import { buildMdChart, rebrandChart } from '../chart/build'
-import { SHADCN_CHART_TOKEN_NAMES, type ShadcnChartTokenName } from '../chart/schema'
+import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../chart/build'
 import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
@@ -395,24 +394,6 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
     else core[name] = argb
   }
   return { core, extended }
-}
-
-// why: ADR-0027 c.4 — terminal pin on shadcn chart tokens. Applied after
-// rebrandChart so overrides win over scheme-derived values byte-identically
-// (argbFromHex of the pinned hex). MD layer untouched per the issue #31
-// scoping (pins live on the shadcn surface only). Empty override map
-// short-circuits: the spread + no-op loop returns a structurally equal
-// TokenMap, keeping the drift-guard byte-identical baseline.
-function applyShadcnChartOverrides(
-  chartLayer: TokenMap,
-  overrides: Partial<Record<ShadcnChartTokenName, string>>,
-): TokenMap {
-  const out = { ...chartLayer }
-  for (const token of SHADCN_CHART_TOKEN_NAMES) {
-    const overrideHex = overrides[token]
-    if (overrideHex !== undefined) out[token] = argbFromHex(overrideHex)
-  }
-  return out
 }
 
 // why: 78 palette tones (13 tones × 6 palettes). Mode/contrast-invariant —

@@ -1,7 +1,7 @@
-import { type DynamicScheme, Hct } from '@tonex/mcu'
+import { argbFromHex, type DynamicScheme, Hct } from '@tonex/mcu'
 import type { Mode } from '../theme/mode'
 import type { PortableTheme } from '../theme/schema'
-import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from './schema'
+import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES, type ShadcnChartTokenName } from './schema'
 import {
   buildMdChartSequentialSamples,
   PROMINENT_EDGE_DARK_DEFAULT,
@@ -96,5 +96,23 @@ export function rebrandChart(mdChart: TokenMap): TokenMap {
     }
     out[shadcnName] = argb
   })
+  return out
+}
+
+// why: ADR-0027 c.4 — terminal pin on shadcn chart tokens. Applied after
+// rebrandChart so overrides win over scheme-derived values byte-identically
+// (argbFromHex of the pinned hex). MD layer untouched per the issue #31
+// scoping (pins live on the shadcn surface only). Empty override map
+// short-circuits: the spread + no-op loop returns a structurally equal
+// TokenMap, keeping the drift-guard byte-identical baseline.
+export function applyShadcnChartOverrides(
+  chartLayer: TokenMap,
+  overrides: Partial<Record<ShadcnChartTokenName, string>>,
+): TokenMap {
+  const out = { ...chartLayer }
+  for (const token of SHADCN_CHART_TOKEN_NAMES) {
+    const overrideHex = overrides[token]
+    if (overrideHex !== undefined) out[token] = argbFromHex(overrideHex)
+  }
   return out
 }
