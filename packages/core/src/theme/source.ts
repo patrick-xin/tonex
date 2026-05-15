@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/schema'
 import type { VariantName } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import { hctFromHex, hexFromHct } from './hct'
@@ -7,7 +8,6 @@ import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
 import {
-  type ChartScheme,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   isValidHex,
@@ -16,7 +16,6 @@ import {
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
-  type ShadcnChartTokenName,
   type ShadcnRoleName,
   STORAGE_KEY,
   type SurfaceAlgo,
@@ -77,6 +76,8 @@ export interface SourceActions {
   // setPaletteOverride. Hex format validated; malformed throws at the seam.
   setCmfSecondSourceHex(hex: string | null): void
   setChartScheme(scheme: ChartScheme): void
+  setChartHueSpread(spread: number): void
+  setChartHueAnchor(anchor: HueAnchor): void
   setHydrated(): void
   reset(): void
 }
@@ -288,7 +289,9 @@ export const useSource = create<SourceState>()(
             }
             return { cmfSecondSourceHex: hex }
           }),
-        setChartScheme: (scheme) => set({ chart: { scheme } }),
+        setChartScheme: (scheme) => set((s) => ({ chart: { ...s.chart, scheme } })),
+        setChartHueSpread: (spread) => set((s) => ({ chart: { ...s.chart, hueSpread: spread } })),
+        setChartHueAnchor: (anchor) => set((s) => ({ chart: { ...s.chart, hueAnchor: anchor } })),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },

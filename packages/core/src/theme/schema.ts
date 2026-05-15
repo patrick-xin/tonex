@@ -1,5 +1,16 @@
 import type { DynamicScheme } from '@tonex/mcu'
 import * as v from 'valibot'
+import {
+  CHART_SCHEMES,
+  type ChartScheme,
+  HUE_ANCHOR_DEFAULT,
+  HUE_ANCHORS,
+  HUE_SPREAD_DEFAULT,
+  type HueAnchor,
+  type MdChartTokenName,
+  SHADCN_CHART_TOKEN_NAMES,
+  type ShadcnChartTokenName,
+} from '../chart/schema'
 import { type VariantName, variants } from '../variants'
 import { SHADCN_PRESETS } from './shadcn-presets'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
@@ -152,43 +163,6 @@ export const MD_EXTENDED_TOKEN_NAMES = [
   '--color-scrim',
 ] as const satisfies readonly MdTokenName[]
 export type MdExtendedTokenName = (typeof MD_EXTENDED_TOKEN_NAMES)[number]
-
-// why: ADR-0021 commitment 2 — chart tokens are derived from the primary
-// palette via a fixed 5-tone mapping. Mode-aware (mirrors core role tokens),
-// not contrast-invariant. Names match the shadcn convention prefixed with
-// `--color-` so they line up with Tailwind v4 utility resolution.
-export const MD_CHART_TOKEN_NAMES = [
-  '--color-chart-1',
-  '--color-chart-2',
-  '--color-chart-3',
-  '--color-chart-4',
-  '--color-chart-5',
-] as const
-export type MdChartTokenName = (typeof MD_CHART_TOKEN_NAMES)[number]
-
-// why: shadcn-side chart names mirror the prevailing shadcn convention
-// (`--chart-1` … `--chart-5`). Values are sourced from the same primary
-// palette tones — chart is one underlying domain, surfaced under each
-// layer's namespace.
-export const SHADCN_CHART_TOKEN_NAMES = [
-  '--chart-1',
-  '--chart-2',
-  '--chart-3',
-  '--chart-4',
-  '--chart-5',
-] as const
-export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
-
-// why: chart-color derivation has two shapes by intent (ADR-0024, renamed
-// in ADR-0027 c.2 to align with data-viz vocabulary). `sequential` reads
-// the scheme's primary palette at fixed tones (variant-aware — Vibrant /
-// Expressive / Rainbow flavor flows through; was `mono`). `categorical`
-// synthesizes 5 hue-rotated points via Hct.from() at fixed chroma + tone
-// (variant-bypassed — hue rotation is the whole point; was `multi`).
-// `diverging` is reserved per ADR-0027 c.2 but lands in a future slice —
-// picklist starts at two values. shadcn's default is sequential.
-export const CHART_SCHEMES = ['sequential', 'categorical'] as const
-export type ChartScheme = (typeof CHART_SCHEMES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
@@ -976,16 +950,20 @@ export interface PortableTheme {
   // disables the field). Hex format validated at the setter boundary via
   // isValidHex.
   cmfSecondSourceHex: string | null
-  // why: chart-palette namespace (ADR-0027 c.1). Object shape reserves the
-  // surface for future derivation axes (seedPalette, count, tones, chroma,
-  // hueSpread) added one slice at a time. Today: `scheme` only.
-  // - sequential (default, shadcn convention) — primary palette at fixed
-  //   tones; variant-aware.
-  // - categorical — hue-rotated synthesis via Hct.from() at fixed
-  //   chroma/tone; variant-bypassed. Achromatic seed (chroma < 5) falls
-  //   back to hue 270 so a gray seed still produces a colorful series.
-  // ADR-0024 introduced the axis; ADR-0027 reshaped the namespace.
-  chart: { scheme: ChartScheme }
+  // why: chart-palette namespace (ADR-0027 c.1). Holds derivation axes that
+  // shape the chart token output:
+  // - scheme — sequential (default, shadcn convention; primary palette at
+  //   contrast-aware tones, variant-aware) or categorical (hue-rotated
+  //   synthesis via Hct.from() at fixed chroma/tone, variant-bypassed;
+  //   achromatic seed (chroma < 5) falls back to hue 270).
+  // - hueSpread — only meaningful under sequential. Degrees of hue rotation
+  //   between chart-1 and chart-N. 0 = single-hue (legacy slice-2 default);
+  //   default 80 (slice 3) = multi-hue. Bounded [0, 360]; values past ~120
+  //   start reading as categorical rather than sequential.
+  // - hueAnchor — only meaningful under sequential when hueSpread > 0.
+  //   Picks which slot pins to the brand/seed hue; see HUE_ANCHORS docstring.
+  // ADR-0024 introduced the axis; ADR-0027 c.2/c.3 reshaped the namespace.
+  chart: { scheme: ChartScheme; hueSpread: number; hueAnchor: HueAnchor }
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -1008,7 +986,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,
-  chart: { scheme: 'sequential' },
+  chart: { scheme: 'sequential', hueSpread: HUE_SPREAD_DEFAULT, hueAnchor: HUE_ANCHOR_DEFAULT },
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
@@ -1117,7 +1095,11 @@ export const PortableThemeSchema = v.object({
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
   cmfSecondSourceHex: v.union([HexSchema, v.null()]),
-  chart: v.object({ scheme: v.picklist(CHART_SCHEMES) }),
+  chart: v.object({
+    scheme: v.picklist(CHART_SCHEMES),
+    hueSpread: v.pipe(v.number(), v.minValue(0), v.maxValue(360)),
+    hueAnchor: v.picklist(HUE_ANCHORS),
+  }),
 })
 
 // why: returns a discriminated result instead of throwing — the caller

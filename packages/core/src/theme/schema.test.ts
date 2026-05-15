@@ -318,12 +318,65 @@ describe('parsePortableTheme', () => {
   // trajectory but lives in a future slice — schema must reject it now so
   // premature adoption can't slip through a stale persisted blob or test fixture.
   it('chart.scheme picklist is categorical and sequential only', () => {
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } }).ok).toBe(
-      true,
-    )
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'sequential' } }).ok).toBe(true)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'diverging' } }).ok).toBe(false)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'foo' } }).ok).toBe(false)
+    expect(
+      parsePortableTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'categorical' },
+      }).ok,
+    ).toBe(true)
+    expect(
+      parsePortableTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'sequential' },
+      }).ok,
+    ).toBe(true)
+    expect(
+      parsePortableTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'diverging' },
+      } as unknown).ok,
+    ).toBe(false)
+    expect(
+      parsePortableTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'foo' },
+      } as unknown).ok,
+    ).toBe(false)
+  })
+
+  // why: ADR-0027 c.3 — chart.hueSpread is degrees of hue rotation between
+  // chart-1 and chart-N under sequential. Bounded [0, 360]: 0 = single-hue
+  // opt-in; 360 = full-wheel rotation (degenerates back to chart-1's hue at
+  // the far slot but the algorithm tolerates it). Negative or > 360 falls
+  // outside the supported range — reject so persisted blobs can't carry
+  // pathological values into the engine.
+  it('chart.hueSpread accepts [0, 360]; rejects out-of-range', () => {
+    const make = (hueSpread: number) => ({
+      ...DEFAULT_INPUTS,
+      chart: { ...DEFAULT_INPUTS.chart, hueSpread },
+    })
+    expect(parsePortableTheme(make(0)).ok).toBe(true)
+    expect(parsePortableTheme(make(80)).ok).toBe(true)
+    expect(parsePortableTheme(make(360)).ok).toBe(true)
+    expect(parsePortableTheme(make(-1)).ok).toBe(false)
+    expect(parsePortableTheme(make(361)).ok).toBe(false)
+  })
+
+  // why: ADR-0027 c.3 — chart.hueAnchor picks which slot pins to the seed
+  // hue under multi-hue (hueSpread > 0). Two strategies — chart-1 anchor
+  // preserves chart-i hue identity across modes; prominent-edge anchor
+  // preserves the "brand at the deep end" mental model. Schema enforces the
+  // closed picklist so unknown strategies don't silently degrade to a
+  // default at the engine seam.
+  it('chart.hueAnchor picklist is chart-1 and prominent-edge only', () => {
+    const make = (hueAnchor: string) => ({
+      ...DEFAULT_INPUTS,
+      chart: { ...DEFAULT_INPUTS.chart, hueAnchor },
+    })
+    expect(parsePortableTheme(make('chart-1')).ok).toBe(true)
+    expect(parsePortableTheme(make('prominent-edge')).ok).toBe(true)
+    expect(parsePortableTheme(make('chart-N')).ok).toBe(false)
+    expect(parsePortableTheme(make('foo')).ok).toBe(false)
   })
 
   // why: SCHEMA_VERSION reference — guards against the literal in the schema

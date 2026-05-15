@@ -6,14 +6,13 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
+import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../chart/build'
 import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
 import {
-  type ChartScheme,
   type CustomColorEntry,
-  MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_TONE_NAMES,
@@ -21,9 +20,7 @@ import {
   type MdTokenName,
   PALETTE_FAMILIES,
   type PortableTheme,
-  SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
-  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   slugifyCustomColorName,
@@ -94,39 +91,6 @@ export interface DerivedTheme {
 
 const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
 const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
-
-// why: 5-tone spread per mode (ADR-0021 commitment 2; ADR-0024 mono branch
-// becomes ADR-0027 sequential scheme). Slice contrast-4 (ADR-0027 c.5) tuned
-// these tones to satisfy the contrast contract: every chart token hits 3:1
-// against `--color-surface`, `--color-surface-container` (md side), and the
-// shadcn-rebranded `--background`, `--card` partners. The binding constraint
-// is shadcn `--card` — surface-treatment shifts it inward toward chart hues
-// (light tone ~87 tinted, dark tone ~17 tinted) so chart tones live in
-// [~20-50] light / [~55-90] dark to keep 3:1 headroom. A future ADR may
-// replace these constants with an algorithmic contrast-aware tone walk in
-// `buildMdChart` so the guarantee extends across all variants/schemes by
-// construction; for now, the contrast.test.ts guard catches drift.
-const CHART_TONES_LIGHT = [40, 50, 20, 30, 45] as const
-const CHART_TONES_DARK = [80, 65, 90, 70, 60] as const
-
-// why: categorical scheme — hue-rotated primitives (ADR-0024, renamed to
-// `categorical` in ADR-0027 c.2). Offsets distribute 5 chart series around
-// the color wheel: source hue, two triadic partners (±120°), then split-
-// complementary fill (60°/180°). Fixed chroma/tone so hue is the only axis
-// of separation — variant treatment intentionally does NOT participate
-// (hue rotation contradicts variant tonal-spotting). Tone values shifted in
-// slice contrast-4: light 50→45, dark 60→65, both for 3:1 headroom against
-// shadcn `--card` partner per ADR-0027 c.5.
-const MULTI_HUE_OFFSETS = [0, 120, 240, 60, 180] as const
-const MULTI_CHROMA = 50
-const MULTI_TONE_LIGHT = 45
-const MULTI_TONE_DARK = 65
-// why: a near-achromatic seed (e.g. user picked #808080) has no usable hue,
-// so multi mode falls back to hue 270 (purple) — matches shadcn's default
-// chart palette character. Threshold 5 chroma units is the same MCU uses
-// internally for "essentially gray" comparisons.
-const MULTI_ACHROMATIC_THRESHOLD = 5
-const MULTI_FALLBACK_HUE = 270
 
 // why: explicit MdTokenName → MCU getter table. Verbose but the mapping is
 // the load-bearing fact this module owes its readers — kebab-cased token
@@ -365,8 +329,21 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   const splitLight = splitMdLayer(mergedLight)
   const splitDark = splitMdLayer(mergedDark)
 
-  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chart.scheme)
-  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chart.scheme)
+  // why: the algorithmic sequential branch bisects against the md surface
+  // family for the 3:1 floor. Under default shadcn bindings `--background` ≡
+  // `--color-surface` and `--card` ≡ `--color-surface-container`, so passing
+  // the md-side partners is sufficient for the contrast-pair contract today;
+  // non-default bindings are at the user's discretion via chart overrides.
+  const lightChartPartners: readonly number[] = [
+    splitLight.core['--color-surface'] as number,
+    splitLight.core['--color-surface-container'] as number,
+  ]
+  const darkChartPartners: readonly number[] = [
+    splitDark.core['--color-surface'] as number,
+    splitDark.core['--color-surface-container'] as number,
+  ]
+  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chart, lightChartPartners)
+  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chart, darkChartPartners)
 
   return {
     md: {
@@ -417,72 +394,6 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
     else core[name] = argb
   }
   return { core, extended }
-}
-
-// why: chart-color derivation has two shapes by intent (ADR-0024).
-//   mono — reads scheme.primaryPalette at fixed tones. Variant-aware (the
-//          palette already encodes Vibrant / Expressive / Rainbow character).
-//          Respects paletteOverrides because the override mutates the
-//          primaryPalette in place upstream of this function.
-//   multi — synthesizes 5 hue-rotated points via Hct.from() at fixed
-//           chroma+tone. Variant-bypassed by design — hue rotation and
-//           variant tonal-spotting are conflicting goals. Achromatic seed
-//           (chroma < 5) uses fallback hue 270 so a gray seed still produces
-//           a colorful series.
-function buildMdChart(
-  seedHct: Hct,
-  scheme: DynamicScheme,
-  mode: Mode,
-  chartScheme: ChartScheme,
-): TokenMap {
-  const out: TokenMap = {}
-  if (chartScheme === 'sequential') {
-    const tones = mode === 'light' ? CHART_TONES_LIGHT : CHART_TONES_DARK
-    MD_CHART_TOKEN_NAMES.forEach((name, i) => {
-      out[name] = scheme.primaryPalette.tone(tones[i])
-    })
-    return out
-  }
-  const baseHue = seedHct.chroma < MULTI_ACHROMATIC_THRESHOLD ? MULTI_FALLBACK_HUE : seedHct.hue
-  const tone = mode === 'dark' ? MULTI_TONE_DARK : MULTI_TONE_LIGHT
-  MD_CHART_TOKEN_NAMES.forEach((name, i) => {
-    const hue = (baseHue + MULTI_HUE_OFFSETS[i]) % 360
-    out[name] = Hct.from(hue, MULTI_CHROMA, tone).toInt()
-  })
-  return out
-}
-
-// why: shadcn's chart names are the same 5 values the md side computes, just
-// renamed (`--color-chart-1` → `--chart-1`). One source of truth, two
-// namespaces — chart character can't drift between layers.
-function rebrandChart(mdChart: TokenMap): TokenMap {
-  const out: TokenMap = {}
-  SHADCN_CHART_TOKEN_NAMES.forEach((shadcnName, i) => {
-    const argb = mdChart[MD_CHART_TOKEN_NAMES[i]]
-    if (argb === undefined) {
-      throw new Error(`[rebrandChart] missing md chart token at index ${i}`)
-    }
-    out[shadcnName] = argb
-  })
-  return out
-}
-
-// why: ADR-0027 c.4 — terminal pin on shadcn chart tokens. Applied after
-// rebrandChart so overrides win over scheme-derived values byte-identically
-// (argbFromHex of the pinned hex). MD layer untouched per the issue #31
-// scoping (pins live on the shadcn surface only). Empty override map
-// short-circuits: the spread + no-op loop returns a structurally equal
-// TokenMap, keeping the drift-guard byte-identical baseline.
-function applyShadcnChartOverrides(
-  chartLayer: TokenMap,
-  overrides: Partial<Record<ShadcnChartTokenName, string>>,
-): TokenMap {
-  const out = { ...chartLayer }
-  for (const token of SHADCN_CHART_TOKEN_NAMES) {
-    const overrideHex = overrides[token]
-    if (overrideHex !== undefined) out[token] = argbFromHex(overrideHex)
-  }
-  return out
 }
 
 // why: 78 palette tones (13 tones × 6 palettes). Mode/contrast-invariant —

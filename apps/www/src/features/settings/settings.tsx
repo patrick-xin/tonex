@@ -3,9 +3,8 @@
 import { GearSixIcon } from '@phosphor-icons/react'
 import { selectPortable, useSource } from '@tonex/core'
 import {
-  CHART_SCHEMES,
-  type ChartScheme,
   findActivePreset,
+  HUE_SPREAD_DEFAULT,
   SHADCN_PRESETS,
   type ShadcnPresetName,
 } from '@tonex/core/schema'
@@ -22,9 +21,13 @@ import { TwPickerEnableToggle } from '@/features/tw-color-picker'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
-const CHART_SCHEME_LABELS: Record<ChartScheme, string> = {
-  sequential: 'Monochrome',
-  categorical: 'Polychrome',
+const CHART_PALETTE_VALUES = ['single', 'multi', 'polychrome'] as const
+type ChartPaletteValue = (typeof CHART_PALETTE_VALUES)[number]
+
+const CHART_PALETTE_LABELS: Record<ChartPaletteValue, string> = {
+  single: 'Single hue',
+  multi: 'Multi hue',
+  polychrome: 'Polychrome',
 }
 
 const PRESET_NAMES = Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]
@@ -35,7 +38,9 @@ export function Settings({ layer }: { layer: Layer }) {
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
   const chartScheme = useSource((s) => s.chart.scheme)
+  const chartHueSpread = useSource((s) => s.chart.hueSpread)
   const setChartScheme = useSource((s) => s.actions.setChartScheme)
+  const setChartHueSpread = useSource((s) => s.actions.setChartHueSpread)
   const portable = useSource(useShallow(selectPortable))
   const activePreset = findActivePreset(portable)
   const setShadcnPreset = useSource((s) => s.actions.setShadcnPreset)
@@ -103,21 +108,37 @@ export function Settings({ layer }: { layer: Layer }) {
         <Field name="chart-scheme" className="gap-1">
           <FieldLabel className="items-center justify-between w-full">Chart palette</FieldLabel>
           <FieldDescription className="max-w-5/6">
-            Color each series differently, or use shades of one color.
+            Shades of one hue, multi-hue rotation, or fully distinct colors.
           </FieldDescription>
           <ToggleGroup
             variant="outline"
             size="xs"
             className="mt-0.5"
-            value={[chartScheme]}
+            value={[
+              chartScheme === 'categorical'
+                ? 'polychrome'
+                : chartHueSpread === 0
+                  ? 'single'
+                  : 'multi',
+            ]}
             onValueChange={(value) => {
               if (value.length === 0) return
-              setChartScheme(value[0] as ChartScheme)
+              const next = value[0] as ChartPaletteValue
+              if (next === 'polychrome') {
+                setChartScheme('categorical')
+                return
+              }
+              setChartScheme('sequential')
+              if (next === 'single') {
+                setChartHueSpread(0)
+              } else if (chartHueSpread === 0) {
+                setChartHueSpread(HUE_SPREAD_DEFAULT)
+              }
             }}
           >
-            {CHART_SCHEMES.map((s) => (
-              <ToggleGroupItem className="h-6" key={s} value={s}>
-                {CHART_SCHEME_LABELS[s]}
+            {CHART_PALETTE_VALUES.map((v) => (
+              <ToggleGroupItem className="h-6" key={v} value={v}>
+                {CHART_PALETTE_LABELS[v]}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>

@@ -252,7 +252,10 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
     // why: ADR-0027 c.5 — same foundation guarantee applies to the categorical
     // scheme (hue-rotated, fixed tone). Sequential and categorical use
     // different tone parameters; both must satisfy the contrast contract.
-    const theme = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } })
+    const theme = deriveTheme({
+      ...DEFAULT_INPUTS,
+      chart: { ...DEFAULT_INPUTS.chart, scheme: 'categorical' },
+    })
     const report = evaluateThemeContrast(theme)
     const chart = [...report.light, ...report.dark].filter(
       (r) => r.pair.layer === 'md-chart' || r.pair.layer === 'shadcn-chart',

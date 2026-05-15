@@ -1,17 +1,16 @@
 import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
+import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../chart/schema'
 import { deriveTheme } from './derive'
 import { hexFromHct } from './hct'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
-  MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
-  SHADCN_CHART_TOKEN_NAMES,
 } from './schema'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
@@ -856,7 +855,10 @@ describe('deriveTheme', () => {
       // must all differ. Round-tripping each through Hct confirms chroma/tone
       // are pinned per-mode (45 light / 65 dark, post slice contrast-4) and
       // chroma rests at the configured 50 (modulo MCU gamut clipping).
-      const { md } = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'categorical' } })
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'categorical' },
+      })
       const lightArgbs = MD_CHART_TOKEN_NAMES.map((n) => md.lightChart[n] as number)
       expect(new Set(lightArgbs).size).toBe(5)
       for (const argb of lightArgbs) {
@@ -878,7 +880,7 @@ describe('deriveTheme', () => {
       const grayInputs = {
         ...DEFAULT_INPUTS,
         seedHex: '#808080',
-        chart: { scheme: 'categorical' as const },
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'categorical' as const },
       }
       const { md } = deriveTheme(grayInputs)
       const chart1 = md.lightChart['--color-chart-1'] as number
@@ -887,16 +889,90 @@ describe('deriveTheme', () => {
       expect(hct.hue).toBeLessThan(275)
     })
 
-    it('chart.scheme="sequential" (default) is unchanged from pre-axis behavior — palette-tone derivation', () => {
-      // why: drift-guard. sequential is the default (ADR-0027 c.2, renamed
-      // from "mono"); its derivation must remain the variant-aware
-      // primaryPalette.tone() path that v9 had inline. Explicit
-      // chart.scheme='sequential' must equal the default DEFAULT_INPUTS
-      // result token-for-token.
+    it('chart.scheme="sequential" (default): explicit override matches DEFAULT_INPUTS token-for-token', () => {
+      // why: drift-guard. sequential is the default (ADR-0027 c.2); explicit
+      // chart.scheme='sequential' MUST equal the default DEFAULT_INPUTS result
+      // token-for-token. The algorithmic walk (ADR-0027 c.3, slice 2
+      // promotion) replaces the legacy hand-picked tones, but default-vs-
+      // explicit identity holds because both paths call the same code.
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const explicit = deriveTheme({ ...DEFAULT_INPUTS, chart: { scheme: 'sequential' } })
+      const explicit = deriveTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, scheme: 'sequential' },
+      })
       expect(explicit.md.lightChart).toEqual(baseline.md.lightChart)
       expect(explicit.md.darkChart).toEqual(baseline.md.darkChart)
+    })
+
+    it('chart.scheme="sequential": L* descends monotonically chart-1 → chart-N (chart-1 is the lightest)', () => {
+      // why: ADR-0027 c.3 — algorithmic sequential walks tone from a safe
+      // edge (just inside 3:1 against the binding partner) toward a brand-
+      // presentation prominent edge. chart-1 lives at the safe edge (lightest
+      // in both modes — ColorBrewer convention), so the L* sequence is
+      // strictly descending. Locks the convention against accidental flips.
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const lightTones = MD_CHART_TOKEN_NAMES.map(
+        (n) => Hct.fromInt(md.lightChart[n] as number).tone,
+      )
+      const darkTones = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.darkChart[n] as number).tone)
+      for (let i = 1; i < lightTones.length; i++) {
+        expect(lightTones[i]).toBeLessThan(lightTones[i - 1] as number)
+      }
+      for (let i = 1; i < darkTones.length; i++) {
+        expect(darkTones[i]).toBeLessThan(darkTones[i - 1] as number)
+      }
+    })
+
+    it('chart.scheme="sequential" hueSpread=0 (opt-in single-hue): all 5 chart tokens share the seed primary-palette hue', () => {
+      // why: ADR-0027 c.3 — slice 3 promoted multi-hue (hueSpread=80) as the
+      // default. Single-hue is the opt-in via chart.hueSpread=0; under that
+      // setting, lightness alone encodes the ordered axis and the brand hue
+      // carries across chart-1..N. <3° tolerance covers the gamut-mapping
+      // shift palette.tone() applies at high-chroma corners of sRGB.
+      const { md } = deriveTheme({
+        ...DEFAULT_INPUTS,
+        chart: { ...DEFAULT_INPUTS.chart, hueSpread: 0 },
+      })
+      const lightHues = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.lightChart[n] as number).hue)
+      const darkHues = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.darkChart[n] as number).hue)
+      const refLight = lightHues[0] as number
+      const refDark = darkHues[0] as number
+      for (const h of lightHues) {
+        expect(Math.abs(h - refLight)).toBeLessThan(3)
+      }
+      for (const h of darkHues) {
+        expect(Math.abs(h - refDark)).toBeLessThan(3)
+      }
+    })
+
+    it('chart.scheme="sequential" (multi-hue default): chart-1 → chart-5 hues span ~hueSpread°', () => {
+      // why: ADR-0027 c.3 — slice 3 promotion. Default chart axis is multi-hue:
+      // hueSpread=80, anchor='chart-1'. chart-1 carries the seed/brand hue;
+      // chart-5 is rotated by hueSpread. The rotation magnitude is the
+      // user-facing knob — assert ~80° with tolerance for HCT's gamut-mapping
+      // shift at saturated corners. Modular distance folded to [-180, 180].
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const lightHues = MD_CHART_TOKEN_NAMES.map((n) => Hct.fromInt(md.lightChart[n] as number).hue)
+      const chart1 = lightHues[0] as number
+      const chartN = lightHues[lightHues.length - 1] as number
+      const rotation = ((chartN - chart1 + 540) % 360) - 180
+      expect(Math.abs(rotation)).toBeGreaterThan(70)
+      expect(Math.abs(rotation)).toBeLessThan(90)
+    })
+
+    it('chart.scheme="sequential" hueAnchor="chart-1": chart-1 carries the seed primary-palette hue (anchor invariant)', () => {
+      // why: ADR-0027 c.3 — anchor='chart-1' (slice 3 default) pins the brand
+      // hue at chart-1 (the lightest slot) in both modes. Identity preservation
+      // across modes is the reason this anchor is the default: "this series is
+      // the same color thing" reads consistently between light and dark
+      // renderings. <5° tolerance is loose enough for variant-specific hue
+      // corrections at the primary palette.
+      const { md } = deriveTheme(DEFAULT_INPUTS)
+      const seedHct = Hct.fromInt(argbFromHex(DEFAULT_INPUTS.seedHex))
+      const light1 = Hct.fromInt(md.lightChart['--color-chart-1'] as number)
+      const dark1 = Hct.fromInt(md.darkChart['--color-chart-1'] as number)
+      expect(Math.abs(light1.hue - seedHct.hue)).toBeLessThan(5)
+      expect(Math.abs(dark1.hue - seedHct.hue)).toBeLessThan(5)
     })
 
     // why: ADR-0027 c.4 — chart overrides are terminal pins applied

@@ -7,9 +7,23 @@
 //
 // Schema types live at `@tonex/core/schema`; static palette data at
 // `@tonex/core/data`; oklch conversion at `@tonex/core/oklch`; variant
-// strategies at `@tonex/core/variants`. Splitting keeps each subpath's
+// strategies at `@tonex/core/variants`. Chart algorithm + chart schema
+// fragments live at sibling subpath `chart/`, composed into the engine and
+// schema barrels at the boundary. Splitting keeps each subpath's
 // reason-to-grow independent — adding a schema field doesn't widen the
 // engine surface, adding a variant doesn't touch the schema barrel.
+
+export {
+  buildSequentialReport,
+  HUE_ANCHOR_DEFAULT,
+  HUE_SPREAD_DEFAULT,
+  type HueAnchor,
+  PROMINENT_EDGE_DARK_DEFAULT,
+  PROMINENT_EDGE_LIGHT_DEFAULT,
+  type SequentialModeOutput,
+  type SequentialOutput,
+  type SequentialParams,
+} from './chart'
 export { applyDom } from './theme/applyDom'
 export {
   type ContrastReport,
