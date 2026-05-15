@@ -1,7 +1,7 @@
 import { type DynamicScheme, Hct } from '@tonex/mcu'
 import type { Mode } from '../theme/mode'
 import type { PortableTheme } from '../theme/schema'
-import { MD_CHART_TOKEN_NAMES } from './schema'
+import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from './schema'
 import {
   buildMdChartSequentialSamples,
   PROMINENT_EDGE_DARK_DEFAULT,
@@ -80,6 +80,21 @@ export function buildMdChart(
   MD_CHART_TOKEN_NAMES.forEach((name, i) => {
     const hue = (baseHue + MULTI_HUE_OFFSETS[i]) % 360
     out[name] = Hct.from(hue, MULTI_CHROMA, tone).toInt()
+  })
+  return out
+}
+
+// why: shadcn's chart names are the same 5 values the md side computes, just
+// renamed (`--color-chart-1` → `--chart-1`). One source of truth, two
+// namespaces — chart character can't drift between layers.
+export function rebrandChart(mdChart: TokenMap): TokenMap {
+  const out: TokenMap = {}
+  SHADCN_CHART_TOKEN_NAMES.forEach((shadcnName, i) => {
+    const argb = mdChart[MD_CHART_TOKEN_NAMES[i]]
+    if (argb === undefined) {
+      throw new Error(`[rebrandChart] missing md chart token at index ${i}`)
+    }
+    out[shadcnName] = argb
   })
   return out
 }

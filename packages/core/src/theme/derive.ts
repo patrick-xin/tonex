@@ -6,12 +6,8 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
-import { buildMdChart } from '../chart/build'
-import {
-  MD_CHART_TOKEN_NAMES,
-  SHADCN_CHART_TOKEN_NAMES,
-  type ShadcnChartTokenName,
-} from '../chart/schema'
+import { buildMdChart, rebrandChart } from '../chart/build'
+import { SHADCN_CHART_TOKEN_NAMES, type ShadcnChartTokenName } from '../chart/schema'
 import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
@@ -399,21 +395,6 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
     else core[name] = argb
   }
   return { core, extended }
-}
-
-// why: shadcn's chart names are the same 5 values the md side computes, just
-// renamed (`--color-chart-1` → `--chart-1`). One source of truth, two
-// namespaces — chart character can't drift between layers.
-function rebrandChart(mdChart: TokenMap): TokenMap {
-  const out: TokenMap = {}
-  SHADCN_CHART_TOKEN_NAMES.forEach((shadcnName, i) => {
-    const argb = mdChart[MD_CHART_TOKEN_NAMES[i]]
-    if (argb === undefined) {
-      throw new Error(`[rebrandChart] missing md chart token at index ${i}`)
-    }
-    out[shadcnName] = argb
-  })
-  return out
 }
 
 // why: ADR-0027 c.4 — terminal pin on shadcn chart tokens. Applied after
