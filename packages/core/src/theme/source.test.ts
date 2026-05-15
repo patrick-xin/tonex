@@ -285,6 +285,91 @@ describe('useSource persistence round-trip', () => {
       s.actions.setSeedTone(50)
       expect(useSource.getState().seedHex).toBe(locked)
     })
+
+    // why: issue #56 — pre-fix sliders displayed Math.round(value) at step=1,
+    // so a button-tap-and-Enter on the inline value display (or a drag with
+    // no real movement) used to commit the rounded integer, decompose →
+    // swap-axis → recompose, and silently drift seedHex by 1–2 channels.
+    // Downstream amplification: up to 41ch on a CMF md token, 252ch under
+    // fidelity, AA verdict flips on --muted-foreground/--muted. Programmatic
+    // callers of these setters (the UI now routes through useHctFromHex, but
+    // the per-axis actions stay exported per hct-control-sliders.tsx) inherit
+    // the same tolerance gate: any caller submitting a value within solver
+    // epsilon of the current axis cannot mutate seedHex.
+    //
+    // Tolerance is half a `.toFixed(2)` step (5e-3): the slider's button-tap
+    // path commits the displayed value verbatim, so the setter must treat
+    // that as a no-op while still letting a typed change of 0.01 through.
+    describe('HCT setters no-op on round-trip-equivalent input (issue #56)', () => {
+      // why: seeds with decimal HCT — exactly the surface that drifts when
+      // rounded. #6750a4 already lives on an integer HCT triplet, so it's
+      // the control. Mix of bright/saturated and one near-grey to cover the
+      // CHROMA_HUE_LOCK regime ceiling.
+      const SEEDS = ['#ff5722', '#1e88e5', '#4caf50', '#9c27b0', '#3b82f6', '#ec4899', '#7a7a7a']
+
+      it('setSeedHue is byte-stable when input equals current decimal hue', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { hue } = hctFromHex(seed)
+          useSource.getState().actions.setSeedHue(hue)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+
+      it('setSeedChroma is byte-stable when input equals current decimal chroma', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { chroma } = hctFromHex(seed)
+          useSource.getState().actions.setSeedChroma(chroma)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+
+      it('setSeedTone is byte-stable when input equals current decimal tone', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { tone } = hctFromHex(seed)
+          useSource.getState().actions.setSeedTone(tone)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+
+      it('setSeedHue is byte-stable on near-current input within solver tolerance', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { hue } = hctFromHex(seed)
+          // why: 4e-3 sits inside the 5e-3 tolerance — the band the
+          // `.toFixed(2)` display rounds away. Outside the band, the setter
+          // must still mutate (real user intent).
+          useSource.getState().actions.setSeedHue(hue + 4e-3)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+
+      it('setSeedChroma is byte-stable on near-current input within solver tolerance', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { chroma } = hctFromHex(seed)
+          useSource.getState().actions.setSeedChroma(chroma + 4e-3)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+
+      it('setSeedTone is byte-stable on near-current input within solver tolerance', async () => {
+        const { hctFromHex } = await import('./hct')
+        for (const seed of SEEDS) {
+          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
+          const { tone } = hctFromHex(seed)
+          useSource.getState().actions.setSeedTone(tone + 4e-3)
+          expect(useSource.getState().seedHex).toBe(seed)
+        }
+      })
+    })
   })
 
   describe('setPaletteOverride', () => {

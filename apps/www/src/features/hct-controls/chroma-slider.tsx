@@ -82,12 +82,16 @@ function ValueDisplay({
       )}
       onClick={() => {
         if (disabled) return
-        setDraft(String(Math.round(value)))
+        // why: see hct-slider.tsx — `.toFixed(2)` preserves decimal HCT
+        // precision; pre-fix `Math.round` drifted seedHex on tap-Enter
+        // (issue #56). gamutLimit stays rounded — it's a max ceiling, not
+        // a value the user adjusts.
+        setDraft(value.toFixed(2))
         setEditing(true)
         requestAnimationFrame(() => inputRef.current?.select())
       }}
     >
-      {Math.round(value)}
+      {value.toFixed(2)}
       <span className="text-on-surface/60"> / {Math.round(gamutLimit)}</span>
     </button>
   )
@@ -98,10 +102,12 @@ function ValueDisplay({
 // inline (striped overlay + tick + tooltip) so the user understands why
 // dragging past gamutPct produces no visible color change. Clamp the value
 // passed to the underlying slider so the thumb never overshoots the wall.
+// why: step=0.01 keeps the slider WYSIWYG with the `.toFixed(2)` display
+// above — see hct-slider.tsx for the same rationale (issue #56).
 export function ChromaSlider({
   value,
   max = 150,
-  step = 1,
+  step = 0.01,
   gradient,
   onValueChange,
   gamutLimit,

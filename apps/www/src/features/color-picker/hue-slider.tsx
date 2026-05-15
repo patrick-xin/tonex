@@ -19,15 +19,20 @@ interface HueSliderProps {
 const HUE_GRADIENT =
   'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
 
+// why: value passes through as decimal HCT; step=0.01 keeps emissions
+// aligned with the underlying precision. Pre-fix `Math.round` + `step={1}`
+// snapped to integer hue and round-tripped through hexFromHct, drifting
+// seedHex (issue #56). This slider has no inline value display so there's
+// no `.toFixed(2)` companion to apply here.
 export function HueSlider({ hue, onChange, disabled }: HueSliderProps) {
   const sliderStore = sliderStyles()
   return (
     <SliderRoot
       disabled={disabled}
       thumbAlignment="edge-client-only"
-      value={Math.round(hue)}
+      value={hue}
       max={360}
-      step={1}
+      step={0.01}
       onValueChange={(v) => onChange(v as unknown as number)}
       className="w-full"
       aria-label="Hue"

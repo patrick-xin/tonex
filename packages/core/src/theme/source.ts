@@ -94,6 +94,12 @@ export type SourceState = PortableTheme & {
   actions: SourceActions
 }
 
+// why: tolerance gate for HCT setters (issue #56). 5e-3 = half of one
+// `.toFixed(2)` step; the slider display rounds away anything tighter than
+// this, so a button-tap commit cannot mutate seedHex while a typed change
+// of 0.01 still flows through. Shared by setSeedHue/Chroma/Tone.
+const HCT_SETTER_EPSILON = 5e-3
+
 // why: trailing-edge debounce for the persist write. 200ms balances two
 // concerns: long enough that 60Hz streaming inputs (slider drag, native
 // color picker, hex keystrokes) coalesce ~12 ticks into one IO call,
@@ -146,22 +152,36 @@ export const useSource = create<SourceState>()(
         // expected to disable the inputs cosmetically; this is the structural
         // backstop for any caller that bypasses the disabled state.
         setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
+        // why: short-circuit when the requested axis is within solver epsilon
+        // of the current value (issue #56). Pre-fix sliders displayed
+        // `Math.round(value)` at step=1 — a button-tap-and-Enter on the
+        // inline value display would commit the rounded integer and drift
+        // seedHex 1–2 channels through the hexFromHct round trip, amplifying
+        // up to 41ch on CMF tokens and 252ch under the fidelity variant. The
+        // UI now writes via setSeedHex through useHctFromHex, but these
+        // per-axis setters remain exported for programmatic callers; the
+        // tolerance gate is the structural backstop. 5e-3 = half of one
+        // `.toFixed(2)` step — the band the slider's display rounds away,
+        // narrow enough to let any typed change of 0.01 through.
         setSeedHue: (hue) =>
           set((s) => {
             if (s.seedHexLock) return {}
             const current = hctFromHex(s.seedHex)
+            if (Math.abs(hue - current.hue) < HCT_SETTER_EPSILON) return {}
             return { seedHex: hexFromHct({ ...current, hue }) }
           }),
         setSeedChroma: (chroma) =>
           set((s) => {
             if (s.seedHexLock) return {}
             const current = hctFromHex(s.seedHex)
+            if (Math.abs(chroma - current.chroma) < HCT_SETTER_EPSILON) return {}
             return { seedHex: hexFromHct({ ...current, chroma }) }
           }),
         setSeedTone: (tone) =>
           set((s) => {
             if (s.seedHexLock) return {}
             const current = hctFromHex(s.seedHex)
+            if (Math.abs(tone - current.tone) < HCT_SETTER_EPSILON) return {}
             return { seedHex: hexFromHct({ ...current, tone }) }
           }),
         setVariant: (variant) => set({ variant }),

@@ -24,11 +24,15 @@ interface HctSliderProps {
   disabled?: boolean
 }
 
+// why: 0.01 keeps the slider WYSIWYG with the `.toFixed(2)` display below —
+// the smallest drag tick the user can see equals the smallest emit. Pre-fix
+// step=1 forced an integer round-trip through hexFromHct on every touch and
+// drifted seedHex (issue #56).
 export function HctSlider({
   label,
   value,
   max,
-  step = 1,
+  step = 0.01,
   gradient,
   onValueChange,
   disabled,
@@ -88,12 +92,16 @@ export function HctSlider({
               )}
               onClick={() => {
                 if (disabled) return
-                setDraft(String(Math.round(value)))
+                // why: `.toFixed(2)` preserves the user's perceptual precision
+                // without rounding away the decimal HCT the slider holds.
+                // Pre-fix `Math.round` collapsed e.g. 47.86 → 48 and tap-Enter
+                // committed the integer, drifting seedHex (issue #56).
+                setDraft(value.toFixed(2))
                 setEditing(true)
                 requestAnimationFrame(() => inputRef.current?.select())
               }}
             >
-              {Math.round(value)}
+              {value.toFixed(2)}
             </button>
           )}
         </div>
