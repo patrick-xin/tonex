@@ -2,11 +2,11 @@
 
 import { CHROMA_HUE_LOCK, type CustomColorPreviewRoles } from '@tonex/core'
 import { cn } from 'tailwind-variants'
-import { NativeColorInput } from '@/components/shared/native-color-input'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Radio, RadioGroup } from '@/components/ui/radio'
 import { Switch } from '@/components/ui/switch'
+import { ColorPicker } from '@/features/color-picker'
 import { ChromaSlider, HctSlider } from '@/features/hct-controls'
 import { useActiveMode } from '@/features/theme-mode'
 import type { Layer } from '@/lib/layer-context'
@@ -62,11 +62,7 @@ export function CustomColorFormBody({
       </div>
 
       <div className="border-t border-outline-variant/40 pt-4 flex items-center gap-3">
-        <NativeColorInput
-          className="size-8"
-          currentHex={form.colorHex}
-          onColorChange={form.handleHexInput}
-        />
+        <ColorPicker value={form.colorHex} onChange={form.handleHexInput} align="start" />
         <div className="flex items-center gap-2 text-sm flex-1">
           <Label htmlFor="custom-hex-input">Hex</Label>
           <Input

@@ -3,7 +3,6 @@
 import { ArrowCounterClockwiseIcon, CaretDownIcon } from '@phosphor-icons/react'
 import { useSource } from '@tonex/core'
 import { cmfSecondSourceDisabledReason } from '@tonex/core/schema'
-import { NativeColorInput } from '@/components/shared/native-color-input'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,6 +12,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { ColorPicker } from '@/features/color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
 // why: the second source color is a CMF-only knob (other variants ignore the
@@ -66,7 +66,7 @@ export function CmfSecondSourcePicker() {
           Optional — drives the tertiary palette and nudges the error hue via CMF&apos;s formula.
         </PopoverDescription>
         <div className="flex items-center gap-2">
-          <NativeColorInput className="size-8" currentHex={formHex} onColorChange={handleChange} />
+          <ColorPicker value={formHex} onChange={handleChange} align="start" />
           <Input
             className="font-mono w-full"
             inputSize="sm"

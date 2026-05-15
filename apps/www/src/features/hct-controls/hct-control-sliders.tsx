@@ -1,23 +1,25 @@
 'use client'
 
-import { CHROMA_HUE_LOCK, hctFromHex, maxChroma, useSource } from '@tonex/core'
+import { CHROMA_HUE_LOCK, maxChroma, useSource } from '@tonex/core'
 import { useMemo } from 'react'
 import { ChromaSlider } from './chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from './gradients'
 import { HctSlider } from './hct-slider'
+import { useHctFromHex } from './use-hct-from-hex'
 
-// why: HCT decomposition is derived from seedHex on every render. Cheap (one
-// MCU solve) and correct — no stale draft state, no commit boundary. If
-// profiling ever shows slider drag stutters, drop a useDeferredValue or
-// reintroduce the draft pattern; until then, the simpler shape wins.
+// why: HCT decomposition is held in the hook's local state with a round-trip
+// cache so commits at the hue 0/360 boundary (where MCU's hctFromHex collapses
+// 360 → 0 by spec) don't snap the slider thumb. The store remains hex-only —
+// the hook writes via setSeedHex; the per-axis store actions (setSeedHue etc.)
+// are still exported for programmatic callers but no UI path uses them. The
+// seedHexLock check lives on setSeedHex in core, so the lock still gates UI
+// writes through this hook.
 export function HctControlSliders() {
   const seedHex = useSource((s) => s.seedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
-  const setSeedHue = useSource((s) => s.actions.setSeedHue)
-  const setSeedChroma = useSource((s) => s.actions.setSeedChroma)
-  const setSeedTone = useSource((s) => s.actions.setSeedTone)
+  const setSeedHex = useSource((s) => s.actions.setSeedHex)
 
-  const { hue, chroma, tone } = hctFromHex(seedHex)
+  const [{ hue, chroma, tone }, updateHct] = useHctFromHex(seedHex, setSeedHex)
   const gamutLimit = useMemo(() => maxChroma(hue, tone), [hue, tone])
 
   // why: hue gradient is hue+chroma+tone-independent — the wheel is the
@@ -40,7 +42,7 @@ export function HctControlSliders() {
         value={hue}
         max={360}
         gradient={hueG}
-        onValueChange={setSeedHue}
+        onValueChange={(h) => updateHct({ hue: h })}
         disabled={hueDisabled}
       />
       <ChromaSlider
@@ -48,7 +50,7 @@ export function HctControlSliders() {
         value={chroma}
         gamutLimit={gamutLimit}
         gradient={chromaG}
-        onValueChange={setSeedChroma}
+        onValueChange={(c) => updateHct({ chroma: c })}
       />
       <HctSlider
         disabled={seedHexLock}
@@ -56,7 +58,7 @@ export function HctControlSliders() {
         value={tone}
         max={100}
         gradient={toneG}
-        onValueChange={setSeedTone}
+        onValueChange={(t) => updateHct({ tone: t })}
       />
     </div>
   )
