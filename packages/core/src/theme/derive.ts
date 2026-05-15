@@ -6,12 +6,12 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
-import { variants } from '../variants'
 import {
   buildMdChartSequentialSamples,
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
-} from './chart-sequential'
+} from '../chart/sequential'
+import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
@@ -430,7 +430,7 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
 //                encodes Vibrant / Expressive / Rainbow chroma character).
 //                Respects paletteOverrides because the override mutates the
 //                primaryPalette in place upstream. Math lives in
-//                `chart-sequential.ts`; this branch is the production call.
+//                `chart/sequential.ts`; this branch is the production call.
 //                Slice 3 (ADR-0027 c.3) routes chart.hueSpread + chart.hueAnchor
 //                through to the algorithm so the multi-hue rotation is
 //                user-tunable. Partners arg is the per-mode md surface family

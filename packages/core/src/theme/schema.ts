@@ -202,7 +202,7 @@ export const HUE_ANCHORS = ['chart-1', 'prominent-edge'] as const
 export type HueAnchor = (typeof HUE_ANCHORS)[number]
 
 // why: production defaults for the multi-hue knobs. Imported by both the
-// schema (DEFAULT_INPUTS.chart) and chart-sequential.ts so the lab page's
+// schema (DEFAULT_INPUTS.chart) and chart/sequential.ts so the lab page's
 // initial knob position matches what production renders by default. 80° was
 // chosen after lab eyeballing — broad enough for visible series separation
 // without crossing the categorical-feeling threshold (~120°+). 'chart-1'

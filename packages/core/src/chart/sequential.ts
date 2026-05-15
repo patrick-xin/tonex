@@ -1,16 +1,16 @@
 import { contrastRatio } from '@tonex/color-utils'
 import { argbFromHex, type DynamicScheme, Hct, TonalPalette } from '@tonex/mcu'
-import { variants } from '../variants'
-import { cmfSecondSourceDisabledReason } from './cmf-second-source'
-import type { Mode } from './mode'
-import { applyPaletteOverrides } from './palette-override'
+import { cmfSecondSourceDisabledReason } from '../theme/cmf-second-source'
+import type { Mode } from '../theme/mode'
+import { applyPaletteOverrides } from '../theme/palette-override'
 import {
   HUE_ANCHOR_DEFAULT,
   HUE_ANCHORS,
   HUE_SPREAD_DEFAULT,
   type HueAnchor,
   type PortableTheme,
-} from './schema'
+} from '../theme/schema'
+import { variants } from '../variants'
 
 // why: re-export schema-owned chart constants here. Slice 3 moved HueAnchor /
 // HUE_SPREAD_DEFAULT / HUE_ANCHOR_DEFAULT into schema.ts because they're

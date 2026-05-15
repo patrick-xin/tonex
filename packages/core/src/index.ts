@@ -10,7 +10,7 @@
 // strategies at `@tonex/core/variants`. Splitting keeps each subpath's
 // reason-to-grow independent — adding a schema field doesn't widen the
 // engine surface, adding a variant doesn't touch the schema barrel.
-export { applyDom } from './theme/applyDom'
+
 export {
   buildSequentialReport,
   HUE_ANCHOR_DEFAULT,
@@ -21,7 +21,8 @@ export {
   type SequentialModeOutput,
   type SequentialOutput,
   type SequentialParams,
-} from './theme/chart-sequential'
+} from './chart/sequential'
+export { applyDom } from './theme/applyDom'
 export {
   type ContrastReport,
   evaluateThemeContrast,
