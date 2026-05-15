@@ -1,7 +1,7 @@
 'use client'
 
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { evaluateThemeContrast, type Mode, useResolvedTokens } from '@tonex/core'
+import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { MD_EXTENDED_TOKEN_NAMES } from '@tonex/core/schema'
 import { XIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -46,18 +46,23 @@ function Body({ theme, mode, layer }: BodyProps) {
   const [filter, setFilter] = useState<Filter>('all')
   const [resultFilter, setResultFilter] = useState<ResultFilter>('fail')
   const showExtended = useUiPrefs((s) => s.showExtended)
-  const report = evaluateThemeContrast(theme)
-  // why: each route owns one layer's pairs AND its chart sibling. md route
-  // surfaces `md` + `md-chart`; shadcn route surfaces `shadcn` + `shadcn-chart`.
-  // Chart pairs land in their own 'Chart' family chip via grouping.familyOf
-  // so they don't fold into Surface/Card. ADR-0027 c.5.
+  const customColors = useSource((s) => s.customColors)
+  const report = evaluateThemeContrast(theme, customColors)
+  // why: each route owns one layer's pairs AND its chart + custom siblings. md
+  // route surfaces `md` + `md-chart` + `md-custom`; shadcn route surfaces the
+  // `shadcn`-prefixed trio. Chart and custom pairs land in their own family
+  // chips via grouping.familyOf so they don't fold into Surface/Card. ADR-0027
+  // c.5; custom pairs per ADR-0025's anticipated pair-union widening.
   const chartLayer = `${layer}-chart` as const
+  const customLayer = `${layer}-custom` as const
   // why: `level` drives the WCAG threshold every pair is evaluated against —
   // applyLevel bakes effectivePasses/effectiveThreshold for the selected level
   // so the table stays in sync with the AA/AAA toggle. The showExtended gate
   // drops md extended-role pairs in lockstep with the inspect role list.
   const all = report[mode]
-    .filter((r) => r.pair.layer === layer || r.pair.layer === chartLayer)
+    .filter(
+      (r) => r.pair.layer === layer || r.pair.layer === chartLayer || r.pair.layer === customLayer,
+    )
     .filter(
       (r) =>
         showExtended ||
