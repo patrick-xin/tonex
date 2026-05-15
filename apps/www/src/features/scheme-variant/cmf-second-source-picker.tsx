@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon, CaretDownIcon } from '@phosphor-icons/react'
-import { useSource } from '@tonex/core'
+import { selectSeedHex, useSource } from '@tonex/core'
 import { cmfSecondSourceDisabledReason } from '@tonex/core/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,15 +22,16 @@ import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 // setCmfSecondSourceHex no-ops disabled writes — UI is the friendly seam,
 // core is the backstop.
 export function CmfSecondSourcePicker() {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const cmfSecondSourceHex = useSource((s) => s.cmfSecondSourceHex)
   const setCmfSecondSourceHex = useSource((s) => s.actions.setCmfSecondSourceHex)
   const disabledReason = useSource((s) => cmfSecondSourceDisabledReason(s))
   const isDisabled = disabledReason !== null
   const isSet = cmfSecondSourceHex !== null
-  // why: when unset, MCU picks its own second source — show the seed as the
-  // starting point so opening the popover doesn't surprise with an unrelated
-  // default. ADR-0003: hex is the canonical seed representation.
+  // why: when unset, MCU picks its own second source — show the seed hex
+  // projection as the starting point so opening the popover doesn't surprise
+  // with an unrelated default. ADR-0028: seedHex is derived from the canonical
+  // HCT via selectSeedHex (preserves user's pasted bytes when present).
   const formHex = cmfSecondSourceHex ?? seedHex
 
   const { hexInput, handleChange, inputProps } = useHexFieldState(formHex, setCmfSecondSourceHex)

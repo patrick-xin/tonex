@@ -8,6 +8,7 @@ import {
   exportJson,
   exportTs,
   selectPortable,
+  selectSeedHex,
   useSource,
 } from '@tonex/core'
 import { useMemo } from 'react'
@@ -63,7 +64,7 @@ export function useExportContent({
   // (potentially 3×) tier set and the default tier shares its slot with
   // useResolvedTokens / applyDom.
   const portable = useSource(useShallow(selectPortable))
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const variant = useSource((s) => s.variant)
   const contrastLevel = useSource((s) => s.contrastLevel)
 

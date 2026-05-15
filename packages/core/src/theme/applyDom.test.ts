@@ -2,9 +2,15 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
 import { deriveTheme, type TokenMap } from './derive'
+import { hctFromHex } from './hct'
 import { oklchString } from './oklch'
 import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS, type PortableTheme } from './schema'
 import { selectPortable, useSource } from './source'
+
+const withSeed = (hex: string) => ({
+  ...DEFAULT_INPUTS,
+  seed: { ...hctFromHex(hex), exactHex: hex },
+})
 
 const STYLE_ID = 'tonex-tokens'
 
@@ -205,7 +211,7 @@ describe('applyDom (jsdom integration)', () => {
   })
 
   it('updates token values when source changes', () => {
-    useSource.setState({ _hydrated: true, seedHex: '#6750a4' })
+    useSource.setState({ _hydrated: true, seed: { ...hctFromHex('#6750a4'), exactHex: '#6750a4' } })
     unsubscribe = applyDom()
     const before = readTokensFromStyle().md.light['--color-primary']
 
@@ -256,7 +262,7 @@ describe('applyDom (jsdom integration)', () => {
   // key disappeared. Pin: removeProperty must not fire across N stable ticks.
   // Issue #25.
   it('does not call removeProperty during steady-state value-only updates', () => {
-    useSource.setState({ _hydrated: true, seedHex: '#6750a4' })
+    useSource.setState({ _hydrated: true, seed: { ...hctFromHex('#6750a4'), exactHex: '#6750a4' } })
     unsubscribe = applyDom()
 
     const el = document.getElementById(STYLE_ID)
@@ -331,7 +337,7 @@ describe('applyDom (jsdom integration)', () => {
   describe('preview === export round-trip', () => {
     const cases: Array<{ name: string; source: PortableTheme }> = [
       { name: 'default inputs', source: DEFAULT_INPUTS },
-      { name: 'red seed', source: { ...DEFAULT_INPUTS, seedHex: '#ff0000' } },
+      { name: 'red seed', source: withSeed('#ff0000') },
       { name: 'tonalSpot variant', source: { ...DEFAULT_INPUTS, variant: 'tonalSpot' } },
       {
         name: 'override applied',
@@ -429,11 +435,11 @@ describe('applyDom (jsdom integration)', () => {
       {
         // why: seedHexLock is a source-input gate, not a derived-side flag —
         // it must NOT change the rendered output. Pairing it with a non-default
-        // seedHex confirms the seed is what drives derive while the lock just
+        // seed confirms the seed is what drives derive while the lock just
         // governs future writes. Pinning this round-trip prevents anyone from
         // accidentally threading seedHexLock into derive in the future.
         name: 'seedHexLock with non-default seed',
-        source: { ...DEFAULT_INPUTS, seedHex: '#ff5500', seedHexLock: true },
+        source: { ...withSeed('#ff5500'), seedHexLock: true },
       },
       {
         name: 'customColors with shadcnSource=color',
@@ -484,7 +490,7 @@ describe('applyDom (jsdom integration)', () => {
       // why: the projection helper IS the contract — if selectPortable diverges
       // from PortableTheme shape, applyDom and useResolvedTokens diverge with
       // it. This test pins the shape match without coupling to specific keys.
-      useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true, seedHex: '#abc123' })
+      useSource.setState({ ...withSeed('#abc123'), _hydrated: true })
       unsubscribe = applyDom()
       const written = readTokensFromStyle()
       const projected = selectPortable(useSource.getState())

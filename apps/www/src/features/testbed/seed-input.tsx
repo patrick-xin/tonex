@@ -1,9 +1,9 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { selectSeedHex, useSource } from '@tonex/core'
 
 export function SeedInput() {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
   const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)

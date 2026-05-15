@@ -12,16 +12,19 @@ import {
   type ShadcnChartTokenName,
 } from '../chart/schema'
 import { type VariantName, variants } from '../variants'
+import { hctFromHex } from './hct'
 import { SHADCN_PRESETS } from './shadcn-presets'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 
 // why: SCHEMA_VERSION pins the persisted PortableTheme shape contract per
-// ADR-0009. v1 baseline — this branch starts the migration ladder fresh
-// (no v0 users to preserve). Future bumps: increment SCHEMA_VERSION AND
-// add a forward-migration branch in source.ts:migrate. Schema describes
-// the *current* shape only; on parse failure the rehydrate handler resets
-// to DEFAULT_INPUTS (ADR-0009 c.4).
-export const SCHEMA_VERSION = 1 as const
+// ADR-0009. v2 — ADR-0028 flips the canonical seed from `seedHex: string`
+// to `seed: { hue, chroma, tone, exactHex? }`. Pre-launch breaking change
+// per memory/feedback_prelaunch_breaking_changes.md: no forward migration
+// from v1, persisted v1 records fail schema parse and reset to
+// DEFAULT_INPUTS on rehydrate (ADR-0009 c.4). Future bumps follow ADR-
+// 0009's procedure: increment SCHEMA_VERSION AND add a forward-migration
+// branch in source.ts:migrate when there are live users to preserve.
+export const SCHEMA_VERSION = 2 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
@@ -843,13 +846,32 @@ export const PALETTE_NAMES = PALETTE_FAMILIES.map((p) => p.paletteName) as reado
 export const SURFACE_ALGOS = ['tint', 'desaturate'] as const
 export type SurfaceAlgo = (typeof SURFACE_ALGOS)[number]
 
+// why: ADR-0028 — canonical seed shape. HCT axes are the source of truth;
+// `exactHex` preserves the user's pasted bytes verbatim across the hex
+// round-trip (#3B82F6 would otherwise project to #3B82F4 via MCU's solver).
+// Set only on hex-input paths (paste, image extraction, native picker);
+// cleared by any HCT-axis setter the moment the user leaves hex-input mode.
+// Selector `selectSeedHex(s)` returns `s.seed.exactHex ?? hexFromHct(s.seed)`
+// so consumers don't reason about the presence/absence at every read site.
+export interface Seed {
+  hue: number
+  chroma: number
+  tone: number
+  exactHex?: string
+}
+
 // why: PortableTheme is the portable wire shape — what gets serialized to
 // localStorage, files, or the network. SourceState (in source.ts) is the
 // in-memory shape and equals: PortableTheme − version + _hydrated + actions.
 // Keep this minimal in slice 1; future slices add overrides, locks, etc.
 export interface PortableTheme {
   version: SchemaVersion
-  seedHex: string
+  // why: ADR-0028 — canonical HCT seed with optional exactHex preservation.
+  // Supersedes v1's `seedHex: string`. Read via `selectSeedHex(state)` for a
+  // hex projection (exporters, applyDom); read `seed.{hue,chroma,tone}`
+  // directly for HCT consumers (sliders, gradients) — no `hctFromHex(seedHex)`
+  // anywhere in product code.
+  seed: Seed
   variant: VariantName
   // why: MCU contrastLevel input — fed straight into variant.build(). Range
   // [0, 1]: 0 is the baseline, 1 is maximum contrast. MCU's spec range is
@@ -858,12 +880,14 @@ export interface PortableTheme {
   // > 1 saturates at `high`. Schema rejects out-of-range; setter clamps
   // (issue #33).
   contrastLevel: number
-  // why: source-input gate, not a per-token snapshot. When true, setSeedHex
-  // becomes a no-op — pathways that mutate the seed (hex input, HCT slider,
-  // image extraction) all flow through the same setter. Lock is orthogonal
-  // to override: locking after setting overrides preserves overrides because
-  // they live on different fields. Boolean (not mode-keyed) — locking the
-  // seed locks both modes since seedHex itself isn't mode-keyed.
+  // why: source-input gate, not a per-token snapshot. When true, every
+  // seed setter (setSeedHex, setSeedHue/Chroma/Tone) becomes a no-op — one
+  // structural gate covers every mutation pathway (hex input, HCT slider,
+  // image extraction). Lock is orthogonal to override: locking after setting
+  // overrides preserves overrides because they live on different fields.
+  // Boolean (not mode-keyed) — locking the seed locks both modes since the
+  // seed itself isn't mode-keyed. Field name retained from v1 for API
+  // continuity; semantics generalise to "lock the canonical seed."
   seedHexLock: boolean
   // why: per ADR-0017 commitment 3 — mode-keyed `{ light, dark }` at the top,
   // `Record<MdTokenName, hex>` inside. Mirrors the export's `:root + .dark`
@@ -967,11 +991,15 @@ export interface PortableTheme {
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
-// globals.css, and the drift-guard test. Changing seedHex here means
-// regenerating globals.css and re-baselining the drift-guard.
+// globals.css, and the drift-guard test. Changing the seed here means
+// regenerating globals.css and re-baselining the drift-guard. exactHex
+// is set to the project default '#6750a4' so the hex display reads back
+// verbatim even though the HCT axes are the canonical store — same UX
+// contract as a user-pasted hex (ADR-0028).
+const DEFAULT_SEED_HEX = '#6750a4'
 export const DEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
-  seedHex: '#6750a4',
+  seed: { ...hctFromHex(DEFAULT_SEED_HEX), exactHex: DEFAULT_SEED_HEX },
   variant: SHADCN_PRESETS.default.variant,
   contrastLevel: 0,
   seedHexLock: false,
@@ -1010,6 +1038,22 @@ export function isValidHex(hex: string): boolean {
 const VARIANT_NAMES = Object.keys(variants) as [VariantName, ...VariantName[]]
 
 const HexSchema = v.pipe(v.string(), v.check(isValidHex, 'invalid hex'))
+
+// why: ADR-0028 — canonical seed shape. Hue allowed inclusive of 360 so a
+// slider drag to the wraparound point stores a distinct value from 0 (the
+// useHctFromHex hook's prior local cache existed exactly to preserve this
+// distinction; with HCT canonical in the store, the schema must allow it).
+// MCU's hexFromHct projects 360 and 0 to the same hex — that's the
+// collapse point, not a state distinction worth losing. chroma has no
+// hard upper bound (MCU's gamut wall is hue+tone dependent; ~150 is a
+// soft ceiling at the most chromatic axes); tone is in [0, 100]. exactHex
+// is optional and must be a valid hex when present.
+const SeedSchema = v.object({
+  hue: v.pipe(v.number(), v.minValue(0), v.maxValue(360)),
+  chroma: v.pipe(v.number(), v.minValue(0)),
+  tone: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
+  exactHex: v.optional(HexSchema),
+})
 
 const CustomColorEntrySchema = v.pipe(
   v.object({
@@ -1068,7 +1112,7 @@ const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
 
 export const PortableThemeSchema = v.object({
   version: v.literal(SCHEMA_VERSION),
-  seedHex: HexSchema,
+  seed: SeedSchema,
   variant: v.picklist(VARIANT_NAMES),
   contrastLevel: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
   seedHexLock: v.boolean(),

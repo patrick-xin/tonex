@@ -1,7 +1,7 @@
 'use client'
 
 import { DotsThreeVerticalIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react'
-import { previewCustomColor, useSource } from '@tonex/core'
+import { previewCustomColor, selectSeedHex, useSource } from '@tonex/core'
 import { type CustomColorEntry, slugifyCustomColorName } from '@tonex/core/schema'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -81,7 +81,7 @@ function CustomColorCard({
   onEdit: () => void
   onDelete: () => void
 }) {
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const mode = useActiveMode()
   const preview = previewCustomColor(seedHex, { hex: entry.hex, blend: entry.blend })
   // why: pre-hydration we render transparent placeholders for the 4 swatch

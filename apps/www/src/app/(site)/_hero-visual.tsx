@@ -1,6 +1,6 @@
 'use client'
 
-import { type TokenMap, useResolvedTokens, useSource } from '@tonex/core'
+import { selectSeedHex, type TokenMap, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { DEFAULT_INPUTS, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
 import { RotateCcw } from 'lucide-react'
@@ -22,7 +22,7 @@ const SMOOTH = [0.22, 1, 0.36, 1] as const
 
 export function HeroVisual() {
   const theme = useResolvedTokens()
-  const seedHex = useSource((s) => s.seedHex)
+  const seedHex = useSource(selectSeedHex)
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
 
   if (theme === null) return null
@@ -54,7 +54,7 @@ export function HeroVisual() {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => setSeedHex(DEFAULT_INPUTS.seedHex)}
+            onClick={() => setSeedHex(selectSeedHex(DEFAULT_INPUTS))}
             aria-label="Reset seed"
           >
             <RotateCcw className="size-4" />

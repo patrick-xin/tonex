@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
+import { hctFromHex } from '../hct'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceTint } from './tint'
+
+const withSeed = (hex: string) => ({
+  ...DEFAULT_INPUTS,
+  seed: { ...hctFromHex(hex), exactHex: hex },
+})
 
 // why: layer is argb-canonical (ADR-0021); tokens are numbers, not strings.
 
@@ -16,8 +22,8 @@ describe('applySurfaceTint', () => {
     // why: at level=0 we want a neutral base, not MCU-as-is. Two different
     // primaries must collapse to identical surface bg tokens — that is the
     // structural guarantee that level=0 carries no primary character.
-    const red = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#ff0000' }).md.light
-    const green = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#00ff00' }).md.light
+    const red = deriveTheme(withSeed('#ff0000')).md.light
+    const green = deriveTheme(withSeed('#00ff00')).md.light
     const tintedRed = applySurfaceTint(red, 'light', 0, 'zinc')
     const tintedGreen = applySurfaceTint(green, 'light', 0, 'zinc')
     for (const tok of SURFACE_BG) {
@@ -26,8 +32,8 @@ describe('applySurfaceTint', () => {
   })
 
   it('level=1 introduces primary character (different primaries → different output)', () => {
-    const red = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#ff0000' }).md.light
-    const green = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#00ff00' }).md.light
+    const red = deriveTheme(withSeed('#ff0000')).md.light
+    const green = deriveTheme(withSeed('#00ff00')).md.light
     const tintedRed = applySurfaceTint(red, 'light', 1, 'zinc')
     const tintedGreen = applySurfaceTint(green, 'light', 1, 'zinc')
     for (const tok of SURFACE_BG) {
@@ -50,7 +56,7 @@ describe('applySurfaceTint', () => {
     // 8-bit quantization swallow small chroma deltas in the hex round-trip.
     // Asserting bytes-differ captures the structural intent without baking
     // in gamut behavior we don't control.
-    const layer = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#ff0000' }).md.dark
+    const layer = deriveTheme(withSeed('#ff0000')).md.dark
     const zero = applySurfaceTint(layer, 'dark', 0, 'zinc')
     const full = applySurfaceTint(layer, 'dark', 1, 'zinc')
     for (const tok of SURFACE_BG) {
