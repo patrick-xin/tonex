@@ -155,10 +155,10 @@ function Body({ theme, mode, layer }: BodyProps) {
 // hotkey is registered per-instance; only one mounts per page so no
 // duplicate-binding risk. Current mode only via useActiveMode.
 export function ContrastChecker({ layer }: { layer: Layer }) {
-  useHotkey('Mod+A', () => checkContrastDialogHandle.open(null), {
+  useHotkey('A', () => checkContrastDialogHandle.open(null), {
     ignoreInputs: true,
     requireReset: true,
-    meta: { name: 'Check contrast', description: 'Press ⌘+A to audit contrast' },
+    meta: { name: 'Check contrast', description: 'Press A to audit contrast' },
   })
 
   const styles = dialogContentStyles({ layout: 'scrollable' })

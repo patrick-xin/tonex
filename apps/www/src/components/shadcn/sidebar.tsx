@@ -1,11 +1,5 @@
 'use client'
 
-import { mergeProps } from '@base-ui/react/merge-props'
-import { useRender } from '@base-ui/react/use-render'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { PanelLeftIcon } from 'lucide-react'
-import * as React from 'react'
-import { cn } from 'tailwind-variants'
 import { Button } from '@/components/shadcn/button'
 import { Input } from '@/components/shadcn/input'
 import { Separator } from '@/components/shadcn/separator'
@@ -19,6 +13,12 @@ import {
 import { Skeleton } from '@/components/shadcn/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/lib/hooks/use-mobile'
+import { mergeProps } from '@base-ui/react/merge-props'
+import { useRender } from '@base-ui/react/use-render'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { PanelLeftIcon } from 'lucide-react'
+import * as React from 'react'
+import { cn } from 'tailwind-variants'
 import { useShadcn } from '../../app/(app)/theme/(shadcn)/shadcn/_provider'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
@@ -228,7 +228,7 @@ function Sidebar({
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l border-sidebar-border',
           className,
         )}
         {...props}
@@ -689,5 +689,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
+  useSidebar
 }
+

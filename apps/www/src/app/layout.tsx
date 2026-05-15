@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/toast'
 import '@/styles/globals.css'
 import { domAnimation, LazyMotion } from 'motion/react'
 import type { Metadata } from 'next'
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LazyMotion features={domAnimation}>
           <Providers>
             <div className="root">{children}</div>
+            <Toaster />
           </Providers>
         </LazyMotion>
       </body>

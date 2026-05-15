@@ -1,6 +1,5 @@
 'use client'
 
-import { CirclePlusIcon, MailIcon } from 'lucide-react'
 import { Button } from '@/components/shadcn/button'
 import {
   SidebarGroup,
@@ -9,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/shadcn/sidebar'
+import { CirclePlusIcon, MailIcon } from 'lucide-react'
 
 export function NavMain({
   items,
@@ -26,7 +26,7 @@ export function NavMain({
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              className="min-w-8 bg-sidebar-primary text-sidebar-primary-foreground duration-200 ease-linear hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground active:bg-sidebar-primary/90 active:text-sidebar-primary-foreground"
             >
               <CirclePlusIcon />
               <span>Quick Create</span>

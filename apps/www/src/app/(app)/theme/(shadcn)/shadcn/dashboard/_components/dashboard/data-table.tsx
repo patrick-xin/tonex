@@ -1,5 +1,54 @@
 'use client'
 
+import { Badge } from '@/components/shadcn/badge'
+import { Button } from '@/components/shadcn/button'
+import { Checkbox } from '@/components/shadcn/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/shadcn/dropdown-menu'
+import { Input } from '@/components/shadcn/input'
+import { Label } from '@/components/shadcn/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shadcn/select'
+import { Separator } from '@/components/shadcn/separator'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/shadcn/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn/tabs'
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
+import { toast } from '@/components/ui/toast'
+import { useIsMobile } from '@/lib/hooks/use-mobile'
 import {
   closestCenter,
   DndContext,
@@ -51,56 +100,14 @@ import {
 import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { z } from 'zod'
-import { Badge } from '@/components/shadcn/badge'
-import { Button } from '@/components/shadcn/button'
-import { Checkbox } from '@/components/shadcn/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/shadcn/dropdown-menu'
-import { Input } from '@/components/shadcn/input'
-import { Label } from '@/components/shadcn/label'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shadcn/select'
-import { Separator } from '@/components/shadcn/separator'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/shadcn/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn/tabs'
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
-import { toast } from '@/components/ui/toast'
-import { useIsMobile } from '@/lib/hooks/use-mobile'
 import { useShadcn } from '../../../_provider'
+import { AccountAccess } from './account-access'
+import { ActivateAgentDialog } from './activate-agent-dialog'
+import { ClaimableBalance } from './claimable-balance'
+import { EmptyExploreCatalog } from './empty-explore-catalog'
+import { FileUpload } from './file-upload'
+import { Shortcuts } from './shortcuts'
+import { UsageCard } from './usage-card'
 
 export const schema = z.object({
   id: z.number(),
@@ -582,13 +589,23 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
         </div>
       </TabsContent>
       <TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-border border-dashed"></div>
+        <div className="aspect-video w-full flex flex-wrap justify-center items-center flex-1 rounded-lg border border-border border-dashed gap-6">
+          <AccountAccess/>
+          <UsageCard/>
+          <Shortcuts/>
+        </div>
       </TabsContent>
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-border border-dashed"></div>
+        <div className="aspect-video w-full flex flex-wrap justify-center items-center flex-1 rounded-lg border border-border border-dashed gap-6">
+          <EmptyExploreCatalog/>
+          <FileUpload/>
+        </div>
       </TabsContent>
       <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-border border-dashed"></div>
+         <div className="aspect-video w-full grid grid-cols-1 sm:grid-cols-2 flex-1 rounded-lg border border-border border-dashed gap-6 p-6">
+          <ClaimableBalance/>
+          <ActivateAgentDialog/>
+        </div>
       </TabsContent>
     </Tabs>
   )

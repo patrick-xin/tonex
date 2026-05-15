@@ -1,6 +1,5 @@
 import type { Dialog as BaseDialog, Popover as BasePopover } from '@base-ui/react'
-import { QuestionMarkIcon } from '@phosphor-icons/react'
-import { Contrast, Download, Settings } from 'lucide-react'
+import { CircleQuestionMarkIcon, Contrast, CopyIcon, Download, Settings } from 'lucide-react'
 import {
   checkContrastDialogHandle,
   exportDialogHandle,
@@ -32,9 +31,16 @@ export const BASE_SHORTCUTS: Item[] = [
     handle: exportDialogHandle,
   },
   {
+    icon: CopyIcon,
+    label: 'Quick Copy',
+    value: 'quick-export',
+    shortcut: 'E then C',
+    handle: exportDialogHandle,
+  },
+  {
     icon: Contrast,
     label: 'Check Contrast',
-    shortcut: '⌘+C',
+    shortcut: 'A',
     value: 'check-contrast',
     handle: checkContrastDialogHandle,
   },
@@ -46,7 +52,7 @@ export const BASE_SHORTCUTS: Item[] = [
     popoverHandle: shadcnSettingsPopoverHandle,
   },
   {
-    icon: QuestionMarkIcon,
+    icon: CircleQuestionMarkIcon,
     label: 'Help',
     shortcut: 'H',
     value: 'help',
