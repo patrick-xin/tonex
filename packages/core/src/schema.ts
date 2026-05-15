@@ -15,7 +15,7 @@ export {
   type MdChartTokenName,
   SHADCN_CHART_TOKEN_NAMES,
   type ShadcnChartTokenName,
-} from './chart/schema'
+} from './chart'
 export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
