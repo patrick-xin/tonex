@@ -7,6 +7,11 @@ import {
   customColor as mdCustomColor,
 } from '@tonex/mcu'
 import {
+  MD_CHART_TOKEN_NAMES,
+  SHADCN_CHART_TOKEN_NAMES,
+  type ShadcnChartTokenName,
+} from '../chart/schema'
+import {
   buildMdChartSequentialSamples,
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
@@ -17,7 +22,6 @@ import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
 import {
   type CustomColorEntry,
-  MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_TONE_NAMES,
@@ -25,9 +29,7 @@ import {
   type MdTokenName,
   PALETTE_FAMILIES,
   type PortableTheme,
-  SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
-  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   slugifyCustomColorName,

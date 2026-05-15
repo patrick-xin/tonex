@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/schema'
 import type { VariantName } from '../variants'
 import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import { hctFromHex, hexFromHct } from './hct'
@@ -7,17 +8,14 @@ import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
 import {
-  type ChartScheme,
   type CustomColorEntry,
   DEFAULT_INPUTS,
-  type HueAnchor,
   isValidHex,
   type MdTokenName,
   type PaletteName,
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
-  type ShadcnChartTokenName,
   type ShadcnRoleName,
   STORAGE_KEY,
   type SurfaceAlgo,

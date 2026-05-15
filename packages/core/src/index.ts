@@ -11,11 +11,9 @@
 // reason-to-grow independent — adding a schema field doesn't widen the
 // engine surface, adding a variant doesn't touch the schema barrel.
 
+export { HUE_ANCHOR_DEFAULT, HUE_SPREAD_DEFAULT, type HueAnchor } from './chart/schema'
 export {
   buildSequentialReport,
-  HUE_ANCHOR_DEFAULT,
-  HUE_SPREAD_DEFAULT,
-  type HueAnchor,
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
   type SequentialModeOutput,

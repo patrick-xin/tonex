@@ -1,8 +1,9 @@
 import { hexFromArgb } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
+import { SHADCN_CHART_TOKEN_NAMES } from '../chart/schema'
 import { evaluateThemeContrast } from './contrast'
 import { deriveTheme } from './derive'
-import { CONTRAST_PAIRS, DEFAULT_INPUTS, SHADCN_CHART_TOKEN_NAMES } from './schema'
+import { CONTRAST_PAIRS, DEFAULT_INPUTS } from './schema'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
   it('reports both modes with 55 pair results each post slice contrast-4', () => {

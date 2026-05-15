@@ -4,29 +4,33 @@
 // barrel so adding a schema field doesn't touch consumers that only need
 // engine functions, and vice versa.
 
-export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
-export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
   CHART_SCHEMES,
   type ChartScheme,
+  HUE_ANCHOR_DEFAULT,
+  HUE_ANCHORS,
+  HUE_SPREAD_DEFAULT,
+  type HueAnchor,
+  MD_CHART_TOKEN_NAMES,
+  type MdChartTokenName,
+  SHADCN_CHART_TOKEN_NAMES,
+  type ShadcnChartTokenName,
+} from './chart/schema'
+export { cmfSecondSourceDisabledReason } from './theme/cmf-second-source'
+export { paletteOverrideDisabledReason } from './theme/palette-override'
+export {
   CONTRAST_PAIRS,
   type ContrastPair,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
-  HUE_ANCHOR_DEFAULT,
-  HUE_ANCHORS,
-  HUE_SPREAD_DEFAULT,
-  type HueAnchor,
   isValidHex,
-  MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TOKEN_NAMES,
   MD_PALETTE_TONE_NAMES,
   MD_TOKEN_NAMES,
-  type MdChartTokenName,
   type MdCoreTokenName,
   type MdExtendedTokenName,
   type MdPaletteFamilyName,
@@ -41,9 +45,7 @@ export {
   parsePortableTheme,
   SCHEMA_VERSION,
   type SchemaVersion,
-  SHADCN_CHART_TOKEN_NAMES,
   SHADCN_ROLE_NAMES,
-  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   STORAGE_KEY,

@@ -1,17 +1,16 @@
 import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
+import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../chart/schema'
 import { deriveTheme } from './derive'
 import { hexFromHct } from './hct'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
-  MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
-  SHADCN_CHART_TOKEN_NAMES,
 } from './schema'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the

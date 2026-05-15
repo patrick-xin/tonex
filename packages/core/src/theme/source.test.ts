@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { ShadcnChartTokenName } from '../chart/schema'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -10,7 +11,6 @@ import {
   type PortableTheme,
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
-  type ShadcnChartTokenName,
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'

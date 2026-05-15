@@ -3,21 +3,9 @@ import { argbFromHex, type DynamicScheme, Hct, TonalPalette } from '@tonex/mcu'
 import { cmfSecondSourceDisabledReason } from '../theme/cmf-second-source'
 import type { Mode } from '../theme/mode'
 import { applyPaletteOverrides } from '../theme/palette-override'
-import {
-  HUE_ANCHOR_DEFAULT,
-  HUE_ANCHORS,
-  HUE_SPREAD_DEFAULT,
-  type HueAnchor,
-  type PortableTheme,
-} from '../theme/schema'
+import type { PortableTheme } from '../theme/schema'
 import { variants } from '../variants'
-
-// why: re-export schema-owned chart constants here. Slice 3 moved HueAnchor /
-// HUE_SPREAD_DEFAULT / HUE_ANCHOR_DEFAULT into schema.ts because they're
-// load-bearing for PortableTheme.chart's shape AND default values; the lab
-// page and the engine barrel both still import them from this file's
-// surface, so the re-export keeps callers stable across the move.
-export { HUE_ANCHOR_DEFAULT, HUE_ANCHORS, HUE_SPREAD_DEFAULT, type HueAnchor }
+import { HUE_ANCHOR_DEFAULT, HUE_ANCHORS, HUE_SPREAD_DEFAULT, type HueAnchor } from './schema'
 
 // why: monotonic perceptual-uniform sequential chart palette (ADR-0027 c.3).
 // This file hosts BOTH the production sequential path and the dev-route lab:
