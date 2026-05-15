@@ -253,7 +253,13 @@ function bindShadcn(
 //   8. SPLIT the merged md result into core/extended/custom buckets by name
 //      so each field's consumer set is sharp.
 export function deriveTheme(source: PortableTheme): DerivedTheme {
-  const seedHct = Hct.fromInt(argbFromHex(source.seedHex))
+  // why: ADR-0028 — read canonical HCT directly from source.seed, not via
+  // hexFromHct → hctFromHex. The round-trip at chroma<4 silently rotated
+  // hue by up to 12.888° (issue #57 Mechanism B); reading the triplet
+  // directly preserves the user's pick verbatim. `Hct.from` runs MCU's
+  // solver to land an in-gamut argb — that's the canonical engine entry
+  // point regardless of the seed's origin (hex paste or HCT slider).
+  const seedHct = Hct.from(source.seed.hue, source.seed.chroma, source.seed.tone)
   const variant = variants[source.variant]
 
   // why: cmf is the only strategy that reads the second hct; resolve once
@@ -305,7 +311,10 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   // ordering keeps the spine consistent: every md token in the final layer
   // is a candidate for binding, customs included. Shadcn customs are
   // produced separately and merged into shadcn layers post-bind.
-  const seedArgb = argbFromHex(source.seedHex)
+  // ADR-0028: reuse seedHct.toInt() rather than re-projecting through hex —
+  // canonical HCT is the source of truth; the customColor blend reference
+  // tracks the engine's in-gamut argb without a redundant hex round-trip.
+  const seedArgb = seedHct.toInt()
   const customGroups = source.customColors.map((entry) => ({
     entry,
     slug: slugifyCustomColorName(entry.name),

@@ -35,3 +35,11 @@ A 60Hz drag now runs ~1 derive + a handful of `setProperty` calls + at most 5 lo
 
 **What no longer applies:**
 - The "transient draft buffer while dragging" pattern. No `draft` field will be added to source. If a future input regresses streaming cost, the fix is in core (cache, applyDom, persist), not a per-input draft.
+
+## Amendment — 2026-05-15: superseded by ADR-0028
+
+This ADR is **superseded** by ADR-0028 (HCT is the canonical seed, with exactHex preserved across hex-input paths). The decision recorded here — hex-as-persisted-canonical, HCT-as-derived-selector — held while the only slider drift surface was per-axis round-tripping (issue #56, fixed in PR #58). Issue #57 then exposed a second drift mechanism that cannot be patched at the slider layer: at `chroma < 4` (`CHROMA_HUE_LOCK`), MCU's solver silently rotates hue by up to 12.888° when chroma changes, because `hexFromHct → hctFromHex` is not an identity in that regime. The cosmetic UI lock no longer matches the underlying state.
+
+ADR-0028 flips the canonical axis to HCT and preserves the user's pasted hex bytes via an optional `exactHex?` field — keeping this ADR's original "intent argument" (`#3B82F6` should round-trip as `#3B82F6`, not `#3B82F4`) intact for the primary intake path while making slider state honest about the user's HCT manipulations.
+
+The "per-tick commit, no draft buffer" position from the 2026-05-06 amendment is retained by ADR-0028 unchanged.

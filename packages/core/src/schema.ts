@@ -45,6 +45,7 @@ export {
   parsePortableTheme,
   SCHEMA_VERSION,
   type SchemaVersion,
+  type Seed,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type ShadcnRoleName,

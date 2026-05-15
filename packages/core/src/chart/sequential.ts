@@ -269,7 +269,8 @@ function buildSchemes(source: PortableTheme): {
   lightScheme: DynamicScheme
   darkScheme: DynamicScheme
 } {
-  const seedHct = Hct.fromInt(argbFromHex(source.seedHex))
+  // why: ADR-0028 — canonical HCT direct read; mirrors derive.ts:deriveTheme.
+  const seedHct = Hct.from(source.seed.hue, source.seed.chroma, source.seed.tone)
   const variant = variants[source.variant]
   const secondHct =
     source.cmfSecondSourceHex !== null && cmfSecondSourceDisabledReason(source) === null

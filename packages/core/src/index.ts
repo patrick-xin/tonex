@@ -61,6 +61,7 @@ export {
   type SourceActions,
   type SourceState,
   selectPortable,
+  selectSeedHex,
   useSource,
 } from './theme/source'
 export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'

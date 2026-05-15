@@ -2,7 +2,7 @@ import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../chart/schema'
 import { deriveTheme } from './derive'
-import { hexFromHct } from './hct'
+import { hctFromHex, hexFromHct } from './hct'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -12,6 +12,7 @@ import {
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
 } from './schema'
+import { selectSeedHex } from './source'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
 // final else clause: (secondHue > 12 && secondHue <= 28) ? 32 : 16. Single-
@@ -94,8 +95,14 @@ describe('deriveTheme', () => {
   })
 
   it('different seeds yield different primaries', () => {
-    const red = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#ff0000' })
-    const green = deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#00ff00' })
+    const red = deriveTheme({
+      ...DEFAULT_INPUTS,
+      seed: { ...hctFromHex('#ff0000'), exactHex: '#ff0000' },
+    })
+    const green = deriveTheme({
+      ...DEFAULT_INPUTS,
+      seed: { ...hctFromHex('#00ff00'), exactHex: '#00ff00' },
+    })
     expect(red.shadcn.light['--primary']).not.toBe(green.shadcn.light['--primary'])
   })
 
@@ -879,7 +886,7 @@ describe('deriveTheme', () => {
       // close to 270.
       const grayInputs = {
         ...DEFAULT_INPUTS,
-        seedHex: '#808080',
+        seed: { ...hctFromHex('#808080'), exactHex: '#808080' },
         chart: { ...DEFAULT_INPUTS.chart, scheme: 'categorical' as const },
       }
       const { md } = deriveTheme(grayInputs)
@@ -968,7 +975,7 @@ describe('deriveTheme', () => {
       // renderings. <5° tolerance is loose enough for variant-specific hue
       // corrections at the primary palette.
       const { md } = deriveTheme(DEFAULT_INPUTS)
-      const seedHct = Hct.fromInt(argbFromHex(DEFAULT_INPUTS.seedHex))
+      const seedHct = Hct.fromInt(argbFromHex(selectSeedHex(DEFAULT_INPUTS)))
       const light1 = Hct.fromInt(md.lightChart['--color-chart-1'] as number)
       const dark1 = Hct.fromInt(md.darkChart['--color-chart-1'] as number)
       expect(Math.abs(light1.hue - seedHct.hue)).toBeLessThan(5)

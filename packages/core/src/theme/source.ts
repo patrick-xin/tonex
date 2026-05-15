@@ -26,12 +26,18 @@ import { SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
 import type { NeutralPaletteName } from './surface'
 
 export interface SourceActions {
+  // why: ADR-0028 — hex input path. Stores the HCT decomposition AND the
+  // user's exact bytes via `seed.exactHex`, so the hex display reads back
+  // verbatim (avoids the #3B82F6 → #3B82F4 round-trip surprise). Idempotent
+  // on byte-equal input. seedHexLock gates this and every HCT-axis setter.
   setSeedHex(seedHex: string): void
-  // why: HCT setters all decompose the current seed, replace one axis, and
-  // recompose to a hex routed through setSeedHex. Centralizing through the
-  // hex setter means seedHexLock gates every mutation pathway with one check
-  // — no per-axis lock plumbing, no chance of a future setter forgetting the
-  // gate.
+  // why: HCT-axis setters write the canonical axis directly and clear
+  // `seed.exactHex` — touching an HCT axis is the user signal that they
+  // have left hex-input mode, so the preserved hex is no longer the live
+  // intent. 5e-3 tolerance gate (issue #56) carries forward: any caller
+  // submitting a value within solver epsilon of the current axis is a
+  // no-op, defending against repeated-commit drift from the slider's
+  // `.toFixed(2)` button-tap path.
   setSeedHue(hue: number): void
   setSeedChroma(chroma: number): void
   setSeedTone(tone: number): void
@@ -94,10 +100,13 @@ export type SourceState = PortableTheme & {
   actions: SourceActions
 }
 
-// why: tolerance gate for HCT setters (issue #56). 5e-3 = half of one
+// why: tolerance gate for HCT-axis setters (issue #56). 5e-3 = half of one
 // `.toFixed(2)` step; the slider display rounds away anything tighter than
-// this, so a button-tap commit cannot mutate seedHex while a typed change
-// of 0.01 still flows through. Shared by setSeedHue/Chroma/Tone.
+// this, so a button-tap commit cannot mutate `seed.{axis}` while a typed
+// change of 0.01 still flows through. Shared by setSeedHue/Chroma/Tone.
+// Post-ADR-0028 the comparison is against `s.seed.{axis}` (canonical HCT)
+// instead of `hctFromHex(s.seedHex)` (derived); same numeric threshold,
+// no round-trip in the comparison itself.
 const HCT_SETTER_EPSILON = 5e-3
 
 // why: trailing-edge debounce for the persist write. 200ms balances two
@@ -140,49 +149,65 @@ export function selectPortable(s: SourceState): PortableTheme {
   return portable
 }
 
+// why: ADR-0028 — hex projection selector. Returns the user's pasted bytes
+// when `seed.exactHex` is set (preserved across hex-input paths); falls
+// back to `hexFromHct(seed)` once any HCT-axis setter has cleared it.
+// Operates on `Pick<PortableTheme, 'seed'>` so it works on both SourceState
+// and the pure PortableTheme shape (derive.ts, chart/sequential.ts).
+// Every read site that needs a hex calls this — `seed.exactHex` is never
+// read directly outside the selector, so the fallback rule has one home.
+export function selectSeedHex(s: Pick<PortableTheme, 'seed'>): string {
+  return s.seed.exactHex ?? hexFromHct(s.seed)
+}
+
 export const useSource = create<SourceState>()(
   persist(
     (set) => ({
       ...DEFAULT_INPUTS,
       _hydrated: false,
       actions: {
-        // why: seedHexLock gates the seed write at the setter so every pathway
-        // (hex input, HCT slider, image extraction) is blocked by one check
-        // instead of each consumer guarding individually. Silent no-op — UI is
-        // expected to disable the inputs cosmetically; this is the structural
-        // backstop for any caller that bypasses the disabled state.
-        setSeedHex: (seedHex) => set((s) => (s.seedHexLock ? {} : { seedHex })),
-        // why: short-circuit when the requested axis is within solver epsilon
-        // of the current value (issue #56). Pre-fix sliders displayed
-        // `Math.round(value)` at step=1 — a button-tap-and-Enter on the
-        // inline value display would commit the rounded integer and drift
-        // seedHex 1–2 channels through the hexFromHct round trip, amplifying
-        // up to 41ch on CMF tokens and 252ch under the fidelity variant. The
-        // UI now writes via setSeedHex through useHctFromHex, but these
-        // per-axis setters remain exported for programmatic callers; the
-        // tolerance gate is the structural backstop. 5e-3 = half of one
-        // `.toFixed(2)` step — the band the slider's display rounds away,
-        // narrow enough to let any typed change of 0.01 through.
+        // why: seedHexLock gates every seed mutation pathway (hex input, HCT
+        // slider, image extraction) at the store seam — one structural check
+        // instead of per-consumer guards. Silent no-op — UI is expected to
+        // disable the inputs cosmetically; this is the backstop for any
+        // caller that bypasses the disabled state. Idempotency check uses
+        // selectSeedHex so a paste of the current value (whether stored as
+        // exactHex or projected from HCT) is a clean no-op.
+        setSeedHex: (hex) =>
+          set((s) => {
+            if (s.seedHexLock) return {}
+            if (hex === selectSeedHex(s)) return {}
+            return { seed: { ...hctFromHex(hex), exactHex: hex } }
+          }),
+        // why: HCT-axis setters write the canonical axis and rebuild `seed`
+        // without `exactHex` — the user has left hex-input mode (ADR-0028).
+        // Spread omission is the explicit clear; the schema treats absent
+        // and undefined as equivalent (optional field). 5e-3 tolerance
+        // (issue #56) suppresses no-op writes from the slider's button-tap
+        // `.toFixed(2)` commit path — the band rounded away by the display
+        // can never mutate state, but any typed 0.01 change still flows.
+        // The comparison is against `s.seed.{axis}` directly — no hex
+        // round-trip — so MCU's gamut solver cannot rotate the unchanged
+        // axes (Mechanism B from #57). At chroma<4 the visual hue lock
+        // matches state because hue is preserved verbatim across a chroma
+        // touch instead of being recomputed from the new hex projection.
         setSeedHue: (hue) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            const current = hctFromHex(s.seedHex)
-            if (Math.abs(hue - current.hue) < HCT_SETTER_EPSILON) return {}
-            return { seedHex: hexFromHct({ ...current, hue }) }
+            if (Math.abs(hue - s.seed.hue) < HCT_SETTER_EPSILON) return {}
+            return { seed: { hue, chroma: s.seed.chroma, tone: s.seed.tone } }
           }),
         setSeedChroma: (chroma) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            const current = hctFromHex(s.seedHex)
-            if (Math.abs(chroma - current.chroma) < HCT_SETTER_EPSILON) return {}
-            return { seedHex: hexFromHct({ ...current, chroma }) }
+            if (Math.abs(chroma - s.seed.chroma) < HCT_SETTER_EPSILON) return {}
+            return { seed: { hue: s.seed.hue, chroma, tone: s.seed.tone } }
           }),
         setSeedTone: (tone) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            const current = hctFromHex(s.seedHex)
-            if (Math.abs(tone - current.tone) < HCT_SETTER_EPSILON) return {}
-            return { seedHex: hexFromHct({ ...current, tone }) }
+            if (Math.abs(tone - s.seed.tone) < HCT_SETTER_EPSILON) return {}
+            return { seed: { hue: s.seed.hue, chroma: s.seed.chroma, tone } }
           }),
         setVariant: (variant) => set({ variant }),
         // why: clamp at the seam (issue #33). MCU's 2025/2026 spec curves
@@ -334,22 +359,27 @@ export const useSource = create<SourceState>()(
       // portable vs ephemeral." Persistence drift is no longer a separate
       // maintenance surface.
       partialize: selectPortable,
-      // why: v1 baseline — no prior versions to migrate from. Future bumps add
-      // forward-migration branches here per ADR-0009. On parse-failure the
-      // rehydrate handler below resets to DEFAULT_INPUTS, so callers never see
-      // a malformed PortableTheme.
+      // why: passthrough — no forward-migration logic for v1 → v2.
+      // ADR-0028 flipped the seed shape (`seedHex: string` → `seed: {...}`)
+      // pre-launch; persisted v1 records fail the v2 schema and reset to
+      // DEFAULT_INPUTS via onRehydrateStorage below (ADR-0009 c.4,
+      // memory/feedback_prelaunch_breaking_changes.md). Future bumps with
+      // live users to preserve add real forward-migration branches per
+      // ADR-0009.
       migrate: (persistedState, _version) => persistedState as PortableTheme,
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is
       // true. Structurally prevents Next.js hydration mismatches. ADR-0015.
       //
       // Validate the rehydrated portable shape against PortableThemeSchema
-      // (ADR-0009). Migration ladder above lifts persisted shape to v10; this
-      // is the v10 contract check. On parse failure (corrupted localStorage,
-      // schema bug, partial write) reset to DEFAULT_INPUTS — all-or-nothing
-      // recovery, the rare path that's simpler than per-field fallback. If
-      // rehydrate itself errored or no state came back, leave the in-memory
-      // DEFAULT_INPUTS in place and just flip the hydrated flag.
+      // (ADR-0009). Migration ladder above is currently a passthrough; this
+      // is the v2 contract check. On parse failure (corrupted localStorage,
+      // schema bug, partial write, OR a persisted v1 record under the
+      // ADR-0028 break — see migrate comment above) reset to DEFAULT_INPUTS
+      // — all-or-nothing recovery, the rare path that's simpler than
+      // per-field fallback. If rehydrate itself errored or no state came
+      // back, leave the in-memory DEFAULT_INPUTS in place and just flip the
+      // hydrated flag.
       onRehydrateStorage: () => (state, error) => {
         if (state === undefined || error !== undefined) return
         const result = parsePortableTheme(selectPortable(state))

@@ -122,9 +122,23 @@ describe('parsePortableTheme', () => {
     expect(parsePortableTheme(bad).ok).toBe(false)
   })
 
-  it('rejects malformed seed hex', () => {
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, seedHex: 'not-a-hex' }).ok).toBe(false)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, seedHex: '#abc' }).ok).toBe(false)
+  it('rejects malformed seed (ADR-0028)', () => {
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, seed: { hue: 999, chroma: 0, tone: 50 } }).ok,
+    ).toBe(false)
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, seed: { hue: 0, chroma: -1, tone: 50 } }).ok,
+    ).toBe(false)
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, seed: { hue: 0, chroma: 0, tone: 999 } }).ok,
+    ).toBe(false)
+    // exactHex must be a valid hex when present (optional, so omission is ok)
+    expect(
+      parsePortableTheme({
+        ...DEFAULT_INPUTS,
+        seed: { hue: 0, chroma: 0, tone: 50, exactHex: 'not-a-hex' },
+      }).ok,
+    ).toBe(false)
   })
 
   it('rejects unknown variant name', () => {

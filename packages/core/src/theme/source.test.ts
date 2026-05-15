@@ -2,6 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ShadcnChartTokenName } from '../chart/schema'
+import { hctFromHex } from './hct'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -14,7 +15,7 @@ import {
   type ShadcnRoleBindings,
   STORAGE_KEY,
 } from './schema'
-import { flushPersist, selectPortable, useSource } from './source'
+import { flushPersist, selectPortable, selectSeedHex, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the
@@ -57,7 +58,7 @@ const NONDEFAULT_CUSTOM_COLORS: CustomColorEntry[] = [
 
 const NONDEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
-  seedHex: '#ff00aa',
+  seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
   variant: 'tonalSpot',
   contrastLevel: 0.5,
   seedHexLock: true,
@@ -104,7 +105,7 @@ describe('useSource persistence round-trip', () => {
 
   it('write half — every PortableTheme field is persisted via setters', () => {
     const s = useSource.getState()
-    s.actions.setSeedHex(NONDEFAULT_INPUTS.seedHex)
+    s.actions.setSeedHex(selectSeedHex(NONDEFAULT_INPUTS))
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
     s.actions.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
     // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
@@ -238,52 +239,48 @@ describe('useSource persistence round-trip', () => {
   // because hexFromHct may snap to gamut — direct equality on the requested
   // axis would fail at extreme values.
   describe('HCT setters', () => {
-    it('setSeedHue replaces hue, preserves tone (chroma may gamut-clamp)', async () => {
-      // why: chroma can drop when hue changes — gamut wall narrows for some
-      // hues at the same (chroma, tone). That's MCU's solver doing its job,
-      // not a bug. Use a low-chroma seed so the assertion isolates the axis
-      // replacement from gamut clamping; tone is the genuinely-invariant axis.
-      const { hexFromHct, hctFromHex } = await import('./hct')
-      useSource.setState({ seedHex: hexFromHct({ hue: 0, chroma: 10, tone: 50 }) })
-      const before = hctFromHex(useSource.getState().seedHex)
+    it('setSeedHue replaces hue exactly, preserves chroma + tone (ADR-0028)', () => {
+      // why: post-ADR-0028 setSeedHue writes seed.hue directly — no hex
+      // round-trip, so the assertion can be byte-exact. Pre-ADR-0028 the
+      // round-trip through hexFromHct could clamp chroma at gamut walls
+      // and rotate hue at low chroma (Mechanism B). Both classes of drift
+      // are gone once the canonical HCT is the source of truth.
+      useSource.setState({ seed: { hue: 0, chroma: 10, tone: 50 }, _hydrated: true })
       useSource.getState().actions.setSeedHue(120)
-      const after = hctFromHex(useSource.getState().seedHex)
-      // why: MCU's solver produces hue values within ~1° of the request
-      // after the round trip through hexFromHct → hctFromHex. ±2 covers
-      // every observed drift without coupling to exact solver output.
-      expect(Math.abs(after.hue - 120)).toBeLessThan(2)
-      expect(Math.abs(after.chroma - before.chroma)).toBeLessThan(2)
-      expect(Math.abs(after.tone - before.tone)).toBeLessThan(2)
+      const after = useSource.getState().seed
+      expect(after.hue).toBe(120)
+      expect(after.chroma).toBe(10)
+      expect(after.tone).toBe(50)
     })
 
-    it('setSeedTone replaces tone, preserves hue', async () => {
-      const { hctFromHex } = await import('./hct')
-      const before = hctFromHex(useSource.getState().seedHex)
+    it('setSeedTone replaces tone exactly, preserves hue + chroma', () => {
+      useSource.setState({ seed: { hue: 90, chroma: 30, tone: 50 }, _hydrated: true })
       useSource.getState().actions.setSeedTone(80)
-      const after = hctFromHex(useSource.getState().seedHex)
-      expect(Math.abs(after.tone - 80)).toBeLessThan(2)
-      expect(Math.abs(after.hue - before.hue)).toBeLessThan(2)
+      const after = useSource.getState().seed
+      expect(after.tone).toBe(80)
+      expect(after.hue).toBe(90)
+      expect(after.chroma).toBe(30)
     })
 
-    it('setSeedChroma replaces chroma, preserves hue + tone', async () => {
-      const { hctFromHex } = await import('./hct')
-      const before = hctFromHex(useSource.getState().seedHex)
+    it('setSeedChroma replaces chroma exactly, preserves hue + tone', () => {
+      useSource.setState({ seed: { hue: 90, chroma: 10, tone: 50 }, _hydrated: true })
       useSource.getState().actions.setSeedChroma(20)
-      const after = hctFromHex(useSource.getState().seedHex)
-      expect(Math.abs(after.chroma - 20)).toBeLessThan(2)
-      expect(Math.abs(after.hue - before.hue)).toBeLessThan(2)
-      expect(Math.abs(after.tone - before.tone)).toBeLessThan(2)
+      const after = useSource.getState().seed
+      expect(after.chroma).toBe(20)
+      expect(after.hue).toBe(90)
+      expect(after.tone).toBe(50)
     })
 
-    it('all three setters no-op when seedHexLock is true', () => {
+    it('all four setters no-op when seedHexLock is true', () => {
       const s = useSource.getState()
       s.actions.setSeedHex('#6750a4')
       s.actions.setSeedHexLock(true)
-      const locked = useSource.getState().seedHex
+      const lockedSeed = useSource.getState().seed
+      s.actions.setSeedHex('#abcdef')
       s.actions.setSeedHue(0)
       s.actions.setSeedChroma(80)
       s.actions.setSeedTone(50)
-      expect(useSource.getState().seedHex).toBe(locked)
+      expect(useSource.getState().seed).toEqual(lockedSeed)
     })
 
     // why: issue #56 — pre-fix sliders displayed Math.round(value) at step=1,
@@ -301,72 +298,77 @@ describe('useSource persistence round-trip', () => {
     // path commits the displayed value verbatim, so the setter must treat
     // that as a no-op while still letting a typed change of 0.01 through.
     describe('HCT setters no-op on round-trip-equivalent input (issue #56)', () => {
-      // why: seeds with decimal HCT — exactly the surface that drifts when
-      // rounded. #6750a4 already lives on an integer HCT triplet, so it's
-      // the control. Mix of bright/saturated and one near-grey to cover the
-      // CHROMA_HUE_LOCK regime ceiling.
+      // why: seeds with decimal HCT — exactly the surface that used to drift
+      // when rounded. #6750a4 already lives on an integer HCT triplet, so
+      // it's the control. Mix of bright/saturated and one near-grey to
+      // cover the CHROMA_HUE_LOCK regime ceiling. Post-ADR-0028 the seeds
+      // are stored with exactHex set, so a no-op setter preserves both the
+      // canonical HCT AND the exact bytes — selectSeedHex stays identical.
       const SEEDS = ['#ff5722', '#1e88e5', '#4caf50', '#9c27b0', '#3b82f6', '#ec4899', '#7a7a7a']
 
-      it('setSeedHue is byte-stable when input equals current decimal hue', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { hue } = hctFromHex(seed)
+      const seedWithExact = (seedHex: string) => ({
+        ...DEFAULT_INPUTS,
+        seed: { ...hctFromHex(seedHex), exactHex: seedHex },
+        _hydrated: true,
+      })
+
+      it('setSeedHue is byte-stable when input equals current decimal hue', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { hue } = hctFromHex(seedHex)
           useSource.getState().actions.setSeedHue(hue)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
+          expect(selectSeedHex(useSource.getState())).toBe(seedHex)
         }
       })
 
-      it('setSeedChroma is byte-stable when input equals current decimal chroma', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { chroma } = hctFromHex(seed)
+      it('setSeedChroma is byte-stable when input equals current decimal chroma', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { chroma } = hctFromHex(seedHex)
           useSource.getState().actions.setSeedChroma(chroma)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
+          expect(selectSeedHex(useSource.getState())).toBe(seedHex)
         }
       })
 
-      it('setSeedTone is byte-stable when input equals current decimal tone', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { tone } = hctFromHex(seed)
+      it('setSeedTone is byte-stable when input equals current decimal tone', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { tone } = hctFromHex(seedHex)
           useSource.getState().actions.setSeedTone(tone)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
+          expect(selectSeedHex(useSource.getState())).toBe(seedHex)
         }
       })
 
-      it('setSeedHue is byte-stable on near-current input within solver tolerance', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { hue } = hctFromHex(seed)
+      it('setSeedHue is byte-stable on near-current input within solver tolerance', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { hue } = hctFromHex(seedHex)
           // why: 4e-3 sits inside the 5e-3 tolerance — the band the
           // `.toFixed(2)` display rounds away. Outside the band, the setter
           // must still mutate (real user intent).
           useSource.getState().actions.setSeedHue(hue + 4e-3)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
         }
       })
 
-      it('setSeedChroma is byte-stable on near-current input within solver tolerance', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { chroma } = hctFromHex(seed)
+      it('setSeedChroma is byte-stable on near-current input within solver tolerance', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { chroma } = hctFromHex(seedHex)
           useSource.getState().actions.setSeedChroma(chroma + 4e-3)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
         }
       })
 
-      it('setSeedTone is byte-stable on near-current input within solver tolerance', async () => {
-        const { hctFromHex } = await import('./hct')
-        for (const seed of SEEDS) {
-          useSource.setState({ ...DEFAULT_INPUTS, seedHex: seed, _hydrated: true })
-          const { tone } = hctFromHex(seed)
+      it('setSeedTone is byte-stable on near-current input within solver tolerance', () => {
+        for (const seedHex of SEEDS) {
+          useSource.setState(seedWithExact(seedHex))
+          const { tone } = hctFromHex(seedHex)
           useSource.getState().actions.setSeedTone(tone + 4e-3)
-          expect(useSource.getState().seedHex).toBe(seed)
+          expect(useSource.getState().seed.exactHex).toBe(seedHex)
         }
       })
     })
@@ -577,10 +579,10 @@ describe('useSource persistence round-trip', () => {
     s.actions.setSeedHex('#aabbcc')
     s.actions.setSeedHexLock(true)
     s.actions.setSeedHex('#112233')
-    expect(useSource.getState().seedHex).toBe('#aabbcc')
+    expect(selectSeedHex(useSource.getState())).toBe('#aabbcc')
     s.actions.setSeedHexLock(false)
     s.actions.setSeedHex('#112233')
-    expect(useSource.getState().seedHex).toBe('#112233')
+    expect(selectSeedHex(useSource.getState())).toBe('#112233')
   })
 
   // why: structural reset assertion — from a fully non-default state, reset()
@@ -597,15 +599,14 @@ describe('useSource persistence round-trip', () => {
     expect(useSource.getState()._hydrated).toBe(true)
   })
 
-  // why: ADR-0009 — schema validates the v9 result post-migrate; on parse
-  // failure the recovery is all-or-nothing reset. Simulate a tampered
-  // localStorage record whose version field is current (so the migrate
-  // ladder is a no-op) but whose seedHex is malformed. Without the parse
-  // gate, deriveTheme would consume the bad hex and throw at MCU. With it,
-  // the source snaps back to DEFAULT_INPUTS and the user gets a working
-  // editor instead of a broken one.
+  // why: ADR-0009 — schema validates the rehydrated shape; on parse failure
+  // recovery is all-or-nothing reset. Simulate a tampered localStorage
+  // record whose version field is current but whose seed shape is malformed
+  // (tone out of [0, 100]). Without the parse gate, deriveTheme would feed
+  // a bad triplet into Hct.from and produce garbage. With it, the source
+  // snaps back to DEFAULT_INPUTS and the user gets a working editor.
   it('rehydrate with invalid persisted state resets to DEFAULT_INPUTS', async () => {
-    const corrupt = { ...DEFAULT_INPUTS, seedHex: 'not-a-hex' }
+    const corrupt = { ...DEFAULT_INPUTS, seed: { hue: 0, chroma: 0, tone: 999 } }
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: corrupt, version: SCHEMA_VERSION }))
     await useSource.persist.rehydrate()
     expect(selectPortable(useSource.getState())).toEqual(DEFAULT_INPUTS)
@@ -620,5 +621,204 @@ describe('useSource persistence round-trip', () => {
     await useSource.persist.rehydrate()
     expect(selectPortable(useSource.getState())).toEqual(NONDEFAULT_INPUTS)
     expect(useSource.getState()._hydrated).toBe(true)
+  })
+
+  // why: ADR-0028 — HCT is the canonical persisted seed; pasted hex is
+  // preserved verbatim via seed.exactHex until any HCT axis is touched.
+  // Tests pin the four invariants the design rests on:
+  //   1. setSeedHex stores both the HCT decomposition AND the exact hex bytes
+  //   2. Any HCT-axis setter clears exactHex (user has left hex-input mode)
+  //   3. A chroma touch in the CHROMA_HUE_LOCK regime preserves seed.hue
+  //      (Mechanism B from #57 — pre-fix drift was up to 12.888°)
+  //   4. A lock-release chroma touch (3.99 → 4.5) preserves seed.hue
+  //      (pre-fix drift was up to 3.3° across 8/15 probed seeds)
+  describe('canonical HCT seed (ADR-0028, issue #57)', () => {
+    it('setSeedHex preserves exact hex bytes via selectSeedHex', () => {
+      // why: ADR-0003's primary intake concern — #3B82F6 round-trips through
+      // hexFromHct to #3B82F4. exactHex preserves the user's pasted bytes.
+      const s = useSource.getState()
+      s.actions.setSeedHex('#3b82f6')
+      expect(selectSeedHex(useSource.getState())).toBe('#3b82f6')
+      expect(useSource.getState().seed.exactHex).toBe('#3b82f6')
+    })
+
+    it('setSeedHex populates seed.{hue,chroma,tone} from the hex', async () => {
+      const { hctFromHex } = await import('./hct')
+      const s = useSource.getState()
+      s.actions.setSeedHex('#3b82f6')
+      const expected = hctFromHex('#3b82f6')
+      const { seed } = useSource.getState()
+      expect(seed.hue).toBeCloseTo(expected.hue, 5)
+      expect(seed.chroma).toBeCloseTo(expected.chroma, 5)
+      expect(seed.tone).toBeCloseTo(expected.tone, 5)
+    })
+
+    it('setSeedHue clears seed.exactHex (user has left hex-input mode)', () => {
+      const s = useSource.getState()
+      s.actions.setSeedHex('#3b82f6')
+      expect(useSource.getState().seed.exactHex).toBe('#3b82f6')
+      s.actions.setSeedHue(120)
+      expect(useSource.getState().seed.exactHex).toBeUndefined()
+    })
+
+    it('setSeedChroma clears seed.exactHex', () => {
+      const s = useSource.getState()
+      s.actions.setSeedHex('#3b82f6')
+      s.actions.setSeedChroma(80)
+      expect(useSource.getState().seed.exactHex).toBeUndefined()
+    })
+
+    it('setSeedTone clears seed.exactHex', () => {
+      const s = useSource.getState()
+      s.actions.setSeedHex('#3b82f6')
+      s.actions.setSeedTone(50)
+      expect(useSource.getState().seed.exactHex).toBeUndefined()
+    })
+
+    it('selectSeedHex returns hexFromHct(seed) when exactHex is absent', async () => {
+      const { hexFromHct } = await import('./hct')
+      // No setter call — DEFAULT_INPUTS.seed.exactHex is '#6750a4' (the
+      // project default). Drop into a no-exactHex state via direct setState
+      // to exercise the fallback branch.
+      const baseHct = { hue: 90, chroma: 30, tone: 50 }
+      useSource.setState({ seed: baseHct, _hydrated: true })
+      expect(selectSeedHex(useSource.getState())).toBe(hexFromHct(baseHct))
+    })
+
+    // why: load-bearing for ADR-0028. Pre-fix, setSeedChroma at chroma<4
+    // ran the canonical seed through hexFromHct → hctFromHex and MCU's
+    // gamut solver picked a different in-gamut hue for the new (chroma,
+    // tone) pair — up to 12.888° silent rotation. Post-fix, the setter
+    // writes seed.chroma directly and seed.hue is untouched.
+    it('setSeedChroma at chroma<4 preserves seed.hue exactly (Mechanism B)', () => {
+      // The seed that produced the maximum probed drift (probe 12 of #57).
+      useSource.setState({
+        seed: { hue: 90, chroma: 0.5, tone: 70 },
+        _hydrated: true,
+      })
+      useSource.getState().actions.setSeedChroma(1.0)
+      const { seed } = useSource.getState()
+      expect(seed.hue).toBe(90)
+      expect(seed.chroma).toBe(1.0)
+      expect(seed.tone).toBe(70)
+    })
+
+    it('setSeedChroma lock-release (3.99 → 4.5) preserves seed.hue', () => {
+      useSource.setState({
+        seed: { hue: 180, chroma: 3.99, tone: 70 },
+        _hydrated: true,
+      })
+      useSource.getState().actions.setSeedChroma(4.5)
+      const { seed } = useSource.getState()
+      expect(seed.hue).toBe(180)
+      expect(seed.chroma).toBe(4.5)
+    })
+
+    it('setSeedTone at chroma<4 preserves seed.hue exactly', () => {
+      useSource.setState({
+        seed: { hue: 270, chroma: 0.5, tone: 50 },
+        _hydrated: true,
+      })
+      useSource.getState().actions.setSeedTone(80)
+      const { seed } = useSource.getState()
+      expect(seed.hue).toBe(270)
+      expect(seed.chroma).toBe(0.5)
+      expect(seed.tone).toBe(80)
+    })
+
+    // why: defense-in-depth for #56 must survive the canonical-HCT flip.
+    // Tolerance gate (5e-3) still suppresses no-op axis writes — but now
+    // it gates against seed.{axis}, not against hctFromHex(seedHex).
+    it('setSeedHue is byte-stable on within-tolerance input (issue #56 carryover)', () => {
+      useSource.setState({
+        seed: { hue: 90, chroma: 30, tone: 50, exactHex: '#aabbcc' },
+        _hydrated: true,
+      })
+      useSource.getState().actions.setSeedHue(90 + 4e-3)
+      // exactHex preserved because the setter no-oped — within tolerance,
+      // no axis write happened, so the user did not "leave hex-input mode".
+      expect(useSource.getState().seed.exactHex).toBe('#aabbcc')
+      expect(useSource.getState().seed.hue).toBe(90)
+    })
+
+    it('seedHexLock blocks all four setters (hex + three axes)', () => {
+      const s = useSource.getState()
+      s.actions.setSeedHex('#112233')
+      s.actions.setSeedHexLock(true)
+      const before = useSource.getState().seed
+      s.actions.setSeedHex('#445566')
+      s.actions.setSeedHue(180)
+      s.actions.setSeedChroma(50)
+      s.actions.setSeedTone(80)
+      expect(useSource.getState().seed).toEqual(before)
+    })
+
+    // why: wide-sweep regression for Mechanism B (#57 probe 12). Pre-fix the
+    // 75-seed matrix (5 hues × 5 low chromas × 3 tones) showed max |Δhue| of
+    // 12.888° after a chroma-only setter call; 10/75 seeds drifted >1°.
+    // Post-fix every seed must hold its hue verbatim — the setter writes
+    // seed.chroma and leaves seed.hue untouched. The 0.01 tolerance below
+    // is generous (effectively a no-op for the post-fix path); any drift at
+    // all means the canonical-HCT contract has regressed.
+    describe('wide-sweep drift-guard (75 low-chroma seeds, ADR-0028)', () => {
+      const HUES = [0, 90, 180, 270, 315] as const
+      const CHROMAS = [0.5, 1, 2, 3, 3.99] as const
+      const TONES = [30, 50, 70] as const
+
+      it('chroma-only setter preserves hue across all 75 low-chroma seeds', () => {
+        const drifters: string[] = []
+        for (const hue of HUES) {
+          for (const chroma of CHROMAS) {
+            for (const tone of TONES) {
+              useSource.setState({ seed: { hue, chroma, tone }, _hydrated: true })
+              // why: 1.0 sits inside the lock regime; the prior bug rotated
+              // hue here. Skip when current chroma equals 1 to avoid the
+              // 5e-3 tolerance gate suppressing the write — that case is
+              // a no-op for both pre- and post-fix paths.
+              const target = chroma === 1 ? 1.5 : 1
+              useSource.getState().actions.setSeedChroma(target)
+              const drift = Math.abs(useSource.getState().seed.hue - hue)
+              if (drift > 0.01)
+                drifters.push(`hue=${hue},c=${chroma}→${target},t=${tone}:Δ=${drift.toFixed(3)}`)
+            }
+          }
+        }
+        expect(drifters).toEqual([])
+      })
+
+      it('tone-only setter preserves hue across all 75 low-chroma seeds', () => {
+        const drifters: string[] = []
+        for (const hue of HUES) {
+          for (const chroma of CHROMAS) {
+            for (const tone of TONES) {
+              useSource.setState({ seed: { hue, chroma, tone }, _hydrated: true })
+              const target = tone === 50 ? 60 : 50
+              useSource.getState().actions.setSeedTone(target)
+              const drift = Math.abs(useSource.getState().seed.hue - hue)
+              if (drift > 0.01)
+                drifters.push(`hue=${hue},c=${chroma},t=${tone}→${target}:Δ=${drift.toFixed(3)}`)
+            }
+          }
+        }
+        expect(drifters).toEqual([])
+      })
+
+      // why: the lock-release case (chroma 3.99 → 4.5) is where the hue
+      // slider re-enables. Pre-fix this drifted up to 3.3° on 8/15 probed
+      // seeds because the canonical seed went through a hex round-trip;
+      // post-fix the user's hue survives intact.
+      it('lock-release (chroma 3.99 → 4.5) preserves hue', () => {
+        const drifters: string[] = []
+        for (const hue of HUES) {
+          for (const tone of TONES) {
+            useSource.setState({ seed: { hue, chroma: 3.99, tone }, _hydrated: true })
+            useSource.getState().actions.setSeedChroma(4.5)
+            const drift = Math.abs(useSource.getState().seed.hue - hue)
+            if (drift > 0.01) drifters.push(`hue=${hue},t=${tone}:Δ=${drift.toFixed(3)}`)
+          }
+        }
+        expect(drifters).toEqual([])
+      })
+    })
   })
 })
