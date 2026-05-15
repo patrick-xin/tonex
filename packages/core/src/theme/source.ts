@@ -10,6 +10,7 @@ import {
   type ChartScheme,
   type CustomColorEntry,
   DEFAULT_INPUTS,
+  type HueAnchor,
   isValidHex,
   type MdTokenName,
   type PaletteName,
@@ -77,6 +78,8 @@ export interface SourceActions {
   // setPaletteOverride. Hex format validated; malformed throws at the seam.
   setCmfSecondSourceHex(hex: string | null): void
   setChartScheme(scheme: ChartScheme): void
+  setChartHueSpread(spread: number): void
+  setChartHueAnchor(anchor: HueAnchor): void
   setHydrated(): void
   reset(): void
 }
@@ -288,7 +291,9 @@ export const useSource = create<SourceState>()(
             }
             return { cmfSecondSourceHex: hex }
           }),
-        setChartScheme: (scheme) => set({ chart: { scheme } }),
+        setChartScheme: (scheme) => set((s) => ({ chart: { ...s.chart, scheme } })),
+        setChartHueSpread: (spread) => set((s) => ({ chart: { ...s.chart, hueSpread: spread } })),
+        setChartHueAnchor: (anchor) => set((s) => ({ chart: { ...s.chart, hueAnchor: anchor } })),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_INPUTS }),
       },

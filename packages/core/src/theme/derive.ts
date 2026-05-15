@@ -16,7 +16,6 @@ import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 import type { Mode } from './mode'
 import { applyPaletteOverrides } from './palette-override'
 import {
-  type ChartScheme,
   type CustomColorEntry,
   MD_CHART_TOKEN_NAMES,
   MD_CORE_TOKEN_NAMES,
@@ -369,20 +368,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
     splitDark.core['--color-surface'] as number,
     splitDark.core['--color-surface-container'] as number,
   ]
-  const mdLightChart = buildMdChart(
-    seedHct,
-    lightScheme,
-    'light',
-    source.chart.scheme,
-    lightChartPartners,
-  )
-  const mdDarkChart = buildMdChart(
-    seedHct,
-    darkScheme,
-    'dark',
-    source.chart.scheme,
-    darkChartPartners,
-  )
+  const mdLightChart = buildMdChart(seedHct, lightScheme, 'light', source.chart, lightChartPartners)
+  const mdDarkChart = buildMdChart(seedHct, darkScheme, 'dark', source.chart, darkChartPartners)
 
   return {
     md: {
@@ -438,14 +425,16 @@ function splitMdLayer(layer: TokenMap): { core: TokenMap; extended: TokenMap } {
 // why: chart-color derivation has two shapes by intent (ADR-0024 / ADR-0027).
 //   sequential — algorithmic monotonic walk in the seed's primaryPalette: L*
 //                spaced evenly between a binary-searched safe edge (3:1 floor
-//                against partners) and a brand-presentation prominent edge.
-//                Variant-aware (palette encodes Vibrant / Expressive / Rainbow
-//                chroma character). Respects paletteOverrides because the
-//                override mutates the primaryPalette in place upstream. Math
-//                lives in `chart-sequential.ts`; this branch is the production
-//                call with single-hue defaults (slice 2 promotion, ADR-0027
-//                c.3). Partners arg is the per-mode md surface family argbs
-//                the algorithm bisects against.
+//                against partners) and a brand-presentation prominent edge,
+//                with optional per-slot hue rotation. Variant-aware (palette
+//                encodes Vibrant / Expressive / Rainbow chroma character).
+//                Respects paletteOverrides because the override mutates the
+//                primaryPalette in place upstream. Math lives in
+//                `chart-sequential.ts`; this branch is the production call.
+//                Slice 3 (ADR-0027 c.3) routes chart.hueSpread + chart.hueAnchor
+//                through to the algorithm so the multi-hue rotation is
+//                user-tunable. Partners arg is the per-mode md surface family
+//                argbs the algorithm bisects against.
 //   categorical — synthesizes 5 hue-rotated points via Hct.from() at fixed
 //                 chroma+tone. Variant-bypassed by design — hue rotation and
 //                 variant tonal-spotting are conflicting goals. Achromatic
@@ -455,18 +444,18 @@ function buildMdChart(
   seedHct: Hct,
   scheme: DynamicScheme,
   mode: Mode,
-  chartScheme: ChartScheme,
+  chart: PortableTheme['chart'],
   partners: readonly number[],
 ): TokenMap {
   const out: TokenMap = {}
-  if (chartScheme === 'sequential') {
+  if (chart.scheme === 'sequential') {
     const { argbs } = buildMdChartSequentialSamples(
       scheme.primaryPalette,
       mode,
       partners,
       mode === 'light' ? PROMINENT_EDGE_LIGHT_DEFAULT : PROMINENT_EDGE_DARK_DEFAULT,
-      0,
-      'chart-1',
+      chart.hueSpread,
+      chart.hueAnchor,
       MD_CHART_TOKEN_NAMES.length,
       Array(MD_CHART_TOKEN_NAMES.length).fill(null),
     )

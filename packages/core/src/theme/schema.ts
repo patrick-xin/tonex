@@ -190,6 +190,26 @@ export type ShadcnChartTokenName = (typeof SHADCN_CHART_TOKEN_NAMES)[number]
 export const CHART_SCHEMES = ['sequential', 'categorical'] as const
 export type ChartScheme = (typeof CHART_SCHEMES)[number]
 
+// why: ADR-0027 c.3 — slice 3 promotion. Sequential chart axis gained
+// multi-hue rotation as the default: chart-1..N rotate hue across hueSpread
+// degrees, with the anchor strategy selecting which slot pins to the seed
+// hue. `chart-1` (the default) preserves "this series is the same color"
+// across modes — chart-1 is always lightest and always carries the brand
+// hue. `prominent-edge` pins the deep/bright end (chart-N in light, chart-1
+// in dark) to the brand hue instead, at the cost of swapping chart-1's hue
+// between modes. Single-hue is the opt-in (chart.hueSpread = 0).
+export const HUE_ANCHORS = ['chart-1', 'prominent-edge'] as const
+export type HueAnchor = (typeof HUE_ANCHORS)[number]
+
+// why: production defaults for the multi-hue knobs. Imported by both the
+// schema (DEFAULT_INPUTS.chart) and chart-sequential.ts so the lab page's
+// initial knob position matches what production renders by default. 80° was
+// chosen after lab eyeballing — broad enough for visible series separation
+// without crossing the categorical-feeling threshold (~120°+). 'chart-1'
+// anchor matches ColorBrewer convention; chart-1 = lightest = brand hue.
+export const HUE_SPREAD_DEFAULT = 80
+export const HUE_ANCHOR_DEFAULT: HueAnchor = 'chart-1'
+
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
 // ramp; the scheme picks tones from it per mode). 13 tones × 6 palettes = 78.
@@ -925,16 +945,20 @@ export interface PortableTheme {
   // disables the field). Hex format validated at the setter boundary via
   // isValidHex.
   cmfSecondSourceHex: string | null
-  // why: chart-palette namespace (ADR-0027 c.1). Object shape reserves the
-  // surface for future derivation axes (seedPalette, count, tones, chroma,
-  // hueSpread) added one slice at a time. Today: `scheme` only.
-  // - sequential (default, shadcn convention) — primary palette at fixed
-  //   tones; variant-aware.
-  // - categorical — hue-rotated synthesis via Hct.from() at fixed
-  //   chroma/tone; variant-bypassed. Achromatic seed (chroma < 5) falls
-  //   back to hue 270 so a gray seed still produces a colorful series.
-  // ADR-0024 introduced the axis; ADR-0027 reshaped the namespace.
-  chart: { scheme: ChartScheme }
+  // why: chart-palette namespace (ADR-0027 c.1). Holds derivation axes that
+  // shape the chart token output:
+  // - scheme — sequential (default, shadcn convention; primary palette at
+  //   contrast-aware tones, variant-aware) or categorical (hue-rotated
+  //   synthesis via Hct.from() at fixed chroma/tone, variant-bypassed;
+  //   achromatic seed (chroma < 5) falls back to hue 270).
+  // - hueSpread — only meaningful under sequential. Degrees of hue rotation
+  //   between chart-1 and chart-N. 0 = single-hue (legacy slice-2 default);
+  //   default 80 (slice 3) = multi-hue. Bounded [0, 360]; values past ~120
+  //   start reading as categorical rather than sequential.
+  // - hueAnchor — only meaningful under sequential when hueSpread > 0.
+  //   Picks which slot pins to the brand/seed hue; see HUE_ANCHORS docstring.
+  // ADR-0024 introduced the axis; ADR-0027 c.2/c.3 reshaped the namespace.
+  chart: { scheme: ChartScheme; hueSpread: number; hueAnchor: HueAnchor }
 }
 
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
@@ -957,7 +981,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   customColors: [],
   paletteOverrides: {},
   cmfSecondSourceHex: null,
-  chart: { scheme: 'sequential' },
+  chart: { scheme: 'sequential', hueSpread: HUE_SPREAD_DEFAULT, hueAnchor: HUE_ANCHOR_DEFAULT },
 }
 
 // why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
@@ -1066,7 +1090,11 @@ export const PortableThemeSchema = v.object({
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
   cmfSecondSourceHex: v.union([HexSchema, v.null()]),
-  chart: v.object({ scheme: v.picklist(CHART_SCHEMES) }),
+  chart: v.object({
+    scheme: v.picklist(CHART_SCHEMES),
+    hueSpread: v.pipe(v.number(), v.minValue(0), v.maxValue(360)),
+    hueAnchor: v.picklist(HUE_ANCHORS),
+  }),
 })
 
 // why: returns a discriminated result instead of throwing — the caller
