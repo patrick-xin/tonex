@@ -140,3 +140,21 @@ ADR-0024 introduces `chartMode: 'mono' | 'multi'` on `PortableTheme`:
 
 Token shape (5 tokens, names per `MD_CHART_TOKEN_NAMES` / `SHADCN_CHART_TOKEN_NAMES`) and emission paths (formatCss, exportCss, applyDom) are **unchanged**. The axis acts upstream of stringification — exporters and applyDom consume the same `lightChart` / `darkChart` TokenMap shape regardless of mode.
 
+---
+
+## Amendment 2026-05-13 — shadcn export shape (paste-replace + bootstrap)
+
+Commitment 5 of this ADR specified class-scoped selectors for the shadcn export (`.shadcn` / `html.dark .shadcn`) on the rationale that "the shadcn audience already owns root `:root` / `.dark` blocks from shadcn-cli." Field feedback flipped that: users paste our output to **replace** shadcn-cli's blocks, not extend them. Class-scoped output forced manual rewriting to merge with the existing globals.css.
+
+**Decision:** shadcn export switches to root selectors `:root` (light) and `.dark` (dark) — drop-in replacement for the blocks shadcn-cli scaffolds. A new opt-in `includeHeader: boolean` (default `false`) prepends the Tailwind v4 incantation (`@import "tailwindcss"` + `@custom-variant dark (&:is(.dark *))`) for green-field projects starting without an existing globals.css.
+
+**Decision:** shadcn export ignores `includeContrastVariants`. The contrast axis is not part of the shadcn audience's surface — contrast tiers are an md-side accessibility feature. The shadcn filter row does not expose the toggle; if a bundle still carries medium/high tiers, the shadcn branch in `exportCss` emits only the default tier (no contrast prefixes). md export shape (commitment 5) is unchanged.
+
+**Decision:** the `ExportOptions` interface gains `includeHeader?: boolean`. md ignores the flag (md always emits the full header). shadcn reads it.
+
+**Why:** matches the failure mode users actually hit. The original commitment 5 framing optimized for a use case (extending an existing scoped block) that isn't how shadcn users actually adopt new themes — they wholesale-replace globals.css role blocks. The new shape is byte-equivalent to what shadcn-cli writes, so the paste target is unambiguous.
+
+**Internal scoping unchanged.** `applyDom`, `format.ts`, and the editor's `apps/www/src/styles/globals.css` still use class-scoped `.md` / `.shadcn` because md and shadcn coexist in the editor's DOM (ADR-0013 symmetry rule). This amendment is scoped to the **user-facing export** seam only.
+
+**Consequence:** the export dialog hides the tab strip when only one tab is configured (shadcn route — we ship only the Tailwind v4 shape). The Tailwind tab on md routes keeps its full filter row.
+

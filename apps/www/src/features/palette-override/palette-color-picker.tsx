@@ -1,8 +1,7 @@
 'use client'
 
-import { CHROMA_HUE_LOCK, hctFromHex, hexFromHct, maxChroma } from '@tonex/core'
-import { useId, useMemo, useRef } from 'react'
-import { NativeColorInput } from '@/components/shared/native-color-input'
+import { CHROMA_HUE_LOCK, maxChroma } from '@tonex/core'
+import { useId, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ColorPicker } from '@/features/color-picker'
@@ -12,6 +11,7 @@ import {
   HctSlider,
   hueGradient,
   toneGradient,
+  useHctFromHex,
 } from '@/features/hct-controls'
 import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
@@ -33,21 +33,12 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
   const twPickerEnabled = useUiPrefs((s) => s.twPickerEnabled)
 
-  const parsed = hctFromHex(value)
-  // why: when chroma drops below the perception lock threshold, MCU's
-  // hue value becomes meaningless (a near-grey has no stable hue), so we
-  // freeze the last good hue as the slider's reference. Otherwise the hue
-  // thumb would jitter or snap to 0 every time tone crosses through grey.
-  const lockedHue = useRef<number | null>(null)
-  const chroma = parsed.chroma
-  const tone = parsed.tone
-
-  if (chroma >= CHROMA_HUE_LOCK) {
-    lockedHue.current = parsed.hue
-  } else if (lockedHue.current === null) {
-    lockedHue.current = parsed.hue
-  }
-  const hue = lockedHue.current
+  // why: hex ↔ HCT is non-bijective at the hue boundary (MCU normalizes to
+  // [0, 360)) AND at low chroma (greys have no stable hue). Holding HCT
+  // locally with a round-trip-aware cache fixes both: the 0/360 thumb snap
+  // disappears, and hue survives chroma-down-then-up without a refspecial
+  // lockedHue shimmy. See useHctFromHex for the cache contract.
+  const [{ hue, chroma, tone }, updateHct] = useHctFromHex(value, onChange)
   const gamutLimit = maxChroma(hue, tone)
 
   // why: gradients are pure functions of (hue, chroma, tone, gamutLimit).
@@ -61,7 +52,6 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <ColorPicker onChange={onChange} value={value} align="start" />
-        <NativeColorInput className="size-8" currentHex={value} onColorChange={onChange} />
         <Label htmlFor={hexInputId} className="flex items-center gap-3 cursor-pointer">
           <Input
             id={hexInputId}
@@ -83,21 +73,21 @@ export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps)
         value={hue}
         max={360}
         gradient={hueG}
-        onValueChange={(h) => onChange(hexFromHct({ hue: h, chroma, tone }))}
+        onValueChange={(h) => updateHct({ hue: h })}
         disabled={chroma < CHROMA_HUE_LOCK}
       />
       <ChromaSlider
         value={chroma}
         gamutLimit={gamutLimit}
         gradient={chromaG}
-        onValueChange={(c) => onChange(hexFromHct({ hue, chroma: c, tone }))}
+        onValueChange={(c) => updateHct({ chroma: c })}
       />
       <HctSlider
         label="Tone"
         value={tone}
         max={100}
         gradient={toneG}
-        onValueChange={(t) => onChange(hexFromHct({ hue, chroma, tone: t }))}
+        onValueChange={(t) => updateHct({ tone: t })}
       />
     </div>
   )

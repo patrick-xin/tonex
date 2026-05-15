@@ -73,4 +73,26 @@ describe('familyOf', () => {
     }
     expect(familyOf(pair)).toBe('Card')
   })
+
+  it('returns "Custom" for md-custom pairs regardless of slug', () => {
+    const pair: ContrastPair = {
+      fg: '--color-on-brand',
+      bg: '--color-brand',
+      layer: 'md-custom',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    expect(familyOf(pair)).toBe('Custom')
+  })
+
+  it('returns "Custom" for shadcn-custom pairs regardless of slug', () => {
+    const pair: ContrastPair = {
+      fg: '--brand-foreground',
+      bg: '--brand',
+      layer: 'shadcn-custom',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    expect(familyOf(pair)).toBe('Custom')
+  })
 })

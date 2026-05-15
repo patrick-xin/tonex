@@ -4,6 +4,7 @@ import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core
 import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
 import { Popover, PopoverContent } from '@/components/ui/popover'
+import { isDecorative } from '@/features/contrast-checker/decorative'
 import { useActiveMode } from '@/features/theme-mode'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { RoleEditor } from './role-editor'
@@ -45,6 +46,7 @@ export function ColorRolesList() {
   const warnings = new Map<MdTokenName, { partner: MdTokenName; ratio: number }>()
   for (const result of report[mode]) {
     if (result.pair.layer !== 'md' || result.passes) continue
+    if (isDecorative(result.pair)) continue
     warnings.set(result.pair.fg as MdTokenName, {
       partner: result.pair.bg as MdTokenName,
       ratio: result.ratio,

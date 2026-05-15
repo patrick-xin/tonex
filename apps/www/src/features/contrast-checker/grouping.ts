@@ -20,12 +20,14 @@ const SHADCN_FAMILY: ReadonlyArray<readonly [RegExp, string]> = [
 
 // why: chart fg's (`--color-chart-N`, `--chart-N`) read against surface
 // backgrounds. Short-circuit on layer so chart pairs cohere as their own
-// family chip instead of folding into a role family. ADR-0027 c.5. md
-// non-chart pairs classify by pair.fg through the color-roles-list family
-// rules so the contrast table and the inspect role list agree; shadcn
-// classifies by pair.bg.
+// family chip instead of folding into a role family. ADR-0027 c.5. Custom-
+// color pairs (md-custom / shadcn-custom) short-circuit the same way — their
+// slugs are runtime, so no role-family rule would match them. md non-chart
+// pairs classify by pair.fg through the color-roles-list family rules so the
+// contrast table and the inspect role list agree; shadcn classifies by pair.bg.
 export function familyOf(pair: ContrastPair): string {
   if (pair.layer === 'md-chart' || pair.layer === 'shadcn-chart') return 'Chart'
+  if (pair.layer === 'md-custom' || pair.layer === 'shadcn-custom') return 'Custom'
   if (pair.layer === 'shadcn') {
     for (const [re, label] of SHADCN_FAMILY) if (re.test(pair.bg)) return label
     return 'Other'
@@ -35,10 +37,10 @@ export function familyOf(pair: ContrastPair): string {
 
 // why: explicit display order so the family chip placement doesn't drift
 // when CONTRAST_PAIRS is reordered upstream. md mirrors color-roles-list's
-// MD_FAMILY_ORDER; Chart trails (separate cohort, non-text only) and 'Other'
-// is a safety bucket. shadcn: Sidebar trails the core token families
-// (scoped surface), Chart lands last.
-const FAMILY_ORDER_MD: readonly string[] = [...MD_FAMILY_ORDER, 'Chart', 'Other']
+// MD_FAMILY_ORDER; Custom + Chart trail as separate cohorts (user-extension
+// surfaces) and 'Other' is a safety bucket. shadcn: Sidebar trails the core
+// token families (scoped surface), then Custom + Chart.
+const FAMILY_ORDER_MD: readonly string[] = [...MD_FAMILY_ORDER, 'Custom', 'Chart', 'Other']
 
 const FAMILY_ORDER_SHADCN = [
   'Surface',
@@ -50,6 +52,7 @@ const FAMILY_ORDER_SHADCN = [
   'Accent',
   'Destructive',
   'Sidebar',
+  'Custom',
   'Chart',
   'Other',
 ] as const

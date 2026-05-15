@@ -12,10 +12,12 @@ import { SHADCN_ROLE_NAMES } from '../schema'
 //    `formatCss` / `pnpm bake`) keeps `.md` / `html.dark .md` because it
 //    coexists with `.shadcn` in the same document — `exportCss` is for
 //    downstream users and that constraint doesn't apply.
-//  - 'shadcn': :root + .dark only; the user's shadcn project already owns
-//    the @import / @custom-variant / shadcn @theme inline. We extend
-//    @theme inline only for custom-color slugs the user defined here, since
-//    shadcn-cli wouldn't have generated bridges for them.
+//  - 'shadcn': :root + .dark, paste-ready. The shadcn audience replaces
+//    the role blocks shadcn-cli scaffolded; root selectors are the drop-in
+//    target. `includeHeader` (off by default) prepends the Tailwind v4
+//    incantation for green-field projects without existing globals.css.
+//    Contrast tiers are not emitted on this path — shadcn users don't
+//    consume the contrast axis.
 //
 // ADR-0017: this file is a sink — it stringifies what deriveTheme returned
 // and never recomputes a color, role mapping, or numeric format. If a value
@@ -53,20 +55,15 @@ const MD_SELECTOR = {
   high: { light: '.contrast-high', dark: '.dark.contrast-high' },
 } as const
 
-// why: shadcn export keeps the class-scoped pattern (`.shadcn` /
-// `html.dark .shadcn`) — the shadcn audience already owns root `:root` /
-// `.dark` blocks from shadcn-cli's `globals.css`, so re-emitting root
-// blocks would clash with the user's existing setup. Class scope is the
-// safe extension surface for shadcn paste.
-const CONTRAST_CLASS_PREFIX_SHADCN = {
-  default: '',
-  medium: 'html.contrast-medium ',
-  high: 'html.contrast-high ',
-} as const
-const CONTRAST_CLASS_PREFIX_SHADCN_DARK = {
-  default: 'html.dark ',
-  medium: 'html.contrast-medium.dark ',
-  high: 'html.contrast-high.dark ',
+// why: shadcn export now uses paste-ready root selectors (`:root` / `.dark`)
+// — the shadcn audience pastes our output to REPLACE shadcn-cli's role
+// blocks, not extend them. Drop-in shape matches what shadcn-cli generates
+// so users can swap with no scope class. Contrast tiers are intentionally
+// omitted from shadcn (see exportCss); shadcn users don't consume the
+// contrast axis.
+const SHADCN_SELECTOR = {
+  light: ':root',
+  dark: '.dark',
 } as const
 
 type ContrastTier = keyof typeof MD_SELECTOR
@@ -105,6 +102,7 @@ interface ResolvedOptions {
   includeExtended: boolean
   includePalette: boolean
   includeChart: boolean
+  includeHeader: boolean
 }
 
 function resolveOptions(options: ExportOptions): ResolvedOptions {
@@ -113,6 +111,7 @@ function resolveOptions(options: ExportOptions): ResolvedOptions {
     includeExtended: options.includeExtended ?? false,
     includePalette: options.includePalette ?? false,
     includeChart: options.includeChart ?? false,
+    includeHeader: options.includeHeader ?? false,
   }
 }
 
@@ -195,28 +194,32 @@ export function exportCss(
     return lines.join('\n')
   }
 
-  // shadcn: any key outside the closed SHADCN_ROLE_NAMES set is a
-  // custom-color slug pair (--{slug}, --{slug}-foreground) the user added.
-  const customSlugTokens = Object.keys(bundle.default.shadcn.light).filter(
+  // shadcn: paste-ready :root + .dark, no contrast tiers (shadcn audience
+  // doesn't consume the contrast axis). Any key outside the closed
+  // SHADCN_ROLE_NAMES set is a custom-color slug pair (--{slug},
+  // --{slug}-foreground) the user added.
+  const defaultTheme = bundle.default
+  const customSlugTokens = Object.keys(defaultTheme.shadcn.light).filter(
     (k) => !SHADCN_ROLE_SET.has(k),
   )
   const parts: string[] = []
-  for (const [tier, theme] of tiers) {
-    parts.push(
-      block(
-        `${CONTRAST_CLASS_PREFIX_SHADCN[tier]}.shadcn`,
-        buildShadcnRuleTokens(theme, 'light', opts),
-        opts.colorFormat,
-      ),
-      '',
-      block(
-        `${CONTRAST_CLASS_PREFIX_SHADCN_DARK[tier]}.shadcn`,
-        buildShadcnRuleTokens(theme, 'dark', opts),
-        opts.colorFormat,
-      ),
-      '',
-    )
+  if (opts.includeHeader) {
+    parts.push('@import "tailwindcss";', '', '@custom-variant dark (&:is(.dark *));', '')
   }
+  parts.push(
+    block(
+      SHADCN_SELECTOR.light,
+      buildShadcnRuleTokens(defaultTheme, 'light', opts),
+      opts.colorFormat,
+    ),
+    '',
+    block(
+      SHADCN_SELECTOR.dark,
+      buildShadcnRuleTokens(defaultTheme, 'dark', opts),
+      opts.colorFormat,
+    ),
+    '',
+  )
   if (customSlugTokens.length > 0) {
     // why: shadcn keys are `--{slug}` / `--{slug}-foreground`; the matching
     // Tailwind v4 utility name is `--color-{slug}`. Drop the leading `--`

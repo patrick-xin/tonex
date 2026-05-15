@@ -43,6 +43,13 @@ export interface ExportOptions {
   includePalette?: boolean
   includeChart?: boolean
   includeContrastVariants?: boolean
+  // why: shadcn bootstrap toggle. When true, the shadcn exporter prepends
+  // the Tailwind v4 incantation (`@import "tailwindcss"`, `@custom-variant
+  // dark`) so green-field projects get a complete globals.css. Existing
+  // shadcn projects leave this off and paste only :root/.dark. md exports
+  // always emit the header (always paste-target globals.css) and ignore
+  // this flag.
+  includeHeader?: boolean
 }
 
 // why: tier values come from the unified derive cache (issue #20). Each
