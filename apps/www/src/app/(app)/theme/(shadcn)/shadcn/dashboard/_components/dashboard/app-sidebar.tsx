@@ -1,6 +1,15 @@
 'use client'
 
 import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/shadcn/sidebar'
+import {
   CameraIcon,
   ChartBarIcon,
   CircleHelpIcon,
@@ -17,19 +26,12 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import type * as React from 'react'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/shadcn/sidebar'
+import { Separator } from '../../../../../../../../components/shadcn/separator'
 import { NavDocuments } from './nav-documents'
 import { NavMain } from './nav-main'
 import { NavSecondary } from './nav-secondary'
 import { NavUser } from './nav-user'
+import { SearchForm } from './search-form'
 
 const data = {
   user: {
@@ -149,7 +151,7 @@ const data = {
 }
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -162,9 +164,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <SearchForm/>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <Separator className="h-px"/>
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

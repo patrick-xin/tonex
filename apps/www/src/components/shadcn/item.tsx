@@ -3,8 +3,8 @@ import { useRender } from '@base-ui/react/use-render'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type * as React from 'react'
 
-import { cn } from 'tailwind-variants'
 import { Separator } from '@/components/shadcn/separator'
+import { cn } from 'tailwind-variants'
 
 function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -184,5 +184,6 @@ export {
   ItemHeader,
   ItemMedia,
   ItemSeparator,
-  ItemTitle,
+  ItemTitle
 }
+

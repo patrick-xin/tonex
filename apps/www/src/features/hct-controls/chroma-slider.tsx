@@ -137,7 +137,7 @@ export function ChromaSlider({
 
       <SliderControl className={cx(sliderStore.control())}>
         <SliderTrack
-          className="relative w-full h-2.5 rounded-full"
+          className={cx('relative w-full h-2.5 rounded-full', disabled && 'opacity-38')}
           style={{ background: gradient }}
         >
           {gamutPct < 100 && !disabled && (

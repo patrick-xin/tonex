@@ -2,7 +2,12 @@ import { hexFromArgb } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { evaluateThemeContrast } from './contrast'
 import { deriveTheme } from './derive'
-import { CONTRAST_PAIRS, DEFAULT_INPUTS, SHADCN_CHART_TOKEN_NAMES } from './schema'
+import {
+  CONTRAST_PAIRS,
+  type CustomColorEntry,
+  customColorContrastPairs,
+  DEFAULT_INPUTS,
+} from './schema'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
   it('reports both modes with 55 pair results each post slice contrast-4', () => {
@@ -291,5 +296,139 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
     // burn 56 contrastRatio computations on every editor keystroke.
     const theme = deriveTheme(DEFAULT_INPUTS)
     expect(evaluateThemeContrast(theme)).toBe(evaluateThemeContrast(theme))
+  })
+})
+
+describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () => {
+  // why: ADR-0025's Consequences section names "custom-color contrast" as a
+  // future pair-union widening (chart contrast already did the same via
+  // ADR-0027). Custom-color pairs are spec-shaped — `on-X / X` and
+  // `-foreground / root` — not the arbitrary persisted pairs commitment 9
+  // rules out. The slugs are runtime, so they cannot live in the closed
+  // CONTRAST_PAIRS tuple; they are built per-call from source.customColors.
+  const brand: CustomColorEntry = {
+    id: 'id-brand',
+    name: 'Brand',
+    hex: '#3b82f6',
+    blend: false,
+    shadcnSource: 'color',
+  }
+  const accentTwo: CustomColorEntry = {
+    id: 'id-accent-two',
+    name: 'Accent Two',
+    hex: '#f59e0b',
+    blend: false,
+    shadcnSource: 'container',
+  }
+
+  describe('customColorContrastPairs', () => {
+    it('emits 2 md-custom + 1 shadcn-custom text pair per entry', () => {
+      const pairs = customColorContrastPairs([brand])
+      expect(pairs).toHaveLength(3)
+      expect(pairs.filter((p) => p.layer === 'md-custom')).toHaveLength(2)
+      expect(pairs.filter((p) => p.layer === 'shadcn-custom')).toHaveLength(1)
+      for (const pair of pairs) {
+        expect(pair.intent).toBe('text')
+        expect(pair.threshold).toBe(4.5)
+      }
+    })
+
+    it('pairs follow on-X/X and -foreground/root semantics, slug-derived', () => {
+      const actual = new Set(
+        customColorContrastPairs([brand]).map((p) => `${p.layer}:${p.fg}/${p.bg}`),
+      )
+      expect(actual).toEqual(
+        new Set([
+          'md-custom:--color-on-brand/--color-brand',
+          'md-custom:--color-on-brand-container/--color-brand-container',
+          'shadcn-custom:--brand-foreground/--brand',
+        ]),
+      )
+    })
+
+    it('slugifies multi-word names the same way deriveTheme emits them', () => {
+      const bgs = new Set(customColorContrastPairs([accentTwo]).map((p) => p.bg))
+      expect(bgs).toEqual(
+        new Set(['--color-accent-two', '--color-accent-two-container', '--accent-two']),
+      )
+    })
+
+    it('empty input yields no pairs; N entries yield 3N', () => {
+      expect(customColorContrastPairs([])).toEqual([])
+      expect(customColorContrastPairs([brand, accentTwo])).toHaveLength(6)
+    })
+  })
+
+  describe('evaluateThemeContrast with customColors', () => {
+    it('omitting customColors leaves the report at the 55 static pairs', () => {
+      // why: the 4 role-editor surfaces call evaluateThemeContrast(theme) with
+      // no custom arg — they must keep seeing exactly the static spec list.
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      const report = evaluateThemeContrast(theme)
+      expect(report.light).toHaveLength(55)
+      expect(report.dark).toHaveLength(55)
+    })
+
+    it('passing customColors appends 3 evaluated pairs per entry, both modes', () => {
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      const report = evaluateThemeContrast(theme, [brand])
+      expect(report.light).toHaveLength(58)
+      expect(report.dark).toHaveLength(58)
+      const custom = report.light.filter(
+        (r) => r.pair.layer === 'md-custom' || r.pair.layer === 'shadcn-custom',
+      )
+      expect(custom).toHaveLength(3)
+    })
+
+    it('md-custom pair argbs read from theme.md[mode]', () => {
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      const report = evaluateThemeContrast(theme, [brand])
+      const onBrand = report.light.find(
+        (r) => r.pair.layer === 'md-custom' && r.pair.fg === '--color-on-brand',
+      )
+      expect(onBrand?.fgArgb).toBe(theme.md.light['--color-on-brand'])
+      expect(onBrand?.bgArgb).toBe(theme.md.light['--color-brand'])
+    })
+
+    it('shadcn-custom pair argbs read from theme.shadcn[mode]', () => {
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      const report = evaluateThemeContrast(theme, [brand])
+      const brandFg = report.dark.find(
+        (r) => r.pair.layer === 'shadcn-custom' && r.pair.fg === '--brand-foreground',
+      )
+      expect(brandFg?.fgArgb).toBe(theme.shadcn.dark['--brand-foreground'])
+      expect(brandFg?.bgArgb).toBe(theme.shadcn.dark['--brand'])
+    })
+
+    it('custom pairs get a real WCAG ratio and passes mirrors ratio >= threshold', () => {
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand, accentTwo] })
+      const report = evaluateThemeContrast(theme, [brand, accentTwo])
+      const custom = [...report.light, ...report.dark].filter(
+        (r) => r.pair.layer === 'md-custom' || r.pair.layer === 'shadcn-custom',
+      )
+      expect(custom).toHaveLength(12)
+      for (const result of custom) {
+        expect(result.ratio).toBeGreaterThan(1)
+        expect(result.passes).toBe(result.ratio >= result.pair.threshold)
+      }
+    })
+
+    it('a prior plain call on the same theme does not poison a custom-aware call', () => {
+      // why: the WeakMap caches only the customColors-independent slice. A
+      // role-editor surface calling evaluateThemeContrast(theme) first must not
+      // make the contrast dialog's evaluateThemeContrast(theme, customColors)
+      // return a stale custom-free report from the shared cache slot.
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      evaluateThemeContrast(theme)
+      const report = evaluateThemeContrast(theme, [brand])
+      expect(report.light).toHaveLength(58)
+      expect(report.light.some((r) => r.pair.layer === 'md-custom')).toBe(true)
+    })
+
+    it('a prior custom-aware call on the same theme does not poison a plain call', () => {
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
+      evaluateThemeContrast(theme, [brand])
+      expect(evaluateThemeContrast(theme).light).toHaveLength(55)
+    })
   })
 })

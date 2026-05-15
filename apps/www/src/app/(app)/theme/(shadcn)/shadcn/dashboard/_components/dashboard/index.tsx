@@ -1,16 +1,16 @@
 import { SidebarInset, SidebarProvider } from '@/components/shadcn/sidebar'
 import { AppSidebar } from './app-sidebar'
 import { ChartAreaInteractive } from './chart-area-interactive'
-import data from './data.json'
 import { DataTable } from './data-table'
+import data from './data.json'
 import { SectionCards } from './section-cards'
 import { SiteHeader } from './site-header'
 
 export default function ShadcnDashboard() {
   return (
-    <div className="relative h-full m-px">
+    <div className="relative h-full m-px outline outline-border">
       <SidebarProvider className="h-full min-h-full">
-        <AppSidebar variant="inset" />
+        <AppSidebar/>
         <SidebarInset className="overflow-y-auto">
           <SiteHeader />
           <div className="flex flex-1 flex-col">

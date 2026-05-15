@@ -1,6 +1,6 @@
 import type { DynamicScheme } from '@tonex/mcu'
 import * as v from 'valibot'
-import { DEFAULT_VARIANT, type VariantName, variants } from '../variants'
+import { type VariantName, variants } from '../variants'
 import { SHADCN_PRESETS } from './shadcn-presets'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 
@@ -307,11 +307,22 @@ export const DEFAULT_SHADCN_ROLE_BINDINGS: {
 // bound through `--color-on-error` at the underlying md level, so a separate
 // shadcn pair would double-count the same surface.
 export interface ContrastPair {
+  fg: string
+  bg: string
+  layer: 'md' | 'md-chart' | 'shadcn' | 'shadcn-chart' | 'md-custom' | 'shadcn-custom'
+  intent: 'text' | 'non-text'
+  threshold: number
+}
+
+// why: the static CONTRAST_PAIRS tuple stays checked against the real token-
+// name unions — a typo there is a type error, not just a test failure. The
+// public `ContrastPair` is wider (fg/bg: string, plus the *-custom layers)
+// because custom-color pairs are keyed on runtime slugs no finite union can
+// enumerate; `customColorContrastPairs` builds those at call time.
+interface StaticContrastPair extends ContrastPair {
   fg: MdTokenName | MdChartTokenName | ShadcnRoleName | ShadcnChartTokenName
   bg: MdTokenName | MdChartTokenName | ShadcnRoleName | ShadcnChartTokenName
   layer: 'md' | 'md-chart' | 'shadcn' | 'shadcn-chart'
-  intent: 'text' | 'non-text'
-  threshold: number
 }
 
 const TEXT_THRESHOLD = 4.5
@@ -734,7 +745,7 @@ export const CONTRAST_PAIRS = [
     intent: 'non-text',
     threshold: NON_TEXT_THRESHOLD,
   },
-] as const satisfies readonly ContrastPair[]
+] as const satisfies readonly StaticContrastPair[]
 
 // why: customColors are first-class dual-layer entries — they emit their
 // own md tokens (4 per entry: --color-{slug}, --color-on-{slug}, --color-
@@ -764,6 +775,46 @@ export function slugifyCustomColorName(name: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+// why: the dynamic sibling of CONTRAST_PAIRS — custom-color slugs are runtime
+// values, so their pairs cannot live in the closed tuple. Each entry emits the
+// spec-shaped pairs deriveTheme's tokens already imply: two md text pairs
+// (color + container, `on-X / X`) plus the one bound shadcn text pair
+// (`-foreground / root`). Slug derivation matches derive.ts emission exactly,
+// so the produced fg/bg names line up with the tokens in DerivedTheme.
+// `evaluateThemeContrast` concatenates these onto the static list per call.
+export function customColorContrastPairs(
+  customColors: readonly CustomColorEntry[],
+): ContrastPair[] {
+  const pairs: ContrastPair[] = []
+  for (const entry of customColors) {
+    const slug = slugifyCustomColorName(entry.name)
+    pairs.push(
+      {
+        fg: `--color-on-${slug}`,
+        bg: `--color-${slug}`,
+        layer: 'md-custom',
+        intent: 'text',
+        threshold: TEXT_THRESHOLD,
+      },
+      {
+        fg: `--color-on-${slug}-container`,
+        bg: `--color-${slug}-container`,
+        layer: 'md-custom',
+        intent: 'text',
+        threshold: TEXT_THRESHOLD,
+      },
+      {
+        fg: `--${slug}-foreground`,
+        bg: `--${slug}`,
+        layer: 'shadcn-custom',
+        intent: 'text',
+        threshold: TEXT_THRESHOLD,
+      },
+    )
+  }
+  return pairs
 }
 
 // why: any kebab name a custom-color slug would emit MUST NOT collide with
