@@ -57,7 +57,7 @@ export function ShadcnOverrideContent() {
         variant="ghost"
         defaultOpen={false}
         height={0}
-        className="text-sm font-semibold uppercase tracking-wider"
+        className="text-sm font-semibold tracking-wider"
         overridden={Object.keys(chartOverrides).length > 0}
       >
         <div className="flex flex-col gap-3 px-1 pb-2">

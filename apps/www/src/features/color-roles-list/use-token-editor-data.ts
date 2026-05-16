@@ -3,6 +3,7 @@
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { MdTokenName } from '@tonex/core/schema'
+import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
 import { isDecorative } from '@/features/contrast-checker/decorative'
 
 export function useTokenEditorData(role: MdTokenName, mode: Mode) {
@@ -29,21 +30,16 @@ export function useTokenEditorData(role: MdTokenName, mode: Mode) {
           (r) => r.pair.layer === 'md' && (r.pair.fg === role || r.pair.bg === role),
         )
       : undefined
-  const partner =
+  const contrast: ContrastBadgeData | null =
     result === undefined
       ? null
-      : ((result.pair.fg === role ? result.pair.bg : result.pair.fg) as MdTokenName)
-  // why: decorative pairs (e.g. outline-variant|surface) are exempt from WCAG
-  // 1.4.11 by M3 spec — show the ratio but swap the pass/fail badge for
-  // "Exempt", matching contrast-table's StatusBadge pattern.
-  const decorativePair = result !== undefined && isDecorative(result.pair)
+      : {
+          ratio: result.ratio,
+          passes: result.passes,
+          partner: result.pair.fg === role ? result.pair.bg : result.pair.fg,
+          threshold: result.pair.threshold,
+          decorative: isDecorative(result.pair),
+        }
 
-  return {
-    currentHex,
-    overridden: role in overrides,
-    partner,
-    ratio: result?.ratio ?? null,
-    passesAA: result?.passes ?? false,
-    decorativePair,
-  }
+  return { currentHex, overridden: role in overrides, contrast }
 }

@@ -8,6 +8,7 @@ export interface ContrastBadgeData {
   passes: boolean
   partner: string
   threshold: number
+  decorative?: boolean
 }
 
 interface ContrastBadgeProps {
@@ -19,7 +20,7 @@ export function ContrastBadge({ contrast, render }: ContrastBadgeProps) {
   if (contrast === null) return null
   if (render === undefined && contrast.passes) return null
 
-  const partnerLabel = contrast.partner.replace(/^--/, '')
+  const partnerLabel = contrast.partner.replace(/^--(?:color-)?/, '')
   const trigger = render ?? (
     <span className="text-xs tabular-nums text-error cursor-help">
       {contrast.ratio.toFixed(1)}:1
@@ -31,11 +32,16 @@ export function ContrastBadge({ contrast, render }: ContrastBadgeProps) {
       <TooltipTrigger delay={0} render={trigger} />
       <TooltipContent variant="inverse" side="top">
         <p className="text-xs">
-          {contrast.passes ? 'Contrast' : 'Fails contrast'} against{' '}
-          <span className="font-mono">{partnerLabel}</span>
+          {contrast.decorative
+            ? 'Decorative pair (exempt)'
+            : contrast.passes
+              ? 'Contrast'
+              : 'Fails contrast'}{' '}
+          against <span className="font-mono">{partnerLabel}</span>
         </p>
         <p className="text-xs">
-          {contrast.ratio.toFixed(1)}:1 (needs {contrast.threshold}:1)
+          {contrast.ratio.toFixed(1)}:1
+          {!contrast.decorative && ` (needs ${contrast.threshold}:1)`}
         </p>
       </TooltipContent>
     </Tooltip>
