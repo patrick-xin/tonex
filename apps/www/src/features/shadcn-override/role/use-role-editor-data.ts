@@ -3,6 +3,7 @@
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { ShadcnRoleName } from '@tonex/core/schema'
+import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
 
 export function useRoleEditorData(role: ShadcnRoleName, mode: Mode) {
   const theme = useResolvedTokens()
@@ -24,16 +25,20 @@ export function useRoleEditorData(role: ShadcnRoleName, mode: Mode) {
           (r) => r.pair.layer === 'shadcn' && (r.pair.fg === role || r.pair.bg === role),
         )
       : undefined
-  const partner =
+
+  const contrast: ContrastBadgeData | null =
     result === undefined
       ? null
-      : ((result.pair.fg === role ? result.pair.bg : result.pair.fg) as ShadcnRoleName)
+      : {
+          ratio: result.ratio,
+          passes: result.passes,
+          partner: result.pair.fg === role ? result.pair.bg : result.pair.fg,
+          threshold: result.pair.threshold,
+        }
 
   return {
     currentHex,
     overridden: role in overrides,
-    partner,
-    ratio: result?.ratio ?? null,
-    passesAA: result?.passes ?? false,
+    contrast,
   }
 }

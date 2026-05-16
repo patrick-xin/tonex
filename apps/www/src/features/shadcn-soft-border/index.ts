@@ -1,3 +1,3 @@
 export { isSoftBorderOn } from './predicate'
-export { ShadcnSoftBorder } from './shadcn-soft-border'
+export { SoftBordersToggle } from './soft-borders-toggle'
 export { setSoftBorder, useSoftBorder } from './toggle'

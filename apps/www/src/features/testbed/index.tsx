@@ -11,7 +11,6 @@
 // production UI ships, /  diverges from /sink and testbed survives as the
 // dev-only surface.
 
-import { ShadcnSoftBorder } from '@/features/shadcn-soft-border'
 import { ContrastLevel } from './contrast-level'
 import { CustomColors } from './custom-colors'
 import { ExportPanels } from './export-panels'
@@ -34,17 +33,13 @@ export function Testbed() {
           small-loop testing surface — every editor + preview pane the current slice exercises.
         </p>
       </header>
-
       <SeedInput />
       <VariantPicker />
       <ContrastLevel />
       <PrimaryContainerOverride />
-
       <SurfaceTint />
       <CustomColors />
-
       <MdSwatches />
-      <ShadcnSoftBorder />
       <ShadcnPreview />
       <ShadcnBindings />
 
