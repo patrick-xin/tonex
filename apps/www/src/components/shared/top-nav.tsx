@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { SiteLogo } from '../../app/(site)/_components/site-logo'
+import { SiteLogo } from './site-logo'
 
 // why: ADR-0022 surface feature — mobile header chrome. Desktop uses the rail
 // for chrome; on mobile the rail is replaced by a drawer, and this slot owns
