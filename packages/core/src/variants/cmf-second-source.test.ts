@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_INPUTS, type PortableTheme } from '../theme/schema'
-import { cmfSecondSourceDisabledReason } from './second-source'
+import { cmfSecondSourceDisabledReason } from './cmf-second-source'
 
 describe('cmfSecondSourceDisabledReason', () => {
   it('returns null when variant is cmf', () => {

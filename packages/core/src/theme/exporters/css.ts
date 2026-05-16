@@ -1,8 +1,8 @@
-import type { ContrastBundle, ExportOptions } from '../contrast-bundle'
 import type { DerivedTheme, TokenMap } from '../derive'
-import { mergeMdEmission } from '../format'
 import { hexString, oklchString } from '../oklch'
 import { SHADCN_ROLE_NAMES } from '../schema'
+import type { ContrastBundle, ExportOptions } from './bundle'
+import { mergeMdEmission } from './format'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +

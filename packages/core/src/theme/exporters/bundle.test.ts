@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { buildContrastBundle } from './contrast-bundle'
-import { deriveTheme } from './derive'
-import { __resetDeriveCache, getDerivedTheme } from './derive-cache'
-import { DEFAULT_INPUTS } from './schema'
+import { deriveTheme, getDerivedTheme } from '../derive'
+import { __resetDeriveCache } from '../derive/cache'
+import { DEFAULT_INPUTS } from '../schema'
+import { buildContrastBundle } from './bundle'
 
 afterEach(() => {
   __resetDeriveCache()

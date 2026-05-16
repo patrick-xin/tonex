@@ -1,10 +1,10 @@
 import { contrastRatio } from '@tonex/color-utils'
 import { argbFromHex, type DynamicScheme, Hct, TonalPalette } from '@tonex/mcu'
-import { cmfSecondSourceDisabledReason } from '../cmf/second-source'
 import type { Mode } from '../theme/mode'
 import { applyPaletteOverrides } from '../theme/palette-override'
 import type { PortableTheme } from '../theme/schema'
 import { variants } from '../variants'
+import { cmfSecondSourceDisabledReason } from '../variants/cmf-second-source'
 import { HUE_ANCHOR_DEFAULT, HUE_ANCHORS, HUE_SPREAD_DEFAULT, type HueAnchor } from './schema'
 
 // why: monotonic perceptual-uniform sequential chart palette (ADR-0027 c.3).

@@ -16,7 +16,7 @@ import { ColorPicker } from '@/features/color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
 // why: the second source color is a CMF-only knob (other variants ignore the
-// param, see cmf/second-source.ts). Surface the disabled reason as a tooltip
+// param, see variants/cmf-second-source.ts). Surface the disabled reason as a tooltip
 // so non-cmf users see *why* the trigger is inert, matching the
 // palette-override AnimatedButtonColorPicker pattern. Core's
 // setCmfSecondSourceHex no-ops disabled writes — UI is the friendly seam,

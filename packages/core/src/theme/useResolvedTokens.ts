@@ -1,6 +1,5 @@
 import { useShallow } from 'zustand/react/shallow'
-import type { DerivedTheme } from './derive'
-import { getDerivedTheme } from './derive-cache'
+import { type DerivedTheme, getDerivedTheme } from './derive'
 import { selectPortable, useSource } from './source'
 
 // why: returns null pre-hydration so SSR and the first client render agree.

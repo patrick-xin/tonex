@@ -1,5 +1,4 @@
-import type { TokenMap } from './derive'
-import { getDerivedTheme } from './derive-cache'
+import { getDerivedTheme, type TokenMap } from './derive'
 import { oklchString } from './oklch'
 import { selectPortable, useSource } from './source'
 
