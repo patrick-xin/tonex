@@ -1,4 +1,4 @@
-import type { PortableTheme } from './schema'
+import type { PortableTheme } from '../theme/schema'
 
 // why: single source of truth for "is the cmfSecondSourceHex field valid
 // given the rest of the source?" Mirrors palette-override/disabled-reason.ts
@@ -11,7 +11,7 @@ import type { PortableTheme } from './schema'
 // reads at the moment of constraint violation.
 //
 // Adding a rule: add a new conditional branch with the reason string. Tests
-// in cmf-second-source.test.ts cover every rule. The selector stays pure
+// in second-source.test.ts cover every rule. The selector stays pure
 // (no I/O, no closures) so callers can invoke it freely during render.
 export function cmfSecondSourceDisabledReason(source: PortableTheme): string | null {
   // why: SchemeCmf is the only MCU variant that reads sourceColorHcts[1].
