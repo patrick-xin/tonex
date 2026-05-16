@@ -16,7 +16,6 @@ export {
   SHADCN_CHART_TOKEN_NAMES,
   type ShadcnChartTokenName,
 } from './chart'
-export { cmfSecondSourceDisabledReason } from './cmf/second-source'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
   CONTRAST_PAIRS,
@@ -61,3 +60,4 @@ export {
   type ShadcnPreset,
   type ShadcnPresetName,
 } from './theme/shadcn-presets'
+export { cmfSecondSourceDisabledReason } from './variants/cmf-second-source'

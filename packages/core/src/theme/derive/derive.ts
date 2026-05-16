@@ -7,8 +7,8 @@ import {
   customColor as mdCustomColor,
 } from '@tonex/mcu'
 import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../../chart/build'
-import { cmfSecondSourceDisabledReason } from '../../cmf/second-source'
 import { variants } from '../../variants'
+import { cmfSecondSourceDisabledReason } from '../../variants/cmf-second-source'
 import type { Mode } from '../mode'
 import { applyPaletteOverrides } from '../palette-override'
 import {
