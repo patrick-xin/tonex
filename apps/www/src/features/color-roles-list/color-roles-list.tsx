@@ -91,20 +91,6 @@ export function ColorRolesList() {
           </div>
         </section>
       ))}
-
-      {/* placeholder: custom-color role swatches.
-       * customColors live in source; deriveTheme emits 4 md tokens per entry
-       * (--color-{slug}, --color-on-{slug}, --color-{slug}-container,
-       * --color-on-{slug}-container) merged into md.{light,dark}. Per-role
-       * override is NOT supported today — applyMd3TokenOverrides runs BEFORE
-       * custom colors merge in derive.ts, and MdTokenName is a closed enum
-       * that doesn't include slug-keyed tokens. Whole-entry edit lives in
-       * features/custom-colors/. Adding per-role override would require a
-       * core-side primitive (extend setMd3TokenOverride to accept slug tokens
-       * AND apply post-custom-color merge in derive). See
-       * code-conventions.md "primitive-shape diff".
-       */}
-
       <Popover handle={popoverHandle}>
         {({ payload: role }) =>
           role !== undefined ? (
