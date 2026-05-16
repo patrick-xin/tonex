@@ -16,14 +16,12 @@ export {
   SHADCN_CHART_TOKEN_NAMES,
   type ShadcnChartTokenName,
 } from './chart'
+export { CONTRAST_PAIRS, type ContrastPair } from './theme/contrast'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
-  CONTRAST_PAIRS,
-  type ContrastPair,
   type CustomColorEntry,
   DEFAULT_INPUTS,
   DEFAULT_SHADCN_ROLE_BINDINGS,
-  isValidHex,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_FAMILY_NAMES,
@@ -48,7 +46,6 @@ export {
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type ShadcnRoleName,
-  STORAGE_KEY,
   SURFACE_ALGOS,
   type SurfaceAlgo,
   slugifyCustomColorName,

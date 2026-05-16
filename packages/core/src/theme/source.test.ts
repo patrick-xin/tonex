@@ -13,9 +13,8 @@ import {
   SCHEMA_VERSION,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
-  STORAGE_KEY,
 } from './schema'
-import { flushPersist, selectPortable, selectSeedHex, useSource } from './source'
+import { flushPersist, STORAGE_KEY, selectPortable, selectSeedHex, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the

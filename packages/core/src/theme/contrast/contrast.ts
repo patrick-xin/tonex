@@ -1,12 +1,8 @@
 import { contrastRatio } from '@tonex/color-utils'
-import type { DerivedTheme, TokenMap } from './derive'
-import type { Mode } from './mode'
-import {
-  CONTRAST_PAIRS,
-  type ContrastPair,
-  type CustomColorEntry,
-  customColorContrastPairs,
-} from './schema'
+import type { CustomColorEntry } from '../custom-color/entry'
+import type { DerivedTheme, TokenMap } from '../derive'
+import type { Mode } from '../mode'
+import { CONTRAST_PAIRS, type ContrastPair, customColorContrastPairs } from './pairs'
 
 // why: ADR-0025 commitment 8 — `evaluateThemeContrast` is downstream of
 // `DerivedTheme`, never on the spine. The spine continues to produce token

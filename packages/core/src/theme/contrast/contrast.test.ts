@@ -1,13 +1,10 @@
 import { hexFromArgb } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
+import type { CustomColorEntry } from '../custom-color/entry'
+import { deriveTheme } from '../derive'
+import { DEFAULT_INPUTS } from '../schema'
 import { evaluateThemeContrast } from './contrast'
-import { deriveTheme } from './derive'
-import {
-  CONTRAST_PAIRS,
-  type CustomColorEntry,
-  customColorContrastPairs,
-  DEFAULT_INPUTS,
-} from './schema'
+import { CONTRAST_PAIRS, customColorContrastPairs } from './pairs'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
   it('reports both modes with 55 pair results each post slice contrast-4', () => {
