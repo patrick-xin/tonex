@@ -25,17 +25,18 @@ describe('format.ts import discipline', () => {
 
   it('runtime imports stay within sibling spine files (no MCU, no app deps)', () => {
     // why: post-ADR-0021, format.ts pulls a few runtime values from sibling
-    // spine modules — `oklchString` from ./oklch for argb projection,
-    // `MD_TOKEN_NAMES` from ./schema for emission-order keying. The intent of
+    // spine modules — `oklchString` from ../oklch for argb projection,
+    // `MD_TOKEN_NAMES` from ../schema for emission-order keying. The intent of
     // this rule is unchanged: format.ts must not pull color logic from MCU
     // (covered by the prior test) and must not import from app boundaries.
     // Sibling-spine runtime imports are fine — they're pure data or one-line
-    // projection wrappers.
+    // projection wrappers. Regex allows both ./ (in-folder) and ../ (theme/
+    // root sibling) since format.ts lives inside exporters/.
     const src = readFileSync(FORMAT_SRC, 'utf8')
     const importLines = src.split('\n').filter((l) => /^\s*import\b/.test(l))
     const runtimeImports = importLines.filter((l) => !/import\s+type\b/.test(l))
     for (const line of runtimeImports) {
-      expect(line).toMatch(/from\s+'\.\/[a-z][a-z-]*'/)
+      expect(line).toMatch(/from\s+'\.\.?\/[a-z][a-z-]*'/)
     }
   })
 })

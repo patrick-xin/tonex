@@ -1,6 +1,6 @@
-import type { DerivedTheme, TokenMap } from './derive'
-import { oklchString } from './oklch'
-import { MD_TOKEN_NAMES } from './schema'
+import type { DerivedTheme, TokenMap } from '../derive'
+import { oklchString } from '../oklch'
+import { MD_TOKEN_NAMES } from '../schema'
 
 function formatBlock(selector: string, tokens: TokenMap): string {
   const decls = Object.entries(tokens)
