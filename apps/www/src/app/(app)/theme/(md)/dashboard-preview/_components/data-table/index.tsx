@@ -41,7 +41,7 @@ import { columns } from './columns'
 import { type Action, DEAL_ROWS } from './data'
 import { TableFooter } from './data-table-footer'
 import { AccountDialog } from './dialogs/account'
-import { DeleteAccoundDialog } from './dialogs/delete-accound'
+import { DeleteAccoundDialog } from './dialogs/delete-account'
 import { DialogOutsideScrollDemo } from './dialogs/payment'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './tables'
 import {
