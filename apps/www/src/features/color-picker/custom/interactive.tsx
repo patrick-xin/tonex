@@ -9,8 +9,8 @@ import {
   useRef,
 } from 'react'
 import { cn } from 'tailwind-variants'
+import { useEventCallback } from '@/lib/hooks/use-event-callback'
 import { clamp } from './color-utils'
-import { useEventCallback } from './use-event-callback'
 
 export interface Interaction {
   left: number

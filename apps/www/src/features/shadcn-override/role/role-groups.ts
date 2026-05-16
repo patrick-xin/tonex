@@ -76,3 +76,72 @@ export const ROLE_GROUPS: ReadonlyArray<RoleGroup> = (() => {
     return roles && roles.length > 0 ? [{ label: FAMILY_LABEL[key], roles }] : []
   })
 })()
+
+// why: hand-curated layout grouping for the page-level override surface where
+// two-column pair sections (background+foreground beside primary+pfg) let
+// users compare related role pairs side-by-side. Distinct from ROLE_GROUPS
+// because that's a family classifier (uniform single-column, used by the
+// rail) — same role set, different rendering intent.
+export type PaletteGroup =
+  | {
+      kind: 'pair'
+      label: string
+      columns: readonly [readonly ShadcnRoleName[], readonly ShadcnRoleName[]]
+    }
+  | { kind: 'flat'; label: string; roles: readonly ShadcnRoleName[] }
+
+export const PALETTE_GROUPS: ReadonlyArray<PaletteGroup> = [
+  {
+    kind: 'pair',
+    label: 'Background & Primary',
+    columns: [
+      ['--background', '--foreground'],
+      ['--primary', '--primary-foreground'],
+    ],
+  },
+  {
+    kind: 'pair',
+    label: 'Secondary & Accent',
+    columns: [
+      ['--secondary', '--secondary-foreground'],
+      ['--accent', '--accent-foreground'],
+    ],
+  },
+  {
+    kind: 'pair',
+    label: 'Card & Popover',
+    columns: [
+      ['--card', '--card-foreground'],
+      ['--popover', '--popover-foreground'],
+    ],
+  },
+  {
+    kind: 'flat',
+    label: 'Muted',
+    roles: ['--muted', '--muted-foreground'],
+  },
+  {
+    kind: 'flat',
+    label: 'Border & Input',
+    roles: ['--border', '--input'],
+  },
+  {
+    kind: 'flat',
+    label: 'Ring & Destructive',
+    roles: ['--ring', '--destructive'],
+  },
+  {
+    kind: 'flat',
+    label: 'Sidebar',
+    roles: [
+      '--sidebar',
+      '--sidebar-foreground',
+      '--sidebar-primary',
+      '--sidebar-primary-foreground',
+      '--sidebar-accent',
+      '--sidebar-accent-foreground',
+      '--sidebar-border',
+      '--sidebar-ring',
+    ],
+  },
+]

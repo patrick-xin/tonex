@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useEventCallback } from '@/lib/hooks/use-event-callback'
 import { equalHex, equalHsva, type HsvaColor, hexToHsva, hsvaToHex } from './color-utils'
-import { useEventCallback } from './use-event-callback'
 
 // why: hex → HSVA → hex is non-bijective at low saturation (greys lose hue),
 // and parent re-renders mid-drag would otherwise yank the thumb back to a

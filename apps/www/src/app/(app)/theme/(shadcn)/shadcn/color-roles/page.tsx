@@ -1,6 +1,5 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { ShadcnChartOverrideList } from '@/features/shadcn-chart-override'
-import { ShadcnRoleOverrideList } from '@/features/shadcn-role-override'
+import { ShadcnChartOverrideList, ShadcnRoleOverrideList } from '@/features/shadcn-override'
 
 // why: ADR-0026 slice override-3 promoted the role override editor here;
 // ADR-0027 slice chart-3 mounts the chart override editor below it as a

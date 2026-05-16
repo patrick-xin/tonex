@@ -1,9 +1,5 @@
 import type { MdTokenName } from '@tonex/core/schema'
 
-// why: mirrors legacy md3-role-picker-panel's GROUP_DEFS adapted to our
-// `--color-*` MD token namespace. The 11 groups partition MD_TOKEN_NAMES
-// exhaustively (50 tokens) so the Roles tab can render a curated, readable
-// hierarchy instead of a flat scroll of token strings.
 export interface MdTokenGroup {
   label: string
   tokens: ReadonlyArray<MdTokenName>

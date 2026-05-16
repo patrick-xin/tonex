@@ -1,0 +1,90 @@
+'use client'
+
+import { WarningIcon } from '@phosphor-icons/react'
+import { cx } from 'tailwind-variants'
+import { type createPopoverHandle, PopoverTrigger } from '@/components/ui/popover'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { isDarkSwatch } from '@/lib/is-dark-swatch'
+
+export interface ColorTileWarning {
+  partnerLabel: string
+  ratio: number
+}
+
+interface ColorTileProps<T> {
+  payload: T
+  popoverHandle: ReturnType<typeof createPopoverHandle<T>>
+  display: string
+  hex: string
+  overridden: boolean
+  warning?: ColorTileWarning
+  size?: 'sm' | 'md'
+}
+
+export function ColorTile<T>({
+  payload,
+  popoverHandle,
+  display,
+  hex,
+  overridden,
+  warning,
+  size = 'sm',
+}: ColorTileProps<T>) {
+  const dark = isDarkSwatch(hex)
+  const textColor = dark ? '#ffffff' : '#000000'
+
+  return (
+    <PopoverTrigger
+      handle={popoverHandle}
+      payload={payload}
+      className={cx(
+        'group relative cursor-pointer rounded-md transition-all m-1 data-popup-open:outline-2 data-popup-open:outline-offset-2 data-popup-open:outline-primary',
+        focusVisiblePrimaryRing,
+        size === 'sm'
+          ? 'outline-transparent'
+          : 'outline outline-outline-variant bg-clip-padding w-44 sm:w-60',
+      )}
+    >
+      <div
+        className={cx(
+          'h-20 flex flex-col justify-end p-2 shrink-0',
+          size === 'sm' ? 'w-36 sm:w-50 rounded-lg' : 'rounded-md',
+        )}
+        style={{ backgroundColor: hex }}
+      >
+        <p
+          className={cx('font-mono leading-tight truncate', size === 'sm' ? 'text-xs' : 'text-sm')}
+          style={{ color: textColor }}
+        >
+          {display}
+        </p>
+        <p
+          className={cx('font-mono', size === 'sm' ? 'text-[10px]' : 'text-xs')}
+          style={{ color: textColor }}
+        >
+          {hex}
+        </p>
+        {overridden && <div className="absolute top-1 right-1 size-2 rounded-full bg-tertiary" />}
+        {warning !== undefined && (
+          <Tooltip>
+            <TooltipTrigger
+              delay={0}
+              render={
+                <div className="absolute top-1 left-1 flex items-center justify-center size-4 rounded-full bg-error">
+                  <WarningIcon className="size-3 text-on-error" weight="fill" />
+                </div>
+              }
+            />
+            <TooltipContent variant="inverse" side="top">
+              <p className="text-xs">
+                Fails WCAG AA against <span className="font-mono">{warning.partnerLabel}</span>
+              </p>
+              <p className="text-xs">{warning.ratio.toFixed(1)}:1 (needs 4.5:1)</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </PopoverTrigger>
+  )
+}

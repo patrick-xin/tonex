@@ -4,7 +4,7 @@ import { CHROMA_HUE_LOCK, maxChroma } from '@tonex/core'
 import { useId, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ColorPicker } from '@/features/color-picker'
+import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import {
   ChromaSlider,
   chromaGradient,
@@ -13,7 +13,6 @@ import {
   toneGradient,
   useHctFromHex,
 } from '@/features/hct-controls'
-import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 

@@ -33,7 +33,7 @@ export function ColorPicker({
     <Popover>
       <PopoverTrigger
         className={cn(
-          'size-8 shrink-0 rounded-md cursor-pointer outline-0 data-popup-open:outline-2 data-popup-open:outline-tertiary',
+          'size-8 shrink-0 rounded-md cursor-pointer outline outline-outline-variant data-popup-open:outline-2 data-popup-open:outline-primary',
         )}
         style={{
           backgroundColor: hexInput,

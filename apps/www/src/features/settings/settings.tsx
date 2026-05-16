@@ -16,8 +16,8 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { TwPickerEnableToggle } from '@/features/color-picker'
 import { ContrastLevelSlider } from '@/features/contrast-level'
-import { TwPickerEnableToggle } from '@/features/tw-color-picker'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
@@ -60,33 +60,37 @@ export function Settings({ layer }: { layer: Layer }) {
         <TooltipContent>Settings</TooltipContent>
       </Tooltip>
       <PopoverContent align="end" className="w-80 flex flex-col gap-2">
-        <Field name="preset" className="gap-1">
-          <FieldLabel className="items-center justify-between w-full">Preset</FieldLabel>
-          <FieldDescription className="max-w-5/6">
-            Start from a curated aesthetic recipe.
-          </FieldDescription>
-          <div className="mt-0.5 flex flex-col gap-1.5">
-            {[PRESET_GROUP_A, PRESET_GROUP_B].map((group) => (
-              <ToggleGroup
-                key={group.join()}
-                variant="outline"
-                size="xs"
-                value={activePreset && group.includes(activePreset) ? [activePreset] : []}
-                onValueChange={(value) => {
-                  if (value.length === 0) return
-                  setShadcnPreset(value[0] as ShadcnPresetName)
-                }}
-              >
-                {group.map((name) => (
-                  <ToggleGroupItem className="h-6 capitalize" key={name} value={name}>
-                    {name}
-                  </ToggleGroupItem>
+        {layer !== 'md' && (
+          <>
+            <Field name="preset" className="gap-1">
+              <FieldLabel className="items-center justify-between w-full">Preset</FieldLabel>
+              <FieldDescription className="max-w-5/6">
+                Start from a curated aesthetic recipe.
+              </FieldDescription>
+              <div className="mt-0.5 flex flex-col gap-1.5">
+                {[PRESET_GROUP_A, PRESET_GROUP_B].map((group) => (
+                  <ToggleGroup
+                    key={group.join()}
+                    variant="outline"
+                    size="xs"
+                    value={activePreset && group.includes(activePreset) ? [activePreset] : []}
+                    onValueChange={(value) => {
+                      if (value.length === 0) return
+                      setShadcnPreset(value[0] as ShadcnPresetName)
+                    }}
+                  >
+                    {group.map((name) => (
+                      <ToggleGroupItem className="h-6 capitalize" key={name} value={name}>
+                        {name}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 ))}
-              </ToggleGroup>
-            ))}
-          </div>
-        </Field>
-        <Separator className="opacity-50" />
+              </div>
+            </Field>
+            <Separator className="opacity-50" />
+          </>
+        )}
         {layer === 'md' && (
           <>
             <Field name="extended-colors" className="gap-1">

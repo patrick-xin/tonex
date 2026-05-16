@@ -14,6 +14,7 @@ import {
   type ShadcnRoleName,
 } from '@tonex/core/schema'
 import { useMemo, useState } from 'react'
+import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,
@@ -27,13 +28,12 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { fuzzyMatches } from '@/features/shadcn-role-override/fuzzy-filter'
-import { MD_TOKEN_ITEM_GROUPS } from '@/features/shadcn-role-override/md-token-groups'
-import { ROLE_GROUPS } from '@/features/shadcn-role-override/role-groups'
+import { MD_TOKEN_ITEM_GROUPS } from '@/features/color-picker'
+import { ROLE_GROUPS } from '@/features/shadcn-override'
 import { useActiveMode } from '@/features/theme-mode'
-import { AnimatedCollapsible } from '../../components/shared/animated-collapsible'
-import { ScrollArea } from '../../components/ui/scroll-area'
+import { fuzzyMatches } from '@/lib/fuzzy-match'
 
 interface TokenItem {
   token: MdTokenName

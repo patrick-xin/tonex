@@ -24,11 +24,11 @@ const chartData = [{ month: 'january', mobile: 570, desktop: 1260 }]
 
 const chartConfig = {
   desktop: {
-    label: 'Desktop',
+    label: 'Chart 1',
     color: 'var(--chart-1)',
   },
   mobile: {
-    label: 'Mobile',
+    label: 'Chart 2',
     color: 'var(--chart-2)',
   },
 } satisfies ChartConfig

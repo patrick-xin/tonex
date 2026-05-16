@@ -25,23 +25,23 @@ const chartConfig = {
     label: 'Visitors',
   },
   chrome: {
-    label: 'Chrome',
+    label: 'Chart 1',
     color: 'var(--chart-1)',
   },
   safari: {
-    label: 'Safari',
+    label: 'Chart 2',
     color: 'var(--chart-2)',
   },
   firefox: {
-    label: 'Firefox',
+    label: 'Chart 3',
     color: 'var(--chart-3)',
   },
   edge: {
-    label: 'Edge',
+    label: 'Chart 4',
     color: 'var(--chart-4)',
   },
   other: {
-    label: 'Other',
+    label: 'Chart 5',
     color: 'var(--chart-5)',
   },
 } satisfies ChartConfig

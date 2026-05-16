@@ -9,7 +9,7 @@ export const shadcnNavConfig: NavConfig = {
     { label: 'Blocks', href: '/theme/shadcn/blocks', icon: Cuboid },
     { label: 'Dashboard', href: '/theme/shadcn/dashboard', icon: PanelLeft },
     { label: 'Charts', href: '/theme/shadcn/charts', icon: BarChart3 },
-    { label: 'Palettes', href: '/theme/shadcn/palettes', icon: Palette },
+    { label: 'Color Roles', href: '/theme/shadcn/color-roles', icon: Palette },
   ],
   // why: ADR-0021 commitment 8 — shadcn routes pass a single tab.
   exportTabs: ['shadcn'],
