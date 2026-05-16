@@ -1,3 +1,4 @@
+import { isValidHex } from '@tonex/color-utils'
 import type { DynamicScheme } from '@tonex/mcu'
 import * as v from 'valibot'
 import {
@@ -36,13 +37,6 @@ export { type CustomColorEntry, slugifyCustomColorName, validateCustomColorEntry
 // branch in source.ts:migrate when there are live users to preserve.
 export const SCHEMA_VERSION = 2 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
-
-// why: STORAGE_KEY is the localStorage key, not a schema-version indicator.
-// The trailing `-v1` is pinned for migration continuity — zustand keys storage
-// by this name and runs `migrate` against whatever's at this key. Renaming
-// would orphan every existing user's persisted state. SCHEMA_VERSION (above)
-// is the version axis; this constant must NOT track it.
-export const STORAGE_KEY = 'tonex-theme-v1' as const
 
 // why: canonical list of md tokens deriveTheme emits per mode. Used as the
 // value-domain of ShadcnRoleBindings — the type system rejects bindings to
@@ -471,19 +465,12 @@ export const DEFAULT_INPUTS: PortableTheme = {
   chart: { scheme: 'sequential', hueSpread: HUE_SPREAD_DEFAULT, hueAnchor: HUE_ANCHOR_DEFAULT },
 }
 
-// why: shared 6-digit hex predicate. Used by validateCustomColorEntry's
-// inline check pattern and by the paletteOverride setter. Centralizing
-// avoids two regex literals drifting on case/format rules.
-export function isValidHex(hex: string): boolean {
-  return /^#[0-9a-fA-F]{6}$/.test(hex)
-}
-
 // why: ADR-0009 — runtime contract for PortableTheme. Migration ladder lifts
 // persisted shape to v10; this schema validates the v10 result post-rehydrate.
 // Recovery on failure is all-or-nothing reset to DEFAULT_INPUTS, gated in
-// source.ts:onRehydrateStorage. Field-level helpers (isValidHex,
-// validateCustomColorEntry) are reused as refinements so the validation
-// logic has one source of truth.
+// source.ts:onRehydrateStorage. Field-level helpers (isValidHex from
+// @tonex/color-utils, validateCustomColorEntry from ./custom-color/entry)
+// are reused as refinements so the validation logic has one source of truth.
 //
 // Cast is safe: `variants` is typed `Record<VariantName, ...>`, so its keys
 // are exactly the VariantName union at runtime. Picklist needs a non-empty

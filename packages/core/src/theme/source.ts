@@ -1,3 +1,4 @@
+import { isValidHex } from '@tonex/color-utils'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/schema'
@@ -10,20 +11,29 @@ import { createDebouncedStorage } from './persist-storage'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
-  isValidHex,
   type MdTokenName,
   type PaletteName,
   type PortableTheme,
   parsePortableTheme,
   SCHEMA_VERSION,
   type ShadcnRoleName,
-  STORAGE_KEY,
   type SurfaceAlgo,
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from './schema'
 import { SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
 import type { NeutralPaletteName } from './surface'
+
+// why: localStorage key for the source store. Trailing `-v1` is pinned for
+// migration continuity — zustand keys storage by this name and runs `migrate`
+// against whatever's at this key. Renaming would orphan every existing user's
+// persisted state. SCHEMA_VERSION is the version axis; this string must NOT
+// track it. Lives here next to the persist config rather than in schema.ts
+// (storage location is a source-store concern, not a wire-shape contract)
+// mirroring `UI_PREFS_STORAGE_KEY` at apps/www/src/lib/stores/ui-prefs.ts.
+// Exported so source.test.ts can assert against the same name without
+// duplicating the literal.
+export const STORAGE_KEY = 'tonex-theme-v1'
 
 export interface SourceActions {
   // why: ADR-0028 — hex input path. Stores the HCT decomposition AND the

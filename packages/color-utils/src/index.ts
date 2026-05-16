@@ -1,4 +1,5 @@
 export { contrastRatio, relativeLuminance } from './contrast'
+export { isValidHex } from './hex'
 export {
   argbComponents,
   argbFromOklch,

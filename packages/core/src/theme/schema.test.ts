@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_INPUTS,
-  isValidHex,
   MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_TOKEN_NAMES,
@@ -9,22 +8,6 @@ import {
   parsePortableTheme,
   SCHEMA_VERSION,
 } from './schema'
-
-describe('isValidHex', () => {
-  it('accepts 6-digit hex with mixed case', () => {
-    expect(isValidHex('#22c55e')).toBe(true)
-    expect(isValidHex('#FFFFFF')).toBe(true)
-    expect(isValidHex('#000000')).toBe(true)
-  })
-
-  it('rejects missing hash, wrong length, non-hex chars', () => {
-    expect(isValidHex('22c55e')).toBe(false)
-    expect(isValidHex('#22c')).toBe(false)
-    expect(isValidHex('#22c55ezz')).toBe(false)
-    expect(isValidHex('#zzzzzz')).toBe(false)
-    expect(isValidHex('')).toBe(false)
-  })
-})
 
 // why: ADR-0009 — schema is the v9 contract enforced post-rehydrate. These
 // tests exercise the contract directly (not via the rehydrate path) so a

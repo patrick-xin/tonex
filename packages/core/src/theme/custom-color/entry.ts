@@ -1,3 +1,4 @@
+import { isValidHex } from '@tonex/color-utils'
 import { MD_TOKEN_NAMES, SHADCN_ROLE_NAMES } from '../schema'
 
 // why: customColors are first-class dual-layer entries — they emit their
@@ -76,6 +77,6 @@ export function validateCustomColorEntry(
     return `name cannot produce a slug ending with "-foreground" (got "${slug}")`
   if (reservedSlugs().has(slug)) return `name "${slug}" collides with a reserved md or shadcn token`
   if (existingSlugs.has(slug)) return `name "${slug}" duplicates an existing custom color`
-  if (!/^#[0-9a-fA-F]{6}$/.test(entry.hex)) return `hex must be a 6-digit "#rrggbb" value`
+  if (!isValidHex(entry.hex)) return `hex must be a 6-digit "#rrggbb" value`
   return null
 }
