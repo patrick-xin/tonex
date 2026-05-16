@@ -1,8 +1,7 @@
 import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../chart/schema'
-import { deriveTheme } from './derive'
-import { hctFromHex, hexFromHct } from './hct'
+import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../../chart/schema'
+import { hctFromHex, hexFromHct } from '../hct'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -11,8 +10,9 @@ import {
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
-} from './schema'
-import { selectSeedHex } from './source'
+} from '../schema'
+import { selectSeedHex } from '../source'
+import { deriveTheme } from './derive'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
 // final else clause: (secondHue > 12 && secondHue <= 28) ? 32 : 16. Single-

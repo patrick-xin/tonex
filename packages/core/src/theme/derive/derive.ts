@@ -6,11 +6,11 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
-import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../chart/build'
-import { cmfSecondSourceDisabledReason } from '../cmf/second-source'
-import { variants } from '../variants'
-import type { Mode } from './mode'
-import { applyPaletteOverrides } from './palette-override'
+import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../../chart/build'
+import { cmfSecondSourceDisabledReason } from '../../cmf/second-source'
+import { variants } from '../../variants'
+import type { Mode } from '../mode'
+import { applyPaletteOverrides } from '../palette-override'
 import {
   type CustomColorEntry,
   MD_CORE_TOKEN_NAMES,
@@ -24,8 +24,8 @@ import {
   type ShadcnRoleBindings,
   type ShadcnRoleName,
   slugifyCustomColorName,
-} from './schema'
-import { applySurfaceDesaturate, applySurfaceTint } from './surface'
+} from '../schema'
+import { applySurfaceDesaturate, applySurfaceTint } from '../surface'
 
 // why: ADR-0021 commitment 1 — argb is the canonical wire format inside
 // DerivedTheme. Colorspace projection (argb → oklch / hex) is a format-time

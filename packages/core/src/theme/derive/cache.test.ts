@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
+import { hctFromHex } from '../hct'
+import { DEFAULT_INPUTS, type PortableTheme } from '../schema'
+import { __resetDeriveCache, getDerivedTheme } from './cache'
 import { deriveTheme } from './derive'
-import { __resetDeriveCache, getDerivedTheme } from './derive-cache'
-import { hctFromHex } from './hct'
-import { DEFAULT_INPUTS, type PortableTheme } from './schema'
 
 describe('getDerivedTheme', () => {
   afterEach(() => {

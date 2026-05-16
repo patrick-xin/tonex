@@ -1,5 +1,4 @@
-import type { DerivedTheme } from './derive'
-import { getDerivedTheme } from './derive-cache'
+import { type DerivedTheme, getDerivedTheme } from './derive'
 import type { PortableTheme } from './schema'
 
 // why: ADR-0021 commitment 5 — class-scoped contrast variants emit as one

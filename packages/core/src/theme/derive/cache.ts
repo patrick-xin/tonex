@@ -1,5 +1,5 @@
+import type { PortableTheme } from '../schema'
 import { type DerivedTheme, deriveTheme } from './derive'
-import type { PortableTheme } from './schema'
 
 // why: deriveTheme is the spine pipeline (Hct + MCU variant.build × 2 +
 // applyPaletteOverrides + buildMdLayer × 2 + applyMd3TokenOverrides + surface
