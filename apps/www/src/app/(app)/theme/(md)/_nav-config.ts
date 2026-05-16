@@ -9,8 +9,9 @@ export const mdNavConfig: NavConfig = {
   tabs: [
     { label: 'Overview', href: '/theme', icon: LayoutDashboard },
     { label: 'Color Roles', href: '/theme/color-roles', icon: Layers },
-    { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
     { label: 'Palettes', href: '/theme/palettes', icon: Palette },
+    { label: 'Dashboard Preview', href: '/theme/dashboard-preview', icon: LayoutDashboard },
+    { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
   ],
   // why: ADR-0021 commitment 8 — md routes pass these four tabs.
   exportTabs: ['Tailwind', 'TS', 'JSON', 'Dart'],

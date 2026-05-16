@@ -1,0 +1,90 @@
+import type { MenuRootChangeEventDetails } from '@base-ui/react'
+import { Copy, DollarSign, Settings, Trash } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLinkItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { toast } from '@/components/ui/toast'
+import {
+  accountDialogHandle,
+  actionMenuHandle,
+  deleteAlertDialogHandle,
+  paymentDialogHandle,
+} from './index'
+
+type ActionDropdownProps = {
+  onOpenChange: (isOpen: boolean, eventDetails: MenuRootChangeEventDetails) => void
+  open: boolean
+  triggerId: string | null
+}
+
+export function ActionDropdown({ onOpenChange, open, triggerId }: ActionDropdownProps) {
+  return (
+    <DropdownMenu
+      handle={actionMenuHandle}
+      onOpenChange={onOpenChange}
+      open={open}
+      triggerId={triggerId}
+    >
+      {({ payload: action }) => {
+        return (
+          <DropdownMenuContent align="start" matchAnchorWidth={false} side="left">
+            <DropdownMenuItem
+              onClick={() =>
+                toast.success({
+                  description: `${action?.id} has been copied to the clipboard`,
+                  title: 'Action ID copied',
+                })
+              }
+            >
+              <Copy /> Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              closeOnClick
+              onClick={() => {
+                accountDialogHandle.openWithPayload({
+                  id: action?.id ?? 1,
+                  name: action?.name ?? '',
+                  owner: action?.owner ?? '',
+                  url: action?.url ?? '',
+                })
+              }}
+            >
+              <Settings /> View Account
+            </DropdownMenuItem>
+            <DropdownMenuLinkItem
+              closeOnClick
+              onClick={() => {
+                paymentDialogHandle.openWithPayload({
+                  id: action?.id ?? 1,
+                  name: action?.name ?? '',
+                  owner: action?.owner ?? '',
+                  url: action?.url ?? '',
+                })
+              }}
+            >
+              <DollarSign /> View payment details
+            </DropdownMenuLinkItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                deleteAlertDialogHandle.openWithPayload({
+                  id: action?.id ?? 1,
+                  name: action?.name ?? '',
+                  owner: action?.owner ?? '',
+                  url: action?.url ?? '',
+                })
+              }}
+              variant="destructive"
+            >
+              <Trash /> Delete Account
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        )
+      }}
+    </DropdownMenu>
+  )
+}
