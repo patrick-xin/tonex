@@ -16,6 +16,7 @@ export function AnimatedCollapsible({
   defaultOpen = false,
   contentClassName,
   triggerRef,
+  overridden = false,
 }: {
   children: React.ReactNode
   title: string
@@ -25,6 +26,7 @@ export function AnimatedCollapsible({
   defaultOpen?: boolean
   contentClassName?: string
   triggerRef?: React.Ref<HTMLButtonElement>
+  overridden?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   const [mounted, setMounted] = useState(false)
@@ -41,7 +43,12 @@ export function AnimatedCollapsible({
             variant={variant}
             className={cn('w-full justify-between px-2! group leading-snug', className)}
           >
-            {title}
+            <span className="flex items-center gap-2">
+              {overridden && (
+                <span className="size-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
+              )}
+              {title}
+            </span>
             <CaretRightIcon
               weight="bold"
               className={cn(

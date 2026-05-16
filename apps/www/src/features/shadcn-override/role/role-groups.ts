@@ -6,7 +6,7 @@ import { SHADCN_ROLE_NAMES, type ShadcnRoleName } from '@tonex/core/schema'
 // surface). Sidebar collapses into one trailing group because all six sidebar
 // roles share one perceptual surface.
 type FamilyKey =
-  | 'surface'
+  | 'background'
   | 'card'
   | 'popover'
   | 'primary'
@@ -18,7 +18,7 @@ type FamilyKey =
   | 'sidebar'
 
 const FAMILY_LABEL: Record<FamilyKey, string> = {
-  surface: 'Surface',
+  background: 'Background',
   card: 'Card',
   popover: 'Popover',
   primary: 'Primary',
@@ -31,7 +31,7 @@ const FAMILY_LABEL: Record<FamilyKey, string> = {
 }
 
 const FAMILY_ORDER: ReadonlyArray<FamilyKey> = [
-  'surface',
+  'background',
   'card',
   'popover',
   'primary',
@@ -47,7 +47,7 @@ const FAMILY_ORDER: ReadonlyArray<FamilyKey> = [
 // non-prefixed sidebar siblings would catch them via substring rules below.
 function familyOf(role: ShadcnRoleName): FamilyKey {
   if (role.startsWith('--sidebar')) return 'sidebar'
-  if (role === '--background' || role === '--foreground') return 'surface'
+  if (role === '--background' || role === '--foreground') return 'background'
   if (role === '--card' || role === '--card-foreground') return 'card'
   if (role === '--popover' || role === '--popover-foreground') return 'popover'
   if (role === '--primary' || role === '--primary-foreground') return 'primary'

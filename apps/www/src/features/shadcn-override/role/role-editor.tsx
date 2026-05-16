@@ -3,6 +3,7 @@
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
 import { type Mode, useSource } from '@tonex/core'
 import type { ShadcnRoleName } from '@tonex/core/schema'
+import { ContrastBadge } from '@/components/shared/contrast-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ColorPicker, MdSnapshotPicker, TwColorPicker } from '@/features/color-picker'
@@ -16,7 +17,7 @@ interface RoleEditorProps {
 
 export function RoleEditor({ role, mode }: RoleEditorProps) {
   const setOverride = useSource((s) => s.actions.setShadcnRoleOverride)
-  const { currentHex, overridden, partner, ratio, passesAA } = useRoleEditorData(role, mode)
+  const { currentHex, overridden, contrast } = useRoleEditorData(role, mode)
 
   const { hexInput, handleChange, inputProps } = useHexFieldState(currentHex, (h) =>
     setOverride(mode, role, h),
@@ -25,13 +26,18 @@ export function RoleEditor({ role, mode }: RoleEditorProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between h-8">
-        {ratio !== null && partner !== null && (
-          <div className="flex items-center justify-between text-xs w-full text-on-surface-variant mr-2">
-            <div>vs {partner.slice(2)}</div>
-            <div className={passesAA ? 'text-on-surface-variant' : 'text-error'}>
-              {ratio.toFixed(1)}:1 {passesAA ? 'AA' : 'Fail'}
-            </div>
-          </div>
+        {contrast !== null && (
+          <ContrastBadge
+            contrast={contrast}
+            render={
+              <div className="flex items-center justify-between text-xs w-full text-on-surface-variant mr-2 cursor-help">
+                <div>vs {contrast.partner.replace(/^--/, '')}</div>
+                <div className={contrast.passes ? 'text-on-surface-variant' : 'text-error'}>
+                  {contrast.ratio.toFixed(1)}:1
+                </div>
+              </div>
+            }
+          />
         )}
 
         {overridden && (
