@@ -7,11 +7,8 @@ import type { ShadcnChartTokenName } from '@tonex/core/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { TwColorPicker } from '@/features/tw-color-picker'
+import { ColorPicker, MdSnapshotPicker, TwColorPicker } from '@/features/color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
-import { ColorPicker } from '../color-picker'
-import { MdSnapshotPicker } from '../shadcn-role-override/md-snapshot-picker'
-import { shadcnChartDisplayName } from './display-name'
 
 interface ChartEditorProps {
   token: ShadcnChartTokenName
@@ -45,7 +42,7 @@ export function ChartEditor({ token, mode }: ChartEditorProps) {
   return (
     <div className="flex flex-col gap-3 min-w-72">
       <div className="flex items-center justify-between">
-        <Label className="text-xs font-mono">{shadcnChartDisplayName(token)}</Label>
+        <Label className="text-xs font-mono">{token.slice(2)}</Label>
         {overridden && (
           <Button
             variant="ghost"

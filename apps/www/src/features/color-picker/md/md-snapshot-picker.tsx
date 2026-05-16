@@ -15,7 +15,7 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
-import { fuzzyMatches } from './fuzzy-filter'
+import { fuzzyMatches } from '@/lib/fuzzy-match'
 import { MD_TOKEN_ITEM_GROUPS } from './md-token-groups'
 import { VirtualizedMdList, type Virtualizer } from './virtualized-md-list'
 

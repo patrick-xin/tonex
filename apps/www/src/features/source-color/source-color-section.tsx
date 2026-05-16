@@ -1,9 +1,8 @@
 'use client'
 
 import { selectSeedHex, useSource } from '@tonex/core'
-import { TwColorPicker } from '@/features/tw-color-picker'
+import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
-import { ColorPicker } from '../color-picker'
 import { HexInput } from './hex-input'
 
 export function SourceColorSection() {

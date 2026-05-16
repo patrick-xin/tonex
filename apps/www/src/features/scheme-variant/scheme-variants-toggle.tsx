@@ -62,12 +62,16 @@ export function SchemeVariantsToggle() {
                 }}
               >
                 {items.map((v) => (
-                  <ToggleGroupItem key={v} value={v} className="px-1.5 gap-0 text-xs">
+                  <ToggleGroupItem
+                    key={v}
+                    value={v}
+                    className={`px-1.5 gap-0 text-xs ${group === 'cmf' ? ' rounded-r-none' : ''}`}
+                  >
                     {VARIANT_LABELS[v]}
+                    {group === 'cmf' && <CmfSecondSourcePicker />}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-              {group === 'cmf' && <CmfSecondSourcePicker />}
             </div>
           </div>
         )

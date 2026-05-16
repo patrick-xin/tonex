@@ -40,15 +40,12 @@ export function CmfSecondSourcePicker() {
     <PopoverTrigger
       disabled={isDisabled}
       render={
-        <Button
-          size="icon-xs"
-          variant="ghost"
-          aria-label="CMF second source color"
-          className="data-popup-open:bg-primary/8 -ml-px"
-        >
-          <CaretDownIcon className="size-3.5 rounded-full" />
-        </Button>
+        <div className="flex items-center">
+          <CaretDownIcon className="size-3" />
+        </div>
       }
+      nativeButton={false}
+      className="ml-0.5"
     />
   )
 
@@ -62,9 +59,9 @@ export function CmfSecondSourcePicker() {
       ) : (
         trigger
       )}
-      <PopoverContent className="py-2 w-56" showArrow sideOffset={8}>
+      <PopoverContent className="py-2 w-56" showArrow sideOffset={14}>
         <PopoverDescription className="text-xs mb-2">
-          Optional — drives the tertiary palette and nudges the error hue via CMF&apos;s formula.
+          Drives the tertiary color palette.
         </PopoverDescription>
         <div className="flex items-center gap-2">
           <ColorPicker value={formHex} onChange={handleChange} align="start" />

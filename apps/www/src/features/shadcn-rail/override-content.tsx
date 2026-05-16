@@ -13,12 +13,9 @@ import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ColorPicker } from '@/features/color-picker'
-import { shadcnChartDisplayName } from '@/features/shadcn-chart-override/display-name'
-import { MdSnapshotPicker } from '@/features/shadcn-role-override/md-snapshot-picker'
-import { ROLE_GROUPS } from '@/features/shadcn-role-override/role-groups'
+import { ColorPicker, MdSnapshotPicker, TwColorPicker } from '@/features/color-picker'
+import { ROLE_GROUPS } from '@/features/shadcn-override'
 import { useActiveMode } from '@/features/theme-mode'
-import { TwColorPicker } from '@/features/tw-color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
 // why: prototype rail-takeover override editor. Lifted layout from legacy
@@ -232,7 +229,7 @@ function ChartOverrideRow({ token, mode, currentArgb, contrast }: ChartOverrideR
           <span className="size-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
         )}
         <div className="text-xs font-mono flex-1 truncate text-on-surface leading-snug">
-          {shadcnChartDisplayName(token)}
+          {token.slice(2)}
         </div>
         <ContrastBadge contrast={contrast} />
         {overridden && (

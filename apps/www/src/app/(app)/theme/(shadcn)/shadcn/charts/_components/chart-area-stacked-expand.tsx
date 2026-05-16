@@ -31,15 +31,15 @@ const chartData = [
 
 const chartConfig = {
   desktop: {
-    label: 'Desktop',
+    label: 'Chart 1',
     color: 'var(--chart-1)',
   },
   mobile: {
-    label: 'Mobile',
+    label: 'Chart 2',
     color: 'var(--chart-2)',
   },
   other: {
-    label: 'Other',
+    label: 'Chart 3',
     color: 'var(--chart-3)',
   },
 } satisfies ChartConfig

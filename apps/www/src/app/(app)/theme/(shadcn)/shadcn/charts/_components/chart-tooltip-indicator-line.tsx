@@ -26,11 +26,11 @@ const chartData = [
 
 const chartConfig = {
   running: {
-    label: 'Running',
+    label: 'Chart 1',
     color: 'var(--chart-1)',
   },
   swimming: {
-    label: 'Swimming',
+    label: 'Chart 2',
     color: 'var(--chart-2)',
   },
 } satisfies ChartConfig

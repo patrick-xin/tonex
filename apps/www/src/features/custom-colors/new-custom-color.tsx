@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -108,9 +107,6 @@ export function NewCustomColor({
       <DialogContent showCloseButton>
         <DialogHeader>
           <DialogTitle>Add custom color</DialogTitle>
-          <DialogDescription>
-            Pick a color and name it. The system generates 4 accessible roles automatically.
-          </DialogDescription>
         </DialogHeader>
 
         <CustomColorFormBody form={form} layer={layer} onEnter={handleAdd} />
