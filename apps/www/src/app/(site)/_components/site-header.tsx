@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { SiteLogo } from './site-logo'
+import { SiteLogo } from '../../../components/shared/site-logo'
 
 export function SiteHeader() {
   return (
