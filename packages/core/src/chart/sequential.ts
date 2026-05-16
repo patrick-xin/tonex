@@ -1,6 +1,6 @@
 import { contrastRatio } from '@tonex/color-utils'
 import { argbFromHex, type DynamicScheme, Hct, TonalPalette } from '@tonex/mcu'
-import { cmfSecondSourceDisabledReason } from '../theme/cmf-second-source'
+import { cmfSecondSourceDisabledReason } from '../cmf/second-source'
 import type { Mode } from '../theme/mode'
 import { applyPaletteOverrides } from '../theme/palette-override'
 import type { PortableTheme } from '../theme/schema'
