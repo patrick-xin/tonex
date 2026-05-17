@@ -18,6 +18,17 @@ import {
 const TONES = [...MD_PALETTE_TONE_NAMES] as number[]
 const TONES_REVERSED = [...MD_PALETTE_TONE_NAMES].reverse() as number[]
 
+// why: matches legacy display order (error before neutrals) rather than
+// schema iteration order (neutrals before error).
+const FAMILY_ORDER = [
+  'primary',
+  'secondary',
+  'tertiary',
+  'error',
+  'neutral',
+  'neutral-variant',
+] as const
+
 type View = 'vertical' | 'horizontal'
 type PaletteMap = Record<string, Record<number, string>>
 
@@ -53,8 +64,8 @@ export function ColorPalettes() {
   const palettes = parsePaletteMap(theme.md.palette)
 
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap gap-2 mb-4 justify-end">
+    <div className="w-full max-w-6xl mx-auto">
+      <div className="flex flex-wrap gap-2 mb-6 justify-end">
         <ToggleGroup
           variant="outline"
           size="xs"
@@ -74,37 +85,23 @@ export function ColorPalettes() {
           <ToggleGroupItem value="descending">Tone (100-0)</ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <PaletteGrid view={view} tones={tones} palettes={palettes} />
+      {view === 'horizontal' ? (
+        <HorizontalView tones={tones} palettes={palettes} />
+      ) : (
+        <VerticalView tones={tones} palettes={palettes} />
+      )}
     </div>
   )
 }
 
-function PaletteGrid({
-  view,
-  tones,
-  palettes,
-}: {
-  view: View
-  tones: number[]
-  palettes: PaletteMap
-}) {
+function HorizontalView({ tones, palettes }: { tones: number[]; palettes: PaletteMap }) {
   const tooltipHandle = createTooltipHandle<{ tone: number; hex: string }>()
-  const isHorizontal = view === 'horizontal'
   return (
-    <div
-      className={
-        isHorizontal
-          ? 'space-y-4 md:space-y-6 flex flex-col items-center'
-          : 'space-y-4 md:space-y-6 flex flex-wrap justify-start sm:justify-center gap-2 w-full'
-      }
-    >
-      {MD_PALETTE_FAMILY_NAMES.map((family) => (
-        <div
-          key={family}
-          className={isHorizontal ? 'flex-1' : 'flex-1 min-w-[112px] max-w-[200px]'}
-        >
+    <div className="space-y-4 md:space-y-6 flex flex-col size-full">
+      {FAMILY_ORDER.map((family) => (
+        <div key={family} className="w-full">
           <p className="font-medium capitalize mb-1.5">{family.replace('-', ' ')}</p>
-          <div className={isHorizontal ? 'flex gap-1 flex-wrap' : 'flex flex-col gap-2 flex-wrap'}>
+          <div className="grid gap-1 grid-cols-[repeat(auto-fit,minmax(44px,1fr))]">
             <TooltipProvider>
               {tones.map((tone) => {
                 const hex = palettes[family]?.[tone] ?? '#000000'
@@ -117,11 +114,7 @@ function PaletteGrid({
                     className="group relative flex flex-col items-center"
                   >
                     <div
-                      className={
-                        isHorizontal
-                          ? 'h-12 w-16 cursor-pointer shrink-0 rounded-sm'
-                          : 'h-9 w-full cursor-pointer shrink-0 rounded-sm px-[7px] py-[5px]'
-                      }
+                      className="h-12 w-full cursor-pointer rounded-sm"
                       style={{ backgroundColor: hex }}
                     />
                   </TooltipTrigger>
@@ -133,7 +126,56 @@ function PaletteGrid({
       ))}
       <Tooltip
         onOpenChange={(_, eventDetails) => {
-          // why: Base UI fires 'trigger-press' on click; cancel so tooltip doesn't open after copy — toast.anchor is the feedback path
+          if (eventDetails.reason === 'trigger-press') {
+            eventDetails.cancel()
+            tooltipHandle.close()
+          }
+        }}
+        handle={tooltipHandle}
+      >
+        {({ payload }) => (
+          <TooltipContent className="flex flex-col gap-0.5">
+            <span className="text-xs font-mono inline-block">Tone: {payload?.tone}</span>
+            <span className="text-xs font-mono inline-block">{payload?.hex}</span>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </div>
+  )
+}
+
+function VerticalView({ tones, palettes }: { tones: number[]; palettes: PaletteMap }) {
+  const tooltipHandle = createTooltipHandle<{ tone: number; hex: string }>()
+  return (
+    <div className="space-y-4 md:space-y-6 flex flex-wrap justify-start sm:justify-center gap-2 size-full">
+      {FAMILY_ORDER.map((family) => (
+        <div key={family} className="flex-1 min-w-28">
+          <p className="font-medium capitalize mb-1.5">{family.replace('-', ' ')}</p>
+          <div className="flex flex-col gap-3 flex-wrap">
+            <TooltipProvider>
+              {tones.map((tone) => {
+                const hex = palettes[family]?.[tone] ?? '#000000'
+                return (
+                  <TooltipTrigger
+                    onClick={(e) => handleCopy(e, hex)}
+                    handle={tooltipHandle}
+                    payload={{ tone, hex }}
+                    key={tone}
+                    className="group relative flex flex-col items-center"
+                  >
+                    <div
+                      className="h-10 w-full cursor-pointer shrink-0 rounded-sm px-2 py-1"
+                      style={{ backgroundColor: hex }}
+                    />
+                  </TooltipTrigger>
+                )
+              })}
+            </TooltipProvider>
+          </div>
+        </div>
+      ))}
+      <Tooltip
+        onOpenChange={(_, eventDetails) => {
           if (eventDetails.reason === 'trigger-press') {
             eventDetails.cancel()
             tooltipHandle.close()

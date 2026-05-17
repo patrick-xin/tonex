@@ -44,7 +44,7 @@ export function ColorRolesList() {
       <Popover handle={popoverHandle}>
         {({ payload: role }) =>
           role !== undefined ? (
-            <PopoverContent sideOffset={8} align="start" className="sm:min-w-56">
+            <PopoverContent sideOffset={8} align="start" matchAnchorWidth>
               <RoleEditor key={role} role={role} mode={mode} />
             </PopoverContent>
           ) : null

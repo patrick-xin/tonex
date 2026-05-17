@@ -26,7 +26,7 @@ export function RoleEditor({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between h-8">
         {contrast !== null && (
-          <div className="flex justify-between w-full items-center text-xs">
+          <div className="flex justify-between w-full items-center text-[10px]">
             <div>vs {contrast.partner.replace(/^--(?:color-)?/, '')}</div>
             <ContrastBadge
               contrast={contrast}
