@@ -9,12 +9,17 @@ import type { MdTokenName, ShadcnRoleName } from '../schema'
 // commitment 7 so slice contrast-3 can add non-text @ 3.0 without a schema
 // migration. Closed const tuple — adding/removing a row is a code change.
 //
-// `--destructive` has no shadcn TEXT pair: shadcn's destructive text is
-// covered by md `on-error / error` (the md side of the same surface). But
-// `--destructive` IS exercised as a non-text element (button fill, border,
-// icon) and the issue #47 sweep added non-text pairs for it against the two
-// universal neutral surfaces (`--background`, `--card`). on-error/error does
-// not cover that case — it validates text on the fill, not the fill itself.
+// `--destructive` does NOT get a `--destructive-foreground / --destructive`
+// pair: that direction (text on destructive fill) is covered by md
+// `on-error / error`. It DOES get two other shapes of coverage the md side
+// cannot stand in for:
+// - Non-text pairs (issue #47 sweep): `--destructive` as button fill /
+//   border / icon against neutral surfaces (`--background`, `--card`).
+// - Role-as-text pairs (link-variant gotcha): `--destructive` as inline
+//   error text via the `text-destructive` utility, against the same neutral
+//   surfaces at the 4.5 text threshold.
+// The same role-as-text shape applies to `--primary` via shadcn's Button
+// `link` variant (`text-primary underline-offset-4 hover:underline`).
 export interface ContrastPair {
   fg: string
   bg: string
@@ -170,8 +175,10 @@ export const CONTRAST_PAIRS = [
     intent: 'text',
     threshold: TEXT_THRESHOLD,
   },
-  // why: 10 shadcn text pairs — every `-foreground` role against its unsuffixed
-  // root. No `--destructive` pair (covered by md `on-error / error`).
+  // why: 10 shadcn `-foreground / root` text pairs — shadcn's canonical
+  // text/fill convention. No `--destructive-foreground / --destructive` entry:
+  // destructive text is covered by md `on-error / error`. The 4 role-as-text
+  // pairs below are a separate cohort with different semantics.
   {
     fg: '--foreground',
     bg: '--background',
@@ -238,6 +245,48 @@ export const CONTRAST_PAIRS = [
   {
     fg: '--sidebar-accent-foreground',
     bg: '--sidebar-accent',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  // why: 4 shadcn role-as-text pairs — shadcn's default templates invert two
+  // fill roles into text usage:
+  // - `--primary` as text via the Button `link` variant
+  //   (`text-primary underline-offset-4 hover:underline`)
+  // - `--destructive` as text via the `text-destructive` utility (standard
+  //   for inline error text; the destructive Button variant also uses it
+  //   for hover text-on-fill in some templates).
+  //
+  // Both render the role on a neutral surface; the foreground/root convention
+  // above does not cover this direction (it checks text-on-fill, not fill-as-
+  // text). Pinned against both --background (root) and --card (the two
+  // universal neutral surfaces). 4.5:1 text threshold — these are read as
+  // glyphs, not shape recognition. Scope strictly tracks documented shadcn
+  // usage; adding every theoretical role-as-text re-use is out of scope.
+  {
+    fg: '--primary',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--primary',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
+    bg: '--card',
     layer: 'shadcn',
     intent: 'text',
     threshold: TEXT_THRESHOLD,

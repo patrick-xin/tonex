@@ -23,8 +23,9 @@ export interface ContrastReport {
 }
 
 // why: WeakMap keyed on the DerivedTheme reference, caching ONLY the
-// customColors-independent slice — the static CONTRAST_PAIRS tuple (69 pairs
-// post issue #47 sweep). That is the per-keystroke hot path: the role-editor
+// customColors-independent slice — the static CONTRAST_PAIRS tuple (73 pairs
+// post issue #47 sweep + link-variant role-as-text addendum). That is the
+// per-keystroke hot path: the role-editor
 // surfaces call evaluateThemeContrast on every edit, and the derive cache
 // (issue #20) hands every consumer the same DerivedTheme for the same
 // source, so they share this slot. Custom-color pairs are NOT cached here —

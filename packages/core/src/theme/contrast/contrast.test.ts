@@ -7,50 +7,56 @@ import { evaluateThemeContrast } from './contrast'
 import { CONTRAST_PAIRS, customColorContrastPairs } from './pairs'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
-  it('reports both modes with 69 pair results each post issue #47 sweep', () => {
+  it('reports both modes with 73 pair results each post issue #47 sweep', () => {
     const theme = deriveTheme(DEFAULT_INPUTS)
     const report = evaluateThemeContrast(theme)
-    expect(CONTRAST_PAIRS).toHaveLength(69)
-    expect(report.light).toHaveLength(69)
-    expect(report.dark).toHaveLength(69)
+    expect(CONTRAST_PAIRS).toHaveLength(73)
+    expect(report.light).toHaveLength(73)
+    expect(report.dark).toHaveLength(73)
   })
 
-  it('layer split is 30 md + 10 md-chart + 19 shadcn + 10 shadcn-chart', () => {
+  it('layer split is 30 md + 10 md-chart + 23 shadcn + 10 shadcn-chart', () => {
     const md = CONTRAST_PAIRS.filter((p) => p.layer === 'md')
     const mdChart = CONTRAST_PAIRS.filter((p) => p.layer === 'md-chart')
     const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn')
     const shadcnChart = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn-chart')
     expect(md).toHaveLength(30)
     expect(mdChart).toHaveLength(10)
-    expect(shadcn).toHaveLength(19)
+    expect(shadcn).toHaveLength(23)
     expect(shadcnChart).toHaveLength(10)
   })
 
-  it('intent split is 28 text @ 4.5 + 41 non-text @ 3.0', () => {
+  it('intent split is 32 text @ 4.5 + 41 non-text @ 3.0', () => {
     // why: ADR-0025 commitment 7 — slice contrast-3 added 7 non-text pairs;
     // slice contrast-4 (ADR-0027 c.5) added 20 more for the chart layer
     // (10 md-chart + 10 shadcn-chart). Issue #47 sweep extended the non-text
-    // catalogue by 14: md outline + outline-variant against each surface-
-    // container variant (10), plus shadcn input/ring on --background and
-    // destructive on --background/--card (4). intent + threshold are coupled
-    // — text always 4.5, non-text always 3.0. Pinning the exact counts
-    // catches drift on either axis.
+    // catalogue by 14 (md outline × surface-container ladder + shadcn
+    // input/ring/destructive on neutral surfaces) AND added 4 role-as-text
+    // pairs at 4.5 for the shadcn link-variant gotcha: --primary and
+    // --destructive used as text (per shadcn's link Button variant +
+    // text-destructive utility) against --background and --card. intent +
+    // threshold are coupled — text always 4.5, non-text always 3.0. Pinning
+    // the exact counts catches drift on either axis.
     const text = CONTRAST_PAIRS.filter((p) => p.intent === 'text')
     const nonText = CONTRAST_PAIRS.filter((p) => p.intent === 'non-text')
-    expect(text).toHaveLength(28)
+    expect(text).toHaveLength(32)
     expect(nonText).toHaveLength(41)
     for (const pair of text) expect(pair.threshold).toBe(4.5)
     for (const pair of nonText) expect(pair.threshold).toBe(3)
   })
 
-  it('shadcn text list is closed at the 10 foreground/root pairs (no destructive)', () => {
-    // why: ADR-0025 commitment 6 — destructive's TEXT partner is bound via
-    // --color-on-error at the md level, so a shadcn destructive text pair
-    // would double-count. Non-text destructive pairs (issue #47 sweep) are
-    // separate — the fill-on-surface check is not covered by on-error/error.
-    // Pinning the exact text set catches additions and omissions.
-    const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn' && p.intent === 'text')
-    const actual = new Set(shadcn.map((p) => `${p.fg}/${p.bg}`))
+  it('shadcn foreground/root text cohort is closed at the 10 -foreground / root pairs', () => {
+    // why: ADR-0025 commitment 6 — the `-foreground / root` convention is
+    // shadcn's canonical text/fill pairing. destructive has no entry here:
+    // destructive's TEXT partner is bound via --color-on-error at the md
+    // level, so a shadcn `--destructive-foreground / --destructive` would
+    // double-count. The 4 role-as-text pairs (--primary, --destructive on
+    // --background/--card per the link-variant gotcha) are a separate
+    // cohort with different semantics — pinned by the sibling test below.
+    const foregroundRoot = CONTRAST_PAIRS.filter(
+      (p) => p.layer === 'shadcn' && p.intent === 'text' && p.fg.endsWith('-foreground'),
+    )
+    const actual = new Set(foregroundRoot.map((p) => `${p.fg}/${p.bg}`))
     expect(actual).toEqual(
       new Set([
         '--foreground/--background',
@@ -63,6 +69,30 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
         '--sidebar-foreground/--sidebar',
         '--sidebar-primary-foreground/--sidebar-primary',
         '--sidebar-accent-foreground/--sidebar-accent',
+      ]),
+    )
+  })
+
+  it('shadcn role-as-text cohort is closed at --primary + --destructive on neutral surfaces', () => {
+    // why: shadcn's default templates use --primary as text via the Button
+    // link variant (`text-primary underline-offset-4 hover:underline`) and
+    // --destructive as text via the `text-destructive` utility (standard
+    // for inline error text). Both inversions take a role normally used as
+    // a FILL and render it as TEXT on a neutral surface; the
+    // `-foreground / root` convention does not cover this direction.
+    // Scope: the two specific roles shadcn documents as text. Adding every
+    // possible role-as-text re-use is out of scope — pair selection tracks
+    // documented usage patterns, not theoretical re-uses.
+    const roleAsText = CONTRAST_PAIRS.filter(
+      (p) => p.layer === 'shadcn' && p.intent === 'text' && !p.fg.endsWith('-foreground'),
+    )
+    const actual = new Set(roleAsText.map((p) => `${p.fg}/${p.bg}`))
+    expect(actual).toEqual(
+      new Set([
+        '--primary/--background',
+        '--primary/--card',
+        '--destructive/--background',
+        '--destructive/--card',
       ]),
     )
   })
@@ -385,20 +415,20 @@ describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () 
   })
 
   describe('evaluateThemeContrast with customColors', () => {
-    it('omitting customColors leaves the report at the 69 static pairs', () => {
+    it('omitting customColors leaves the report at the 73 static pairs', () => {
       // why: the 4 role-editor surfaces call evaluateThemeContrast(theme) with
       // no custom arg — they must keep seeing exactly the static spec list.
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       const report = evaluateThemeContrast(theme)
-      expect(report.light).toHaveLength(69)
-      expect(report.dark).toHaveLength(69)
+      expect(report.light).toHaveLength(73)
+      expect(report.dark).toHaveLength(73)
     })
 
     it('passing customColors appends 3 evaluated pairs per entry, both modes', () => {
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       const report = evaluateThemeContrast(theme, [brand])
-      expect(report.light).toHaveLength(72)
-      expect(report.dark).toHaveLength(72)
+      expect(report.light).toHaveLength(76)
+      expect(report.dark).toHaveLength(76)
       const custom = report.light.filter(
         (r) => r.pair.layer === 'md-custom' || r.pair.layer === 'shadcn-custom',
       )
@@ -446,14 +476,14 @@ describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () 
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       evaluateThemeContrast(theme)
       const report = evaluateThemeContrast(theme, [brand])
-      expect(report.light).toHaveLength(72)
+      expect(report.light).toHaveLength(76)
       expect(report.light.some((r) => r.pair.layer === 'md-custom')).toBe(true)
     })
 
     it('a prior custom-aware call on the same theme does not poison a plain call', () => {
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       evaluateThemeContrast(theme, [brand])
-      expect(evaluateThemeContrast(theme).light).toHaveLength(69)
+      expect(evaluateThemeContrast(theme).light).toHaveLength(73)
     })
   })
 })
