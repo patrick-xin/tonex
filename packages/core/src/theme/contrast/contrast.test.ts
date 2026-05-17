@@ -7,43 +7,48 @@ import { evaluateThemeContrast } from './contrast'
 import { CONTRAST_PAIRS, customColorContrastPairs } from './pairs'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
-  it('reports both modes with 55 pair results each post slice contrast-4', () => {
+  it('reports both modes with 69 pair results each post issue #47 sweep', () => {
     const theme = deriveTheme(DEFAULT_INPUTS)
     const report = evaluateThemeContrast(theme)
-    expect(CONTRAST_PAIRS).toHaveLength(55)
-    expect(report.light).toHaveLength(55)
-    expect(report.dark).toHaveLength(55)
+    expect(CONTRAST_PAIRS).toHaveLength(69)
+    expect(report.light).toHaveLength(69)
+    expect(report.dark).toHaveLength(69)
   })
 
-  it('layer split is 20 md + 10 md-chart + 15 shadcn + 10 shadcn-chart', () => {
+  it('layer split is 30 md + 10 md-chart + 19 shadcn + 10 shadcn-chart', () => {
     const md = CONTRAST_PAIRS.filter((p) => p.layer === 'md')
     const mdChart = CONTRAST_PAIRS.filter((p) => p.layer === 'md-chart')
     const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn')
     const shadcnChart = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn-chart')
-    expect(md).toHaveLength(20)
+    expect(md).toHaveLength(30)
     expect(mdChart).toHaveLength(10)
-    expect(shadcn).toHaveLength(15)
+    expect(shadcn).toHaveLength(19)
     expect(shadcnChart).toHaveLength(10)
   })
 
-  it('intent split is 28 text @ 4.5 + 27 non-text @ 3.0', () => {
+  it('intent split is 28 text @ 4.5 + 41 non-text @ 3.0', () => {
     // why: ADR-0025 commitment 7 — slice contrast-3 added 7 non-text pairs;
-    // slice contrast-4 (ADR-0027 c.5) adds 20 more for the chart layer
-    // (10 md-chart + 10 shadcn-chart). intent + threshold are coupled —
-    // text always 4.5, non-text always 3.0. Pinning the exact counts catches
-    // drift on either axis.
+    // slice contrast-4 (ADR-0027 c.5) added 20 more for the chart layer
+    // (10 md-chart + 10 shadcn-chart). Issue #47 sweep extended the non-text
+    // catalogue by 14: md outline + outline-variant against each surface-
+    // container variant (10), plus shadcn input/ring on --background and
+    // destructive on --background/--card (4). intent + threshold are coupled
+    // — text always 4.5, non-text always 3.0. Pinning the exact counts
+    // catches drift on either axis.
     const text = CONTRAST_PAIRS.filter((p) => p.intent === 'text')
     const nonText = CONTRAST_PAIRS.filter((p) => p.intent === 'non-text')
     expect(text).toHaveLength(28)
-    expect(nonText).toHaveLength(27)
+    expect(nonText).toHaveLength(41)
     for (const pair of text) expect(pair.threshold).toBe(4.5)
     for (const pair of nonText) expect(pair.threshold).toBe(3)
   })
 
   it('shadcn text list is closed at the 10 foreground/root pairs (no destructive)', () => {
-    // why: ADR-0025 commitment 6 — destructive's partner is bound via
-    // --color-on-error at the md level, so a shadcn destructive pair would
-    // double-count. Pinning the exact set catches additions and omissions.
+    // why: ADR-0025 commitment 6 — destructive's TEXT partner is bound via
+    // --color-on-error at the md level, so a shadcn destructive text pair
+    // would double-count. Non-text destructive pairs (issue #47 sweep) are
+    // separate — the fill-on-surface check is not covered by on-error/error.
+    // Pinning the exact text set catches additions and omissions.
     const shadcn = CONTRAST_PAIRS.filter((p) => p.layer === 'shadcn' && p.intent === 'text')
     const actual = new Set(shadcn.map((p) => `${p.fg}/${p.bg}`))
     expect(actual).toEqual(
@@ -62,11 +67,17 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
     )
   })
 
-  it('non-text pairs cover outline (md) + border/input/ring + sidebar edges (shadcn)', () => {
-    // why: ADR-0025 commitment 7 — closed list of non-text pairs at 3:1.
-    // Per-role bg picks the most loaded render context: --border on root,
-    // --input/--ring on cards (form surfaces), sidebar edges scoped to
-    // --sidebar. md outline + outline-variant against --color-surface.
+  it('non-text pairs cover outline (md) + border/input/ring/destructive + sidebar edges (shadcn)', () => {
+    // why: ADR-0025 commitment 7 + issue #47 sweep — closed list of non-text
+    // pairs at 3:1. md outline + outline-variant against --color-surface AND
+    // each --color-surface-container variant (outlines render inside the
+    // container ladder, not only on the base surface). shadcn coverage:
+    // --border on root --background (universal edge); --input/--ring on BOTH
+    // --card (form-in-card, the common case) AND --background (toolbar/header
+    // forms outside any card); --destructive on --background and --card
+    // (destructive button fill / border / icon against the two universal
+    // neutral surfaces — md on-error/error covers the text case, not this);
+    // sidebar edges scoped to --sidebar.
     const nonText = CONTRAST_PAIRS.filter(
       (p) => p.intent === 'non-text' && p.layer !== 'shadcn-chart' && p.layer !== 'md-chart',
     )
@@ -74,10 +85,24 @@ describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
     expect(actual).toEqual(
       new Set([
         'md:--color-outline/--color-surface',
+        'md:--color-outline/--color-surface-container-lowest',
+        'md:--color-outline/--color-surface-container-low',
+        'md:--color-outline/--color-surface-container',
+        'md:--color-outline/--color-surface-container-high',
+        'md:--color-outline/--color-surface-container-highest',
         'md:--color-outline-variant/--color-surface',
+        'md:--color-outline-variant/--color-surface-container-lowest',
+        'md:--color-outline-variant/--color-surface-container-low',
+        'md:--color-outline-variant/--color-surface-container',
+        'md:--color-outline-variant/--color-surface-container-high',
+        'md:--color-outline-variant/--color-surface-container-highest',
         'shadcn:--border/--background',
         'shadcn:--input/--card',
+        'shadcn:--input/--background',
         'shadcn:--ring/--card',
+        'shadcn:--ring/--background',
+        'shadcn:--destructive/--background',
+        'shadcn:--destructive/--card',
         'shadcn:--sidebar-border/--sidebar',
         'shadcn:--sidebar-ring/--sidebar',
       ]),
@@ -360,20 +385,20 @@ describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () 
   })
 
   describe('evaluateThemeContrast with customColors', () => {
-    it('omitting customColors leaves the report at the 55 static pairs', () => {
+    it('omitting customColors leaves the report at the 69 static pairs', () => {
       // why: the 4 role-editor surfaces call evaluateThemeContrast(theme) with
       // no custom arg — they must keep seeing exactly the static spec list.
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       const report = evaluateThemeContrast(theme)
-      expect(report.light).toHaveLength(55)
-      expect(report.dark).toHaveLength(55)
+      expect(report.light).toHaveLength(69)
+      expect(report.dark).toHaveLength(69)
     })
 
     it('passing customColors appends 3 evaluated pairs per entry, both modes', () => {
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       const report = evaluateThemeContrast(theme, [brand])
-      expect(report.light).toHaveLength(58)
-      expect(report.dark).toHaveLength(58)
+      expect(report.light).toHaveLength(72)
+      expect(report.dark).toHaveLength(72)
       const custom = report.light.filter(
         (r) => r.pair.layer === 'md-custom' || r.pair.layer === 'shadcn-custom',
       )
@@ -421,14 +446,14 @@ describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () 
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       evaluateThemeContrast(theme)
       const report = evaluateThemeContrast(theme, [brand])
-      expect(report.light).toHaveLength(58)
+      expect(report.light).toHaveLength(72)
       expect(report.light.some((r) => r.pair.layer === 'md-custom')).toBe(true)
     })
 
     it('a prior custom-aware call on the same theme does not poison a plain call', () => {
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       evaluateThemeContrast(theme, [brand])
-      expect(evaluateThemeContrast(theme).light).toHaveLength(55)
+      expect(evaluateThemeContrast(theme).light).toHaveLength(69)
     })
   })
 })

@@ -23,14 +23,15 @@ export interface ContrastReport {
 }
 
 // why: WeakMap keyed on the DerivedTheme reference, caching ONLY the
-// customColors-independent slice — the 55 static CONTRAST_PAIRS. That is the
-// per-keystroke hot path: the role-editor surfaces call evaluateThemeContrast
-// on every edit, and the derive cache (issue #20) hands every consumer the
-// same DerivedTheme for the same source, so they share this slot. Custom-color
-// pairs are NOT cached here — they depend on the customColors argument, so
-// caching them under the theme key alone would let one caller's custom pairs
-// leak into another's. They are cheap (≤3 per entry, cold dialog path) and
-// recomputed per call instead. WeakMap auto-collects on derive-cache eviction.
+// customColors-independent slice — the static CONTRAST_PAIRS tuple (69 pairs
+// post issue #47 sweep). That is the per-keystroke hot path: the role-editor
+// surfaces call evaluateThemeContrast on every edit, and the derive cache
+// (issue #20) hands every consumer the same DerivedTheme for the same
+// source, so they share this slot. Custom-color pairs are NOT cached here —
+// they depend on the customColors argument, so caching them under the theme
+// key alone would let one caller's custom pairs leak into another's. They
+// are cheap (≤3 per entry, cold dialog path) and recomputed per call
+// instead. WeakMap auto-collects on derive-cache eviction.
 const staticReportCache = new WeakMap<DerivedTheme, ContrastReport>()
 
 // why: `customColors` must be the same source's that produced `theme` — the
