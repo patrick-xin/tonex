@@ -1,6 +1,7 @@
 'use client'
 
 import { GearSixIcon } from '@phosphor-icons/react'
+import { useHotkey } from '@tanstack/react-hotkeys'
 import { selectPortable, useSource } from '@tonex/core'
 import {
   findActivePreset,
@@ -8,6 +9,7 @@ import {
   SHADCN_PRESETS,
   type ShadcnPresetName,
 } from '@tonex/core/schema'
+import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
@@ -18,6 +20,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TwPickerEnableToggle } from '@/features/color-picker'
 import { ContrastLevelSlider } from '@/features/contrast-level'
+import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
@@ -35,6 +38,8 @@ const PRESET_GROUP_B: ShadcnPresetName[] = ['soft', 'warm', 'playful']
 const PRESET_GROUP_A = PRESET_NAMES.filter((n) => !PRESET_GROUP_B.includes(n))
 
 export function Settings({ layer }: { layer: Layer }) {
+  const [isOpen, setIsOpen] = useState(false)
+  useHotkey('S', () => setIsOpen((prev) => !prev))
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
   const chartScheme = useSource((s) => s.chart.scheme)
@@ -46,9 +51,10 @@ export function Settings({ layer }: { layer: Layer }) {
   const setShadcnPreset = useSource((s) => s.actions.setShadcnPreset)
 
   return (
-    <Popover>
+    <Popover handle={settingsPopoverHandle} open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip>
         <TooltipTrigger
+          id="settings"
           render={
             <PopoverTrigger
               render={<Button variant="secondary" size="icon-sm" aria-label="Settings" />}

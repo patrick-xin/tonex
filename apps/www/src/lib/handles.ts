@@ -7,5 +7,5 @@ import { createPopoverHandle } from '@/components/ui/popover'
 export const exportDialogHandle = createDialogHandle<null>()
 export const checkContrastDialogHandle = createDialogHandle<null>()
 export const helpDialogHandle = createDialogHandle<null>()
-export const shadcnSettingsPopoverHandle = createPopoverHandle<null>()
+export const settingsPopoverHandle = createPopoverHandle<null>()
 export const md3SettingsPopoverHandle = createPopoverHandle<null>()

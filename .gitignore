@@ -19,3 +19,7 @@ NOTES.md
 # point-in-time references for "what changed" comparisons across sessions.
 graphify-out/
 scratch/
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json

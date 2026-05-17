@@ -185,7 +185,7 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
                               key={item.value}
                               value={item}
                               onClick={() => {
-                                item.popoverHandle?.open('shadcn-settings')
+                                item.popoverHandle?.open('settings')
                                 setIsOpen(false)
                               }}
                             >

@@ -4,7 +4,7 @@ import {
   checkContrastDialogHandle,
   exportDialogHandle,
   helpDialogHandle,
-  shadcnSettingsPopoverHandle,
+  settingsPopoverHandle,
 } from '@/lib/handles'
 
 export interface Item {
@@ -49,7 +49,7 @@ export const BASE_SHORTCUTS: Item[] = [
     label: 'Settings',
     shortcut: 'S',
     value: 'settings',
-    popoverHandle: shadcnSettingsPopoverHandle,
+    popoverHandle: settingsPopoverHandle,
   },
   {
     icon: CircleQuestionMarkIcon,
