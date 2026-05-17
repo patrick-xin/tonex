@@ -9,9 +9,17 @@ import type { MdTokenName, ShadcnRoleName } from '../schema'
 // commitment 7 so slice contrast-3 can add non-text @ 3.0 without a schema
 // migration. Closed const tuple — adding/removing a row is a code change.
 //
-// `--destructive` does not gain a shadcn pair: shadcn's destructive role is
-// bound through `--color-on-error` at the underlying md level, so a separate
-// shadcn pair would double-count the same surface.
+// `--destructive` does NOT get a `--destructive-foreground / --destructive`
+// pair: that direction (text on destructive fill) is covered by md
+// `on-error / error`. It DOES get two other shapes of coverage the md side
+// cannot stand in for:
+// - Non-text pairs (issue #47 sweep): `--destructive` as button fill /
+//   border / icon against neutral surfaces (`--background`, `--card`).
+// - Role-as-text pairs (link-variant gotcha): `--destructive` as inline
+//   error text via the `text-destructive` utility, against the same neutral
+//   surfaces at the 4.5 text threshold.
+// The same role-as-text shape applies to `--primary` via shadcn's Button
+// `link` variant (`text-primary underline-offset-4 hover:underline`).
 export interface ContrastPair {
   fg: string
   bg: string
@@ -167,8 +175,10 @@ export const CONTRAST_PAIRS = [
     intent: 'text',
     threshold: TEXT_THRESHOLD,
   },
-  // why: 10 shadcn text pairs — every `-foreground` role against its unsuffixed
-  // root. No `--destructive` pair (covered by md `on-error / error`).
+  // why: 10 shadcn `-foreground / root` text pairs — shadcn's canonical
+  // text/fill convention. No `--destructive-foreground / --destructive` entry:
+  // destructive text is covered by md `on-error / error`. The 4 role-as-text
+  // pairs below are a separate cohort with different semantics.
   {
     fg: '--foreground',
     bg: '--background',
@@ -239,13 +249,75 @@ export const CONTRAST_PAIRS = [
     intent: 'text',
     threshold: TEXT_THRESHOLD,
   },
-  // why: 7 non-text pairs at 3:1 (WCAG 1.4.11) — slice contrast-3.
-  // md outline + outline-variant against --color-surface (M3 spec: outline
-  // is the edge token, outline-variant is decorative dividers; both sit on
-  // the surface). shadcn picks per-role bg by most loaded render context:
-  // --border on root background (universal border), --input/--ring on
-  // --card (form fields most often live in card-class containers — dialog,
-  // popover, card itself), sidebar-border/sidebar-ring scoped to --sidebar.
+  // why: 4 shadcn role-as-text pairs — shadcn's default templates invert two
+  // fill roles into text usage:
+  // - `--primary` as text via the Button `link` variant
+  //   (`text-primary underline-offset-4 hover:underline`)
+  // - `--destructive` as text via the `text-destructive` utility (standard
+  //   for inline error text; the destructive Button variant also uses it
+  //   for hover text-on-fill in some templates).
+  //
+  // Both render the role on a neutral surface; the foreground/root convention
+  // above does not cover this direction (it checks text-on-fill, not fill-as-
+  // text). Pinned against both --background (root) and --card (the two
+  // universal neutral surfaces). 4.5:1 text threshold — these are read as
+  // glyphs, not shape recognition. Scope strictly tracks documented shadcn
+  // usage; adding every theoretical role-as-text re-use is out of scope.
+  {
+    fg: '--primary',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--primary',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  // why: 21 non-text pairs at 3:1 (WCAG 1.4.11) — slice contrast-3 baseline
+  // (7 pairs) + issue #47 sweep (14 pairs).
+  //
+  // md outline + outline-variant against the surface ladder. Outlines are
+  // not only drawn on the base --color-surface — every container variant
+  // (--color-surface-container{,-lowest,-low,-high,-highest}) is also a
+  // legitimate render context for edges and dividers, and contrast must
+  // hold against each (a dim outline on a high-tone container fails 3:1
+  // even when it passes on the base surface). 12 md pairs = 2 fg tokens ×
+  // 6 surface backgrounds.
+  //
+  // shadcn picks per-role bg by render context:
+  // - --border on --background (universal root border).
+  // - --input + --ring on BOTH --card AND --background. Form fields most
+  //   often live in card-class containers (dialog, popover, card itself)
+  //   — that's the original slice contrast-3 pair — but they also render
+  //   directly on the root background in toolbar/header/standalone forms,
+  //   and a low-contrast input on the root would slip past a card-only
+  //   check.
+  // - --destructive on --background and --card as a non-text fill / border
+  //   / icon. md on-error/error covers destructive TEXT (text on the fill);
+  //   it does NOT cover the fill itself against the neutral surface it sits
+  //   on, which is the WCAG 1.4.11 concern for icon-only destructive
+  //   buttons and outline-style destructive variants.
+  // - --sidebar-border / --sidebar-ring scoped to --sidebar (sidebar is its
+  //   own surface family — edges and rings rendered inside it are checked
+  //   against it, not the root).
   {
     fg: '--color-outline',
     bg: '--color-surface',
@@ -254,8 +326,78 @@ export const CONTRAST_PAIRS = [
     threshold: NON_TEXT_THRESHOLD,
   },
   {
+    fg: '--color-outline',
+    bg: '--color-surface-container-lowest',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline',
+    bg: '--color-surface-container-low',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline',
+    bg: '--color-surface-container',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline',
+    bg: '--color-surface-container-high',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline',
+    bg: '--color-surface-container-highest',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
     fg: '--color-outline-variant',
     bg: '--color-surface',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface-container-lowest',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface-container-low',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface-container',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface-container-high',
+    layer: 'md',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--color-outline-variant',
+    bg: '--color-surface-container-highest',
     layer: 'md',
     intent: 'non-text',
     threshold: NON_TEXT_THRESHOLD,
@@ -275,7 +417,35 @@ export const CONTRAST_PAIRS = [
     threshold: NON_TEXT_THRESHOLD,
   },
   {
+    fg: '--input',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
     fg: '--ring',
+    bg: '--card',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--ring',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
+    bg: '--background',
+    layer: 'shadcn',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--destructive',
     bg: '--card',
     layer: 'shadcn',
     intent: 'non-text',
