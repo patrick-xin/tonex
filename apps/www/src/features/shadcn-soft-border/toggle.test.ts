@@ -17,24 +17,28 @@ describe('setSoftBorder', () => {
     expect(isSoftBorderOn(useSource.getState().shadcnRoleBindings)).toBe(false)
   })
 
-  it('setSoftBorder(true) binds --border and --input to outline-variant in both modes', () => {
+  it('setSoftBorder(true) binds --border, --input, --sidebar-border to outline-variant in both modes', () => {
     setSoftBorder(true)
     const b = useSource.getState().shadcnRoleBindings
     expect(b.light['--border']).toBe('--color-outline-variant')
     expect(b.light['--input']).toBe('--color-outline-variant')
+    expect(b.light['--sidebar-border']).toBe('--color-outline-variant')
     expect(b.dark['--border']).toBe('--color-outline-variant')
     expect(b.dark['--input']).toBe('--color-outline-variant')
+    expect(b.dark['--sidebar-border']).toBe('--color-outline-variant')
     expect(isSoftBorderOn(b)).toBe(true)
   })
 
-  it('setSoftBorder(false) restores --border and --input to outline in both modes', () => {
+  it('setSoftBorder(false) restores --border, --input, --sidebar-border to outline in both modes', () => {
     setSoftBorder(true)
     setSoftBorder(false)
     const b = useSource.getState().shadcnRoleBindings
     expect(b.light['--border']).toBe('--color-outline')
     expect(b.light['--input']).toBe('--color-outline')
+    expect(b.light['--sidebar-border']).toBe('--color-outline')
     expect(b.dark['--border']).toBe('--color-outline')
     expect(b.dark['--input']).toBe('--color-outline')
+    expect(b.dark['--sidebar-border']).toBe('--color-outline')
     expect(isSoftBorderOn(b)).toBe(false)
   })
 

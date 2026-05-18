@@ -12,17 +12,19 @@ describe('isSoftBorderOn', () => {
     expect(isSoftBorderOn(DEFAULT_SHADCN_ROLE_BINDINGS)).toBe(false)
   })
 
-  it('is true when both modes bind --border and --input to outline-variant', () => {
+  it('is true when both modes bind --border, --input, --sidebar-border to outline-variant', () => {
     const both: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings } = {
       light: {
         ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
         '--border': '--color-outline-variant',
         '--input': '--color-outline-variant',
+        '--sidebar-border': '--color-outline-variant',
       },
       dark: {
         ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
         '--border': '--color-outline-variant',
         '--input': '--color-outline-variant',
+        '--sidebar-border': '--color-outline-variant',
       },
     }
     expect(isSoftBorderOn(both)).toBe(true)
@@ -34,6 +36,7 @@ describe('isSoftBorderOn', () => {
         ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
         '--border': '--color-outline-variant',
         '--input': '--color-outline-variant',
+        '--sidebar-border': '--color-outline-variant',
       },
       dark: DEFAULT_SHADCN_ROLE_BINDINGS.dark,
     }
@@ -46,5 +49,21 @@ describe('isSoftBorderOn', () => {
       dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark, '--border': '--color-outline-variant' },
     }
     expect(isSoftBorderOn(borderOnly)).toBe(false)
+  })
+
+  it('is false when --border and --input are soft but --sidebar-border is not', () => {
+    const noSidebar: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings } = {
+      light: {
+        ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
+        '--border': '--color-outline-variant',
+        '--input': '--color-outline-variant',
+      },
+      dark: {
+        ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
+        '--border': '--color-outline-variant',
+        '--input': '--color-outline-variant',
+      },
+    }
+    expect(isSoftBorderOn(noSidebar)).toBe(false)
   })
 })
