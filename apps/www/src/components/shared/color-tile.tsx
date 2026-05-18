@@ -5,12 +5,9 @@ import { cx } from 'tailwind-variants'
 import { type createPopoverHandle, PopoverTrigger } from '@/components/ui/popover'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import type { ContrastWarning } from '@/features/contrast-checker/warning'
 import { isDarkSwatch } from '@/lib/is-dark-swatch'
-
-export interface ColorTileWarning {
-  partnerLabel: string
-  ratio: number
-}
+import { ContrastWarningTooltipBody } from './contrast-warning-tooltip'
 
 interface ColorTileProps<T> {
   payload: T
@@ -18,7 +15,7 @@ interface ColorTileProps<T> {
   display: string
   hex: string
   overridden: boolean
-  warning?: ColorTileWarning
+  warning?: ContrastWarning
   size?: 'sm' | 'md'
 }
 
@@ -66,7 +63,7 @@ export function ColorTile<T>({
           {hex}
         </p>
         {overridden && <div className="absolute top-1 right-1 size-2 rounded-full bg-tertiary" />}
-        {warning !== undefined && (
+        {warning !== undefined && !warning.passes && !warning.decorative && (
           <Tooltip>
             <TooltipTrigger
               delay={0}
@@ -77,10 +74,7 @@ export function ColorTile<T>({
               }
             />
             <TooltipContent variant="inverse" side="top">
-              <p className="text-xs">
-                Fails WCAG AA against <span className="font-mono">{warning.partnerLabel}</span>
-              </p>
-              <p className="text-xs">{warning.ratio.toFixed(1)}:1 (needs 4.5:1)</p>
+              <ContrastWarningTooltipBody warning={warning} />
             </TooltipContent>
           </Tooltip>
         )}

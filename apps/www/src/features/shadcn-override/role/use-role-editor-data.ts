@@ -3,7 +3,7 @@
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { ShadcnRoleName } from '@tonex/core/schema'
-import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 
 export function useRoleEditorData(role: ShadcnRoleName, mode: Mode) {
   const theme = useResolvedTokens()
@@ -26,15 +26,8 @@ export function useRoleEditorData(role: ShadcnRoleName, mode: Mode) {
         )
       : undefined
 
-  const contrast: ContrastBadgeData | null =
-    result === undefined
-      ? null
-      : {
-          ratio: result.ratio,
-          passes: result.passes,
-          partner: result.pair.fg === role ? result.pair.bg : result.pair.fg,
-          threshold: result.pair.threshold,
-        }
+  const contrast: ContrastWarning | null =
+    result === undefined ? null : toContrastWarning(result, role)
 
   return {
     currentHex,

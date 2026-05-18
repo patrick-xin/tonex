@@ -3,8 +3,7 @@
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { MdTokenName } from '@tonex/core/schema'
-import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
-import { isDecorative } from '@/features/contrast-checker/decorative'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 
 export function useTokenEditorData(role: MdTokenName, mode: Mode) {
   const theme = useResolvedTokens()
@@ -30,16 +29,8 @@ export function useTokenEditorData(role: MdTokenName, mode: Mode) {
           (r) => r.pair.layer === 'md' && (r.pair.fg === role || r.pair.bg === role),
         )
       : undefined
-  const contrast: ContrastBadgeData | null =
-    result === undefined
-      ? null
-      : {
-          ratio: result.ratio,
-          passes: result.passes,
-          partner: result.pair.fg === role ? result.pair.bg : result.pair.fg,
-          threshold: result.pair.threshold,
-          decorative: isDecorative(result.pair),
-        }
+  const contrast: ContrastWarning | null =
+    result === undefined ? null : toContrastWarning(result, role)
 
   return { currentHex, overridden: role in overrides, contrast }
 }

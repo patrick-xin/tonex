@@ -7,8 +7,8 @@ import {
   type MdTokenName,
   type ShadcnRoleName,
 } from '@tonex/core/schema'
-import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
 import { MD_TOKEN_ITEM_GROUPS } from '@/features/color-picker'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
 
 export interface TokenItem {
@@ -67,15 +67,10 @@ export function useBindingData() {
   const tokenItems: ReadonlyArray<TokenItem> = tokenItemGroups.flatMap((g) => g.items)
 
   const report = evaluateThemeContrast(theme)
-  const roleContrastByRole = new Map<ShadcnRoleName, ContrastBadgeData>()
+  const roleContrastByRole = new Map<ShadcnRoleName, ContrastWarning>()
   for (const r of report[mode]) {
     if (r.pair.layer !== 'shadcn') continue
-    roleContrastByRole.set(r.pair.fg as ShadcnRoleName, {
-      ratio: r.ratio,
-      passes: r.passes,
-      partner: r.pair.bg,
-      threshold: r.pair.threshold,
-    })
+    roleContrastByRole.set(r.pair.fg as ShadcnRoleName, toContrastWarning(r))
   }
 
   return {

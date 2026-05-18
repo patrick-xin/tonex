@@ -5,10 +5,11 @@ import { type Mode, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_CHART_TOKEN_NAMES } from '@tonex/core/schema'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
-import { ContrastBadge, type ContrastBadgeData } from '@/components/shared/contrast-badge'
+import { ContrastBadge } from '@/components/shared/contrast-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ColorPicker, MdSnapshotPicker, TwColorPicker } from '@/features/color-picker'
+import type { ContrastWarning } from '@/features/contrast-checker/warning'
 import { ROLE_GROUPS } from '@/features/shadcn-override'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { useOverrideData } from './use-override-data'
@@ -82,7 +83,7 @@ interface OverrideRowProps {
   mode: Mode
   display: string
   currentArgb: number | undefined
-  contrast: ContrastBadgeData | null
+  contrast: ContrastWarning | null
   overridden: boolean
   setOverride: (hex: string | null) => void
 }
@@ -104,7 +105,7 @@ function OverrideRow({
         <div className="text-xs font-mono flex-1 truncate text-on-surface leading-snug">
           {display}
         </div>
-        <ContrastBadge contrast={contrast} />
+        <ContrastBadge warning={contrast} />
         {overridden && (
           <Button
             variant="ghost"

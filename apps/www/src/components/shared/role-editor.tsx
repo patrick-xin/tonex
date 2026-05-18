@@ -2,16 +2,18 @@
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
 import type { Mode } from '@tonex/core'
-import { ContrastBadge, type ContrastBadgeData } from '@/components/shared/contrast-badge'
+import { cx } from 'tailwind-variants'
+import { ContrastBadge } from '@/components/shared/contrast-badge'
 import { HexInputField } from '@/components/shared/hex-input-field'
 import { Button } from '@/components/ui/button'
 import { ColorPicker, MdSnapshotPicker, TwColorPicker } from '@/features/color-picker'
+import type { ContrastWarning } from '@/features/contrast-checker/warning'
 
 interface RoleEditorProps {
   value: string
   onChange: (hex: string | null) => void
   overridden: boolean
-  contrast?: ContrastBadgeData | null
+  contrast?: ContrastWarning | null
   mode?: Mode
 }
 
@@ -29,18 +31,19 @@ export function RoleEditor({
           <div className="flex justify-between w-full items-center text-[10px]">
             <div>vs {contrast.partner.replace(/^--(?:color-)?/, '')}</div>
             <ContrastBadge
-              contrast={contrast}
+              warning={contrast}
               render={
                 <div className="flex items-center gap-1 mr-2 cursor-help">
                   <span
-                    className={
+                    className={cx(
+                      'tabular-nums',
                       contrast.decorative || contrast.passes
                         ? 'text-on-surface-variant'
-                        : 'text-error'
-                    }
+                        : 'text-error',
+                    )}
                   >
                     {contrast.ratio.toFixed(1)}:1{' '}
-                    {contrast.decorative ? 'Exempt' : contrast.passes ? 'AA' : 'Fail'}
+                    {contrast.decorative ? 'Exempt' : contrast.passes ? 'Pass' : 'Fail'}
                   </span>
                 </div>
               }

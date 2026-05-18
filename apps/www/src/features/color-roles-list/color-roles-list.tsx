@@ -23,11 +23,7 @@ export function ColorRolesList() {
         display={role.slice('--color-'.length)}
         hex={hexByRole[role] ?? '#000000'}
         overridden={role in overrides}
-        warning={
-          warning === undefined
-            ? undefined
-            : { partnerLabel: warning.partner.slice('--color-'.length), ratio: warning.ratio }
-        }
+        warning={warning}
       />
     )
   }

@@ -4,6 +4,7 @@ import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core
 import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
 import { isDecorative } from '@/features/contrast-checker/decorative'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ROLE_GROUPS } from './role-groups'
@@ -38,14 +39,11 @@ export function useTokens() {
   // cache), so this hits the same memoized result that role-editor reads — no
   // duplicate contrastRatio walk per render.
   const report = evaluateThemeContrast(theme)
-  const warnings = new Map<MdTokenName, { partner: MdTokenName; ratio: number }>()
+  const warnings = new Map<MdTokenName, ContrastWarning>()
   for (const result of report[mode]) {
     if (result.pair.layer !== 'md' || result.passes) continue
     if (isDecorative(result.pair)) continue
-    warnings.set(result.pair.fg as MdTokenName, {
-      partner: result.pair.bg as MdTokenName,
-      ratio: result.ratio,
-    })
+    warnings.set(result.pair.fg as MdTokenName, toContrastWarning(result))
   }
 
   // why: visibility filter for inspect surface; ADR-0023 commitment 1 —
