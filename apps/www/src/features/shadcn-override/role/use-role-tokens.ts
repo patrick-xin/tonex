@@ -3,6 +3,7 @@
 import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_ROLE_NAMES, type ShadcnRoleName } from '@tonex/core/schema'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
 
 // why: data prep for the role override grid. Returns null until both hydration
@@ -26,13 +27,10 @@ export function useRoleTokens() {
   }
 
   const report = evaluateThemeContrast(theme)
-  const warnings = new Map<ShadcnRoleName, { partner: ShadcnRoleName; ratio: number }>()
+  const warnings = new Map<ShadcnRoleName, ContrastWarning>()
   for (const result of report[mode]) {
     if (result.pair.layer !== 'shadcn' || result.passes) continue
-    warnings.set(result.pair.fg as ShadcnRoleName, {
-      partner: result.pair.bg as ShadcnRoleName,
-      ratio: result.ratio,
-    })
+    warnings.set(result.pair.fg as ShadcnRoleName, toContrastWarning(result))
   }
 
   return { mode, hexByRole, warnings, overrides }

@@ -24,11 +24,7 @@ export function ShadcnRoleOverrideList() {
         display={role.slice(2)}
         hex={hexByRole[role] ?? '#000000'}
         overridden={role in overrides}
-        warning={
-          warning === undefined
-            ? undefined
-            : { partnerLabel: warning.partner.slice(2), ratio: warning.ratio }
-        }
+        warning={warning}
         size="md"
       />
     )

@@ -10,7 +10,7 @@ import { hexString } from '@tonex/core/oklch'
 import type { MdTokenName, ShadcnRoleName } from '@tonex/core/schema'
 import { useMemo, useState } from 'react'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
-import { ContrastBadge, type ContrastBadgeData } from '@/components/shared/contrast-badge'
+import { ContrastBadge } from '@/components/shared/contrast-badge'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,
@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/combobox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import type { ContrastWarning } from '@/features/contrast-checker/warning'
 import { ROLE_GROUPS } from '@/features/shadcn-override'
 import { fuzzyMatches } from '@/lib/fuzzy-match'
 import { type TokenItem, type TokenItemGroup, useBindingData } from './use-binding-data'
@@ -90,7 +91,7 @@ export function ShadcnBindingsContent() {
 interface BindingRowProps {
   role: ShadcnRoleName
   roleHex: string
-  contrast: ContrastBadgeData | null
+  contrast: ContrastWarning | null
   currentToken: MdTokenName
   defaultToken: MdTokenName
   tokenItems: ReadonlyArray<TokenItem>
@@ -123,7 +124,7 @@ function BindingRow({
         <div className="text-xs font-mono flex-1 min-w-0 truncate text-on-surface">
           {role.slice(2)}
         </div>
-        <ContrastBadge contrast={contrast} />
+        <ContrastBadge warning={contrast} />
         {isCustom && (
           <Button variant="ghost" size="icon-xs" onClick={onReset} title="Reset to default">
             <ArrowCounterClockwiseIcon />

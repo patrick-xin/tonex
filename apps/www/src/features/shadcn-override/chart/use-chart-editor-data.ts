@@ -3,7 +3,7 @@
 import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { ShadcnChartTokenName } from '@tonex/core/schema'
-import type { ContrastBadgeData } from '@/components/shared/contrast-badge'
+import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 
 export function useChartEditorData(token: ShadcnChartTokenName, mode: Mode) {
   const theme = useResolvedTokens()
@@ -18,21 +18,16 @@ export function useChartEditorData(token: ShadcnChartTokenName, mode: Mode) {
   const currentHex = argb !== undefined ? hexString(argb) : '#000000'
 
   // why: chart tokens evaluate against multiple bg partners (--background, --card).
-  // Badge surfaces the worst (min) ratio's partner + threshold; `passes` ANDs
-  // across all partners so the badge fails if any partner does.
-  let contrast: ContrastBadgeData | null = null
+  // Warning surfaces the worst (min) ratio's partner + threshold; `passes` ANDs
+  // across all partners so the editor's chip flags if any partner does.
+  let contrast: ContrastWarning | null = null
   if (theme !== null) {
     const pairs = evaluateThemeContrast(theme, customColors)[mode].filter(
       (r) => r.pair.layer === 'shadcn-chart' && r.pair.fg === token,
     )
     if (pairs.length > 0) {
       const worst = pairs.reduce((acc, r) => (r.ratio < acc.ratio ? r : acc))
-      contrast = {
-        ratio: worst.ratio,
-        passes: pairs.every((r) => r.passes),
-        partner: worst.pair.bg,
-        threshold: worst.pair.threshold,
-      }
+      contrast = { ...toContrastWarning(worst), passes: pairs.every((r) => r.passes) }
     }
   }
 

@@ -2,28 +2,26 @@
 
 import type { ReactElement } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-
-export interface ContrastBadgeData {
-  ratio: number
-  passes: boolean
-  partner: string
-  threshold: number
-  decorative?: boolean
-}
+import type { ContrastWarning } from '@/features/contrast-checker/warning'
+import { ContrastWarningTooltipBody } from './contrast-warning-tooltip'
 
 interface ContrastBadgeProps {
-  contrast: ContrastBadgeData | null
+  warning: ContrastWarning | null
   render?: ReactElement
 }
 
-export function ContrastBadge({ contrast, render }: ContrastBadgeProps) {
-  if (contrast === null) return null
-  if (render === undefined && contrast.passes) return null
+// why: default trigger is a fail-only indicator on the rail row — passing
+// and decorative pairs don't add visual noise. Callers supplying `render` are
+// state indicators (e.g. role-editor's "Pass / Fail / Exempt" chip) that want
+// every state visible; they take responsibility for their own styling and read
+// the warning fields to drive it.
+export function ContrastBadge({ warning, render }: ContrastBadgeProps) {
+  if (warning === null) return null
+  if (render === undefined && (warning.passes || warning.decorative)) return null
 
-  const partnerLabel = contrast.partner.replace(/^--(?:color-)?/, '')
   const trigger = render ?? (
     <span className="text-xs tabular-nums text-error cursor-help">
-      {contrast.ratio.toFixed(1)}:1
+      {warning.ratio.toFixed(1)}:1
     </span>
   )
 
@@ -31,18 +29,7 @@ export function ContrastBadge({ contrast, render }: ContrastBadgeProps) {
     <Tooltip>
       <TooltipTrigger delay={0} render={trigger} />
       <TooltipContent variant="inverse" side="top">
-        <p className="text-xs">
-          {contrast.decorative
-            ? 'Decorative pair (exempt)'
-            : contrast.passes
-              ? 'Contrast'
-              : 'Fails contrast'}{' '}
-          against <span className="font-mono">{partnerLabel}</span>
-        </p>
-        <p className="text-xs">
-          {contrast.ratio.toFixed(1)}:1
-          {!contrast.decorative && ` (needs ${contrast.threshold}:1)`}
-        </p>
+        <ContrastWarningTooltipBody warning={warning} />
       </TooltipContent>
     </Tooltip>
   )
