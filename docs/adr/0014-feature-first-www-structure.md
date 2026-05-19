@@ -56,3 +56,11 @@ Three slices of real features (editor-rail, export, testbed in active use; md/sh
 ADR-0022 also clarifies that route-provided `<LayerContext>` for behavior parameterization is allowed and distinct from the runtime primitive switching banned by ADR-0019.
 
 Rules 1–4 of this ADR stand unchanged. See ADR-0022 for the current rule set and the locate-test worked examples.
+
+## Amendment 2026-05-19 — rule 4 relaxed; `components/shared/` allowed
+
+Rule 4 banned `components/shared/` outright, treating "shared" as the rot-folder name from the legacy prototype. In practice, layer-agnostic primitives (cross-layer pieces that are neither md-styled nor shadcn-styled) need a home, and routing them into `components/ui/` or `components/shadcn/` mis-categorizes them by layer.
+
+**Decision:** `components/shared/` is allowed as a third primitive folder alongside `components/ui/` (md) and `components/shadcn/`. The 2+ feature promotion rule (rule 4) still applies — single-feature components stay private to their feature.
+
+**Why:** the three primitive folders now carry distinct semantics — `ui/` is md-styled, `shadcn/` is shadcn-styled, `shared/` is layer-agnostic. The rot failure mode is bounded by the promotion gate; anything that lands in `shared/` is already consumed by 2+ features. The original ban over-corrected, blocking a legitimate composition slot to prevent a failure mode the promotion rule already prevents.
