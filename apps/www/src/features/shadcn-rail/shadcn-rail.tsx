@@ -11,7 +11,7 @@ export function ShadcnRail() {
       )}
     >
       <ShadcnRailContent />
-      <RailFooter />
+      <RailFooter layer="shadcn" />
     </aside>
   )
 }

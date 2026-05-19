@@ -12,7 +12,7 @@ export default function ShadcnLayout({ children }: { children: React.ReactNode }
       <div className="flex h-dvh overflow-hidden">
         <ShadcnRailSwitcher />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-2">
-          <TopNav>
+          <TopNav layer="shadcn">
             <ShadcnRailDrawer />
           </TopNav>
           <ShadcnNavTabs />
