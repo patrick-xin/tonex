@@ -3,27 +3,25 @@ import { subscribe } from '@/features/subscribe'
 
 const RATE_LIMIT = 5
 const WINDOW_MS = 60_000
+// why: backstop against unique-IP floods. ipHits otherwise grows forever
+// (one entry per visitor) until the serverless instance recycles. At cap we
+// wipe — rate-limit state is best-effort, not a security boundary.
+const MAX_IPS = 10_000
 
-// why: per-IP best-effort throttle. In serverless this is per-instance, not
-// global — sufficient for launch-traffic flood protection but not a security
-// boundary. PRD ships this and reconsiders Turnstile if first 100 captures
-// show bot pollution.
 const ipHits = new Map<string, number[]>()
 
 const Body = z.object({
   email: z.string().email(),
-  // why: honeypot field — humans don't fill it in (hidden via CSS in the form);
-  // bots that auto-fill all inputs will. When present we 200-silently so we
-  // don't tell the bot it got caught.
+  // why: honeypot field. Humans don't fill it (hidden via CSS, aria-hidden,
+  // tabIndex=-1); bots that auto-fill all inputs do. When present we
+  // 200-silently so the bot can't probe to learn the trigger.
   website: z.string().optional(),
 })
 
 export async function POST(req: Request) {
-  const ip = getIp(req)
-  if (isRateLimited(ip)) {
+  if (!checkAndRecord(getIp(req))) {
     return Response.json({ ok: false, error: 'rate_limited' }, { status: 429 })
   }
-  recordHit(ip)
 
   let raw: unknown
   try {
@@ -37,7 +35,7 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: 'invalid_email' }, { status: 400 })
   }
 
-  if (parsed.data.website && parsed.data.website.length > 0) {
+  if (parsed.data.website) {
     return Response.json({ ok: true }, { status: 200 })
   }
 
@@ -58,17 +56,15 @@ function getIp(req: Request): string {
   return req.headers.get('x-real-ip') ?? 'unknown'
 }
 
-function isRateLimited(ip: string): boolean {
-  const hits = ipHits.get(ip) ?? []
+function checkAndRecord(ip: string): boolean {
   const now = Date.now()
-  const fresh = hits.filter((t) => now - t < WINDOW_MS)
-  return fresh.length >= RATE_LIMIT
-}
-
-function recordHit(ip: string) {
-  const hits = ipHits.get(ip) ?? []
-  const now = Date.now()
-  const fresh = hits.filter((t) => now - t < WINDOW_MS)
+  const fresh = (ipHits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS)
+  if (fresh.length >= RATE_LIMIT) {
+    ipHits.set(ip, fresh)
+    return false
+  }
   fresh.push(now)
   ipHits.set(ip, fresh)
+  if (ipHits.size > MAX_IPS) ipHits.clear()
+  return true
 }

@@ -6,24 +6,28 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldControl, FieldError, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 
-type Status = 'idle' | 'submitting' | 'success'
+type State =
+  | { kind: 'idle' }
+  | { kind: 'submitting' }
+  | { kind: 'success'; alreadySubscribed: boolean }
 
 type SubscribeResponse = { ok: true; alreadySubscribed?: boolean } | { ok: false; error: string }
 
 export function SubscribeForm() {
   const [errors, setErrors] = React.useState<Record<string, string>>({})
-  const [status, setStatus] = React.useState<Status>('idle')
-  const [alreadySubscribed, setAlreadySubscribed] = React.useState(false)
+  const [state, setState] = React.useState<State>({ kind: 'idle' })
 
-  if (status === 'success') {
+  if (state.kind === 'success') {
     return (
       <p className="text-sm text-on-surface-variant">
-        {alreadySubscribed
+        {state.alreadySubscribed
           ? "You're already on the list — thanks for double-checking."
           : 'Thanks. Check your inbox for a welcome note.'}
       </p>
     )
   }
+
+  const submitting = state.kind === 'submitting'
 
   return (
     <Form
@@ -34,7 +38,7 @@ export function SubscribeForm() {
         const email = formData.get('email') as string
         const website = formData.get('website') as string
         setErrors({})
-        setStatus('submitting')
+        setState({ kind: 'submitting' })
 
         const response = await fetch('/api/subscribe', {
           method: 'POST',
@@ -44,13 +48,12 @@ export function SubscribeForm() {
         const data = (await response.json()) as SubscribeResponse
 
         if (data.ok) {
-          setAlreadySubscribed(Boolean(data.alreadySubscribed))
-          setStatus('success')
+          setState({ kind: 'success', alreadySubscribed: Boolean(data.alreadySubscribed) })
           return
         }
 
         setErrors({ email: humanizeError(data.error) })
-        setStatus('idle')
+        setState({ kind: 'idle' })
       }}
     >
       <Field name="email">
@@ -69,8 +72,8 @@ export function SubscribeForm() {
         tabIndex={-1}
         type="text"
       />
-      <Button disabled={status === 'submitting'} isLoading={status === 'submitting'} type="submit">
-        {status === 'submitting' && <Loader2 className="size-4 animate-spin" />} Notify me
+      <Button disabled={submitting} isLoading={submitting} type="submit">
+        {submitting && <Loader2 className="size-4 animate-spin" />} Notify me
       </Button>
     </Form>
   )
