@@ -16,7 +16,7 @@ Working rules for `packages/core/` — applied at generation time, not at decisi
 - **Exporters are pure.** Files in `packages/core/src/theme/exporters/` return strings — no DOM access, no side effects. _(ADR-0008)_
 - **Bake-time CSS uses `formatCss`, not `applyDom`.** Tools and CLIs never call the renderer. _(ADR-0008)_
 - **Clipboard is an app-layer consumer.** Don't bundle DOM/clipboard calls into core exporters; the www app handles the clipboard call. _(ADR-0008)_
-- **One format = one file until 2+ ship.** Don't pre-build a typed exporter registry. When the second exporter lands, lift to a registry that mirrors the variants registry shape. _(ADR-0008; companion to ADR-0010)_
+- **Adding a new exporter = new file + barrel export.** New format gets a file in `packages/core/src/theme/exporters/`, exported from the barrel. If the format takes options, extend `ExportOptions` in `bundle.ts`. The barrel + options pattern is the registry — no separate typed registry. _(ADR-0008)_
 
 ## Chart palette derivation
 

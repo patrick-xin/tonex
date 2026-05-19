@@ -24,7 +24,7 @@ emit() {
 
 case "$file_path" in
   docs/adr/[0-9]*.md|*/docs/adr/[0-9]*.md)
-    emit "ADR boundary reminder: docs/adr/*.md is frozen (lifecycle header). New decisions get new ADRs; existing ADRs get amendment blocks appended at the bottom — never rewrite the body. If this edit changed body prose, undo and convert to an amendment block."
+    emit "ADR boundary reminder: docs/adr/*.md holds living rationale — body cleanup (file paths, slice plans, future-shape predictions, type-signature code blocks that don't name a contract surface) is allowed when reality overtakes prose. The decision sentence, Why rationale, and rejected alternatives stay intact; substantive decision changes require a new ADR."
     ;;
   packages/core/src/theme/applyDom.ts|*/packages/core/src/theme/applyDom.ts|*/exporters/*.ts)
     emit "Sink boundary reminder (ADR-0017): applyDom and exporters/* must only format what deriveTheme returned — no color conversion, rounding, or role mapping. If this edit added such logic, push it into deriveTheme instead."

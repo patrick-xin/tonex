@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Post-MCU surface treatment is algorithmic, not palette-sourced
 
@@ -7,12 +7,11 @@ ADR-0002 framed surface treatment as **palette-sourced**: the user picks a palet
 **Decision:** Surface treatment is a **post-derive algorithmic transform** applied inside `deriveTheme`. It has no palette dependency. Shape:
 
 - `surfaceAlgo: 'none' | 'tint' | 'desaturate'` selects a single algorithm. Mutually exclusive — composing tint and desaturate is not a product feature.
-- `surfaceTintLevel: number` (0..1) — strength when `surfaceAlgo === 'tint'` (0 = neutral zinc, 1 = full primary character).
-- `surfaceDesaturateLevel: number` (0..1) — strength when `surfaceAlgo === 'desaturate'` (0 = MCU as-is, 1 = chroma stripped).
-- Treatment touches the **md surface family only** (`--color-surface`, `--color-surface-container`, `--color-surface-container-high`, `--color-on-surface`). The primary family stays MCU. The surface/component asymmetry from ADR-0002 is preserved — only the *mechanism* changed.
+- `surfaceTintLevel`, `surfaceDesaturateLevel` — per-mode scalars in `0..1`. Strength for the corresponding algorithm. Zero is the no-op endpoint; one is the full-treatment endpoint.
+- Treatment touches the **md surface family only**. The primary family stays MCU. The surface/component asymmetry from ADR-0002 is preserved — only the *mechanism* changed.
 - Treatment runs after MCU emit and before shadcn binds, so any shadcn role bound to a treated surface token automatically reflects the treated value.
 
-Algorithms live as free functions: `applySurfaceTint(layer, mode, level)` and `applySurfaceDesaturate(layer, level)` in `packages/core/src/theme/`. No registry abstraction yet (see issue #3 for the deferred-abstraction rationale).
+Algorithms live as pure free functions that transform per-token hex inputs to outputs; coverage is declared per-algorithm at the code site. No registry abstraction yet (see issue #3 for the deferred-abstraction rationale).
 
 **Why this won out over ADR-0002's mechanism:**
 
@@ -26,16 +25,13 @@ Algorithms live as free functions: `applySurfaceTint(layer, mode, level)` and `a
 - ADR-0017's WYSIWYG commitment holds. The single `deriveTheme` path produces treated tokens; `applyDom` and `exporters/*` only format what derive returned. There is no second derive path for "treated" output.
 - The chrome/component asymmetry from ADR-0002 survives in the *which tokens get touched* dimension. Treatment functions accept and return only the md surface family; primary/on-primary/etc. flow through MCU untouched.
 - Adding a third algorithm (e.g. `'lift'`, `'dim'`) is one new file in `packages/core/src/theme/`, one entry in `SURFACE_ALGOS`, one branch in `applyTreatment`. No type-shape pressure until issue #3's second-consumer trigger fires.
-- Future palette-sourced surfaces (the original ADR-0002 idea, now via ColorSystem's optional `surfaceShadeMap` per ADR-0004) remain possible as a separate, additive feature — picker-driven, not algorithm-driven. If/when shipped, it composes alongside (not instead of) the algorithmic treatments here.
+- Future palette-sourced surfaces (the original ADR-0002 idea, now via ColorSystem's optional `surfaceShadeMap`) remain possible as a separate, additive feature — picker-driven, not algorithm-driven. If/when shipped, it composes alongside (not instead of) the algorithmic treatments here.
 - Issue #3 governs the abstraction question (a unified `SurfaceTreatment` registry). This ADR governs the mechanism. The two are independent: mechanism is decided now; abstraction waits for a concrete second consumer.
 
 ## Amendment — 2026-05-05
 
-The body lists the treatment family as four tokens (`--color-surface`, `--color-surface-container`, `--color-surface-container-high`, `--color-on-surface`). That list was authored against slice 1's md token set. Slice 2 expanded the md surface ramp to nine tokens (`-dim`, `-bright`, `-container-lowest`, `-container-low`, `-container-highest`, plus `--color-on-surface-variant`).
+The body's original "treatment family" was authored against slice 1's md token set. The surface ramp later expanded, and each algorithm now picks its own subset rather than the uniform family the body originally implied.
 
-Each algorithm now picks its own subset of the **expanded ramp**, not a uniform 4-token family:
+Each algorithm declares its token-coverage subset in its own `// why:` block at the code site. The desaturation algorithm covers the full ramp uniformly; the tint algorithm covers a subset (text-on-surface tokens stay MCU-derived since no shade map applies). Expansion of subset coverage is a product call best made when a UI surfaces the affected token set under treatment.
 
-- `applySurfaceDesaturate` covers the **full** ramp (8 surface-bg tokens + `on-surface` + `on-surface-variant`). Uniform chroma scaling — no design call to add tokens.
-- `applySurfaceTint` covers **three** surface-bg tokens (`--color-surface`, `--color-surface-container`, `--color-surface-container-high`). Expansion to the full ramp is deferred: each new token needs a chosen zinc shade in `SHADE_MAP`, which is a product call best made when a UI surfaces the full ramp under tint. `--color-on-surface` and `--color-on-surface-variant` stay MCU-derived (no shade map for text-on-surface).
-
-The "treatment touches the md surface family only — primary stays MCU" invariant from the body is unchanged. What changed is "family" is now a per-algorithm subset, declared in each algorithm's leading `// why:` block.
+The "treatment touches the md surface family only — primary stays MCU" invariant from the body is unchanged. What changed is "family" is now a per-algorithm subset.

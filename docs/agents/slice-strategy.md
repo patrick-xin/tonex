@@ -47,3 +47,9 @@ Slice 1 (the day-one tracer) verifies BOTH layers — md default + shadcn sub-sc
 - Each slice's tests (Red) are the contract. Don't write code outside what the test demands.
 - Refactor (the third R) only happens green. Never refactor while red.
 - **Blueprint slices** (no code, only ADRs / repo doc updates) are legitimate when an architectural decision spans multiple implementation slices and must land before any of those slices ship. Slice 9 was the precedent: ADR-0019 + ADR-0020 + this doc landed without code, unblocking the parallel lifts that followed.
+
+## Two adapters = real seam
+
+A typed abstraction (registry, interface, base class) earns its keep only when there's a second concrete adapter in scope. Until then, the inferred shape from one consumer is speculation — the second consumer typically reshapes the abstraction. Defer the abstraction until the second adapter is concrete enough to constrain the shape.
+
+The rule fires across scales: when to add a `ColorEngine` slot, when to lift one-format-per-file exporters to a registry, when to extract a shared options bag for surface treatments, when to introduce an importer interface. **One concrete = no abstraction. Two concrete = candidate abstraction.** A speculative second adapter doesn't count — "we might add Radix" is not Radix in scope.

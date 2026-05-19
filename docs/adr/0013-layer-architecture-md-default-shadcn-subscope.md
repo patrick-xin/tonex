@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Layer architecture — md default, shadcn sub-scope, both class-scoped
 
@@ -6,7 +6,7 @@ Tonex serves two audiences (md3 users, shadcn users) from one engine. ADR-0017 p
 
 **Decision:**
 
-1. **`<body class="md">`.** Tonex's app default is md. Set in `apps/www/src/app/layout.tsx`.
+1. **`<body class="md">`.** Tonex's app default is md. Set in the root layout.
 
 2. **Shadcn is a class-scoped sub-region.** Where shadcn output is rendered (today: the shadcn canvas at `/theme/shadcn` per ADR-0019), a `<div class="shadcn">` wraps it.
 
@@ -27,4 +27,4 @@ The route-segmentation play (ADR-0019) sits on top of this: the route picks whic
 - **Reject** the "single layer" framing — "the app is shadcn" or "the app is md" misses that both scopes coexist day one.
 - **Reject** a runtime `<Layer>` context that swaps primitives at runtime — route-level segmentation (ADR-0019) is the layer mechanism.
 - Slice 1 (the day-one tracer) verifies BOTH layers — one md element + one shadcn element, both updating from one source change. The "and" is load-bearing.
-- The Tailwind v4 bridge between md `--color-*` tokens and shadcn classic names (`--primary` etc.) lives in `globals.css` via `.shadcn { --color-X: var(--Y); }` aliases — a CSS-mechanism concern, not an engine concern. `derive.ts` stays a pure value function.
+- The Tailwind v4 bridge between md `--color-*` tokens and shadcn classic names (`--primary` etc.) lives in `globals.css`, not in engine code. `derive.ts` stays a pure value function.

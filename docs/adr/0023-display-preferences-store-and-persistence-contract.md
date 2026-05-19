@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Display preferences — taxonomy, store boundary, persistence contract
 
@@ -10,7 +10,7 @@ ADR-0021 line 128 pre-authorized "lift to a small UI store when a second consume
 
 State formerly grouped as "UI prefs" partitions into three categories with distinct lifecycles:
 
-- **Display preferences** — long-lived, applicable across the whole app, sync-eligible when authed. Examples: `showExtended`, `showTwColorPicker`, inspect `colorFormat`, `showContrastWarnings`, `contrastAlgorithm` (`'apca-w3' | 'wcag2'`). The user's question: *"how do I want the app to look across all my uses?"*
+- **Display preferences** — long-lived, applicable across the whole app, sync-eligible when authed. Examples: visibility toggles (e.g. `showExtended`), format preferences, accessibility-checker choice. The user's question: *"how do I want the app to look across all my uses?"*
 - **Session state** — bounded to a working context, sync-eligible for *resume*. Examples: theme being edited, panel layouts, dialog scratch state. Out of scope for this ADR; documented as a future store when its first consumer (likely auth) lands.
 - **Job parameters** — ephemeral to a single action. Examples: `includeExtended`, `includePalette`, `includeChart`, `includeContrastVariants`, and `colorFormat` *in the export dialog*. The user's question: *"what do I want in this export I'm about to copy?"*
 
@@ -36,36 +36,15 @@ When two surfaces *appear* to want the same pref but mean different things — t
 
 ## 4. Display popover canonical; MdRail-portable-state boundary
 
-Display preferences surface in a "Display" popover (gear or eye icon) composed into `features/nav-tabs/`. **Not** "Settings" — that name reads as system-y stuff (account, language, theme name); "Display" reads as "what I see in this app," which is what these prefs are.
+`MdRail` holds *controls that change the derived theme* — portable state per ADR-0017 (source color, scheme variant, contrast level, palette overrides, custom colors, surface adjustments). The Display popover holds *prefs that change what I see without touching the theme*. Each surface stays focused; nothing slides into either as a junk drawer. The split is principled — state-class boundary, not chrome aesthetics.
 
-`MdRail` (`features/md-rail/`) holds *controls that change the derived theme* — portable state per ADR-0017 (source color, scheme variant, contrast level, palette overrides, custom colors, surface adjustments). The Display popover holds *prefs that change what I see without touching the theme*. Each surface stays focused; nothing slides into either as a junk drawer. The split is principled — state-class boundary, not chrome aesthetics.
-
-A pref may *also* surface inline next to its affected content for discoverability, writing the same `useUiPrefs` field — single source of truth, multiple access points, no conflict (commitment 3 still holds because both write-paths target the same store key). Not the default; case-by-case as discoverability demand emerges. `showExtended` ships popover-only (keyboard shortcut covers power-user access; inline duplication would clutter the role-list header without earning its keep).
+A pref may *also* surface inline next to its affected content for discoverability, writing the same `useUiPrefs` field — single source of truth, multiple access points, no conflict (commitment 3 still holds because both write-paths target the same store key). Not the default; case-by-case as discoverability demand emerges.
 
 **Why:** MdRail bloats fast if portable-state controls and visibility prefs co-mingle. Naming the boundary by *what kind of state lives here* (not by *which chrome it sits in*) gives every future pref an unambiguous home.
 
 ## 5. Versioned persistence schema; sync-eligible when authed
 
-The store mirrors `useSource`'s actions-namespace shape:
-
-```ts
-interface UiPrefs {
-  showExtended: boolean
-  // add fields ONLY when a second consumer materially needs them (commitment 6)
-}
-
-interface UiPrefsActions {
-  setShowExtended(next: boolean): void
-  reset(): void
-}
-
-type UiPrefsState = UiPrefs & {
-  _hydrated: boolean
-  actions: UiPrefsActions
-}
-```
-
-`selectUiPrefs(s)` is a two-key blacklist (`_hydrated`, `actions`) — adding new prefs auto-flows through `partialize`; adding new actions auto-stays out of persistence. Same maintenance-free pattern as `selectPortable` in `useSource`.
+The store mirrors `useSource`'s actions-namespace shape: typed prefs object, typed actions namespace, `_hydrated` runtime flag. The persisted shape is the prefs object alone — `_hydrated` and `actions` are excluded via a two-key blacklist (same maintenance-free pattern as `selectPortable` in `useSource`). Adding new prefs auto-flows through `partialize`; adding new actions auto-stays out of persistence.
 
 Persistence: `localStorage` via `createJSONStorage`, name `'tonex-ui-prefs'`, version starts at 1. Migration ladder follows ADR-0009 discipline as fields land. **The persisted shape is a wire contract**, not implementation incidentalia — when auth ships, the same shape lifts to a server-backed storage adapter without migration. The sync mechanism itself (storage-adapter swap, conflict resolution, offline cache) is parked; the schema discipline is committed now.
 
@@ -96,4 +75,4 @@ The store mirrors `useSource`'s shape but deliberately diverges on three details
 - "Should this be a pref?" routes through the taxonomy: display → `useUiPrefs` (with second-consumer guard); session → future store; job parameter → React-local. Disagreement about which category a flag belongs to is the productive disagreement.
 - ADR-0021 line 128 is **superseded** by this ADR's commitments 1, 2, 5, and 6. The "lift to a small UI store when a second consumer appears" rule is preserved (commitment 6); the surrounding context (categorization, layer boundary, persistence contract) is added.
 - `docs/agents/code-conventions.md` gains a one-paragraph reference pointing to this ADR's taxonomy and boundary rules so the convention layer stays in sync without restating the contract.
-- The Display popover's first occupant is `showExtended`. Future occupants enter only via commitment 6 (second-consumer guard); the popover is not a junk drawer for "things we might want a switch for someday."
+- Future occupants of the Display popover enter only via commitment 6 (second-consumer guard); the popover is not a junk drawer for "things we might want a switch for someday."

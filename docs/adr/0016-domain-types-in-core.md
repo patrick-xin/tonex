@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Domain types and constants live in @tonex/core
 
@@ -14,13 +14,7 @@ The monorepo seam between `@tonex/core` (engine + schema + registries) and `apps
 
 **App-only (may live in www):** UI panel state, routing strings, www-only UX strings, display labels (`VARIANT_LABELS`, `GROUP_LABELS`), layout-specific helpers, panel ordering driven by display layout.
 
-**Subpath exports from `@tonex/core`:**
-
-- `@tonex/core` — engine (`deriveTheme`, `applyDom`, `useSource`, `useResolvedTokens`, `selectPortable`, `formatCss`, hooks)
-- `@tonex/core/schema` — `PortableTheme`, token + role names, defaults, validators
-- `@tonex/core/oklch` — colour-space helpers
-- `@tonex/core/data` — palette data (Tailwind palette, neutral palette names)
-- `@tonex/core/variants` — variants registry + types
+**Subpath exports from `@tonex/core`** organise domain content into named scopes — engine surface (derivation, sink functions, hooks), schema (`PortableTheme`, token + role names, defaults, validators), colour-space helpers, palette data, variants registry. The specific subpaths are defined in `@tonex/core/package.json#exports`; that is the truth-source.
 
 Adding a schema field doesn't widen the engine surface; adding an engine API doesn't drag schema into every importer.
 
@@ -32,4 +26,3 @@ Adding a schema field doesn't widen the engine surface; adding an engine API doe
 - Reaching into `@tonex/core/src/...` (a subpath into source files) bypasses the public exports — refuse. Use the declared subpaths.
 - When a needed runtime tuple is missing from core (e.g. `MODES`), **add it to core first, then import** — don't inline-define and intend to lift later. The "I'll lift it later" intention is exactly what the rule blocks.
 - **Drift sentinel (cheap, mechanical):** grep for `'light' | 'dark'` literal unions outside `packages/core/src/theme/mode.ts`. Each hit is either an `import type { Mode }` (fine) or an inline definition (violation).
-- **Known violations at write time** (tracked in tracker, not in this ADR): six domain-discipline violations and one missing core export (`MODES` runtime tuple) at the moment this ADR lands. Filed as a single cleanup issue.

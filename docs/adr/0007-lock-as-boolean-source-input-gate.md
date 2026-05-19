@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Lock is a boolean source-input gate, not a derived-side snapshot
 
@@ -23,5 +23,5 @@ When `true`, every seed-mutation pathway (`setSeedHex`, `setSeedHue`, `setSeedCh
 - Lock and override are **orthogonal flat siblings** on `PortableTheme`. Override is per-token, mode-keyed, hex-valued. Lock is global, not-mode-keyed, boolean. Two parallel pinning concerns at materially different shapes — the difference is the proof that ADR-0006's single-flat-field rule handles both without nesting.
 - `setSeedHex` and every other seed-mutation pathway routes through the same gate. Adding a new seed pathway requires the same `if (s.seedHexLock) return {}` early return at the source seam. Centralisation is load-bearing — if a pathway forgets the gate, the lock leaks.
 - Reset (`reset()` action) is allowed to bypass the gate; reset restores `DEFAULT_INPUTS` whose `seedHexLock` is `false` again. Locking does not survive reset.
-- Earlier draft direction (`lockedSnapshot: LockedSnapshot | null`) is closed. Future "lock another input" needs are new boolean fields, not a struct. A `primaryHexLock` once existed alongside `seedHexLock` and was pruned in schema v6 — narrower lock surface, fewer surprises.
-- Disable invalid interaction states up-front (UI tooltip + greyed input) rather than allowing the action and emitting a runtime warning — see related design feedback. The lock toggle and the lock-aware setters are both consumers of the same boolean source-of-truth.
+- Earlier draft direction (`lockedSnapshot: LockedSnapshot | null`) is closed. Future "lock another input" needs are new boolean fields, not a struct. A `primaryHexLock` once existed alongside `seedHexLock` and was pruned — narrower lock surface, fewer surprises.
+- Disable invalid interaction states up-front (UI tooltip + greyed input) rather than allowing the action and emitting a runtime warning. The lock toggle and the lock-aware setters are both consumers of the same boolean source-of-truth.

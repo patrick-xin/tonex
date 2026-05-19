@@ -7,6 +7,9 @@ This is a tool that turns a logo or seed hex color into a copy-paste-ready theme
 **Engine**:
 The fixed color-generation library: Material Color Utilities (MCU). Produces palettes from a seed using HCT/CAM16. Not swappable — see ADR-0001.
 
+**ColorSystem**:
+A palette-library slot for third-party libraries (Tailwind, Radix). Not an engine — MCU is the engine. See ADR-0001.
+
 **Source**:
 The persisted state — only what the user picked, never what was computed. `PortableTheme` in `packages/core/src/theme/schema.ts` is the wire shape; `SourceState` adds `_hydrated` and actions. HCT is the canonical seed representation, with the user's pasted hex preserved verbatim in `seed.exactHex` until they touch an HCT axis — see ADR-0028 (supersedes ADR-0003).
 

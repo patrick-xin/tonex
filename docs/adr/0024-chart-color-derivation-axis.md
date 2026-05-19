@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Superseded by ADR-0027.
 
 # Chart-color derivation axis — mono vs multi
 

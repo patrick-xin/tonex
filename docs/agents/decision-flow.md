@@ -10,7 +10,7 @@ When a decision changes how we approach work that an existing rule already cover
 
 - **New rule with no prior conflict** — write it in the appropriate doc (`CLAUDE.md`, working-style, code-conventions, slice-strategy, etc.). No issue needed; nothing to track against.
 - **Decision that contradicts or refines an existing rule** — file an issue first via `/to-issues`. The doc update can come later; the issue is the source of truth for the change.
-- **Decision that needs a new ADR** — file the issue first. ADRs are frozen on commit, so the rationale must be captured before the ADR text is written.
+- **Decision that needs a new ADR** — file the issue first. ADRs hold living rationale, but a new decision (or a flip of an existing one) gets a new ADR; the rationale must be captured before the ADR text is written.
 - **When unsure** whether a decision modifies an existing rule, lean toward filing an issue. The cost of an extra issue is small; the cost of lost rationale is high.
 
 ## Agent role

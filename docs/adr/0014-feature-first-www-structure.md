@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Feature-first www structure with five hard rules
 
@@ -36,13 +36,12 @@ Most slots are created on demand. The features/ + components/ + app/_providers.t
 
 **Consequence:**
 
-- New feature → model on the *first* existing feature folder. That folder is the de-facto template.
+- New feature → model on a representative existing feature folder. That folder is the de-facto template.
 - Tempted to nest sub-features → refuse; split into a sibling.
 - Tempted to leave a hook bare at `features/` root → refuse; place under a `features/<name>/` folder (promote to `lib/` only when 2+ features consume it).
 - Tempted to create `features/shared/` → refuse; promote to `components/` if 2+ features need it, otherwise keep private.
 - Tempted to add a `<Layer>` context → refuse; route-level segmentation is the layer mechanism (ADR-0019).
 - Doc surface for these rules: `docs/agents/www-structure.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
-- **Known violations at write time** (tracked in tracker, not in this ADR): the codebase has a small number of rule-1, rule-2, and rule-4 violations at the moment this ADR lands. They are filed as cleanup issues; the rules supersede them, not the other way around.
 
 ## Amendment 2026-05-08 — rule 5 superseded; rule 6 added (see ADR-0022)
 

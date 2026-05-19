@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Export pipeline — every layer at its own boundary
 
@@ -14,12 +14,12 @@ Export is the product's deliverable. ADR-0017 established WYSIWYG between previe
 
 ## 2. Three-class md partition + chart
 
-`schema.ts` exports four constant arrays:
+The schema exports four constant token-name arrays:
 
-- `MD_CORE_TOKEN_NAMES` (28) — primary/secondary/tertiary/error families, surface ladder, outline.
-- `MD_EXTENDED_TOKEN_NAMES` (22) — fixed/fixed-dim families, per-family dim, inverse trio, surface-tint, shadow, scrim.
-- `MD_PALETTE_TOKEN_NAMES` (78) — 13 tones × 6 palettes, mode/contrast invariant.
-- `MD_CHART_TOKEN_NAMES` (5) — `--color-chart-1`…`--color-chart-5`, derived from the primary palette via a fixed 5-tone mapping (legacy function reused).
+- `MD_CORE_TOKEN_NAMES` — primary/secondary/tertiary/error families, surface ladder, outline.
+- `MD_EXTENDED_TOKEN_NAMES` — fixed/fixed-dim families, per-family dim, inverse trio, surface-tint, shadow, scrim.
+- `MD_PALETTE_TOKEN_NAMES` — palette tones, mode/contrast invariant.
+- `MD_CHART_TOKEN_NAMES` — chart slots, derived from the primary palette via a fixed tone mapping (chart-related arrays live in `chart/schema.ts`).
 
 `MD_TOKEN_NAMES` keeps its current family-grouped order; partitions are name-match Sets, not contiguous slices. Order in baked CSS is unchanged.
 
@@ -27,26 +27,7 @@ Export is the product's deliverable. ADR-0017 established WYSIWYG between previe
 
 ## 3. Dedicated fields per semantics class
 
-`MdLayer` carries fields keyed by *what each class is for*, not flattened with sidecar Sets:
-
-```ts
-interface MdLayer {
-  light: TokenMap          // 28 core role (mode-aware, DOM-emitted)
-  dark: TokenMap
-  lightChart: TokenMap     // 5 chart (mode-aware, DOM-emitted, filter-gated for export)
-  darkChart: TokenMap
-  lightExtended: TokenMap  // 22 extended role (mode-aware, data-only)
-  darkExtended: TokenMap
-  palette: TokenMap        // 78 palette tones (mode/contrast-invariant, data-only)
-}
-interface ShadcnLayer {
-  light: TokenMap          // shadcn core, including role-bound sidebar
-  dark: TokenMap
-  lightChart: TokenMap     // 5 chart with shadcn naming (`--chart-1`)
-  darkChart: TokenMap
-}
-interface DerivedTheme { md: MdLayer; shadcn: ShadcnLayer; warnings: string[] }
-```
+`MdLayer` carries fields keyed by *what each class is for*, not flattened with sidecar Sets. The md layer separates core role tokens (mode-aware, DOM-emitted), chart tokens (mode-aware, DOM-emitted, filter-gated for export), extended role tokens (mode-aware, data-only), and palette tones (mode/contrast-invariant, data-only). The shadcn layer carries core role tokens and chart tokens (with shadcn naming). `DerivedTheme` composes both layers plus warnings.
 
 **Why:** each field's update frequency, DOM relevance, and consumer set is sharp. `applyDom` iterates only DOM-emitted fields with no partition import. Format-time filters merge fields based on toggles. Shape encodes intent — every consumer reads what it needs without a filter step at the seam.
 
@@ -75,19 +56,7 @@ Palette declares once in `.md`'s rule (mode/contrast-invariant); role overrides 
 
 ## 6. Format options at the seam, defaults off
 
-`format.ts` accepts:
-
-```ts
-interface ExportOptions {
-  colorFormat?: 'oklch' | 'hex'         // default 'oklch'
-  includeExtended?: boolean              // default false
-  includePalette?: boolean               // default false
-  includeChart?: boolean                 // default false
-  includeContrastVariants?: boolean      // default false
-}
-```
-
-md exports surface 4 filters + colorFormat; shadcn exports surface 1 filter (`includeChart`) + colorFormat — sidebar is already covered by shadcn role bindings, custom colors emit by presence.
+`format.ts` accepts an `ExportOptions` object whose defaults match the current single-contrast oklch behavior — `colorFormat: 'oklch'`, every `include*` filter off. md exports surface 4 filters + colorFormat; shadcn exports surface 1 filter (`includeChart`) + colorFormat — sidebar is already covered by shadcn role bindings, custom colors emit by presence.
 
 **Why:** every default reflects what most users actually paste. Extended, palette, chart, and contrast variants are opt-in surfaces — users who don't need them get a clean, lean export. Defaults match the current single-contrast oklch behavior.
 
@@ -110,7 +79,7 @@ The button is route-agnostic. No path-sniffing inside the dialog, no duplicated 
 
 ## 9. Stubs visible, formatters deferred
 
-TS / JSON / Dart tabs ship visible from day one with stub bodies (a TODO comment describing the intended output). When a formatter lands, it earns a file in `packages/core/src/theme/exporters/<name>.ts` (per ADR-0008) and the stub is replaced. The exporter registry shape from ADR-0008 stays deferred until two real formats coexist.
+TS / JSON / Dart tabs ship visible from day one with stub bodies (a TODO comment describing the intended output). When a formatter lands, it joins the `exporters/` barrel pattern per ADR-0008 and the stub is replaced.
 
 **Why:** users see the roadmap. The stub is cheap and pre-builds the tab structure so the only churn when a formatter lands is swapping the body.
 
@@ -122,7 +91,6 @@ Material's official theme builder ships 6 separate files (light/light-mc/light-h
 
 ## Consequences
 
-- The `exporters/` registry shape from ADR-0008 stays one-function-with-discriminator until a second real format ships. Stubs don't count.
 - Drift-guard test (ADR-0017's amendment) reads tokens back from each `CSSStyleRule.style` for the four DOM-emitted fields × four scope rules; format-side has its own pure-function snapshot tests over `exportCss(bundle, layer, options)` covering each filter combination.
 - `pnpm bake` calls `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` becomes a thin convenience wrapper that constructs `{ default: theme }` and calls `exportCss`. globals.css regenerates with identical text post-refactor (oklch output preserved).
 - Toggle state for the dialog lives as React-local state, not in `useSource` (UI prefs aren't portable theme). Lift to a small UI store only when a second consumer (a production inspect UI) appears.
