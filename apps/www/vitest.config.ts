@@ -7,5 +7,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     passWithNoTests: true,
+    env: {
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+      RESEND_API_KEY: 'test_key',
+      EMAIL_DOMAIN: 'resend.dev',
+    },
   },
 })
