@@ -23,3 +23,7 @@ scratch/
 # MemPalace per-project files (issue #185)
 mempalace.yaml
 entities.json
+
+# env files (secrets — never commit)
+.env*
+!.env.example
