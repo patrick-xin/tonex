@@ -9,7 +9,7 @@ export default function MdThemeLayout({ children }: { children: React.ReactNode 
       <div className="flex h-dvh overflow-hidden">
         <MdRail />
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-2">
-          <TopNav>
+          <TopNav layer="md">
             <MdRailDrawer />
           </TopNav>
           <MdNavTabs />
