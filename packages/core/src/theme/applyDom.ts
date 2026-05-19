@@ -60,7 +60,7 @@ export function applyDom(): () => void {
       // tokens + chart merge into the existing 4 scope rules; extended
       // tokens and palette stay data-only (consumed by inspect UIs via
       // useResolvedTokens). Per-tick setProperty count drops because the
-      // 22-token extended tier and 78-tone palette never enter the diff.
+      // 22-token extended tier and 108-tone palette never enter the diff.
       applyDiff(rules['.md'], lastTokens['.md'], { ...theme.md.light, ...theme.md.lightChart })
       applyDiff(rules['html.dark .md'], lastTokens['html.dark .md'], {
         ...theme.md.dark,

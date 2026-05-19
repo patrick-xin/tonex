@@ -173,16 +173,20 @@ export type MdExtendedTokenName = (typeof MD_EXTENDED_TOKEN_NAMES)[number]
 
 // why: ADR-0021 commitment 2 — palette tokens expose the full tonal ramp for
 // each of MCU's six palettes. Mode/contrast invariant (a palette IS a tone
-// ramp; the scheme picks tones from it per mode). 13 tones × 6 palettes = 78.
-// Naming follows the project-wide `--color-{family}-{tone}` convention so
-// palette tones live in the same namespace as role tokens (Tailwind v4
+// ramp; the scheme picks tones from it per mode). 18 tones × 6 palettes = 108.
+// Ladder matches Google's Material Theme Builder reference grid 1:1 so the
+// inspect UI's swatch column reads identically to the official tool. Naming
+// follows the project-wide `--color-{family}-{tone}` convention so palette
+// tones live in the same namespace as role tokens (Tailwind v4
 // `bg-primary-50` once they're registered in `@theme inline`). Numeric tone
 // suffix (`-50`, `-100`) disambiguates from M3 role tokens (`--color-primary-
 // container`, etc.) — no collision. Consumed by inspect UIs (landing
 // showcase, tone-palette swatches, per-token override editor) via
 // useResolvedTokens(); never emitted to DOM by applyDom (data-only per
 // commitment 4).
-export const MD_PALETTE_TONE_NAMES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100] as const
+export const MD_PALETTE_TONE_NAMES = [
+  0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100,
+] as const
 export type MdPaletteToneName = (typeof MD_PALETTE_TONE_NAMES)[number]
 
 // why: single canonical table for the six MCU palette families. Each row binds
