@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # HCT is the canonical seed, with exactHex preserved across hex-input paths
 
@@ -29,7 +29,7 @@ seed: {
 
 1. **`PortableTheme.seedHex` (the persisted string field) is removed.** `seed: {hue, chroma, tone, exactHex?}` replaces it. Pre-launch breaking change — bump `SCHEMA_VERSION`; no migration ladder per `memory/feedback_prelaunch_breaking_changes.md`. Existing localStorage rehydrate fails schema parse, recovers via `state.actions.reset()` per ADR-0009.
 2. **`seedHexLock` continues to gate every seed-input pathway** at the store seam — it's now phrased as "lock the canonical seed" but applies identically to HCT-axis setters, hex-input setters, image extraction, and any future seed source. The lock-vs-override pair (ADR-0007) is unchanged.
-3. **`useHctFromHex` hook collapses to a thin selector + update pair.** The hook exists today (`apps/www/src/features/hct-controls/use-hct-from-hex.ts`) to hold an HCT cache locally and dodge the 0↔360 round-trip — that cache becomes redundant once HCT is canonical in the store. The 5e-3 tolerance gate (issue #56 fix) stays at the setter layer as defense-in-depth.
+3. **`useHctFromHex` hook collapses to a thin selector + update pair.** The hook exists today as a legacy HCT-cache hook in the editor rail to hold an HCT cache locally and dodge the 0↔360 round-trip — that cache becomes redundant once HCT is canonical in the store. The 5e-3 tolerance gate (issue #56 fix) stays at the setter layer as defense-in-depth.
 4. **`CHROMA_HUE_LOCK = 4` UX is unchanged** — the hue slider still visually disables when `chroma < 4`. The fix is structural: with HCT canonical, the hue field is *preserved* across a chroma touch instead of being recomputed from the new (chroma, tone) hex. The visual lock now matches the underlying state.
 5. **Reconciles with ADR-0006 (single flat source store).** `seed: {hue, chroma, tone, exactHex?}` is a nested record, but ADR-0006's prohibition is on nested struct slots used for *categorisation* ("which slice does this field go in?"). A canonical seed is a *value* — parallel to `{ light, dark }` mode-keyed records, which ADR-0006 explicitly classifies as values, not slices. The flat-store rule remains intact.
 6. **Reaffirms ADR-0017 (WYSIWYG no preview/export drift).** This change is upstream of `deriveTheme` — every Sink still consumes the same `deriveTheme(source) → {md, shadcn, warnings}` output. The drift this ADR closes is *between source-state and user-intent*, not between preview and export. The byte-equality contract (`applyDom` ≡ exporters) holds because both still derive from `seedHex` (now via the selector) the same way.

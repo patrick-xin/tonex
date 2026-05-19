@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # `@tonex/color-utils` — workspace boundary and contrast pair sweep
 
@@ -6,7 +6,7 @@ The contrast-checking feature surfaced two coupled decisions. First: where does 
 
 ADR-0012 settled the same boundary question for MCU by vendoring at a workspace package (`packages/mcu/`) with three reasons: arm's-length isolation, spec-version pinning, strict-mode containment. That pattern fits MCU because MCU is a spec implementation, was unreleased on npm at the time, and its source files do not pass tonex's strict TS. None of those conditions apply to general-purpose color libraries (culori, colorjs.io, apca-w3): they are released, semver-versioned, well-typed. Vendoring would forfeit those properties; ad-hoc npm dependencies in `@tonex/core` would forfeit the first two ADR-0012 reasons.
 
-**Decision:** eleven commitments, organized from boundary to evaluation.
+**Decision:** ten commitments, organized from boundary to evaluation.
 
 ## 1. `@tonex/color-utils` is the workspace boundary for color libraries
 
@@ -33,7 +33,7 @@ culori does not ship APCA. When APCA lands as a feature (commitment 10), `apca-w
 - Trailing-zero stripping (defends against biome's CSS formatter, which would otherwise break the drift-guard test)
 - Chromaless hue snap (`if (C < 1e-4) H = 0` — defends against float noise on near-neutral surfaces)
 
-These rules were established at `oklch.ts:55-66, 113-115` and are tonex commitments, not culori commitments. They are NOT delegated to culori's `formatCss` defaults.
+These rules are tonex commitments, not culori commitments. They are NOT delegated to culori's `formatCss` defaults.
 
 **Why:** ADR-0017's drift-guard discipline pins emission strings byte-exact. If a culori minor version changed its `formatCss` precision, every tonex `globals.css` would shift silently across versions — a supply-chain WYSIWYG hazard even when underlying math is identical. The firewall makes culori's job math, not formatting; tonex owns formatting in tonex's source tree, with `// why:` lines pointing at this ADR.
 
@@ -41,47 +41,23 @@ These rules were established at `oklch.ts:55-66, 113-115` and are tonex commitme
 
 `packages/core/src/theme/oklch.ts` collapses to a thin re-export from `@tonex/color-utils` (or is deleted entirely with `@tonex/core/oklch` subpath shifted to re-export). The OKLab matrix constants, `srgbToLinear`, `linearToSrgb` migrate into culori's call-site implementation. The canonical-form rules (commitment 3) move into `packages/color-utils/src/oklch.ts`.
 
-`globals.css` stays byte-identical post-migration. The drift-guard test (`packages/core/src/theme/applyDom.test.ts`, the post-issue-#9 amendment) continues to pass without rebake. If parity fails on any sample input, the canonicalization layer is the fix point — not `globals.css`.
+`globals.css` stays byte-identical post-migration. The drift-guard test continues to pass without rebake. If parity fails on any sample input, the canonicalization layer is the fix point — not `globals.css`.
 
 **Why:** Shape A (rebake-and-accept) was rejected because it sets a precedent that every future culori upgrade is a potential rebake event. Shape C (parallel verification phase) was rejected as ceremony for a 180-line file replacement with full test coverage. Shape B (firewall + byte-identical migration) keeps the canonical form a tonex commitment in perpetuity.
 
 ## 5. Contrast math lives in `@tonex/color-utils`, not `@tonex/core`
 
-`contrastRatio(fgArgb: number, bgArgb: number): number` ships from `@tonex/color-utils`. Backed by culori's `wcagContrast` (or a one-line implementation over `relativeLuminance` if the wrapper cost is lower). The duplicated `relativeLuminance` and `contrastRatio` in `apps/www/src/features/color-roles-list/contrast-utils.ts` retire; the file shrinks to UI-only helpers (`isDarkSwatch`, `roleDisplayName`).
+`contrastRatio(fgArgb: number, bgArgb: number): number` ships from `@tonex/color-utils`. Backed by culori's `wcagContrast` (or a one-line implementation over `relativeLuminance` if the wrapper cost is lower). The previously-duplicated `relativeLuminance` and `contrastRatio` in www retire; UI files keep only UI-only helpers.
 
 **Why:** contrast is color math. Color math lives at the boundary (commitment 1). Allowing contrast math to drift into `@tonex/core` or `apps/www` reproduces the duplication this ADR retires.
 
 ## 6. Pair definitions live in `@tonex/core/schema`, layer-tagged, intent-tagged
 
-`ContrastPair` and `CONTRAST_PAIRS` are exported from `@tonex/core/schema`:
-
-```ts
-export interface ContrastPair {
-  fg: MdTokenName | ShadcnRoleName
-  bg: MdTokenName | ShadcnRoleName
-  layer: 'md' | 'shadcn'
-  intent: 'text' | 'non-text'
-  threshold: number  // 4.5 for text, 3 for non-text
-}
-export const CONTRAST_PAIRS: readonly ContrastPair[] = [...]
-```
-
-The list ships closed, with **28 text pairs** at slice landing: 18 md pairs (lifted from the existing `ROLE_CONTRAST_PAIRS` — every `on-X / X` pair, surface-on-variant against surface, inverse trio, fixed family) plus 10 shadcn pairs:
-
-- `--foreground / --background`
-- `--card-foreground / --card`
-- `--popover-foreground / --popover`
-- `--primary-foreground / --primary`
-- `--secondary-foreground / --secondary`
-- `--accent-foreground / --accent`
-- `--muted-foreground / --muted`
-- `--sidebar-foreground / --sidebar`
-- `--sidebar-primary-foreground / --sidebar-primary`
-- `--sidebar-accent-foreground / --sidebar-accent`
+`ContrastPair` and `CONTRAST_PAIRS` are exported from `@tonex/core/schema`. Each pair carries foreground + background token references, the layer (`md` or `shadcn`), intent (`text` or `non-text`), and threshold (4.5 for text, 3 for non-text). The list ships closed with text pairs at threshold 4.5: md pairs cover every `on-X / X` pair, surface-on-variant against surface, inverse trio, and fixed family; shadcn pairs cover the `-foreground` / unsuffixed root convention across the shadcn role surface.
 
 Adding a pair is a one-row schema edit. Removing one breaks any test asserting count.
 
-`--destructive` does not gain a shadcn pair; per `schema.ts:248`, destructive's contrast partner is bound through `--color-on-error` at the underlying md level, already covered by the md `on-error / error` pair.
+`--destructive` does not gain a shadcn pair; destructive's contrast partner is bound through `--color-on-error` at the underlying md level, already covered by the md `on-error / error` pair.
 
 **Why:** the pairs encode M3 spec semantics (`on-X` always pairs with `X`) and shadcn role-pair conventions (`-foreground` always pairs with the unsuffixed root). Both are domain knowledge per code-conventions.md. Allowing pair definitions to live in www would split domain across packages.
 
@@ -93,25 +69,11 @@ Slice 1 ships only `intent: 'text'` pairs at `threshold: 4.5`. Non-text pairs (`
 
 ## 8. `evaluateThemeContrast` is downstream of `DerivedTheme`, not on the spine
 
-`evaluateThemeContrast(theme: DerivedTheme): ContrastReport` ships from `packages/core/src/theme/contrast.ts`:
+`evaluateThemeContrast(theme: DerivedTheme): ContrastReport` is the analysis primitive — it returns per-pair results (ratio, pass/fail) keyed by mode. The shape lives in the contrast module; consumers read it directly.
 
-```ts
-export interface PairResult {
-  pair: ContrastPair
-  fgArgb: number
-  bgArgb: number
-  ratio: number
-  passes: boolean
-}
-export interface ContrastReport {
-  light: readonly PairResult[]
-  dark: readonly PairResult[]
-}
-```
+`DerivedTheme` itself is unchanged — no `contrast` field, no widening. The spine continues to produce token values; analyses are pure functions over those values. Per-token UI consumers and app-level sweep consumers read from the same report; consistency is by construction.
 
-`DerivedTheme` itself is unchanged — no `contrast` field, no widening. The spine continues to produce token values; analyses are pure functions over those values. Stage (a) consumers (per-token feedback in `role-editor.tsx`) and stage (b) consumers (app-level sweep, slice contrast-2) read from the same `ContrastReport`; consistency is by construction.
-
-Memoization layers via the existing derive cache pattern (issue #20): a sibling cache slot keyed by source identity returns the same `ContrastReport` reference for repeated calls.
+Memoization layers via the existing derive cache pattern (issue #20): a sibling cache slot keyed by source identity returns the same report reference for repeated calls.
 
 **Why:** ADR-0017's lean-spine principle. Adding `contrast` to `DerivedTheme` would set a precedent that any analysis (deltaE, gamut, future APCA) earns a spine slot, bloating the seam every consumer must handle. Keeping analyses downstream means each is a separate import; consumers that don't need contrast don't pay for it.
 
@@ -135,28 +97,14 @@ When APCA lands:
 
 **Why:** four reasons. (a) culori does not ship APCA, so committing to APCA is committing to a second lib decision tree we have not walked. (b) APCA's user-facing model is unstable — Lc thresholds depend on font weight/size, the recommended cutoffs have shifted twice since 2022, and tonex is a generation tool, not a compliance auditor. (c) WCAG 2 is the lingua franca: shadcn docs, M3 docs, accessibility blogs all talk in 4.5:1; matching that mental model lowers cognitive friction. (d) ADR-0023 commitment 6's second-consumer guard rejects the pref outright until a second surface materializes.
 
-## 11. Slice order, with promise sentences
-
-Implementation proceeds in this order, each slice with a one-sentence promise per slice-strategy.md and one orchestrating subagent per slice per the memory convention:
-
-- **Slice contrast-1** — *"Introduce `@tonex/color-utils`, route emission through it, extend contrast pair sweep to shadcn."* Foundation + stage (a) refactor + shadcn pairs. Four red tests as TDD entry: (R1) canonical-form pinning in `packages/color-utils/src/oklch.test.ts`, (R2) WCAG2 known-value tests for `contrastRatio`, (R3) `evaluateThemeContrast` shape and content over `DEFAULT_INPUTS` in `packages/core/src/theme/contrast.test.ts`, (R4) the existing drift-guard test in `applyDom.test.ts` continues to pass byte-identical.
-- **Slice contrast-2** — *"Add a global contrast summary at <one chosen surface>."* Stage (b) at one of: export dialog pre-flight banner / Display popover badge / MdRail summary line. Surface choice deliberate at slice opening.
-- **Slice contrast-3** — *"Add non-text contrast pairs at 3:1 with sectioned UI."* Schema additions + grouping UI. Threshold semantics surface in user-visible copy.
-- **Slice contrast-4 (conditional)** — *"Add APCA as second algorithm under `contrastAlgorithm` Display pref."* `apca-w3` joins color-utils; `PairResult` widens; pref enters `useUiPrefs` with second-consumer rationale.
-
-R1 stays as the permanent canonical-form firewall guard — the first test that fails on any culori upgrade that shifts emission. R3 is the extension seam: slice contrast-3 adds non-text pair-existence assertions, slice contrast-4 adds algorithm-parameter assertions. Same files, additive growth.
-
-**Why:** memory's "one subagent per slice" rule + slice-strategy.md's one-sentence-promise rule. Each slice crosses one new seam (boundary, app surface, non-text grouping, algorithm dispatch). Conflating any two re-introduces the cross-cutting risk these rules retire.
-
 ## Consequences
 
 - `apps/www/src/features/color-roles-list/contrast-utils.ts` shrinks to UI helpers (`isDarkSwatch`, `roleDisplayName`); `relativeLuminance`, `contrastRatio`, `ROLE_CONTRAST_PAIRS`, `AA_THRESHOLD` retire. Consumers (`color-roles-list.tsx`, `role-editor.tsx`) read from `evaluateThemeContrast`.
 - `@tonex/core/oklch` subpath stays as a public import path but re-exports from `@tonex/color-utils` (or shifts entirely; consumer-side import path may move). Subpath stability is a www-side concern; `docs/agents/core-surface.md` updates with the migration.
 - The `ContrastPair` type's `MdTokenName | ShadcnRoleName` union is the first place outside `derive.ts` that crosses the md/shadcn name surfaces. If a future schema change widens those name spaces (chart token contrast, custom-color contrast), the pair union widens too.
-- Drift-guard tests (`packages/core/src/theme/applyDom.test.ts` + `packages/core/src/theme/oklch.test.ts`) continue to pass byte-identical post-migration. R1 (the new canonical-form pinning in `packages/color-utils/src/oklch.test.ts`) becomes the upstream-monitoring contract.
+- Drift-guard tests continue to pass byte-identical post-migration. The canonical-form pinning test in the color-utils package becomes the upstream-monitoring contract.
 - ADR-0023 commitment 1's anticipated `contrastAlgorithm` and `showContrastWarnings` fields stay anticipated; ADR-0023 needs no amendment until APCA actually ships and an algorithm pref earns its second consumer.
 - The cmf-vs-2025 spec memo's caveat (cmf primary tracks seed luminance; can fail against `--color-surface` in light mode) gains live shadcn-side coverage: `--primary-foreground / --primary` against a cmf-derived primary now surfaces the WCAG warning the memo warned about, instead of relying on the user noticing it visually.
-- Slice contrast-1's hidden UX question — does `color-roles-list` grow a shadcn section, or do shadcn warnings surface elsewhere — is captured as TBD; resolved during slice-1 implementation, not pre-committed in this ADR. A new shadcn-side role-editor is one of the candidate shapes.
 - `packages/color-utils/` is auto-discovered by the existing `packages/*` glob in `pnpm-workspace.yaml` — no manual workspace entry required. `packages/color-utils/package.json` declares culori as a direct dep, exposes a single barrel, and inherits the strict tsconfig (per ADR-0012's third reason — strict-mode relax stays scoped to vendored packages, never to npm-dep packages).
 
 ## Amendment — 2026-05-17

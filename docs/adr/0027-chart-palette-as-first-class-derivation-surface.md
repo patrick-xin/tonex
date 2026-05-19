@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Chart palette as a first-class derivation surface
 
@@ -9,23 +9,11 @@ ADR-0024 introduced `chartMode: 'mono' | 'multi'` to split chart derivation alon
 
 This ADR reserves the namespace, renames the existing axis, and records the trajectory. It does not pre-build axes — those land as future slices when concrete asks materialize.
 
-**Decision:** six commitments.
+**Decision:** five commitments.
 
 ## 1. Nested `chart` namespace replaces flat `chartMode`
 
-`PortableTheme` gains a `chart` object; `chartMode` is removed.
-
-```ts
-// today
-chartMode: 'mono' | 'multi'
-
-// after this ADR
-chart: {
-  scheme: 'categorical' | 'sequential' | 'diverging'
-}
-```
-
-`chart.scheme` is the renamed axis. Future derivation axes (`seedPalette`, `count`, `tones`, `hueSpread`, `chroma`) slot in as additional properties on the `chart` object, one slice per concrete user-driven ask.
+`PortableTheme` gains a `chart` namespace replacing the flat `chartMode`; the renamed axis is `chart.scheme: 'categorical' | 'sequential' | 'diverging'`. Future derivation axes (`seedPalette`, `count`, `tones`, `hueSpread`, `chroma`) slot in as additional properties on the `chart` object, one slice per concrete user-driven ask.
 
 **Why:** the rename is cheap under the pre-launch schema-mutability policy (one slice, no migration plumbing). Nesting reserves the shape so each subsequent axis is a property addition on an existing object rather than another flat field on `PortableTheme`. Flat would also work (`chartScheme`, `chartSeedPalette`, …) but the chart-prefixed cluster reads cleaner as a namespace once it grows past two fields, and the singular `chart` matches the conceptual unit ("the chart palette") more closely than the alternative `chartConfig` did in discussion.
 
@@ -65,28 +53,6 @@ The trajectory under this namespace is justified by properties the foundation gi
 - **Override layer for last-mile control** — the algorithmic foundation never becomes a cage. Users who need a specific brand color in a chart slot pin it (commitment 4), and the rest of the scheme stays consistent around it.
 
 **Why:** explicit commitments give future slices their acceptance criteria. A "categorical scheme" slice that ships HSL hue rotation fails the HCT-uniformity test; a "diverging scheme" slice that ignores contrast-pair coverage fails ADR-0025's extension; a "count axis" slice that re-derives light and dark independently fails the shared-contract test. Naming the rubric in the ADR keeps slice work honest about what the surface is *for*.
-
-## 6. Slice order, with promise sentences
-
-Implementation proceeds in this order, each slice with a one-sentence promise per `slice-strategy.md` and one orchestrating subagent per slice per the memory convention. TDD entries (failing tests, written first) live in the GitHub issue tracking each slice — not pre-committed in the ADR.
-
-- **Slice chart-1 (rename)** — *"Rename `chartMode` to `chart.scheme` with data-viz vocabulary; math unchanged, drift-guard byte-identical."* Schema field shape change + source action rename + derive signature update. Maps `mono`→`sequential` and `multi`→`categorical` verbatim; `diverging` reserved in commitment 2's trajectory, not in this slice's picklist. Tracked under this ADR (no separate issue — the rename is pure ADR-driven schema work).
-
-- **Slice chart-2 (override schema)** — *"Add `shadcnChartOverrides` to schema, source, and derive; pins apply post-`rebrandChart`; drift-guard byte-identical when empty."* Mirrors ADR-0026 slice override-1 on the chart token domain. Same shape modulo the key picklist (`SHADCN_CHART_TOKEN_NAMES` instead of `SHADCN_ROLE_NAMES`). Tracked by issue #31.
-
-- **Slice chart-3 (override UI)** — *"Surface chart override editing in the role override rail under a Chart group; mirrors role override picker UX."* Placement: extend `ROLE_GROUPS` with a "Chart" group at the bottom (per issue #31's proposal); revisit if grouping is awkward in the spike. Per-chart contrast pair surfaced inline where applicable (ADR-0025 c.8 — chart-vs-chart and chart-vs-background pairs). Tracked by issue #31.
-
-**Why:** memory's "one subagent per slice" rule + `slice-strategy.md`'s one-sentence-promise rule. Each slice crosses exactly one new seam — slice 1 the namespace, slice 2 the override storage, slice 3 the UI surface. Conflating any two re-introduces the cross-cutting risk these rules retire.
-
----
-
-## Implementation pointers
-
-- `packages/core/src/theme/schema.ts` — replace `chartMode` with `chart: { scheme }`. New `CHART_SCHEMES` picklist replaces `CHART_MODES`. Picklist starts at `['categorical', 'sequential']`; `diverging` extends the picklist when its slice ships.
-- `packages/core/src/theme/source.ts` — `setChartScheme(scheme)` action replaces `setChartMode(mode)`. No migration plumbing (pre-launch policy).
-- `packages/core/src/theme/derive.ts` — `buildMdChart` signature: `(seedHct, scheme, mode, chartScheme)`. Branches map verbatim from the prior names — `categorical` ≡ today's multi branch, `sequential` ≡ today's mono branch. Math is byte-identical until commitment 3's follow-up slice tightens `sequential`.
-- `packages/core/src/theme/derive.test.ts` — rename tests; existing math is preserved so existing assertions hold.
-- `apps/www/src/features/testbed/` — UI surface for the scheme toggle remains deferred (per ADR-0024's UI-deferred note). The rename does not force a UI slice.
 
 ## Out of scope (named for clarity, not commitment)
 

@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Feature-first www structure with five hard rules
 
@@ -36,13 +36,12 @@ Most slots are created on demand. The features/ + components/ + app/_providers.t
 
 **Consequence:**
 
-- New feature → model on the *first* existing feature folder. That folder is the de-facto template.
+- New feature → model on a representative existing feature folder. That folder is the de-facto template.
 - Tempted to nest sub-features → refuse; split into a sibling.
 - Tempted to leave a hook bare at `features/` root → refuse; place under a `features/<name>/` folder (promote to `lib/` only when 2+ features consume it).
 - Tempted to create `features/shared/` → refuse; promote to `components/` if 2+ features need it, otherwise keep private.
 - Tempted to add a `<Layer>` context → refuse; route-level segmentation is the layer mechanism (ADR-0019).
 - Doc surface for these rules: `docs/agents/www-structure.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
-- **Known violations at write time** (tracked in tracker, not in this ADR): the codebase has a small number of rule-1, rule-2, and rule-4 violations at the moment this ADR lands. They are filed as cleanup issues; the rules supersede them, not the other way around.
 
 ## Amendment 2026-05-08 — rule 5 superseded; rule 6 added (see ADR-0022)
 
@@ -56,3 +55,11 @@ Three slices of real features (editor-rail, export, testbed in active use; md/sh
 ADR-0022 also clarifies that route-provided `<LayerContext>` for behavior parameterization is allowed and distinct from the runtime primitive switching banned by ADR-0019.
 
 Rules 1–4 of this ADR stand unchanged. See ADR-0022 for the current rule set and the locate-test worked examples.
+
+## Amendment 2026-05-19 — rule 4 relaxed; `components/shared/` allowed
+
+Rule 4 banned `components/shared/` outright, treating "shared" as the rot-folder name from the legacy prototype. In practice, layer-agnostic primitives (cross-layer pieces that are neither md-styled nor shadcn-styled) need a home, and routing them into `components/ui/` or `components/shadcn/` mis-categorizes them by layer.
+
+**Decision:** `components/shared/` is allowed as a third primitive folder alongside `components/ui/` (md) and `components/shadcn/`. The 2+ feature promotion rule (rule 4) still applies — single-feature components stay private to their feature.
+
+**Why:** the three primitive folders now carry distinct semantics — `ui/` is md-styled, `shadcn/` is shadcn-styled, `shared/` is layer-agnostic. The rot failure mode is bounded by the promotion gate; anything that lands in `shared/` is already consumed by 2+ features. The original ban over-corrected, blocking a legitimate composition slot to prevent a failure mode the promotion rule already prevents.

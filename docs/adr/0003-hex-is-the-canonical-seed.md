@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Superseded by ADR-0028.
 
 # Hex is the canonical seed representation
 

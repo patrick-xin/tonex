@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # Hydration guard — two flags, both required
 
@@ -25,10 +25,9 @@ The flip-via-action rule (point 2) is load-bearing for a different reason: `_hyd
 - Every consumer of derived theme state (rendered tokens) goes through `useResolvedTokens`. Direct `useSource(s => s.someSourceField)` reads of *source* state are fine; what cannot bypass the guard is the *derived* output.
 - Every consumer of `resolvedTheme` goes through `useActiveMode`. `useTheme()` is reserved for `_providers.tsx` (one site, set up the provider) and event handlers where SSR mismatch is structurally impossible (e.g. keypress).
 - **Drift sentinels (cheap, mechanical)** catch the bypass class:
-  - Grep for `useTheme()` outside `{use-active-mode.ts, _providers.tsx}` — bypass candidate.
-  - Grep for raw `_hydrated` reads outside `packages/core/src/theme/source.ts` and `useResolvedTokens.ts` — bypass candidate.
+  - `useTheme()` outside its allowlist — bypass candidate. The current allowlist is enforced by the drift sentinel in `.claude/settings.json` rule #5.
+  - Raw `_hydrated` reads outside the source store and `useResolvedTokens` — bypass candidate.
 - "Remove the null check, it's annoying" — refuse. The annoyance is the guard working. Render proper placeholders instead.
-- **Known violations at write time** (real bugs, not just convention slip): two `editor-rail/` components read `useTheme().resolvedTheme` raw and silently coerce undefined → `'light'` — produces an incorrect swatch on first paint for users with dark system theme. Tracked as cleanup issues; the rule supersedes them.
 
 ## Amendment 2026-05-09
 

@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # shadcn role override layer — literal pins above symbolic bindings
 
@@ -11,16 +11,11 @@ The two operations are conceptually distinct and the project benefits from namin
 
 Conflating them — folding the override into the binding as a `kind: 'hex'` discriminator — is a coherent feature, but it's a *different* feature: it widens what "binding" means and breaks symmetry with `md3TokenOverrides`. This ADR keeps them separate.
 
-**Decision:** eight commitments, organized from conceptual cut to slice order.
+**Decision:** seven commitments, organized from conceptual cut to UI shape.
 
 ## 1. Two axes: bindings symbolic, overrides literal
 
-`PortableTheme` carries two parallel cross-layer fields:
-
-```ts
-shadcnRoleBindings:  { light: Record<ShadcnRoleName, MdTokenName>, dark: ... }            // unchanged
-shadcnRoleOverrides: { light: Partial<Record<ShadcnRoleName, string>>, dark: ... }        // new
-```
+`PortableTheme` carries two parallel cross-layer fields: `shadcnRoleBindings` (unchanged) maps each shadcn role to an MD token name per mode; `shadcnRoleOverrides` (new) maps each shadcn role to a literal hex string per mode.
 
 Bindings stay user-editable, symbolic, fully populated. Overrides are user-editable, literal hex, sparse — an entry's presence means "user pinned this role for this mode."
 
@@ -35,13 +30,6 @@ Bindings stay user-editable, symbolic, fully populated. Overrides are user-edita
 ## 3. Override field shape mirrors `md3TokenOverrides`
 
 Per-mode partial map of role → hex string. Empty default. Mode-keyed because users pin light and dark independently (light `--ring` pinned, dark `--ring` follows binding).
-
-```ts
-shadcnRoleOverrides: {
-  light: Partial<Record<ShadcnRoleName, string>>
-  dark:  Partial<Record<ShadcnRoleName, string>>
-}
-```
 
 Setter action: `setShadcnRoleOverride(mode, role, hex | null)` — `null` deletes the entry. Hex format validated at the seam via `isValidHex`; malformed throws.
 
@@ -61,29 +49,13 @@ Override beats both binding and md-layer override. The two override axes operate
 
 ## 5. `bindShadcn` becomes two-step
 
-The existing resolver:
-
-```ts
-function bindShadcn(mdLayer: TokenMap, bindings: ShadcnRoleBindings): TokenMap
-```
-
-becomes:
-
-```ts
-function bindShadcn(
-  mdLayer: TokenMap,
-  bindings: ShadcnRoleBindings,
-  overrides: Partial<Record<ShadcnRoleName, string>>,
-): TokenMap
-```
-
-Per role: if `overrides[role]` is set, parse hex → argb (via `@tonex/color-utils`'s `argbFromHex`) and store. Else: existing md-token lookup. The post-override md layer is already built upstream by `applyMd3TokenOverrides` (current pipeline order preserved).
+The resolver takes overrides as a third input alongside md-layer tokens and bindings. Per role, override-presence beats binding-resolution; hex is parsed at resolve time. The post-override md layer is built upstream by the md-override pass (current pipeline order preserved).
 
 **Why:** the seam is one new function parameter and one new branch — no surgery to the rest of derive. Preserves ADR-0017's "deriveTheme is the single source of truth" — overrides resolve inside derive, every consumer sees the resolved value through the existing `DerivedTheme` shape.
 
 ## 6. Override picker is UI-side; storage is always hex
 
-The override editor surface is a separate feature directory under `apps/www/src/features/` (mirroring `color-roles-list/`). Its picker can source values from any combination of: an MD-token combobox (capture the token's *current resolved hex*), an MD-palette-tone combobox (capture the tone's hex), a TW palette swatch picker, a native color picker, a hex text input. Whatever the source, storage is a single hex string — `shadcnRoleOverrides[mode][role] = '#abc123'`.
+The override editor surface is a separate feature directory. Its picker can source values from any combination of: an MD-token combobox (capture the token's *current resolved hex*), an MD-palette-tone combobox (capture the tone's hex), a TW palette swatch picker, a native color picker, a hex text input. Whatever the source, storage is a single hex string.
 
 **Why:** decoupling picker affordances from storage shape lets the UI evolve (add or remove sources, restructure groupings) without schema churn. The only invariant the schema cares about: hex format. Sources that resolve to a hex can grow or shrink freely; sources that don't resolve to a hex (a hypothetical "track this token symbolically" picker) would be a binding feature, not an override feature, and earn their own ADR.
 
@@ -97,16 +69,6 @@ Two distinct affordances, never collapsed:
 A "reset everything for this role" affordance, if surfaced, composes the two — it doesn't replace either.
 
 **Why:** the two axes have independent state. Collapsing reset into a single button forces a choice (reset which axis?) and loses partial state. Two atomic operations match the two-axis storage shape and let UI compose them as needed (group-level "reset to defaults," row-level "reset override only," etc).
-
-## 8. Slice order, with promise sentences
-
-Implementation proceeds in this order, each slice with a one-sentence promise per slice-strategy.md and one orchestrating subagent per slice per the memory convention. TDD entries (failing tests, written first) live in the GitHub issue tracking each slice — not pre-committed in the ADR.
-
-- **Slice override-1** — *"Add `shadcnRoleOverrides` to schema, source, and derive; resolver branches; drift-guard byte-identical."* Schema field + `bindShadcn` extension + store action.
-- **Slice override-2** — *"Add the shadcn override editor surface."* New feature directory mirroring `color-roles-list/` structure. Picker covers MD-token combobox + MD-palette-tone combobox + TW palette + native picker + hex input. Per-role contrast pair surfaced inline where applicable, reading `evaluateThemeContrast` per ADR-0025 c.8.
-- **Slice override-3 (conditional)** — *"Promote the override editor to production routes."* If override-2 lands as a testbed or feature-flagged surface, this slice routes it per ADR-0019's segmented-routes model. Skipped if override-2 lands directly in production.
-
-**Why:** memory's "one subagent per slice" rule + slice-strategy.md's one-sentence-promise rule. Each slice crosses one new seam (schema/resolver, UI surface, route exposure). Conflating any two re-introduces the cross-cutting risk these rules retire.
 
 ## Consequences
 

@@ -1,4 +1,4 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
+> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
 
 # No ThemeSystem facade — keep Source / Derived / Sinks layered
 
@@ -12,18 +12,8 @@ A reasonable-sounding suggestion is to collapse the theme code behind a single `
 
 **Why the facade actively harms:**
 1. Mixing pure derivation with DOM/clipboard side effects in one class makes derivation untestable without mocking effects. Today `deriveTheme` is testable as `(source) → output` with real fixtures.
-2. The facade collapses real seams: TW + Radix as `ColorSystem` adapters (ADR-0004), DOM + clipboard as Sink adapters. **Two adapters = real seam** — collapsing them is the textbook anti-move.
+2. The facade collapses real seams: TW + Radix as `ColorSystem` adapters, DOM + clipboard as Sink adapters. **Two adapters = real seam** — collapsing them is the textbook anti-move.
 3. It defeats the slot-fill goal. Adding Radix under the layered design is one file in `color-systems/`. Adding it inside a facade means editing internal switches.
 4. The "many imports" complaint that motivates the facade is a strawman: callers import the public surface (a hook + a sink), not the file tree.
 
-**Consequence:** The public surface for callers is small but **not** funneled through one class:
-- `useResolvedTokens()` — hook for components
-- `deriveTheme(source)` — pure function for tests, CLI, fixtures
-- `applyDom(tokens)` — boot-time effect, called once
-- `copyShadcnCss(tokens)` — export effect
-
-The file count under `lib/theme/` is higher than a facade design would have, but that's the **shape** of slot-fill, not a smell. Resist future suggestions to consolidate into a class.
-
-## Amendment — 2026-05-05
-
-Path correction: the theme code lives at `packages/core/src/theme/`, not `lib/theme/` (the prior prototype's path). The `useResolvedTokens` / `applyDom` / `deriveTheme` public surface listed under "Consequence" is accurate; only the directory reference was stale.
+**Consequence:** The public surface for callers is small but **not** funneled through one class — a hook (`useResolvedTokens`) for components, a pure derive function (`deriveTheme`) for tests and fixtures, and sink functions (`applyDom`, exporters) for DOM and export. The file count is higher than a facade design would have, but that's the **shape** of slot-fill, not a smell. Resist future suggestions to consolidate into a class.
