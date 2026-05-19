@@ -13,7 +13,7 @@ const MAX_IPS = 10_000
 const ipHits = new Map<string, number[]>()
 
 const Body = z.object({
-  email: z.string().email(),
+  email: z.email(),
   // why: honeypot field. Humans don't fill it (hidden via CSS, aria-hidden,
   // tabIndex=-1); bots that auto-fill all inputs do. When present we
   // 200-silently so the bot can't probe to learn the trigger.
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
     const sent = await resend.emails.send(
       {
-        from: `tonex <onboarding@${emailDomain}>`,
+        from: `${emailDomain}>`,
         to: [email],
         subject: 'Welcome to tonex',
         html,
