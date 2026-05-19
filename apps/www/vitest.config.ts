@@ -10,7 +10,6 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
       RESEND_API_KEY: 'test_key',
-      RESEND_AUDIENCE_ID: 'test_audience',
       EMAIL_DOMAIN: 'resend.dev',
     },
   },

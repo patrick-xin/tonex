@@ -5,55 +5,48 @@ import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Field, FieldControl, FieldError, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
-
-type State =
-  | { kind: 'idle' }
-  | { kind: 'submitting' }
-  | { kind: 'success'; alreadySubscribed: boolean }
+import { toast } from '@/components/ui/toast'
 
 type SubscribeResponse = { ok: true; alreadySubscribed?: boolean } | { ok: false; error: string }
 
 export function SubscribeForm() {
-  const [errors, setErrors] = React.useState<Record<string, string>>({})
-  const [state, setState] = React.useState<State>({ kind: 'idle' })
-
-  if (state.kind === 'success') {
-    return (
-      <p className="text-sm text-on-surface-variant">
-        {state.alreadySubscribed
-          ? "You're already on the list — thanks for double-checking."
-          : 'Thanks. Check your inbox for a welcome note.'}
-      </p>
-    )
-  }
-
-  const submitting = state.kind === 'submitting'
+  const [submitting, setSubmitting] = React.useState(false)
 
   return (
     <Form
-      errors={errors}
+      validationMode="onSubmit"
       onSubmit={async (event) => {
         event.preventDefault()
-        const formData = new FormData(event.currentTarget)
+        const form = event.currentTarget
+        const formData = new FormData(form)
         const email = formData.get('email') as string
         const website = formData.get('website') as string
-        setErrors({})
-        setState({ kind: 'submitting' })
+        setSubmitting(true)
 
-        const response = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ email, website }),
-        })
-        const data = (await response.json()) as SubscribeResponse
+        try {
+          const response = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ email, website }),
+          })
+          const data = (await response.json()) as SubscribeResponse
 
-        if (data.ok) {
-          setState({ kind: 'success', alreadySubscribed: Boolean(data.alreadySubscribed) })
-          return
+          if (data.ok) {
+            toast.success({
+              title: data.alreadySubscribed
+                ? "You're already on the list"
+                : 'Thanks — check your inbox',
+              description: data.alreadySubscribed
+                ? 'Thanks for double-checking.'
+                : 'A welcome note is on the way.',
+            })
+            form.reset()
+          } else {
+            toast.error({ title: humanizeError(data.error) })
+          }
+        } finally {
+          setSubmitting(false)
         }
-
-        setErrors({ email: humanizeError(data.error) })
-        setState({ kind: 'idle' })
       }}
     >
       <Field name="email">

@@ -7,26 +7,23 @@ export type SubscribeResult =
   | { ok: true; alreadySubscribed: boolean }
   | { ok: false; error: string }
 
-const FROM = `Tonex <onboarding@${env.EMAIL_DOMAIN}>`
+const FROM = `${env.EMAIL_DOMAIN}>`
 
 export async function subscribe(email: string): Promise<SubscribeResult> {
-  const existing = await resend.contacts.get({
-    email,
-    audienceId: env.RESEND_AUDIENCE_ID,
-  })
+  const existing = await resend.contacts.get({ email })
   if (existing.data) {
     return { ok: true, alreadySubscribed: true }
   }
 
   const created = await resend.contacts.create({
     email,
-    audienceId: env.RESEND_AUDIENCE_ID,
   })
   if (created.error) {
     return { ok: false, error: 'subscribe_failed' }
   }
 
   const html = await render(<WelcomeEmail roadmapUrl={`${env.NEXT_PUBLIC_APP_URL}/roadmap`} />)
+
   const sent = await resend.emails.send(
     {
       from: FROM,

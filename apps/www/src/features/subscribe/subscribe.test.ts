@@ -16,7 +16,6 @@ vi.mock('resend', () => ({
 import { subscribe } from './subscribe'
 
 const EMAIL = 'alice@example.com'
-const AUDIENCE_ID = 'test_audience'
 const APP_URL = 'http://localhost:3000'
 
 function mockNotFound() {
@@ -39,7 +38,7 @@ describe('subscribe', () => {
     vi.clearAllMocks()
   })
 
-  it('adds a new contact to the audience on first call', async () => {
+  it('adds a new contact on first call', async () => {
     mockNotFound()
     mockCreateOk()
     mockSendOk()
@@ -47,9 +46,7 @@ describe('subscribe', () => {
     const result = await subscribe(EMAIL)
 
     expect(result).toEqual({ ok: true, alreadySubscribed: false })
-    expect(mocks.contactsCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ email: EMAIL, audienceId: AUDIENCE_ID }),
-    )
+    expect(mocks.contactsCreate).toHaveBeenCalledWith(expect.objectContaining({ email: EMAIL }))
   })
 
   it('returns alreadySubscribed and does not re-send welcome on duplicate', async () => {
