@@ -3,6 +3,7 @@
 import { useResolvedTokens } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { cn } from 'tailwind-variants'
+import { SectionHeading } from '@/components/shared/section-heading'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { toast } from '@/components/ui/toast'
 import { useActiveMode } from '@/features/theme-mode'
@@ -180,7 +181,8 @@ export function ColorRolesOverview() {
         return (
           <section key={group.label} className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-xl tracking-tight">{group.label}</h2>
+              {/* biome-ignore lint/a11y/useHeadingContent: useRender injects children into the h2 at runtime; the static empty <h2 /> is just the tag selector */}
+              <SectionHeading render={<h2 />}>{group.label}</SectionHeading>
             </div>
             <div className="flex flex-wrap gap-4">
               {items.map((item, i) =>

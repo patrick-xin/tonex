@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Radio, RadioGroup } from '@/components/ui/radio'
 import { Switch } from '@/components/ui/switch'
-import { ColorPicker } from '@/features/color-picker'
+import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import { ChromaSlider, HctSlider } from '@/features/hct-controls'
 import { useActiveMode } from '@/features/theme-mode'
 import type { Layer } from '@/lib/layer-context'
+import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import type { CustomColorFormState } from './use-custom-color-form'
 
 // why: shared form JSX for the new + edit dialogs. The hook owns state; this
@@ -32,6 +33,7 @@ export function CustomColorFormBody({
   // interaction so hydration is settled, but fall back to 'light' defensively.
   const mode = useActiveMode()
   const previewRoles = form.preview[mode ?? 'light']
+  const twPickerEnabled = useUiPrefs((s) => s.twPickerEnabled)
   return (
     <div className="grid gap-4">
       <div className="space-y-1.5">
@@ -78,6 +80,9 @@ export function CustomColorFormBody({
             placeholder="#000000"
           />
         </div>
+        {twPickerEnabled && (
+          <TwColorPicker currentColor={form.colorHex} onSelect={form.handleHexInput} />
+        )}
       </div>
 
       <div className="flex flex-col gap-3">

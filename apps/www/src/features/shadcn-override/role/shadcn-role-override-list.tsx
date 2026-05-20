@@ -2,6 +2,7 @@
 
 import type { ShadcnRoleName } from '@tonex/core/schema'
 import { ColorTile } from '@/components/shared/color-tile'
+import { SectionHeading } from '@/components/shared/section-heading'
 import { createPopoverHandle, Popover, PopoverContent } from '@/components/ui/popover'
 import { RoleEditor } from './role-editor'
 import { PALETTE_GROUPS } from './role-groups'
@@ -35,7 +36,7 @@ export function ShadcnRoleOverrideList() {
       <div className="space-y-6">
         {PALETTE_GROUPS.map((group) => (
           <section key={group.label}>
-            <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
+            <SectionHeading className="mb-2">{group.label}</SectionHeading>
             {group.kind === 'pair' ? (
               <div className="flex flex-wrap gap-x-4 gap-y-2">
                 {group.columns.map((col, i) => (

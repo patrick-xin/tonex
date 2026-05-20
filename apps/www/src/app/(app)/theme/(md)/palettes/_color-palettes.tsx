@@ -5,6 +5,7 @@ import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/sche
 import { hexFromArgb } from '@tonex/mcu'
 import type { MouseEvent } from 'react'
 import { useState } from 'react'
+import { SectionHeading } from '@/components/shared/section-heading'
 import { toast } from '@/components/ui/toast'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
@@ -100,7 +101,7 @@ function HorizontalView({ tones, palettes }: { tones: number[]; palettes: Palett
     <div className="space-y-4 md:space-y-6 flex flex-col size-full">
       {FAMILY_ORDER.map((family) => (
         <div key={family} className="w-full">
-          <p className="font-medium capitalize mb-1.5">{family.replace('-', ' ')}</p>
+          <SectionHeading className="capitalize mb-1.5">{family.replace('-', ' ')}</SectionHeading>
           <div className="grid gap-1 grid-cols-[repeat(auto-fit,minmax(44px,1fr))]">
             <TooltipProvider>
               {tones.map((tone) => {
@@ -147,10 +148,10 @@ function HorizontalView({ tones, palettes }: { tones: number[]; palettes: Palett
 function VerticalView({ tones, palettes }: { tones: number[]; palettes: PaletteMap }) {
   const tooltipHandle = createTooltipHandle<{ tone: number; hex: string }>()
   return (
-    <div className="space-y-4 md:space-y-6 flex flex-wrap justify-start sm:justify-center gap-2 size-full">
+    <div className="space-y-2 flex flex-wrap justify-start sm:justify-center gap-2 size-full">
       {FAMILY_ORDER.map((family) => (
         <div key={family} className="flex-1 min-w-28">
-          <p className="font-medium capitalize mb-1.5">{family.replace('-', ' ')}</p>
+          <SectionHeading className="capitalize mb-1.5">{family.replace('-', ' ')}</SectionHeading>
           <div className="flex flex-col gap-3 flex-wrap">
             <TooltipProvider>
               {tones.map((tone) => {
@@ -164,7 +165,7 @@ function VerticalView({ tones, palettes }: { tones: number[]; palettes: PaletteM
                     className="group relative flex flex-col items-center"
                   >
                     <div
-                      className="h-10 w-full cursor-pointer shrink-0 rounded-sm px-2 py-1"
+                      className="h-8 w-full cursor-pointer shrink-0 rounded-sm px-2 py-1"
                       style={{ backgroundColor: hex }}
                     />
                   </TooltipTrigger>

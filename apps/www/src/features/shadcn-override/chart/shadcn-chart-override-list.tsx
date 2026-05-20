@@ -4,6 +4,7 @@ import { useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_CHART_TOKEN_NAMES, type ShadcnChartTokenName } from '@tonex/core/schema'
 import { ColorTile } from '@/components/shared/color-tile'
+import { SectionHeading } from '@/components/shared/section-heading'
 import { createPopoverHandle, Popover, PopoverContent } from '@/components/ui/popover'
 import { useActiveMode } from '@/features/theme-mode'
 import { ChartEditor } from './chart-editor'
@@ -35,7 +36,7 @@ export function ShadcnChartOverrideList() {
   return (
     <div className="m-px">
       <section>
-        <p className="text-sm font-semibold uppercase tracking-wider mb-2">Chart</p>
+        <SectionHeading className="mb-2">Chart</SectionHeading>
         <div className="flex flex-wrap gap-2">
           {SHADCN_CHART_TOKEN_NAMES.map((token) => (
             <ColorTile

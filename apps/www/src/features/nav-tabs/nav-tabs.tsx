@@ -11,12 +11,12 @@ import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ExportButton } from '@/features/export'
+import { ResetButton } from '@/features/reset-button'
 import { Settings } from '@/features/settings'
 import { SiteCommandMenu } from '@/features/site-command-menu'
 import type { NavConfig } from '@/lib/nav-config'
 import { ContrastChecker } from '../contrast-checker'
 import { HelpDialog } from '../help-dialog'
-import { ResetButton } from '../testbed/reset-button'
 
 // why: ADR-0021 commitment 8 + ADR-0022 commitment 3 — the route layout owns
 // audience and layer; this component is route-agnostic and takes everything
