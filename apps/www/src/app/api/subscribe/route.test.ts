@@ -81,7 +81,7 @@ describe('POST /api/subscribe', () => {
     expect(payload.from).toMatch(/^tonex <onboarding@resend\.dev>$/)
     expect(payload.to).toEqual(['alice@example.com'])
     expect(payload.subject).toBe('Welcome to tonex')
-    expect(payload.html).toContain('http://localhost:3000/roadmap')
+    expect(payload.react.props.url).toBe('http://localhost:3000/roadmap')
     expect(options).toEqual({ idempotencyKey: 'welcome-email/alice@example.com' })
   })
 

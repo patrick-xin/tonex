@@ -1,4 +1,3 @@
-import { render } from '@react-email/components'
 import { Resend } from 'resend'
 import { z } from 'zod'
 import { WelcomeEmail } from '@/features/subscribe/welcome-email'
@@ -67,14 +66,12 @@ export async function POST(req: Request) {
       return Response.json({ ok: false, error: 'subscribe_failed' }, { status: 500 })
     }
 
-    const html = await render(<WelcomeEmail roadmapUrl={`${appUrl}/roadmap`} />)
-
     const sent = await resend.emails.send(
       {
-        from: `${emailDomain}>`,
+        from: `tonex <onboarding@${emailDomain}>`,
         to: [email],
         subject: 'Welcome to tonex',
-        html,
+        react: <WelcomeEmail url={`${appUrl}/roadmap`} companyName="Tonex" />,
       },
       // why: idempotency key prevents duplicate sends if the route retries
       // the same request within Resend's 24h key window.
