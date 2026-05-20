@@ -10,12 +10,23 @@ When a decision changes how we approach work that an existing rule already cover
 
 - **New rule with no prior conflict** — write it in the appropriate doc (`CLAUDE.md`, working-style, code-conventions, slice-strategy, etc.). No issue needed; nothing to track against.
 - **Decision that contradicts or refines an existing rule** — file an issue first via `/to-issues`. The doc update can come later; the issue is the source of truth for the change.
-- **Decision that needs a new ADR** — file the issue first. ADRs hold living rationale, but a new decision (or a flip of an existing one) gets a new ADR; the rationale must be captured before the ADR text is written.
+- **Decision that needs a new ADR** — write the ADR directly. A new ADR is net-new rationale and an amendment is append-only, so neither overwrites history — the ADR *is* the durable, dated rationale store, and routing it through a throwaway issue first buys nothing. (The issue-first rule above protects *living*-doc history from in-place overwrites; ADRs don't have that failure mode.)
 - **When unsure** whether a decision modifies an existing rule, lean toward filing an issue. The cost of an extra issue is small; the cost of lost rationale is high.
+
+## From decision to code
+
+The chain for a decision big enough to need an ADR:
+
+1. **ADR** — written directly (rationale; a new ADR, or an append-amendment to the one it refines).
+2. **`/to-prd`** — publish the spec to the tracker as a PRD issue (the problem / solution / user-stories / implementation-decisions shape, e.g. issue #80).
+3. **`/to-issues`** — split the PRD into independently-grabbable slice issues when it spans more than one; a one-chunk PRD skips this.
+4. **Implement** — the planner writes each slice's Red test as the contract (see `working-style.md`, "The planner writes the contract"); the implementer makes it green and refactors.
+
+PRDs live on the tracker (transient — see the lifecycle convention), not as `docs/prd/` files. `docs/prd/0021` is a blueprint-era exception paired with the foundational export ADR.
 
 ## Agent role
 
-The `/to-issues` skill is user-invoked, not agent-invoked. When a moment calls for one, surface it: "this looks like a `/to-issues` moment — want me to draft the issue body?"
+The `/to-prd` and `/to-issues` skills are user-invoked, not agent-invoked. When a moment calls for one, surface it: "this looks like a `/to-issues` moment — want me to draft the issue body?"
 
 ## Authoring & auditing ADRs
 

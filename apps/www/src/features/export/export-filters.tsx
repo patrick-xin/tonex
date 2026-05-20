@@ -6,10 +6,14 @@ import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { ExportTab } from './use-export-content'
 
-// why: ADR-0021 commitment 6 — filter visibility is per-tab. Tailwind tab
-// surfaces the full tier filters (Extended, Palette, Chart, Contrast);
-// shadcn surfaces Chart + New project. TS / JSON / Dart tabs return null
-// since their formatters are stubs.
+// why: the option surface is shared across formats (ADR-0021 amendment
+// 2026-05-20) and rendered once above the tab strip by export-button. This
+// component renders the subset each tab can actually use: Tailwind gets the
+// full tier filters (Extended, Palette, Chart, Contrast); shadcn gets Chart +
+// New project; JSON gets Extended, Palette, Contrast — no Chart and no header,
+// because neither has a home in the MTB shape (ADR-0029), so the JSON formatter
+// ignores them and we don't surface dead toggles. TS / Dart are still stub
+// formatters with no options, so they render nothing (#86).
 //
 // Layout: Format is a single-select chooser (oklch vs hex are mutually
 // exclusive) so it stays a ToggleGroup. Include flags are independent
@@ -47,11 +51,31 @@ const SHADCN_INCLUDES: readonly IncludeItem[] = [
   { key: 'includeHeader', label: 'New project' },
 ] as const
 
+// why: JSON honors color format + Extended / Palette / Contrast (the options
+// with an MTB home, #85's formatter). includeChart and includeHeader are
+// omitted on purpose — the MTB shape has no slot for either (ADR-0029), so
+// offering them would be a toggle that changes nothing.
+const JSON_INCLUDES: readonly IncludeItem[] = [
+  { key: 'includeExtended', label: 'Extended' },
+  { key: 'includePalette', label: 'Palette' },
+  { key: 'includeContrastVariants', label: 'Contrast' },
+] as const
+
+// why: per-tab subset lookup. A tab absent from this map (TS / Dart) has no
+// tunable options, so the component renders nothing for it.
+const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeItem[]>> = {
+  Tailwind: TAILWIND_INCLUDES,
+  shadcn: SHADCN_INCLUDES,
+  JSON: JSON_INCLUDES,
+}
+
 export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
-  if (tab !== 'Tailwind' && tab !== 'shadcn') return null
+  // why: TS / Dart formatters are stubs with no tunable options, so they map to
+  // no subset and render nothing. JSON joined the option-aware tabs in #86.
+  const items = INCLUDES_BY_TAB[tab]
+  if (items === undefined) return null
 
   const fmt = options.colorFormat ?? 'oklch'
-  const items = tab === 'Tailwind' ? TAILWIND_INCLUDES : SHADCN_INCLUDES
 
   const onFormatChange = (next: string[]) => {
     const value = (next[0] ?? 'oklch') as 'oklch' | 'hex'

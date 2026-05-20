@@ -38,3 +38,9 @@ The most effective correction is "model your code on file X," not "you violated 
 Subagents spawned by a main agent cannot see machine-local memory or session history. Anything load-bearing for a subagent must live in repo files: code with `// why:` comments, ADRs, `CONTEXT.md`, this doc, or be embedded in the subagent's prompt.
 
 When orchestrating, prefer pointing subagents at specific repo paths over restating rules in their prompt. Repo paths are durable; prompt content evaporates with the subagent.
+
+## The planner writes the contract; the implementer makes it pass
+
+Work splits into two roles. A **planner** produces only durable artifacts — ADRs (the why), a PRD on the tracker (the what), sliced issues, and **the failing test that fixes each slice's contract**. An **implementer** takes those plus the codebase, makes the test green, and refactors. The artifacts are the entire interface; the implementer needs nothing from the planner's session.
+
+The Red test is load-bearing for the same reason `// why:` comments are — it's read at generation time and can't be misread. Prose specs get reconstructed and drift in the gaps; a failing test states exactly what passing means. `slice-strategy.md` already names the Red test the contract; this names its author — the planner, because pinning the contract is where planning pays off, and a contract the implementer writes is one no one checked against intent. So a planner producing "docs only" is not a degraded handoff: the contract travels as a test, the why as an ADR, the what as the PRD. Residual friction lives in the gap between those and the implementer's micro-decisions — keep slices small so a bad gap-fill dies in one Red-Green cycle.

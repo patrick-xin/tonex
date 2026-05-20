@@ -126,3 +126,17 @@ Commitment 5 of this ADR specified class-scoped selectors for the shadcn export 
 
 **Consequence:** the export dialog hides the tab strip when only one tab is configured (shadcn route — we ship only the Tailwind v4 shape). The Tailwind tab on md routes keeps its full filter row.
 
+---
+
+## Amendment 2026-05-20 — options are a shared surface across every format
+
+Commitment 6 framed `ExportOptions` as per-tab filter rows (md surfaces four filters, shadcn one), and the consequences kept toggle state React-local "until a second consumer appears." Real non-CSS formatters (JSON, per ADR-0029) make every tab a consumer, retiring the per-tab framing.
+
+**Decision:** `ExportOptions` is one control surface shared across all formats, not a per-tab filter set. A single option change re-renders every format at once; each format applies the options meaningful to it and ignores the rest — JSON honors `colorFormat`, contrast, palette, and the role-tier toggle; it has no use for the Tailwind-only header flag, and a chart concept a target schema lacks is dropped, never invented. Defaults stay lean per commitment 6: a fresh dialog is the minimal export, toggles expand it.
+
+**Why:** the per-tab framing was an artifact of only one real formatter existing when commitment 6 was written. Options describe *the theme the user is handing off*, not the tab they happen to be on — so they sit above the format choice, with one action propagating everywhere. A format ignoring an option it can't use is strictly simpler than maintaining disjoint per-tab option sets.
+
+**Convention, not decision:** where the shared control row physically renders (e.g. above the tab strip) is a www-structure concern, recorded there — not in this ADR.
+
+**Consequence:** the original "lift toggle state to a UI store when a second consumer appears" line is now live — the JSON formatter is that second consumer. Whether the lift happens or React-local state still suffices is an implementation call for the wiring slice, not a commitment here.
+
