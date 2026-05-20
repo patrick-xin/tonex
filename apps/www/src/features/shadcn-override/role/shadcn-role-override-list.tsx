@@ -31,7 +31,7 @@ export function ShadcnRoleOverrideList() {
   }
 
   return (
-    <div className="m-px my-6">
+    <div className="m-px">
       <div className="space-y-6">
         {PALETTE_GROUPS.map((group) => (
           <section key={group.label}>

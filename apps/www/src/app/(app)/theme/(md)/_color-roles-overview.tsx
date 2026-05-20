@@ -7,6 +7,7 @@ import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { toast } from '@/components/ui/toast'
 import { useActiveMode } from '@/features/theme-mode'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
+import { isDarkSwatch } from '@/lib/is-dark-swatch'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
 type RoleSuffix = string
@@ -109,8 +110,10 @@ function HexButton({ hex, className }: { hex: string; className?: string }) {
     <button
       type="button"
       onClick={() => copyToClipboard(hex)}
+      style={{ color: isDarkSwatch(hex) ? '#fff' : '#000' }}
       className={cn(
         'text-xs font-mono uppercase cursor-pointer rounded-md px-1',
+        'opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100',
         focusVisiblePrimaryRing,
         className,
       )}
@@ -124,14 +127,14 @@ function PairTile({ bg, fg, bgHex, fgHex }: Pair & { bgHex: string; fgHex: strin
   return (
     <div className="h-32 w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
       <div
-        className="h-2/3 p-3 text-sm font-medium leading-tight capitalize flex flex-col justify-end relative"
+        className="group h-2/3 p-3 text-sm font-medium leading-tight capitalize flex flex-col justify-end relative"
         style={{ backgroundColor: bgHex, color: fgHex }}
       >
         <HexButton hex={bgHex} className="absolute top-3 right-3" />
         {bg.replace(/-/g, ' ')}
       </div>
       <div
-        className="h-1/3 px-3 py-2 text-sm font-medium leading-tight capitalize flex items-center justify-between"
+        className="group h-1/3 px-3 py-2 text-sm font-medium leading-tight capitalize flex items-center justify-between"
         style={{ backgroundColor: fgHex, color: bgHex }}
       >
         <span>{fg.replace(/-/g, ' ')}</span>
@@ -145,7 +148,7 @@ function SoloTile({ token, hex }: { token: RoleSuffix; hex: string }) {
   return (
     <div className="h-32 w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
       <div
-        className="h-2/3 p-3 flex flex-col justify-end rounded-md rounded-b-none border-outline-variant/40 relative"
+        className="group h-2/3 p-3 flex flex-col justify-end rounded-md rounded-b-none border-outline-variant/40 relative"
         style={{ backgroundColor: hex }}
       >
         <HexButton hex={hex} className="absolute top-3 right-3" />

@@ -8,8 +8,10 @@ import { ShadcnChartOverrideList, ShadcnRoleOverrideList } from '@/features/shad
 export default function ShadcnPalettesPage() {
   return (
     <ScrollArea noScrollBar gradientScrollFade>
-      <ShadcnRoleOverrideList />
-      <ShadcnChartOverrideList />
+      <div className="flex flex-col gap-6 py-6">
+        <ShadcnRoleOverrideList />
+        <ShadcnChartOverrideList />
+      </div>
     </ScrollArea>
   )
 }
