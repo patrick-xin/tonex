@@ -39,14 +39,14 @@ export function ColorTile<T>({
         'group relative cursor-pointer rounded-md transition-all m-1 data-popup-open:outline-2 data-popup-open:outline-offset-2 data-popup-open:outline-primary',
         focusVisiblePrimaryRing,
         size === 'sm'
-          ? 'outline-transparent'
-          : 'outline outline-outline-variant bg-clip-padding w-44 sm:w-60',
+          ? 'outline outline-outline-variant'
+          : 'outline outline-outline-variant w-44 sm:w-60',
       )}
     >
       <div
         className={cx(
-          'h-20 flex flex-col justify-end p-2 shrink-0',
-          size === 'sm' ? 'w-36 sm:w-50 rounded-lg' : 'rounded-md',
+          'h-20 flex flex-col justify-end p-2 shrink-0 rounded-md',
+          size === 'sm' && 'w-36 sm:w-50',
         )}
         style={{ backgroundColor: hex }}
       >
