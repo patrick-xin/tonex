@@ -29,9 +29,12 @@ import { type ExportTab, useExportContent } from './use-export-content'
 // works.
 const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'TS', 'JSON', 'Dart']
 
-// why: ADR-0021 consequences — toggle state is React-local, not zustand.
-// Each dialog open starts at lean defaults (story 19). An empty options
-// object equals "everything off, oklch" per ExportOptions defaults.
+// why: toggle state stays React-local, not zustand (UI prefs aren't portable
+// theme). ADR-0021's 2026-05-20 amendment named the JSON formatter the
+// "second consumer" that could justify a UI store but left the lift optional
+// (#86) — one useState shared across every tab is already a single source of
+// truth, so a store would add indirection with no second reader. Each dialog
+// open starts at lean defaults (story 19): empty options == oklch, all off.
 const LEAN_DEFAULTS: ExportOptions = {}
 
 export const ExportButton = ({
@@ -89,35 +92,43 @@ export const ExportButton = ({
         <DialogDescription className="sr-only">
           Copy or download the theme for your target framework.
         </DialogDescription>
-        {showTabs ? (
-          <Tabs
-            defaultValue={initialTab}
-            onValueChange={(value) => setExportTab(value as ExportTab)}
-            className="h-full gap-0"
-          >
-            <TabsList className="border-b border-outline-variant">
+        {/* why: ExportOptions is one shared surface (ADR-0021 amendment
+         * 2026-05-20), so the option row renders ONCE above the tab strip —
+         * keyed to the active tab (exportTab) so a toggle set on any format
+         * carries to every other — instead of once per TabsPanel. The wrapper
+         * keeps the row + content as one flex column so DialogContent's gap-6
+         * (dialog-section spacing) doesn't open a gap above the tabs.
+         * ExportFilters itself renders nothing for option-less tabs (TS/Dart). */}
+        <div className="h-full flex flex-col min-h-0 gap-0">
+          <ExportFilters tab={exportTab} options={options} onChange={setOptions} />
+          {showTabs ? (
+            <Tabs
+              defaultValue={initialTab}
+              onValueChange={(value) => setExportTab(value as ExportTab)}
+              className="flex-1 min-h-0 gap-0"
+            >
+              <TabsList className="border-b border-outline-variant">
+                {tabs.map((tab) => (
+                  <TabsTab className="data-active:text-on-surface" key={tab} value={tab}>
+                    {tab}
+                  </TabsTab>
+                ))}
+                <TabsIndicator className="bg-primary -bottom-0.5 left-px h-0.5 translate-x-(--active-tab-left) translate-y-0" />
+              </TabsList>
               {tabs.map((tab) => (
-                <TabsTab className="data-active:text-on-surface" key={tab} value={tab}>
-                  {tab}
-                </TabsTab>
+                <TabsPanel key={tab} value={tab} className="h-full flex flex-col min-h-0">
+                  <ExportContentDisplay content={exportContent} />
+                  <ExportControls exportContent={exportContent} ext={ext} />
+                </TabsPanel>
               ))}
-              <TabsIndicator className="bg-primary -bottom-0.5 left-px h-0.5 translate-x-(--active-tab-left) translate-y-0" />
-            </TabsList>
-            {tabs.map((tab) => (
-              <TabsPanel key={tab} value={tab} className="h-full flex flex-col min-h-0">
-                <ExportFilters tab={tab} options={options} onChange={setOptions} />
-                <ExportContentDisplay content={exportContent} />
-                <ExportControls exportContent={exportContent} ext={ext} />
-              </TabsPanel>
-            ))}
-          </Tabs>
-        ) : (
-          <div className="h-full flex flex-col min-h-0 gap-0">
-            <ExportFilters tab={initialTab} options={options} onChange={setOptions} />
-            <ExportContentDisplay content={exportContent} />
-            <ExportControls exportContent={exportContent} ext={ext} />
-          </div>
-        )}
+            </Tabs>
+          ) : (
+            <div className="flex-1 min-h-0 flex flex-col">
+              <ExportContentDisplay content={exportContent} />
+              <ExportControls exportContent={exportContent} ext={ext} />
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
