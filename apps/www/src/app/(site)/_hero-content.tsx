@@ -46,7 +46,13 @@ export function HeroContent() {
       >
         The MD3 engine.
         <br />
-        <span className="inline bg-linear-to-r from-primary via-secondary to-tertiary bg-clip-text text-transparent pb-1">
+        <span
+          className="inline bg-clip-text pb-1 text-transparent"
+          style={{
+            backgroundImage:
+              'linear-gradient(100deg, var(--color-primary-container) 0%, var(--color-secondary) 40%, var(--color-tertiary-container) 100%)',
+          }}
+        >
           With dials.
         </span>
       </motion.h1>
