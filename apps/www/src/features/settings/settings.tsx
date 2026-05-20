@@ -20,6 +20,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TwPickerEnableToggle } from '@/features/color-picker'
 import { ContrastLevelSlider } from '@/features/contrast-level'
+import { ResetButton } from '@/features/reset-button'
 import { PresetSwitchDialog, requestPresetSwitch } from '@/features/shadcn-preset-switch'
 import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
@@ -154,6 +155,15 @@ export function Settings({ layer }: { layer: Layer }) {
               ))}
             </ToggleGroup>
           </Field>
+          <Separator className="opacity-50" />
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium leading-snug text-on-surface">
+              Reset to defaults
+            </span>
+            <ResetButton variant="danger" size="sm" onConfirm={() => settingsPopoverHandle.close()}>
+              Reset
+            </ResetButton>
+          </div>
         </PopoverContent>
       </Popover>
       <PresetSwitchDialog />

@@ -11,13 +11,13 @@
 // production UI ships, /  diverges from /sink and testbed survives as the
 // dev-only surface.
 
+import { ResetButton } from '@/features/reset-button'
 import { ContrastLevel } from './contrast-level'
 import { CustomColors } from './custom-colors'
 import { ExportPanels } from './export-panels'
 import { MdSwatches } from './md-swatches'
 import { PrimaryContainerOverride } from './primary-container-override'
 import { PrimitivesDemo } from './primitives-demo'
-import { ResetButton } from './reset-button'
 import { SeedInput } from './seed-input'
 import { ShadcnBindings } from './shadcn-bindings'
 import { ShadcnPreview } from './shadcn-preview'
