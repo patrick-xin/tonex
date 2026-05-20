@@ -2,6 +2,7 @@
 
 import type { MdTokenName } from '@tonex/core/schema'
 import { ColorTile } from '@/components/shared/color-tile'
+import { SectionHeading } from '@/components/shared/section-heading'
 import { createPopoverHandle, Popover, PopoverContent } from '@/components/ui/popover'
 import { RoleEditor } from './role-editor'
 import { useTokens } from './use-tokens'
@@ -32,7 +33,7 @@ export function ColorRolesList() {
     <div className="space-y-6">
       {filteredGroups.map((group) => (
         <section key={group.label}>
-          <p className="text-sm font-semibold uppercase tracking-wider mb-2">{group.label}</p>
+          <SectionHeading className="mb-2">{group.label}</SectionHeading>
           <div className="flex flex-wrap gap-2">{group.roles.map(renderSwatch)}</div>
         </section>
       ))}
