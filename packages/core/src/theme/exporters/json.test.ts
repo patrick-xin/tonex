@@ -18,7 +18,7 @@ import { buildMaterialThemeJson, exportJson } from './json'
 // why no sample load: ADR-0029 says faithfulness is "judged against the
 // target's schema, not a captured file" — a reference export is a shape
 // oracle, not a value oracle. Our roster deliberately diverges from Material
-// Theme Builder's (`material-theme(1).json` at repo root): we ship six
+// Theme Builder's (`exporters/__fixtures__/material-theme-builder.json`): we ship six
 // palettes incl. `error` (MTB ships five), our per-family `*-dim` + fixed +
 // inverse tokens, and we drop MTB's deprecated `background`/`onBackground`/
 // `surfaceVariant`. Diffing against the file would demand subset gymnastics

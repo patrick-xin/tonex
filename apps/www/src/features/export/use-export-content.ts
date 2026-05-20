@@ -70,10 +70,24 @@ export function useExportContent({
 
   return useMemo(() => {
     if (exportTab === 'TS') return { exportContent: exportTs(), ext: 'ts' }
-    if (exportTab === 'JSON') return { exportContent: exportJson(), ext: 'json' }
     if (exportTab === 'Dart') return { exportContent: exportDart(), ext: 'dart' }
 
     if (!hydrated) return { exportContent: '/* Loading… */', ext: 'css' }
+
+    // why: ADR-0021 commitment 5 — buildContrastBundle is lazy and shared by the
+    // JSON and CSS paths, so it's built once below the hydration guard. Toggling
+    // includeContrastVariants triggers the 3× derive only on dialog mount /
+    // option change, not on every source render. WYSIWYG-visibility per
+    // commitment 7 — the string we hand to the dialog pane equals what the user
+    // pastes byte-for-byte.
+    const bundle = buildContrastBundle(portable, options)
+
+    // why: the JSON branch lives below the hydration guard (#84) — unlike the
+    // TS / Dart stubs it needs the derived bundle + source. exportJson reshapes
+    // the same DerivedTheme the CSS path uses into MTB-shaped JSON (ADR-0029).
+    if (exportTab === 'JSON') {
+      return { exportContent: exportJson(portable, bundle, options), ext: 'json' }
+    }
 
     // why: ISO yyyy-mm-dd — sortable, locale-free, and the form users expect
     // to see in a generated-file banner. Captured at memo recompute time so
@@ -81,12 +95,6 @@ export function useExportContent({
     const date = new Date().toISOString().slice(0, 10)
     const header = formatHeader(seedHex, variant, contrastLevel, date)
     const layer = exportTab === 'Tailwind' ? 'md' : 'shadcn'
-    // why: ADR-0021 commitment 5 — buildContrastBundle is lazy here. Toggling
-    // includeContrastVariants triggers the 3× derive only on dialog mount /
-    // option change, not on every source render. WYSIWYG-visibility per
-    // commitment 7 — the string we hand to the dialog pane equals what the
-    // user pastes byte-for-byte.
-    const bundle = buildContrastBundle(portable, options)
     return { exportContent: header + exportCss(bundle, layer, options), ext: 'css' }
   }, [exportTab, hydrated, portable, options, seedHex, variant, contrastLevel])
 }
