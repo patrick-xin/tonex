@@ -107,7 +107,7 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
   ]
 
   function handleItemClick(item: Item) {
-    if (!item.href) return
+    if (item.disabled || !item.href) return
     setIsOpen(false)
     setCommandQuery('')
     if (item.href.startsWith('http')) {
@@ -158,6 +158,9 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
                           <>
                             <Icon className="size-4 text-on-surface-variant group-data-highlighted/command-item:text-on-surface" />
                             {item.label}
+                            {item.disabled && (
+                              <span className="text-xs text-on-surface-variant">(coming soon)</span>
+                            )}
                             {item.shortcut && (
                               <CommandShortcut className="hidden md:block">
                                 {item.shortcut}
@@ -227,6 +230,7 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
                         return (
                           <CommandItem
                             key={item.value}
+                            disabled={item.disabled}
                             onClick={() => handleItemClick(item)}
                             value={item}
                           >

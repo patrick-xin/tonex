@@ -11,6 +11,7 @@ export interface Item {
   value: string
   label: string
   href?: string
+  disabled?: boolean
   icon: React.ElementType
   shortcut?: string
   handle?: BaseDialog.Handle<null>

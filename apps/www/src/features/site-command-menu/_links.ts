@@ -7,8 +7,14 @@ import type { Item } from './_shortcuts'
 
 export const links: Item[] = [
   { icon: Home, label: 'Home Page', value: 'home-page', href: '/' },
-  { icon: LayoutGrid, label: 'Components', value: 'components', href: '/components' },
-  { icon: BookOpen, label: 'Blog', value: 'blog', href: '/blog' },
+  {
+    icon: LayoutGrid,
+    label: 'Components',
+    value: 'components',
+    href: '/components',
+    disabled: true,
+  },
+  { icon: BookOpen, label: 'Blog', value: 'blog', href: '/blog', disabled: true },
   { icon: MdIcon, label: 'MD3 Builder', value: 'md3-builder', href: '/theme' },
   { icon: ShadcnIcon, label: 'Shadcn Builder', value: 'shadcn-builder', href: '/theme/shadcn' },
 ]
