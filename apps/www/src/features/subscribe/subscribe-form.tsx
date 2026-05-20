@@ -48,6 +48,7 @@ export function SubscribeForm() {
           setSubmitting(false)
         }
       }}
+      className="gap-3 text-left"
     >
       <Field name="email">
         <FieldLabel>Email</FieldLabel>
