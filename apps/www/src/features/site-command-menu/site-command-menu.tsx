@@ -5,6 +5,7 @@ import { useSource } from '@tonex/core'
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  Compass,
   CornerDownLeftIcon,
   LockIcon,
   LockOpenIcon,
@@ -34,7 +35,10 @@ import {
 } from '@/components/ui/command-menu'
 import { DialogTrigger } from '@/components/ui/dialog'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { useGuideOptional } from '@/features/onboarding-guide'
 import { useThemeToggle } from '@/features/theme-mode'
+import { helpDialogHandle } from '@/lib/handles'
+import { useIsRailVisible } from '@/lib/hooks/use-rail-visible'
 import type { NavTab } from '@/lib/nav-config'
 import { community, links, resources } from './_links'
 import { BASE_SHORTCUTS, type Group, type Item } from './_shortcuts'
@@ -78,6 +82,8 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
   const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)
 
   const { isDark, toggle: toggleTheme } = useThemeToggle()
+  const guide = useGuideOptional()
+  const railVisible = useIsRailVisible()
   const toggleLock = () => setSeedHexLock(!seedHexLock)
 
   useHotkey('Mod+K', () => setIsOpen((prev) => !prev), {
@@ -96,6 +102,11 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
       label: isDark ? 'Switch to light' : 'Switch to dark',
       shortcut: 'D',
       value: 'toggle-theme-mode',
+    },
+    {
+      icon: Compass,
+      label: 'Take the tour',
+      value: 'take-tour',
     },
   ]
 
@@ -219,6 +230,27 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
                               value={item}
                               onClick={() => {
                                 toggleTheme()
+                                setIsOpen(false)
+                              }}
+                            >
+                              {content}
+                            </CommandItem>
+                          )
+                        }
+
+                        if (item.value === 'take-tour') {
+                          return (
+                            <CommandItem
+                              key={item.value}
+                              value={item}
+                              onClick={() => {
+                                // Desktop runs the spotlight tour; below the rail
+                                // breakpoint there's no anchor, so fall back to Help.
+                                if (railVisible) {
+                                  guide?.setOpen(true)
+                                } else {
+                                  helpDialogHandle.open(null)
+                                }
                                 setIsOpen(false)
                               }}
                             >

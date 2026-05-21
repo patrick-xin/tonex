@@ -1,16 +1,75 @@
+'use client'
+
 import {
   Accordion,
   AccordionItem,
   AccordionPanel,
   AccordionSummary,
 } from '@/components/ui/accordion'
+import type { HelpSection } from './help-sections'
+import { useHelpSectionOpen } from './use-help-section-open'
 
-export const KeyConcepts = () => {
+export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
+  const { value, setValue } = useHelpSectionOpen(section, 'concepts', ['hct'])
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-semibold">Key Concepts</h3>
-      <Accordion className="w-full" defaultValue={['hct']} multiple>
-        <AccordionItem variant="underline" value="hct">
+      <Accordion
+        className="w-full"
+        value={value}
+        onValueChange={(next) => setValue(next as string[])}
+        multiple
+      >
+        <AccordionItem id="light-dark-modes" variant="underline" value="light-dark-modes">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            Light & dark — what's shared vs per-mode
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              Tonex writes <span className="font-medium">both</span> themes from one seed — a light
+              (<code className="font-mono text-xs">:root</code>) and a dark (
+              <code className="font-mono text-xs">.dark</code>) block. The mode toggle (press{' '}
+              <span className="font-medium">D</span>) is the same switch your users' OS flips.
+            </p>
+            <p>
+              <span className="font-medium">Shared controls</span> — one value, used for both modes;
+              editing changes light and dark together: seed color, scheme variant, contrast level,
+              custom-color definitions, surface algorithm + neutral palette, palette overrides, CMF
+              second source, chart settings.
+            </p>
+            <p>
+              <span className="font-medium">Per-mode controls</span> — stored separately for light
+              and dark; editing one leaves the other untouched: surface strength (Tint / Desaturate
+              level), the Tint text accent level, role bindings, role overrides, md-token overrides,
+              chart overrides.
+            </p>
+            <p>
+              <span className="font-medium">Surface adjustment is split:</span> its algorithm and
+              palette are shared, but all three strength sliders are per-mode. Set Tint to 50% in
+              dark, switch to light, and the slider snaps to light's value (often 0%) — nothing was
+              lost, your 50% is still on the dark side.
+            </p>
+            <p className="font-medium">The order that works:</p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                Set your shared foundation first — color, recipe, contrast, custom colors — in
+                whatever mode you're in; it applies to both.
+              </li>
+              <li>
+                Then polish one mode at a time: pick a mode, set its surface strength + any pinned
+                colors, switch, repeat.
+              </li>
+              <li>
+                Audit both modes before shipping — the contrast audit only reads the mode you're in,
+                so a dark-only pass ships an unchecked light theme.
+              </li>
+            </ul>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="hct" variant="underline" value="hct">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -26,7 +85,7 @@ export const KeyConcepts = () => {
             @material/material-color-utilities library — real HCT math, not an approximation.
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="cmf">
+        <AccordionItem id="cmf" variant="underline" value="cmf">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -51,7 +110,7 @@ export const KeyConcepts = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="scheme-variants">
+        <AccordionItem id="scheme-variants" variant="underline" value="scheme-variants">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -108,7 +167,7 @@ export const KeyConcepts = () => {
             </ul>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="contrast-levels">
+        <AccordionItem id="contrast-levels" variant="underline" value="contrast-levels">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -136,7 +195,7 @@ export const KeyConcepts = () => {
             </ul>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="shadcn-mode">
+        <AccordionItem id="shadcn-mode" variant="underline" value="shadcn-mode">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -157,7 +216,7 @@ export const KeyConcepts = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="custom-colors">
+        <AccordionItem id="custom-colors" variant="underline" value="custom-colors">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"

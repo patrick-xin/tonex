@@ -1,16 +1,26 @@
+'use client'
+
 import {
   Accordion,
   AccordionItem,
   AccordionPanel,
   AccordionSummary,
 } from '@/components/ui/accordion'
+import type { HelpSection } from './help-sections'
+import { useHelpSectionOpen } from './use-help-section-open'
 
-export const QA = () => {
+export const QA = ({ section }: { section: HelpSection | null }) => {
+  const { value, setValue } = useHelpSectionOpen(section, 'qa', [])
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-semibold">Q&A</h3>
-      <Accordion className="w-full" defaultValue={[]} multiple>
-        <AccordionItem variant="underline" value="md3-shadcn-mapping">
+      <Accordion
+        className="w-full"
+        value={value}
+        onValueChange={(next) => setValue(next as string[])}
+        multiple
+      >
+        <AccordionItem id="md3-shadcn-mapping" variant="underline" value="md3-shadcn-mapping">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -35,7 +45,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="contrast-issues">
+        <AccordionItem id="contrast-issues" variant="underline" value="contrast-issues">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -58,7 +68,11 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="brand-color-not-matching">
+        <AccordionItem
+          id="brand-color-not-matching"
+          variant="underline"
+          value="brand-color-not-matching"
+        >
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -76,7 +90,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="md3-vs-shadcn-borders">
+        <AccordionItem id="md3-vs-shadcn-borders" variant="underline" value="md3-vs-shadcn-borders">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -95,7 +109,11 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="dialog-colors-mismatch">
+        <AccordionItem
+          id="dialog-colors-mismatch"
+          variant="underline"
+          value="dialog-colors-mismatch"
+        >
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -110,7 +128,7 @@ export const QA = () => {
             <p>This is a preview limitation, not a theme bug.</p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="cmf-safety">
+        <AccordionItem id="cmf-safety" variant="underline" value="cmf-safety">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -132,7 +150,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="cmf-colors-different">
+        <AccordionItem id="cmf-colors-different" variant="underline" value="cmf-colors-different">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -150,7 +168,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="preserve-brand-color">
+        <AccordionItem id="preserve-brand-color" variant="underline" value="preserve-brand-color">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -172,7 +190,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="vs-others">
+        <AccordionItem id="vs-others" variant="underline" value="vs-others">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
