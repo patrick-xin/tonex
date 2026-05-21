@@ -50,6 +50,12 @@ const MID_BAND = [
 
 const TEXT = ['--color-on-surface', '--color-on-surface-variant'] as const
 
+// why: borders ride the SAME surfaceTintLevel + recipe as the backgrounds (#93)
+// — coherence-coupled, NOT a separate accent knob like text. A brand-colored
+// edge on a neutral card reads as a structural leftover, so at level=0 outline
+// drains to the chosen neutral exactly like the 8 backgrounds.
+const OUTLINE = ['--color-outline', '--color-outline-variant'] as const
+
 describe('applySurfaceTint', () => {
   it('level=0: every surface bg is neutral, not just the 3 legacy tokens (#91)', () => {
     // why: THE regression guard. A chromatic seed makes MCU paint all 8
@@ -164,6 +170,43 @@ describe('applySurfaceTint', () => {
     const textOnly = applySurfaceTint(layer, 0, 'zinc', 1)
     for (const tok of TEXT) expect(textOnly[tok]).not.toBe(baseline[tok]) // accent independent
     for (const tok of SURFACE_BG) expect(textOnly[tok]).toBe(baseline[tok]) // bgs untouched by textLevel
+  })
+
+  it('level=0 drains outline to the chosen neutral, riding surfaceTintLevel not textLevel (#93)', () => {
+    // why: THE #93 guard for tint. A chromatic seed makes MCU paint outline at
+    // chroma 16–39; a neutral surface with that border glowing is the bug. So
+    // outline rides surfaceTintLevel (level=0 → pure chosen neutral, like the 8
+    // backgrounds), is primary-independent there, and is NOT moved by textLevel
+    // (borders are coherence-coupled to the surface, not part of the text accent).
+    for (const mode of ['light', 'dark'] as const) {
+      const vivid = deriveTheme(withSeed('#6750A4')).md[mode]
+      for (const tok of OUTLINE) {
+        expect(chromaOf(vivid[tok])).toBeGreaterThan(8) // MCU really hands us a brand border
+      }
+      const neutralized = applySurfaceTint(vivid, 0, 'neutral')
+      for (const tok of OUTLINE) {
+        expect(chromaOf(neutralized[tok])).toBeLessThan(4) // drained to the grey palette
+        expect(Math.abs(toneOf(neutralized[tok]) - toneOf(vivid[tok]))).toBeLessThan(1.5) // tone pinned
+      }
+    }
+    // primary-independent at level 0: the border is the palette, not the seed.
+    const red = applySurfaceTint(deriveTheme(withSeed('#ff0000')).md.light, 0, 'zinc')
+    const green = applySurfaceTint(deriveTheme(withSeed('#00ff00')).md.light, 0, 'zinc')
+    for (const tok of OUTLINE) expect(red[tok]).toBe(green[tok])
+    // decoupled from textLevel: pushing the text accent never touches the borders.
+    const layer = deriveTheme(withSeed('#ff0000')).md.light
+    const noText = applySurfaceTint(layer, 0, 'zinc', 0)
+    const fullText = applySurfaceTint(layer, 0, 'zinc', 1)
+    for (const tok of OUTLINE) expect(fullText[tok]).toBe(noText[tok])
+  })
+
+  it('level=1 blends outline back toward brand (rides the surface knob) (#93)', () => {
+    // why: coupled to surfaceTintLevel — at full surface tint the borders nudge
+    // back toward the primary's hue along with the backgrounds, so two seeds
+    // diverge. Tone stays MCU's.
+    const red = applySurfaceTint(deriveTheme(withSeed('#ff0000')).md.light, 1, 'zinc')
+    const green = applySurfaceTint(deriveTheme(withSeed('#00ff00')).md.light, 1, 'zinc')
+    for (const tok of OUTLINE) expect(red[tok]).not.toBe(green[tok])
   })
 
   it('the chosen palette drives the output (zinc ≠ slate ≠ olive)', () => {

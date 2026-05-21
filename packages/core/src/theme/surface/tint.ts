@@ -27,10 +27,13 @@ import {
 // this mirrors desaturate's per-token shape, the two differing only in
 // direction (desaturate drains brand out, tint adds a chosen neutral in).
 //
-// Coverage: the 8 surface backgrounds (driven by `level`) PLUS, opt-in, the 2
-// text tokens on-surface/on-surface-variant (driven by a SEPARATE `textLevel`,
-// GH #92 / ADR-0018 amendment 2026-05-21). The two levels are decoupled so
-// "clean neutral cards + brand-accented text" is reachable.
+// Coverage: the 8 surface backgrounds AND the 2 outline tokens (both driven by
+// `level` — borders are coherence-coupled to the surface, GH #93 / ADR-0018
+// amendment 2026-05-21) PLUS, opt-in, the 2 text tokens on-surface/
+// on-surface-variant (driven by a SEPARATE `textLevel`, GH #92). Text decouples
+// from `level` so "clean neutral cards + brand-accented text" is reachable;
+// outline does NOT, because a brand border on a neutral card reads as a leftover
+// rather than a deliberate accent.
 //
 // Text follows the SAME neutral→brand model as the backgrounds, on its own knob:
 // textLevel=0 is the chosen neutral palette at the token's own tone (a clean
@@ -64,6 +67,13 @@ const SURFACE_BACKGROUNDS = [
   '--color-surface-container-high',
   '--color-surface-container-highest',
 ] as const
+
+// why: outline/outline-variant ride the SAME `level` and recipe as the
+// backgrounds (GH #93) — coherence-coupled to surfaceTintLevel, NOT a separate
+// accent knob like text (#92). A brand-colored border on a neutral surface
+// reads as a structural leftover, not a deliberate accent, so level=0 drains
+// outline to the chosen neutral exactly as it does the backgrounds.
+const SURFACE_OUTLINES = ['--color-outline', '--color-outline-variant'] as const
 
 interface ShadePoint {
   hue: number
@@ -165,7 +175,7 @@ export function applySurfaceTint(
   const primary = Hct.fromInt(primaryArgb)
   const points = NEUTRAL_SHADE_POINTS[paletteName]
   const out: TokenMap = { ...mcuLayer }
-  for (const token of SURFACE_BACKGROUNDS) {
+  for (const token of [...SURFACE_BACKGROUNDS, ...SURFACE_OUTLINES]) {
     const argb = mcuLayer[token]
     if (argb === undefined) continue
     const tone = Hct.fromInt(argb).tone

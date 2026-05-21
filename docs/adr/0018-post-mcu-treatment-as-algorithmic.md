@@ -57,3 +57,16 @@ Text follows the **same neutral→brand model as the backgrounds**, on its own k
 The one place text diverges from the background recipe is the chroma ceiling. Backgrounds cap at `TARGET_CHROMA` (8 — a whisper, surfaces must stay calm); text caps at `TEXT_CHROMA_CEILING_FRACTION` (**25%**) of the *primary's own* chroma — a deliberately stronger, seed-relative accent so a vivid seed pops and a muted one stays muted. The curve is linear (no easing). Both constants were settled by eye in the throwaway `/prototype-text-accent` lab across vivid and muted seeds: 25% is the most accent that clears the 4.5:1 floor on the canary token in both modes.
 
 Responsible to expose only because the contrast audit is live: the `on-surface-variant`/`--color-surface` pair (the canary muted token, nearest the 4.5:1 floor) is already in `CONTRAST_PAIRS`, so user-pushed text-tint levels are scored automatically — no new pair was needed.
+
+## Amendment — 2026-05-21 (outline coverage, GH #93)
+
+The 2026-05-05 amendment's "each algorithm picks its own subset" left `--color-outline`/`--color-outline-variant` in neither treatment — they flowed straight from MCU's neutral-variant palette at chroma 16–39. So at either neutralizing extreme (desaturate maxed, tint at level 0) the surface went neutral while every border, divider and focus ring kept full brand chroma on it. These tokens feed `--border`/`--input`/`--ring`/`--sidebar-border`/`--sidebar-ring`, so the mismatch showed on every bordered component, not just md consumers.
+
+Both treatments now cover the outline pair, **coherence-coupled** to the surface — *not* decoupled the way text (#92) is. The fork is the same coherence-vs-accent one as #91→#92, resolved the opposite way for borders: a brand-colored heading is a deliberate look (so text earned its own opt-in `textLevel`), but a brand-colored border on an otherwise-neutral card reads as a structural leftover, not an accent. So borders simply follow the surface — desaturate adds them to its uniform chroma-drain family; tint rides them on `surfaceTintLevel` with the backgrounds' resample recipe (level 0 → chosen neutral, level 1 → nudged back toward brand at `TARGET_CHROMA`). No new schema field.
+
+Two consequences worth recording:
+
+- **`--ring`/focus differentiation is a binding concern, deliberately out of scope here.** md has no distinct ring token — `--ring` is a shadcn binding onto outline. A brand focus ring on neutral borders is reachable by rebinding `--ring`→`--color-primary`, which is an override/binding decision, not a surface-treatment one. The treatment touches the two md outline tokens uniformly.
+- **Outline now obeys the pipeline's treatment-over-pin order.** md3 token pins land before `applyTreatment` (derive.ts), so a pin on a treated token is then subject to the active treatment — long-standing for the surface backgrounds, now also true for outline. This is consistent, not a new rule: the surgical-pin guarantee was always "beats MCU and palette regen", never "beats the surface treatment".
+
+Contrast-safe to make automatic: outline×surface pairs already sit in `CONTRAST_PAIRS` at the 3:1 structural floor, and chroma scaling preserves tone, so the live audit guards user-pushed levels. The body invariant (treatment touches the md surface family, primary stays MCU) is unchanged — outline is part of that family.

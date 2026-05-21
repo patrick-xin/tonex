@@ -1,6 +1,7 @@
 import { Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
+import { hctFromHex } from '../hct'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceDesaturate } from './desaturate'
 
@@ -18,6 +19,10 @@ const SURFACE_FAMILY = [
   '--color-surface-container-highest',
   '--color-on-surface',
   '--color-on-surface-variant',
+  // why: borders are coherence-coupled too (#93) — a brand-colored divider on a
+  // drained surface reads broken, same reason on-surface is here.
+  '--color-outline',
+  '--color-outline-variant',
 ] as const
 
 describe('applySurfaceDesaturate', () => {
@@ -52,6 +57,26 @@ describe('applySurfaceDesaturate', () => {
         const before = Hct.fromInt(layer[tok])
         const after = Hct.fromInt(out[tok])
         expect(Math.abs(after.tone - before.tone)).toBeLessThan(1)
+      }
+    }
+  })
+
+  it('drains outline/outline-variant with the surface — no brand border on a grey card (#93)', () => {
+    // why: THE #93 regression guard. A red seed makes MCU paint outline at
+    // chroma ~39; before this fix desaturate left it untouched, so every border
+    // glowed red on a fully-drained (c≈3) surface. Borders are structural, not
+    // accents — they drain with the surface, automatically (no knob), the same
+    // coherence call desaturate already makes for on-surface text.
+    for (const mode of ['light', 'dark'] as const) {
+      const layer = deriveTheme({
+        ...DEFAULT_INPUTS,
+        seed: { ...hctFromHex('#ff0000'), exactHex: '#ff0000' },
+      }).md[mode]
+      // sanity: MCU really does hand us a chromatic border to drain.
+      expect(Hct.fromInt(layer['--color-outline']).chroma).toBeGreaterThan(20)
+      const out = applySurfaceDesaturate(layer, 1)
+      for (const tok of ['--color-outline', '--color-outline-variant'] as const) {
+        expect(Hct.fromInt(out[tok]).chroma).toBeLessThan(4)
       }
     }
   })
