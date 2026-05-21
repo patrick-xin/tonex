@@ -50,22 +50,43 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
           >
-            Why do I see contrast issues with the shadcn preset?
+            What does the contrast audit mean, and how do I fix a fail?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              The shadcn preset samples colors at fixed positions to match shadcn's look. With some
-              source colors (especially vivid ones), this can produce insufficient contrast.
+              It's an <span className="font-medium">audit, not a gate</span> — it reports every
+              color pair against WCAG, it never blocks your export. Most themes pass; the audit
+              opens on "All" so you see the fails in proportion.
             </p>
+            <p>What the colors mean:</p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">Red — text fail</span> (under 4.5:1). A real
+                readability problem; fix before shipping.
+              </li>
+              <li>
+                <span className="font-medium">Amber — UI fail</span> (a border, ring, or fill under
+                3:1). A judgment call — often fine for a faint divider, your decision.
+              </li>
+              <li>
+                <span className="font-medium">Exempt</span> — decorative; WCAG doesn't require it.
+              </li>
+            </ul>
             <p>
-              <span className="font-medium">Solution:</span> Use the built-in contrast checker, then
-              override failing tokens individually. The app supports per-token overrides for exactly
-              this.
+              <span className="font-medium">How to fix one:</span>
             </p>
-            <p>
-              <span className="font-medium">Alternative:</span> Try the MD3 preset — it uses
-              semantic roles designed for contrast.
-            </p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                Raise the <span className="font-medium">Contrast level</span> in Settings — a global
+                lever that pushes every pair toward AA/AAA.
+              </li>
+              <li>
+                <span className="font-medium">Override</span> the failing role to a higher-contrast
+                hex, or <span className="font-medium">rebind</span> it to a stronger generated color
+                (see <span className="font-medium">Role bindings vs overrides</span>).
+              </li>
+            </ul>
+            <p>There's no auto-fix engine today — these levers are how you act on a fail.</p>
           </AccordionPanel>
         </AccordionItem>
         <AccordionItem
@@ -103,9 +124,19 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
               brand hue. Switching presets changes the entire color philosophy.
             </p>
             <p>
-              <span className="font-medium">Want MD3 colors with subtle borders?</span> Turn on the
-              soft borders toggle in the theme settings in control panel. The only downside is this
-              will create <span className="font-medium">contrast issues</span>. Use with caution.
+              <span className="font-medium">Want MD3 colors with shadcn-style subtle borders?</span>{' '}
+              Turn on the soft borders toggle in the theme settings. By design it binds{' '}
+              <code className="font-mono text-xs">--border</code>,{' '}
+              <code className="font-mono text-xs">--input</code>, and{' '}
+              <code className="font-mono text-xs">--sidebar-border</code> to Material's faint{' '}
+              <code className="font-mono text-xs">outline-variant</code> — a near-decorative
+              divider.
+            </p>
+            <p>
+              That pair sits below 3:1, so on the shadcn layer the audit flags it as an{' '}
+              <span className="font-medium">amber UI fail</span> (the same pair is marked Exempt on
+              the md layer). It's an aesthetic tradeoff, not a bug: keep soft borders for the
+              quieter look, or turn them off for higher-contrast edges.
             </p>
           </AccordionPanel>
         </AccordionItem>
