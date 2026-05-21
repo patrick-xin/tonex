@@ -77,6 +77,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   surfaceAlgo: 'tint',
   surfacePaletteName: 'slate',
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
+  surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
   surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
   customColors: NONDEFAULT_CUSTOM_COLORS,
   paletteOverrides: {
@@ -134,6 +135,7 @@ describe('useSource persistence round-trip', () => {
     s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
     for (const mode of ['light', 'dark'] as const) {
       s.actions.setSurfaceTintLevel(mode, NONDEFAULT_INPUTS.surfaceTintLevel[mode])
+      s.actions.setSurfaceTintTextLevel(mode, NONDEFAULT_INPUTS.surfaceTintTextLevel[mode])
       s.actions.setSurfaceDesaturateLevel(mode, NONDEFAULT_INPUTS.surfaceDesaturateLevel[mode])
     }
     for (const entry of NONDEFAULT_CUSTOM_COLORS) s.actions.addCustomColor(entry)

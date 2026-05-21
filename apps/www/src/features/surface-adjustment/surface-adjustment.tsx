@@ -5,6 +5,7 @@ import { SURFACE_ALGOS, type SurfaceAlgo } from '@tonex/core/schema'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { SurfaceLevelSlider } from './surface-level-slider'
 import { SurfacePaletteSelect } from './surface-palette-select'
+import { SurfaceTextTintSlider } from './surface-text-tint-slider'
 
 export const SurfaceAdjustment = ({
   triggerRef,
@@ -35,7 +36,12 @@ export const SurfaceAdjustment = ({
       </div>
       <div className="space-y-3">
         <SurfaceLevelSlider labelClassName="text-xs" />
-        {surfaceAlgo === 'tint' && <SurfacePaletteSelect />}
+        {surfaceAlgo === 'tint' && (
+          <>
+            <SurfacePaletteSelect />
+            <SurfaceTextTintSlider labelClassName="text-xs" />
+          </>
+        )}
       </div>
     </div>
   )

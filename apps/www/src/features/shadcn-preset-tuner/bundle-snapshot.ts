@@ -17,6 +17,7 @@ export interface PresetBundle {
   surfaceAlgo: SurfaceAlgo
   surfacePaletteName: NeutralPaletteName
   surfaceTintLevel: { light: number; dark: number }
+  surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
 }
@@ -35,6 +36,7 @@ export interface BundleDiff {
   surfaceAlgoChanged: boolean
   surfacePaletteNameChanged: boolean
   surfaceTintLevel: { light: boolean; dark: boolean }
+  surfaceTintTextLevel: { light: boolean; dark: boolean }
   surfaceDesaturateLevel: { light: boolean; dark: boolean }
   bindings: { light: ShadcnRoleName[]; dark: ShadcnRoleName[] }
   totalChanges: number
@@ -46,6 +48,7 @@ export function snapshotBundle(source: PortableTheme): PresetBundle {
     surfaceAlgo: source.surfaceAlgo,
     surfacePaletteName: source.surfacePaletteName,
     surfaceTintLevel: { ...source.surfaceTintLevel },
+    surfaceTintTextLevel: { ...source.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...source.surfaceDesaturateLevel },
     shadcnRoleBindings: {
       light: { ...source.shadcnRoleBindings.light },
@@ -85,6 +88,8 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
   const surfacePaletteNameChanged = bundle.surfacePaletteName !== baseline.surfacePaletteName
   const tintLight = bundle.surfaceTintLevel.light !== baseline.surfaceTintLevel.light
   const tintDark = bundle.surfaceTintLevel.dark !== baseline.surfaceTintLevel.dark
+  const textTintLight = bundle.surfaceTintTextLevel.light !== baseline.surfaceTintTextLevel.light
+  const textTintDark = bundle.surfaceTintTextLevel.dark !== baseline.surfaceTintTextLevel.dark
   const desatLight = bundle.surfaceDesaturateLevel.light !== baseline.surfaceDesaturateLevel.light
   const desatDark = bundle.surfaceDesaturateLevel.dark !== baseline.surfaceDesaturateLevel.dark
 
@@ -94,6 +99,8 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
     (surfacePaletteNameChanged ? 1 : 0) +
     (tintLight ? 1 : 0) +
     (tintDark ? 1 : 0) +
+    (textTintLight ? 1 : 0) +
+    (textTintDark ? 1 : 0) +
     (desatLight ? 1 : 0) +
     (desatDark ? 1 : 0) +
     lightBindings.length +
@@ -104,6 +111,7 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
     surfaceAlgoChanged,
     surfacePaletteNameChanged,
     surfaceTintLevel: { light: tintLight, dark: tintDark },
+    surfaceTintTextLevel: { light: textTintLight, dark: textTintDark },
     surfaceDesaturateLevel: { light: desatLight, dark: desatDark },
     bindings: { light: lightBindings, dark: darkBindings },
     totalChanges,
