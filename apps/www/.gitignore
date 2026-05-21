@@ -44,3 +44,5 @@ next-env.d.ts
 # fumadocs
 .source
 
+# throwaway prototype routes — locally usable, never committed
+src/app/**/prototype/
