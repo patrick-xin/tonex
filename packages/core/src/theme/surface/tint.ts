@@ -1,6 +1,5 @@
 import { Hct } from '@tonex/mcu'
 import type { TokenMap } from '../derive'
-import type { Mode } from '../mode'
 import { argbFromOklch } from '../oklch'
 import {
   NEUTRAL_PALETTE_NAMES,
@@ -8,59 +7,68 @@ import {
   TAILWIND_PALETTE_OKLCH,
 } from './tailwind-colors'
 
-// why: surface tint — replaces MCU's surfaces with a chosen TW neutral palette
-// shade, then blends primary's hue+chroma back in proportional to `level`.
-// Tone is preserved exactly (the shade map mirrors MCU's tone ladder).
+// why: surface tint — repaints the md surface backgrounds with a chosen
+// Tailwind neutral palette, then blends the primary's hue back in proportional
+// to `level`. Each token keeps its MCU *tone*; only hue+chroma are swapped, so
+// the elevation staircase MCU built survives intact.
 //
-// level=0: pure base palette shade (no primary character).
-// level=1: base shade with chroma forced to TARGET_CHROMA and hue snapped to primary.
+// level=0: pure chosen neutral, no primary character — the inspectable anchor
+//          "give me exactly this palette" (take-2 semantics, GH #91 discussion).
+// level=1: that neutral nudged to the primary's hue, chroma → TARGET_CHROMA.
 //
-// Slice 7 generalized this from hardcoded zinc to any of NEUTRAL_PALETTE_NAMES;
-// `paletteName` is required and validated by the type system.
+// Mechanism (B2, GH #91): the old tint snapped 3 tokens to literal Tailwind
+// shades (50/100/200) and let the other 5 ramp steps flow through MCU — so
+// neutral and brand-tinted steps alternated in one ramp (broken elevation).
+// Literal shades can't scale: Tailwind's ladder has no rung for most of MCU's
+// narrow high-tone surface band. So instead we *resample* the palette — read
+// its hue+chroma at each token's own MCU tone (linear interp between the
+// bracketing shades) — covering all 8 backgrounds with one coherent neutral
+// ramp. Tone now carries the light/dark split, so the `mode` param is gone;
+// this mirrors desaturate's per-token shape, the two differing only in
+// direction (desaturate drains brand out, tint adds a chosen neutral in).
 //
-// Scope: deliberately narrower than desaturate. Only the three core surface-bg
-// tokens (`--color-surface`, `--color-surface-container`, `--color-surface-
-// container-high`) are tinted — a known gap relative to the full md surface
-// ramp added in slice 2 (`-dim`, `-bright`, `-container-lowest`, `-container-
-// low`, `-container-highest` flow through MCU untouched). Expanding requires
-// picking shades for each new token (a design call), not just enlarging
-// SHADE_MAP. Defer until a UI exposes the full ramp under tint. on-surface +
-// on-surface-variant are MCU-derived (no shade map for text-on-surface).
+// Coverage: the 8 surface backgrounds only. on-surface/on-surface-variant stay
+// MCU-derived — brand-tinted text ships later as an opt-in accent decoupled
+// from this level (ADR-0018 amendment 2026-05-20), not folded in here.
 //
-// Argb-canonical per ADR-0021 — input layer holds argb, HCT math is native
-// argb, output stays argb. Stringification happens at the format/applyDom
-// seam.
+// Argb-canonical per ADR-0021 — argb in, HCT math native argb, argb out.
+// Stringification happens at the format/applyDom seam.
 
 const TARGET_CHROMA = 8
 
-// why: parse OKLCH strings → argb once at module load. Source of truth is
-// `tailwind-colors.ts`; this is a derived lookup. Keeping the conversion here
-// (not in tailwind-colors.ts) preserves that file as pure data.
-const NEUTRAL_PALETTE_ARGB: Record<NeutralPaletteName, Record<string, number>> = (() => {
-  const out = {} as Record<NeutralPaletteName, Record<string, number>>
+const SURFACE_BACKGROUNDS = [
+  '--color-surface',
+  '--color-surface-dim',
+  '--color-surface-bright',
+  '--color-surface-container-lowest',
+  '--color-surface-container-low',
+  '--color-surface-container',
+  '--color-surface-container-high',
+  '--color-surface-container-highest',
+] as const
+
+interface ShadePoint {
+  hue: number
+  chroma: number
+  tone: number
+}
+
+// why: parse each neutral palette's OKLCH shades → HCT once at module load,
+// sorted by tone ascending so sampleNeutral can walk bracketing pairs. Source
+// of truth is tailwind-colors.ts; this derived lookup lives here to keep that
+// file pure data.
+const NEUTRAL_SHADE_POINTS: Record<NeutralPaletteName, ShadePoint[]> = (() => {
+  const out = {} as Record<NeutralPaletteName, ShadePoint[]>
   for (const name of NEUTRAL_PALETTE_NAMES) {
-    const shades = TAILWIND_PALETTE_OKLCH[name]
-    const map: Record<string, number> = {}
-    for (const [shade, oklch] of Object.entries(shades)) {
-      map[shade] = argbFromOklch(oklch)
-    }
-    out[name] = map
+    const points = Object.values(TAILWIND_PALETTE_OKLCH[name]).map((oklch) => {
+      const hct = Hct.fromInt(argbFromOklch(oklch))
+      return { hue: hct.hue, chroma: hct.chroma, tone: hct.tone }
+    })
+    points.sort((a, b) => a.tone - b.tone)
+    out[name] = points
   }
   return out
 })()
-
-const SHADE_MAP: Record<Mode, Record<string, string>> = {
-  light: {
-    '--color-surface': '50',
-    '--color-surface-container': '100',
-    '--color-surface-container-high': '200',
-  },
-  dark: {
-    '--color-surface': '950',
-    '--color-surface-container': '900',
-    '--color-surface-container-high': '800',
-  },
-}
 
 function lerpHue(a: number, b: number, t: number): number {
   let diff = b - a
@@ -69,33 +77,57 @@ function lerpHue(a: number, b: number, t: number): number {
   return (a + diff * t + 360) % 360
 }
 
-function blendOne(baseArgb: number, primaryArgb: number, level: number): number {
-  if (level <= 0) return baseArgb
-  const base = Hct.fromInt(baseArgb)
-  const primary = Hct.fromInt(primaryArgb)
-  const blended = Hct.from(
-    lerpHue(base.hue, primary.hue, level),
-    base.chroma + (TARGET_CHROMA - base.chroma) * level,
-    base.tone,
-  )
-  return blended.toInt()
+// why: the palette's hue+chroma at an arbitrary MCU tone, linearly interpolated
+// between the two bracketing shades. Tones past the palette's range (MCU's t100
+// white / t0 black extremes) clamp to the nearest end.
+function sampleNeutral(points: ShadePoint[], tone: number): { hue: number; chroma: number } {
+  const first = points[0]
+  if (tone <= first.tone) return { hue: first.hue, chroma: first.chroma }
+  const last = points[points.length - 1]
+  if (tone >= last.tone) return { hue: last.hue, chroma: last.chroma }
+  for (let i = 0; i < points.length - 1; i++) {
+    const lo = points[i]
+    const hi = points[i + 1]
+    if (tone <= hi.tone) {
+      const t = (tone - lo.tone) / (hi.tone - lo.tone || 1)
+      return { hue: lerpHue(lo.hue, hi.hue, t), chroma: lo.chroma + (hi.chroma - lo.chroma) * t }
+    }
+  }
+  return { hue: last.hue, chroma: last.chroma }
+}
+
+// why: level=0 returns the pure neutral at this tone; above 0 it lerps hue
+// toward primary and lifts chroma toward TARGET_CHROMA. Tone is fixed by the
+// caller (MCU's), never moved.
+function tintToken(
+  tone: number,
+  neutral: { hue: number; chroma: number },
+  primaryHue: number,
+  level: number,
+): number {
+  if (level <= 0) return Hct.from(neutral.hue, neutral.chroma, tone).toInt()
+  return Hct.from(
+    lerpHue(neutral.hue, primaryHue, level),
+    neutral.chroma + (TARGET_CHROMA - neutral.chroma) * level,
+    tone,
+  ).toInt()
 }
 
 export function applySurfaceTint(
   mcuLayer: TokenMap,
-  mode: Mode,
   level: number,
   paletteName: NeutralPaletteName,
 ): TokenMap {
   const primaryArgb = mcuLayer['--color-primary']
   if (primaryArgb === undefined) return mcuLayer
+  const primaryHue = Hct.fromInt(primaryArgb).hue
+  const points = NEUTRAL_SHADE_POINTS[paletteName]
   const out: TokenMap = { ...mcuLayer }
-  const shades = SHADE_MAP[mode]
-  const palette = NEUTRAL_PALETTE_ARGB[paletteName]
-  for (const [token, shade] of Object.entries(shades)) {
-    const baseArgb = palette[shade]
-    if (baseArgb === undefined) continue
-    out[token] = blendOne(baseArgb, primaryArgb, level)
+  for (const token of SURFACE_BACKGROUNDS) {
+    const argb = mcuLayer[token]
+    if (argb === undefined) continue
+    const tone = Hct.fromInt(argb).tone
+    out[token] = tintToken(tone, sampleNeutral(points, tone), primaryHue, level)
   }
   return out
 }

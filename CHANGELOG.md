@@ -10,6 +10,11 @@ Slice-organized history. Each entry corresponds to a vertical-tracer increment p
 - Domain-discipline rules graduated to `docs/agents/code-conventions.md` (primitive-shape diff, disable-over-warn).
 - Triage labels aligned between `docs/agents/triage-labels.md` and GitHub.
 
+### Slice tint-ramp — Surface tint covers the full ramp (closes #91)
+
+- `fix(core)`: surface tint repainted only 3 of 8 surface-background tokens, leaving 5 to flow through MCU carrying brand chroma (6.5–38) — so neutral and brand-tinted steps alternated in one elevation ramp. Tint now covers all 8 backgrounds with one coherent neutral ramp.
+- `refactor(core)`: tint mechanism swapped from literal-Tailwind-shade snapping (`SHADE_MAP`, structurally capped at 3 tokens — Tailwind's lightness ladder has no rung for most of MCU's narrow surface tone band) to **resampling** the chosen neutral palette onto each token's own MCU tone. `applySurfaceTint(layer, level, paletteName)` drops the `mode` param (tone carries the light/dark split), mirroring `applySurfaceDesaturate`'s per-token shape. `level=0` is now pure chosen neutral — the inspectable anchor. Text (`on-surface`/`on-surface-variant`) stays MCU-derived; brand-tinted text deferred to an opt-in accent (#92). ADR-0018 amendment 2026-05-20.
+
 ### Slice preset-1 — Shadcn aesthetic presets (closes #36)
 
 - `feat(core)`: `SHADCN_PRESETS` library — 7 curated aesthetic bundles (`default`, `stark`, `soft`, `warm`, `playful`, `monotone`, `tech`). Each holds the 6 structural fields a preset can pin: `variant`, `surfaceAlgo`, `surfacePaletteName`, `surfaceTintLevel`, `surfaceDesaturateLevel`, `shadcnRoleBindings`. Per ADR-0026, presets touch bindings only — no override fields.

@@ -35,3 +35,15 @@ The body's original "treatment family" was authored against slice 1's md token s
 Each algorithm declares its token-coverage subset in its own `// why:` block at the code site. The desaturation algorithm covers the full ramp uniformly; the tint algorithm covers a subset (text-on-surface tokens stay MCU-derived since no shade map applies). Expansion of subset coverage is a product call best made when a UI surfaces the affected token set under treatment.
 
 The "treatment touches the md surface family only — primary stays MCU" invariant from the body is unchanged. What changed is "family" is now a per-algorithm subset.
+
+## Amendment — 2026-05-20
+
+The tint subset (3 of 8 surface backgrounds) was the gap the 2026-05-05 amendment parked as "a product call when a UI surfaces it." GH #91 turned it into a visible defect: the 5 untouched ramp steps kept MCU's brand chroma (6.5–38) and alternated with the 3 snapped-neutral steps in one elevation ramp.
+
+Tint now covers all 8 surface backgrounds. The mechanism changed from snapping each covered token to a literal Tailwind shade (`SHADE_MAP`, which can't scale — Tailwind's lightness ladder has no rung for most of MCU's narrow high-tone surface band) to **resampling** the chosen neutral palette onto each token's own MCU tone (read the palette's hue+chroma at that tone, keep the tone, blend the primary's hue back by level). Coverage now scales to the whole ramp, and the `mode` param drops out because tone carries the light/dark split. Tint is now per-token and binding-independent, mirroring desaturate — the two differ only in direction (desaturate drains brand chroma out toward grey; tint adds a chosen neutral in, optionally nudged back toward brand).
+
+`level=0` is **pure chosen neutral**, not MCU-as-is — the inspectable anchor "give me exactly this palette." This already held for the 3 legacy tokens; the change extends it to all 8, so it is a faithful completion rather than a redirection.
+
+Text (`on-surface`/`on-surface-variant`) stays MCU-derived. Desaturate touches text for *coherence* (chromatic text on a drained surface looks broken), which is a correctness fix and rightly automatic; tint touching text would be an *accent* (a deliberate brand pop in the foreground), which is a taste choice. Different intent → different UX, so brand-tinted text ships separately as an **opt-in accent decoupled from the surface level**, deferred to its own slice (GH #92), guarded by the live contrast audit.
+
+Coverage is still declared per-algorithm at the code site; the body invariant (treatment touches the md surface family, primary stays MCU) is unchanged.
