@@ -1,3 +1,4 @@
+import { MD_CHART_TOKEN_NAMES } from '../../chart/schema'
 import type { DerivedTheme, TokenMap } from '../derive'
 import { hexFromHct } from '../hct'
 import { MODES, type Mode } from '../mode'
@@ -16,10 +17,13 @@ import type { ContrastBundle, ExportOptions } from './bundle'
 // our roster, never fabricate a token to fill a competitor's slot). A tool that
 // consumes an MTB export consumes ours, and an operator reads ours the way they
 // expect. Where our roster is wider — six palettes incl. `error`, the per-family
-// `*-dim` / fixed / inverse tokens — the extra keys appear in their natural
-// slot; where MTB carries deprecated tokens we dropped (`background`,
-// `onBackground`, `surfaceVariant`) they are simply absent. Divergence is
-// visible by construction, never hidden behind fabricated values.
+// `*-dim` / fixed / inverse tokens, the chart family (ADR-0027) — the extra keys
+// appear in their natural slot; where MTB carries deprecated tokens we dropped
+// (`background`, `onBackground`, `surfaceVariant`) they are simply absent.
+// Divergence is visible by construction, never hidden behind fabricated values.
+// The "MTB has no slot for chart" reasoning that once dropped it (issue #89)
+// applied equally to `error` and the extended tokens — which we emit — so chart
+// is no exception: per-mode chart colors have a natural home inside each scheme.
 //
 // Sibling to css.ts and bound by the same rules: ADR-0017 — this is a sink, it
 // reshapes / re-encodes what deriveTheme returned and never recomputes a color
@@ -52,18 +56,22 @@ export interface MaterialThemeJson {
 interface ResolvedOptions {
   colorFormat: ColorFormat
   includeExtended: boolean
+  includeChart: boolean
   includePalette: boolean
 }
 
 // why: mirrors css.ts's resolveOptions — lean defaults per ADR-0021 c.6 (oklch,
-// core tokens, no palette). JSON honors only options with an MTB home:
-// includeChart and includeHeader are dropped (no MTB slot — never invented), and
-// contrast tiers arrive already resolved inside the bundle, so there is no
-// includeContrastVariants knob here.
+// core tokens, no chart, no palette). includeHeader is dropped (no MTB home —
+// it's the shadcn bootstrap incantation) and contrast tiers arrive already
+// resolved inside the bundle, so there is no includeContrastVariants knob here.
+// includeChart IS honored (issue #89): chart is part of our wider roster, and
+// ADR-0029 puts wider-roster tokens in their natural slot — same rule as the
+// extended tokens and `error` family MTB also lacks.
 function resolveOptions(options: ExportOptions): ResolvedOptions {
   return {
     colorFormat: options.colorFormat ?? 'oklch',
     includeExtended: options.includeExtended ?? false,
+    includeChart: options.includeChart ?? false,
     includePalette: options.includePalette ?? false,
   }
 }
@@ -110,6 +118,7 @@ function buildScheme(
   mode: Mode,
   roster: readonly string[],
   fmt: ColorFormat,
+  includeChart: boolean,
 ): Record<string, string> {
   const core = mode === 'light' ? theme.md.light : theme.md.dark
   const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
@@ -119,6 +128,18 @@ function buildScheme(
     const argb = lookup[name]
     if (argb === undefined) continue
     out[toSchemeKey(name)] = projectColor(argb, fmt)
+  }
+  // why: chart trails the roster, mirroring css.ts's `Object.assign(merged,
+  // chart)` after core+extended. Iterate the explicit MD_CHART_TOKEN_NAMES
+  // (not the merged lookup) — chart is its own mode-aware family on md, never
+  // part of MD_TOKEN_NAMES (issue #89, ADR-0027 / ADR-0029).
+  if (includeChart) {
+    const chart = mode === 'light' ? theme.md.lightChart : theme.md.darkChart
+    for (const name of MD_CHART_TOKEN_NAMES) {
+      const argb = chart[name]
+      if (argb === undefined) continue
+      out[toSchemeKey(name)] = projectColor(argb, fmt)
+    }
   }
   return out
 }
@@ -131,13 +152,14 @@ function buildSchemes(
   bundle: ContrastBundle,
   roster: readonly string[],
   fmt: ColorFormat,
+  includeChart: boolean,
 ): Record<string, Record<string, string>> {
   const tiers = tiersOf(bundle)
   const schemes: Record<string, Record<string, string>> = {}
   for (const mode of MODES) {
     for (const [tier, theme] of tiers) {
       const key = tier === 'default' ? mode : `${mode}-${tier}-contrast`
-      schemes[key] = buildScheme(theme, mode, roster, fmt)
+      schemes[key] = buildScheme(theme, mode, roster, fmt, includeChart)
     }
   }
   return schemes
@@ -196,7 +218,7 @@ export function buildMaterialThemeJson(
     seed,
     coreColors: { primary: seed },
     extendedColors: [],
-    schemes: buildSchemes(bundle, roster, opts.colorFormat),
+    schemes: buildSchemes(bundle, roster, opts.colorFormat, opts.includeChart),
   }
   // why: palettes is the trailing key, present only when toggled. Assigned after
   // schemes (object insertion order = key order, which the Red test asserts) and

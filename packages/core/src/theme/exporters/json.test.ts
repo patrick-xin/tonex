@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MD_CHART_TOKEN_NAMES } from '../../chart/schema'
 import { deriveTheme } from '../derive'
 import {
   DEFAULT_INPUTS,
@@ -41,6 +42,7 @@ function toSchemeKey(tokenName: string): string {
 
 const CORE_SCHEME_KEYS = MD_CORE_TOKEN_NAMES.map(toSchemeKey)
 const FULL_SCHEME_KEYS = MD_TOKEN_NAMES.map(toSchemeKey)
+const CHART_SCHEME_KEYS = MD_CHART_TOKEN_NAMES.map(toSchemeKey)
 const PALETTE_FAMILY_KEYS = [...MD_PALETTE_FAMILY_NAMES]
 const TONE_KEYS = MD_PALETTE_TONE_NAMES.map(String)
 
@@ -130,6 +132,45 @@ describe('buildMaterialThemeJson — MTB shape, our tokens (ADR-0029)', () => {
       expect(result.schemes.light).toHaveProperty('primaryDim')
       expect(result.schemes.light).toHaveProperty('surfaceTint')
       expect(result.schemes.light).toHaveProperty('shadow')
+    })
+  })
+
+  describe('includeChart option', () => {
+    // why: chart is a tonex-specific derived family (ADR-0027) with no MTB slot,
+    // but ADR-0029's rule is that a wider roster lands in its natural slot — the
+    // same rule that emits `error` and the extended tokens MTB lacks. Chart
+    // tokens are per-mode colors, so their natural home is inside each scheme,
+    // merged like includeExtended. Off by default (issue #89).
+    it('appends chart1..chart5 to each scheme when on, after the core roster', () => {
+      const result = buildMaterialThemeJson(source, leanBundle, { includeChart: true })
+      expect(Object.keys(result.schemes.light)).toEqual([...CORE_SCHEME_KEYS, ...CHART_SCHEME_KEYS])
+      expect(Object.keys(result.schemes.dark)).toEqual([...CORE_SCHEME_KEYS, ...CHART_SCHEME_KEYS])
+    })
+
+    it('composes with includeExtended — chart trails the full roster', () => {
+      const result = buildMaterialThemeJson(source, leanBundle, {
+        includeExtended: true,
+        includeChart: true,
+      })
+      expect(Object.keys(result.schemes.light)).toEqual([...FULL_SCHEME_KEYS, ...CHART_SCHEME_KEYS])
+    })
+
+    it('omits chart keys entirely when off (default)', () => {
+      const result = buildMaterialThemeJson(source, leanBundle, {})
+      for (const key of CHART_SCHEME_KEYS) {
+        expect(result.schemes.light).not.toHaveProperty(key)
+        expect(result.schemes.dark).not.toHaveProperty(key)
+      }
+    })
+
+    it('encodes chart values per colorFormat (uppercase hex here)', () => {
+      const result = buildMaterialThemeJson(source, leanBundle, {
+        includeChart: true,
+        colorFormat: 'hex',
+      })
+      for (const key of CHART_SCHEME_KEYS) {
+        expect(result.schemes.light[key]).toMatch(/^#[0-9A-F]{6}$/)
+      }
     })
   })
 

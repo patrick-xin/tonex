@@ -10,10 +10,11 @@ import type { ExportTab } from './use-export-content'
 // 2026-05-20) and rendered once above the tab strip by export-button. This
 // component renders the subset each tab can actually use: Tailwind gets the
 // full tier filters (Extended, Palette, Chart, Contrast); shadcn gets Chart +
-// New project; JSON gets Extended, Palette, Contrast — no Chart and no header,
-// because neither has a home in the MTB shape (ADR-0029), so the JSON formatter
-// ignores them and we don't surface dead toggles. TS / Dart are still stub
-// formatters with no options, so they render nothing (#86).
+// New project; JSON gets Extended, Chart, Palette, Contrast — Chart rejoined in
+// #89 (it has a natural slot in the MTB shape, ADR-0029), but `New project`
+// stays off the JSON tab since the shadcn header has no JSON home and the
+// formatter ignores it. TS / Dart are still stub formatters with no options, so
+// they render nothing (#86).
 //
 // Layout: Format is a single-select chooser (oklch vs hex are mutually
 // exclusive) so it stays a ToggleGroup. Include flags are independent
@@ -51,12 +52,15 @@ const SHADCN_INCLUDES: readonly IncludeItem[] = [
   { key: 'includeHeader', label: 'New project' },
 ] as const
 
-// why: JSON honors color format + Extended / Palette / Contrast (the options
-// with an MTB home, #85's formatter). includeChart and includeHeader are
-// omitted on purpose — the MTB shape has no slot for either (ADR-0029), so
-// offering them would be a toggle that changes nothing.
+// why: JSON honors color format + Extended / Chart / Palette / Contrast (the
+// options with a natural home in the MTB shape). Chart rejoined the set in #89:
+// chart is part of our wider roster, and the JSON formatter now merges it into
+// each scheme just like Extended (ADR-0029 — wider roster lands in its natural
+// slot). includeHeader stays omitted — it's the shadcn bootstrap incantation,
+// with no JSON home — so offering it would be a toggle that changes nothing.
 const JSON_INCLUDES: readonly IncludeItem[] = [
   { key: 'includeExtended', label: 'Extended' },
+  { key: 'includeChart', label: 'Chart' },
   { key: 'includePalette', label: 'Palette' },
   { key: 'includeContrastVariants', label: 'Contrast' },
 ] as const
