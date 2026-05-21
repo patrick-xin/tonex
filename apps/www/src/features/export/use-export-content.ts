@@ -19,11 +19,11 @@ export type ExportTab = 'Tailwind' | 'shadcn' | 'TS' | 'JSON' | 'Dart'
 // why: Tailwind tab emits the md layer (full globals.css with @theme inline);
 // shadcn tab emits :root + .dark only since the user already owns the @import
 // and @theme inline in their shadcn project. Both go through core's exportCss
-// so the drift-guard (ADR-0017) covers what users actually paste. TS / JSON /
-// Dart bodies live in `@tonex/core/exporters/{ts,json,dart}.ts` — they ship
-// as visible tabs from day one with TODO bodies (ADR-0021 commitment 9); when
-// a real formatter lands the file body swaps and this manager keeps the
-// same call.
+// so the drift-guard (ADR-0017) covers what users actually paste. JSON and Dart
+// now have real formatters in `@tonex/core/exporters/{json,dart}.ts`; TS still
+// ships the visible-from-day-one TODO body (ADR-0021 commitment 9). When a
+// stub's formatter lands its file body swaps and this manager keeps the same
+// call.
 
 // why: header is the export's provenance trail. seed + variant always carry
 // signal; date is what users actually find useful when comparing two pasted
@@ -70,7 +70,6 @@ export function useExportContent({
 
   return useMemo(() => {
     if (exportTab === 'TS') return { exportContent: exportTs(), ext: 'ts' }
-    if (exportTab === 'Dart') return { exportContent: exportDart(), ext: 'dart' }
 
     if (!hydrated) return { exportContent: '/* Loading… */', ext: 'css' }
 
@@ -88,6 +87,11 @@ export function useExportContent({
     if (exportTab === 'JSON') {
       return { exportContent: exportJson(portable, bundle, options), ext: 'json' }
     }
+
+    // why: Dart joined the bundle-consuming branches in slice dart-1 — it
+    // reshapes the same DerivedTheme into a Flutter MaterialTheme (ADR-0021
+    // c.9). Default light + dark only for now; contrast tiers land in dart-2.
+    if (exportTab === 'Dart') return { exportContent: exportDart(bundle), ext: 'dart' }
 
     // why: ISO yyyy-mm-dd — sortable, locale-free, and the form users expect
     // to see in a generated-file banner. Captured at memo recompute time so
