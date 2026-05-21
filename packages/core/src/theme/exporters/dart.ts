@@ -18,7 +18,8 @@ import type { ContrastBundle } from './bundle'
 // fixed-shape ColorScheme has no field — the four `*-dim` role tokens, chart,
 // palette — the token is simply absent (divergence visible by construction).
 // Chart / palette reach Dart parity through their own emission channels in a
-// later slice; this slice ships the default light + dark ColorScheme only.
+// later slice (dart-3). Contrast tiers (dart-2) emit when the bundle carries
+// them — the lean default bundle is still just light + dark.
 
 // why: the ColorScheme constructor is a fixed-shape arg list, so the roster is
 // an explicit ordered [dartField, token] map rather than a camelCase transform
@@ -103,20 +104,23 @@ function buildColorScheme(theme: DerivedTheme, mode: Mode): string {
   return lines.join('\n')
 }
 
-// why: the per-mode factory + its ThemeData accessor, mirroring MTB's
-// `lightScheme()` / `light()` pairing. `const ColorScheme(...)` so Flutter can
-// fold it at compile time.
-function modeBlock(theme: DerivedTheme, mode: Mode): string {
-  const Scheme = mode === 'light' ? 'light' : 'dark'
+// why: the (mode × tier) factory + its ThemeData accessor, mirroring MTB's
+// `lightScheme()` / `light()` and `lightMediumContrastScheme()` /
+// `lightMediumContrast()` pairings. The accessor name is `${mode}${tier}` — the
+// base tier carries no suffix (`light` / `dark`), so a lean bundle reproduces
+// dart-1's two-method output byte-for-byte. `const ColorScheme(...)` so Flutter
+// can fold it at compile time.
+function modeBlock(theme: DerivedTheme, mode: Mode, tier: TierSuffix): string {
+  const name = `${mode}${tier}`
   return [
-    `  static ColorScheme ${Scheme}Scheme() {`,
+    `  static ColorScheme ${name}Scheme() {`,
     '    return const ColorScheme(',
     buildColorScheme(theme, mode),
     '    );',
     '  }',
     '',
-    `  ThemeData ${Scheme}() {`,
-    `    return theme(${Scheme}Scheme());`,
+    `  ThemeData ${name}() {`,
+    `    return theme(${name}Scheme());`,
     '  }',
   ].join('\n')
 }
@@ -139,8 +143,32 @@ const THEME_BUILDER = [
   '  );',
 ].join('\n')
 
+// why: the contrast-tier suffix attached to a ColorScheme factory / ThemeData
+// accessor name. The base tier is suffix-free so the lean path stays identical
+// to dart-1; medium / high mirror MTB's `*MediumContrast` / `*HighContrast`.
+type TierSuffix = '' | 'MediumContrast' | 'HighContrast'
+
+// why: walk the tiers the bundle actually carries (ADR-0021 c.5 — medium / high
+// are present only when includeContrastVariants is on) and pair each with its
+// MTB suffix. A lean bundle yields just the base tier, so exportDart collapses
+// back to dart-1's two-method form with no dead branches.
+function presentTiers(bundle: ContrastBundle): ReadonlyArray<readonly [DerivedTheme, TierSuffix]> {
+  const tiers: Array<readonly [DerivedTheme, TierSuffix]> = [[bundle.default, '']]
+  if (bundle.medium) tiers.push([bundle.medium, 'MediumContrast'])
+  if (bundle.high) tiers.push([bundle.high, 'HighContrast'])
+  return tiers
+}
+
 export function exportDart(bundle: ContrastBundle): string {
-  const theme = bundle.default
+  const tiers = presentTiers(bundle)
+  // why: group every tier of one mode before the next, matching MTB's emission
+  // order (light, lightMediumContrast, lightHighContrast, then the dark trio).
+  const blocks: string[] = []
+  for (const mode of ['light', 'dark'] as const) {
+    for (const [theme, tier] of tiers) {
+      blocks.push(modeBlock(theme, mode, tier))
+    }
+  }
   return [
     'import "package:flutter/material.dart";',
     '',
@@ -149,9 +177,7 @@ export function exportDart(bundle: ContrastBundle): string {
     '',
     '  const MaterialTheme(this.textTheme);',
     '',
-    modeBlock(theme, 'light'),
-    '',
-    modeBlock(theme, 'dark'),
+    blocks.join('\n\n'),
     '',
     THEME_BUILDER,
     '}',
