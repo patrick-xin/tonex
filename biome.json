@@ -1,5 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "includes": [
       "**",
@@ -11,7 +12,8 @@
       "!packages/mcu",
       "!**/next-env.d.ts",
       "!apps/www/src/components/shadcn",
-      "!apps/www/src/app/**/(shadcn)/shadcn/**/_components"
+      "!apps/www/src/app/**/(shadcn)/shadcn/**/_components",
+      "!**/__fixtures__"
     ]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
