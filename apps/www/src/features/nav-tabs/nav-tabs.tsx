@@ -118,7 +118,6 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
           <ExportButton tabs={exportTabs} icon />
           <Settings layer={config.layer} />
           <ContrastChecker layer={config.layer} />
-          <ResetButton />
           <HelpDialog />
         </TooltipProvider>
         <Button

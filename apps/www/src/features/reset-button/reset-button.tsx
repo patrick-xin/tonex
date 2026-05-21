@@ -23,12 +23,6 @@ interface ResetButtonProps {
   onConfirm?: () => void
 }
 
-// why: reset wipes every source field, so it's gated behind an alert dialog
-// (replacing the old window.confirm) — the destructive action lives only on the
-// dialog's confirm button, never on the trigger. variant/size/label are props so
-// one component serves the testbed, the nav-tabs bar, and the settings row;
-// onConfirm fires after the reset lands so a host can react — e.g. the settings
-// row closes its popover via the handle once defaults are restored.
 export function ResetButton({
   variant,
   size = 'sm',
