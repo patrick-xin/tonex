@@ -10,7 +10,7 @@ import type { HelpSection } from './help-sections'
 import { useHelpSectionOpen } from './use-help-section-open'
 
 export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
-  const { value, setValue } = useHelpSectionOpen(section, 'concepts', ['hct'])
+  const { value, setValue } = useHelpSectionOpen(section, 'concepts', [])
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-semibold">Key Concepts</h3>
@@ -260,6 +260,60 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
               MD3 mode exposes the complete token system: all tonal palettes, every color role,
               per-token overrides, and native MD3 export formats. It's the full engine with no
               shortcuts.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="bindings-overrides" variant="underline" value="bindings-overrides">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            Role bindings vs overrides
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              Two power-user editors on the shadcn rail —{' '}
+              <span className="font-medium">Bindings</span> and{' '}
+              <span className="font-medium">Overrides</span>. They do different jobs, and you can
+              use them together.
+            </p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">
+                  Binding — point a role at a different generated color.
+                </span>{' '}
+                Each shadcn role follows one generated MD color; a binding changes{' '}
+                <em>which one</em> (e.g. make <code className="font-mono text-xs">--accent</code>{' '}
+                follow your secondary). It stays auto-generated — change your seed, variant, or
+                contrast and the role re-derives with it. Defaults come from the active preset.
+              </li>
+              <li>
+                <span className="font-medium">Override — lock a role to an exact color.</span> Pins
+                the role to a fixed hex (hex field, color picker, a Tailwind swatch, or by
+                snapshotting a generated color). It stops auto-generating — the seed can change,
+                this stays put.
+              </li>
+            </ul>
+            <p>
+              <span className="font-medium">They compose, and the override wins.</span> A role
+              resolves to its override hex if it has one, otherwise its binding-resolved color. If
+              you both rebind and override a role, the override shows; the binding sits underneath,
+              dormant, and comes back the moment you clear the override (the per-row reset).
+            </p>
+            <p>
+              <span className="font-medium">Both are per-mode</span>, and{' '}
+              <span className="font-medium">both land in your export exactly as you see them</span>{' '}
+              — pin light <code className="font-mono text-xs">--ring</code> while dark stays on its
+              binding, and the export matches the preview.
+            </p>
+            <p>
+              <span className="font-medium">What survives what:</span> switching the{' '}
+              <span className="font-medium">scheme variant</span> keeps both (bound colors just
+              re-derive); switching a <span className="font-medium">shadcn preset</span> replaces
+              your <span className="font-medium">bindings</span> but keeps your{' '}
+              <span className="font-medium">overrides</span>. Strength, binding, and override are
+              all per-mode — see{' '}
+              <span className="font-medium">Light &amp; dark — what's shared vs per-mode</span>.
             </p>
           </AccordionPanel>
         </AccordionItem>

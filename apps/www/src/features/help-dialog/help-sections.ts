@@ -11,6 +11,7 @@ export const HELP_SECTIONS = {
   'surface-adjustment': 'concepts',
   'contrast-levels': 'concepts',
   'shadcn-mode': 'concepts',
+  'bindings-overrides': 'concepts',
   'custom-colors': 'concepts',
   // Q&A accordion
   'md3-shadcn-mapping': 'qa',
