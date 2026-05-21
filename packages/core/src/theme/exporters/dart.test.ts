@@ -161,3 +161,34 @@ describe('exportDart — contrast tiers (slice dart-2)', () => {
     expect(literals).toHaveLength(COLOR_SCHEME_FIELD_COUNT * 6)
   })
 })
+
+// why: chart is a tonex-specific family (ADR-0027) with no slot in Flutter's
+// ColorScheme, so dart-3 emits it as its own `ChartColors` class — a const
+// constructor with chart1..chart5 plus light()/dark() factories, gated on the
+// includeChart option just like the JSON/CSS chart block (#89). Off by default,
+// so the dart-1/dart-2 contracts above (which never pass options) are unmoved.
+// Chart is mode-aware but not contrast-aware, so it reads the base tier only.
+describe('exportDart — chart channel (slice dart-3)', () => {
+  const bundle: ContrastBundle = { default: deriveTheme(DEFAULT_INPUTS) }
+
+  it('omits ChartColors unless includeChart is on', () => {
+    expect(exportDart(bundle)).not.toContain('ChartColors')
+    expect(exportDart(bundle, {})).not.toContain('ChartColors')
+  })
+
+  it('emits a ChartColors class with light()/dark() factories when on', () => {
+    const out = exportDart(bundle, { includeChart: true })
+    expect(out).toContain('class ChartColors {')
+    expect(out).toMatch(/static ChartColors light\(\) => const ChartColors\(/)
+    expect(out).toMatch(/static ChartColors dark\(\) => const ChartColors\(/)
+    for (const field of ['chart1', 'chart2', 'chart3', 'chart4', 'chart5']) {
+      expect(out).toContain(`${field}: Color(0x`)
+    }
+  })
+
+  it('adds 5 chart colors per mode (10 opaque literals) on top of the scheme', () => {
+    const out = exportDart(bundle, { includeChart: true })
+    const all = out.match(/Color\(0xff[0-9a-f]{6}\)/g) ?? []
+    expect(all).toHaveLength(COLOR_SCHEME_FIELD_COUNT * 2 + 10)
+  })
+})
