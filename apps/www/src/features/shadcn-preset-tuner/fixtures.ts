@@ -21,6 +21,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'desaturate',
       surfacePaletteName: 'zinc',
       surfaceTintLevel: { light: 0, dark: 0 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 0 },
       shadcnRoleBindings: {
         light: {
@@ -91,6 +92,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'tint',
       surfacePaletteName: 'zinc',
       surfaceTintLevel: { light: 0, dark: 0 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 0 },
       shadcnRoleBindings: {
         light: {
@@ -160,6 +162,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'desaturate',
       surfacePaletteName: 'stone',
       surfaceTintLevel: { light: 0.1, dark: 0.3 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0.2, dark: 1 },
       shadcnRoleBindings: {
         light: {
@@ -229,6 +232,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'tint',
       surfacePaletteName: 'taupe',
       surfaceTintLevel: { light: 0.1, dark: 0.1 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 1 },
       shadcnRoleBindings: {
         light: {
@@ -298,6 +302,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'desaturate',
       surfacePaletteName: 'mauve',
       surfaceTintLevel: { light: 1, dark: 0 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 0 },
       shadcnRoleBindings: {
         light: {
@@ -367,6 +372,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'tint',
       surfacePaletteName: 'zinc',
       surfaceTintLevel: { light: 0, dark: 0 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 0 },
       shadcnRoleBindings: {
         light: {
@@ -436,6 +442,7 @@ export const PRESET_FIXTURES: PresetFixture[] = [
       surfaceAlgo: 'tint',
       surfacePaletteName: 'mist',
       surfaceTintLevel: { light: 0.5, dark: 0.5 },
+      surfaceTintTextLevel: { light: 0, dark: 0 },
       surfaceDesaturateLevel: { light: 0, dark: 0 },
       shadcnRoleBindings: {
         light: {

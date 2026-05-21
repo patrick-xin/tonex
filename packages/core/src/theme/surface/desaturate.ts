@@ -8,12 +8,16 @@ import type { TokenMap } from '../derive'
 // level=0: MCU as-is (no effect).
 // level=1: chroma forced to 0 (pure neutral).
 //
-// Covers the FULL md surface ramp + on-surface text pair. Uniform multiplier
-// means new tokens cost nothing to include; leaving them out would let a
-// "neutral" surface sit next to an MCU-tinted `--color-surface-container-low`
-// in the same ramp (visible inconsistency). on-surface and on-surface-variant
-// are included because text-on-tinted-surface was the original complaint
-// (e.g. `#352f43` purple-tinted text in temp.md).
+// Covers the FULL md surface ramp + on-surface text pair + the outline pair.
+// Uniform multiplier means new tokens cost nothing to include; leaving them out
+// would let a "neutral" surface sit next to an MCU-tinted
+// `--color-surface-container-low` in the same ramp (visible inconsistency).
+// on-surface and on-surface-variant are included because text-on-tinted-surface
+// was the original complaint (e.g. `#352f43` purple-tinted text in temp.md).
+// outline/outline-variant join for the same coherence reason (GH #93): they
+// flow from MCU's neutral-variant palette at chroma 16–39, so an undrained
+// border would glow brand on a fully-drained surface — borders are structural,
+// not accents, so they drain with the surface automatically (no knob).
 
 const SURFACE_FAMILY = [
   '--color-surface',
@@ -26,6 +30,8 @@ const SURFACE_FAMILY = [
   '--color-surface-container-highest',
   '--color-on-surface',
   '--color-on-surface-variant',
+  '--color-outline',
+  '--color-outline-variant',
 ] as const
 
 function scaleChroma(argb: number, level: number): number {

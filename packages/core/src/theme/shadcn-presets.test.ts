@@ -25,6 +25,7 @@ function projectPreset(theme: PortableTheme): ShadcnPreset {
     surfaceAlgo: theme.surfaceAlgo,
     surfacePaletteName: theme.surfacePaletteName,
     surfaceTintLevel: theme.surfaceTintLevel,
+    surfaceTintTextLevel: theme.surfaceTintTextLevel,
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
   }
@@ -98,6 +99,13 @@ describe('R4: findActivePreset negative cases', () => {
   it('returns null when surfaceTintLevel differs', () => {
     const theme = themeWithPreset('default')
     expect(findActivePreset({ ...theme, surfaceTintLevel: { light: 0.5, dark: 0.5 } })).toBeNull()
+  })
+
+  it('returns null when surfaceTintTextLevel differs', () => {
+    const theme = themeWithPreset('default')
+    expect(
+      findActivePreset({ ...theme, surfaceTintTextLevel: { light: 0.5, dark: 0.5 } }),
+    ).toBeNull()
   })
 
   it('returns null when surfaceDesaturateLevel differs', () => {

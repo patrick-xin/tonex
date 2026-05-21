@@ -539,6 +539,12 @@ describe('deriveTheme', () => {
       // pins the shadcn role; override wins.
       const { md, shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
+        // why: outline now joins the desaturate family (#93), and the default
+        // preset desaturates light at 0.3 — which would drain this pin. Zero the
+        // treatment so this test isolates override-vs-md3-pin PRECEDENCE, the
+        // thing it's actually about, from the (separately tested) treatment-over-
+        // pin ordering.
+        surfaceDesaturateLevel: { light: 0, dark: 0 },
         md3TokenOverrides: { light: { '--color-outline': '#00ff00' }, dark: {} },
         shadcnRoleOverrides: { light: { '--ring': '#ff0000' }, dark: {} },
       })
@@ -556,6 +562,10 @@ describe('deriveTheme', () => {
       // default preset's binding (which now uses --color-primary).
       const { shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
+        // why: outline is treated now (#93); zero the default 0.3 light
+        // desaturate so the md3 pin propagates intact and this test isolates the
+        // binding→md3 propagation contract from treatment.
+        surfaceDesaturateLevel: { light: 0, dark: 0 },
         md3TokenOverrides: { light: { '--color-outline': '#00ff00' }, dark: {} },
         shadcnRoleBindings: {
           light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light, '--ring': '--color-outline' },

@@ -20,6 +20,7 @@ export interface ShadcnPreset {
   surfaceAlgo: SurfaceAlgo
   surfacePaletteName: NeutralPaletteName
   surfaceTintLevel: { light: number; dark: number }
+  surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
 }
@@ -43,6 +44,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'zinc',
     surfaceTintLevel: { light: 0, dark: 0 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0.3, dark: 0 },
     shadcnRoleBindings: {
       light: {
@@ -108,6 +110,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
     surfaceTintLevel: { light: 0, dark: 0 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
@@ -173,6 +176,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'stone',
     surfaceTintLevel: { light: 0.1, dark: 0.3 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0.2, dark: 1 },
     shadcnRoleBindings: {
       light: {
@@ -238,6 +242,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'tint',
     surfacePaletteName: 'taupe',
     surfaceTintLevel: { light: 0.1, dark: 0.1 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 1 },
     shadcnRoleBindings: {
       light: {
@@ -303,6 +308,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'mauve',
     surfaceTintLevel: { light: 1, dark: 0 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
@@ -368,6 +374,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
     surfaceTintLevel: { light: 0, dark: 0 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
@@ -433,6 +440,7 @@ export const SHADCN_PRESETS = {
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',
     surfaceTintLevel: { light: 1, dark: 1 },
+    surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
@@ -528,6 +536,8 @@ export function findActivePreset(theme: PortableTheme): ShadcnPresetName | null 
     if (theme.surfacePaletteName !== preset.surfacePaletteName) continue
     if (theme.surfaceTintLevel.light !== preset.surfaceTintLevel.light) continue
     if (theme.surfaceTintLevel.dark !== preset.surfaceTintLevel.dark) continue
+    if (theme.surfaceTintTextLevel.light !== preset.surfaceTintTextLevel.light) continue
+    if (theme.surfaceTintTextLevel.dark !== preset.surfaceTintTextLevel.dark) continue
     if (theme.surfaceDesaturateLevel.light !== preset.surfaceDesaturateLevel.light) continue
     if (theme.surfaceDesaturateLevel.dark !== preset.surfaceDesaturateLevel.dark) continue
     if (!bindingsEqual(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)) continue

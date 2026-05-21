@@ -27,14 +27,35 @@ import {
 // this mirrors desaturate's per-token shape, the two differing only in
 // direction (desaturate drains brand out, tint adds a chosen neutral in).
 //
-// Coverage: the 8 surface backgrounds only. on-surface/on-surface-variant stay
-// MCU-derived — brand-tinted text ships later as an opt-in accent decoupled
-// from this level (ADR-0018 amendment 2026-05-20), not folded in here.
+// Coverage: the 8 surface backgrounds AND the 2 outline tokens (both driven by
+// `level` — borders are coherence-coupled to the surface, GH #93 / ADR-0018
+// amendment 2026-05-21) PLUS, opt-in, the 2 text tokens on-surface/
+// on-surface-variant (driven by a SEPARATE `textLevel`, GH #92). Text decouples
+// from `level` so "clean neutral cards + brand-accented text" is reachable;
+// outline does NOT, because a brand border on a neutral card reads as a leftover
+// rather than a deliberate accent.
+//
+// Text follows the SAME neutral→brand model as the backgrounds, on its own knob:
+// textLevel=0 is the chosen neutral palette at the token's own tone (a clean
+// baseline — picking a neutral palette drains MCU's brand chroma out of text too,
+// not just the surfaces), and textLevel rises toward --color-primary's hue.
+// The one difference is the chroma ceiling: backgrounds cap at TARGET_CHROMA (a
+// whisper), text at TEXT_CHROMA_CEILING_FRACTION of the primary's own chroma — a
+// deliberately stronger accent, settled at 25% in /prototype-text-accent (enough
+// pop without tripping the 4.5:1 floor; linear, no easing). Tone is pinned
+// throughout (text legibility depends on it).
 //
 // Argb-canonical per ADR-0021 — argb in, HCT math native argb, argb out.
 // Stringification happens at the format/applyDom seam.
 
 const TARGET_CHROMA = 8
+
+// why: text-accent chroma ceiling, as a fraction of the primary's own chroma.
+// 25% accents without crowding the 4.5:1 contrast floor on the canary token
+// (settled in /prototype-text-accent across vivid + muted seeds, GH #92).
+const TEXT_CHROMA_CEILING_FRACTION = 0.25
+
+const TEXT_TOKENS = ['--color-on-surface', '--color-on-surface-variant'] as const
 
 const SURFACE_BACKGROUNDS = [
   '--color-surface',
@@ -46,6 +67,13 @@ const SURFACE_BACKGROUNDS = [
   '--color-surface-container-high',
   '--color-surface-container-highest',
 ] as const
+
+// why: outline/outline-variant ride the SAME `level` and recipe as the
+// backgrounds (GH #93) — coherence-coupled to surfaceTintLevel, NOT a separate
+// accent knob like text (#92). A brand-colored border on a neutral surface
+// reads as a structural leftover, not a deliberate accent, so level=0 drains
+// outline to the chosen neutral exactly as it does the backgrounds.
+const SURFACE_OUTLINES = ['--color-outline', '--color-outline-variant'] as const
 
 interface ShadePoint {
   hue: number
@@ -113,21 +141,50 @@ function tintToken(
   ).toInt()
 }
 
+// why: opt-in text accent — same neutral→brand model as tintToken, on its own
+// knob. Base is the chosen neutral palette at the token's own tone (textLevel=0
+// → clean neutral text, NOT MCU). textLevel lerps hue toward the primary and
+// lifts chroma toward TEXT_CHROMA_CEILING_FRACTION of the primary's chroma —
+// a stronger ceiling than backgrounds, since text is a deliberate accent. Tone
+// stays MCU's (legibility).
+function tintTextToken(
+  textArgb: number,
+  neutralPoints: ShadePoint[],
+  primary: Hct,
+  level: number,
+): number {
+  const tone = Hct.fromInt(textArgb).tone
+  const base = sampleNeutral(neutralPoints, tone)
+  if (level <= 0) return Hct.from(base.hue, base.chroma, tone).toInt()
+  const ceiling = primary.chroma * TEXT_CHROMA_CEILING_FRACTION
+  return Hct.from(
+    lerpHue(base.hue, primary.hue, level),
+    base.chroma + (ceiling - base.chroma) * level,
+    tone,
+  ).toInt()
+}
+
 export function applySurfaceTint(
   mcuLayer: TokenMap,
   level: number,
   paletteName: NeutralPaletteName,
+  textLevel = 0,
 ): TokenMap {
   const primaryArgb = mcuLayer['--color-primary']
   if (primaryArgb === undefined) return mcuLayer
-  const primaryHue = Hct.fromInt(primaryArgb).hue
+  const primary = Hct.fromInt(primaryArgb)
   const points = NEUTRAL_SHADE_POINTS[paletteName]
   const out: TokenMap = { ...mcuLayer }
-  for (const token of SURFACE_BACKGROUNDS) {
+  for (const token of [...SURFACE_BACKGROUNDS, ...SURFACE_OUTLINES]) {
     const argb = mcuLayer[token]
     if (argb === undefined) continue
     const tone = Hct.fromInt(argb).tone
-    out[token] = tintToken(tone, sampleNeutral(points, tone), primaryHue, level)
+    out[token] = tintToken(tone, sampleNeutral(points, tone), primary.hue, level)
+  }
+  for (const token of TEXT_TOKENS) {
+    const argb = mcuLayer[token]
+    if (argb === undefined) continue
+    out[token] = tintTextToken(argb, points, primary, textLevel)
   }
   return out
 }

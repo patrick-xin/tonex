@@ -74,6 +74,7 @@ export interface SourceActions {
   setSurfaceAlgo(algo: SurfaceAlgo): void
   setSurfacePaletteName(name: NeutralPaletteName): void
   setSurfaceTintLevel(mode: Mode, level: number): void
+  setSurfaceTintTextLevel(mode: Mode, level: number): void
   setSurfaceDesaturateLevel(mode: Mode, level: number): void
   addCustomColor(entry: CustomColorEntry): void
   updateCustomColor(id: string, patch: Partial<Omit<CustomColorEntry, 'id'>>): void
@@ -292,6 +293,8 @@ export const useSource = create<SourceState>()(
         // SourceActions take `(mode, value)` first.
         setSurfaceTintLevel: (mode, level) =>
           set((s) => ({ surfaceTintLevel: { ...s.surfaceTintLevel, [mode]: level } })),
+        setSurfaceTintTextLevel: (mode, level) =>
+          set((s) => ({ surfaceTintTextLevel: { ...s.surfaceTintTextLevel, [mode]: level } })),
         setSurfaceDesaturateLevel: (mode, level) =>
           set((s) => ({
             surfaceDesaturateLevel: { ...s.surfaceDesaturateLevel, [mode]: level },

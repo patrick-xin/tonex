@@ -136,6 +136,11 @@ function DiffSummary({ diff }: DiffSummaryProps) {
       detail: changedModes(diff.surfaceTintLevel),
     },
     {
+      label: 'surfaceTintTextLevel',
+      changed: diff.surfaceTintTextLevel.light || diff.surfaceTintTextLevel.dark,
+      detail: changedModes(diff.surfaceTintTextLevel),
+    },
+    {
       label: 'surfaceDesaturateLevel',
       changed: diff.surfaceDesaturateLevel.light || diff.surfaceDesaturateLevel.dark,
       detail: changedModes(diff.surfaceDesaturateLevel),
@@ -207,6 +212,8 @@ function useApplyBundle() {
     actions.setSurfacePaletteName(bundle.surfacePaletteName)
     actions.setSurfaceTintLevel('light', bundle.surfaceTintLevel.light)
     actions.setSurfaceTintLevel('dark', bundle.surfaceTintLevel.dark)
+    actions.setSurfaceTintTextLevel('light', bundle.surfaceTintTextLevel.light)
+    actions.setSurfaceTintTextLevel('dark', bundle.surfaceTintTextLevel.dark)
     actions.setSurfaceDesaturateLevel('light', bundle.surfaceDesaturateLevel.light)
     actions.setSurfaceDesaturateLevel('dark', bundle.surfaceDesaturateLevel.dark)
     for (const role of SHADCN_ROLE_NAMES) {

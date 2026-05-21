@@ -387,12 +387,18 @@ export interface PortableTheme {
   //   pre-slice-7 behavior bytewise (algorithm was hardcoded to zinc).
   // - surfaceTintLevel: 0=neutral palette base → 1=full primary character.
   //   Mode-keyed since v7 — independent levels per mode.
+  // - surfaceTintTextLevel: opt-in brand accent on on-surface/on-surface-
+  //   variant, 0=MCU text → 1=text at the primary's hue+chroma (GH #92).
+  //   DECOUPLED from surfaceTintLevel by design so "neutral surfaces +
+  //   brand-accented text" is reachable. Only consumed when surfaceAlgo=
+  //   'tint'. Default {0,0} keeps the drift-guard baseline byte-identical.
   // - surfaceDesaturateLevel: 0=MCU as-is → 1=chroma stripped. Mode-keyed
   //   since v7. The level=0 short-circuit in applySurfaceDesaturate keeps
   //   the drift-guard baseline byte-identical when both modes are 0.
   surfaceAlgo: SurfaceAlgo
   surfacePaletteName: NeutralPaletteName
   surfaceTintLevel: { light: number; dark: number }
+  surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
   // why: user-defined dual-layer color slots (md: 4 tokens, shadcn: 2 tokens
   // sourced per entry.shadcnSource). Empty by default — drift-guard baseline
@@ -462,6 +468,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   surfaceAlgo: SHADCN_PRESETS.default.surfaceAlgo,
   surfacePaletteName: SHADCN_PRESETS.default.surfacePaletteName,
   surfaceTintLevel: SHADCN_PRESETS.default.surfaceTintLevel,
+  surfaceTintTextLevel: SHADCN_PRESETS.default.surfaceTintTextLevel,
   surfaceDesaturateLevel: SHADCN_PRESETS.default.surfaceDesaturateLevel,
   customColors: [],
   paletteOverrides: {},
@@ -580,6 +587,7 @@ export const PortableThemeSchema = v.object({
   surfaceAlgo: v.picklist(SURFACE_ALGOS),
   surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),
   surfaceTintLevel: ModeKeyedNumberSchema,
+  surfaceTintTextLevel: ModeKeyedNumberSchema,
   surfaceDesaturateLevel: ModeKeyedNumberSchema,
   customColors: CustomColorsSchema,
   paletteOverrides: PaletteOverridesSchema,
