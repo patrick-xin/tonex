@@ -2,7 +2,7 @@ import type { MdChartTokenName } from '../../chart/schema'
 import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
 import { argbComponents } from '../oklch'
-import type { MdTokenName } from '../schema'
+import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES, type MdTokenName } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
 
 // why: paste-ready Flutter theme shaped like Material Theme Builder's Dart
@@ -16,11 +16,12 @@ import type { ContrastBundle, ExportOptions } from './bundle'
 //
 // We are not a fork of MTB: where Flutter's ColorScheme can hold a tonex token
 // we emit it, even one MTB's own sample omits (`onInverseSurface`). Where the
-// fixed-shape ColorScheme has no field — the four `*-dim` role tokens, chart,
-// palette — the token is simply absent (divergence visible by construction).
-// Chart / palette reach Dart parity through their own emission channels in a
-// later slice (dart-3). Contrast tiers (dart-2) emit when the bundle carries
-// them — the lean default bundle is still just light + dark.
+// fixed-shape ColorScheme has no field — the four `*-dim` role tokens — the
+// token is simply absent from the scheme (divergence visible by construction).
+// Chart and palette have no ColorScheme slot either, so they reach Dart parity
+// through their own emission channels: a ChartColors class (dart-3) and a
+// tonalPalettes map (dart-4), each option-gated. Contrast tiers (dart-2) emit
+// when the bundle carries them — the lean default bundle is just light + dark.
 
 // why: the ColorScheme constructor is a fixed-shape arg list, so the roster is
 // an explicit ordered [dartField, token] map rather than a camelCase transform
@@ -214,6 +215,27 @@ function chartColorsClass(theme: DerivedTheme): string {
   ].join('\n')
 }
 
+// why: the tonal palettes are the mode- and contrast-invariant source ramps the
+// scheme reads tones from (ADR-0021 c.5 — palette is derived once from the light
+// scheme), so they emit as a single `static const` map on MaterialTheme rather
+// than per-mode factories. Keyed by the kebab emission slug (matching the JSON
+// `palettes` block, #85) and tone int. Family / tone order follow the canonical
+// schema arrays so a new family or tone flows through without a name list here.
+function tonalPalettesBlock(theme: DerivedTheme): string {
+  const lines = ['  static const Map<String, Map<int, Color>> tonalPalettes = {']
+  for (const family of MD_PALETTE_FAMILY_NAMES) {
+    lines.push(`    '${family}': {`)
+    for (const tone of MD_PALETTE_TONE_NAMES) {
+      const argb = theme.md.palette[`--color-${family}-${tone}`]
+      if (argb === undefined) continue
+      lines.push(`      ${tone}: ${dartColor(argb)},`)
+    }
+    lines.push('    },')
+  }
+  lines.push('  };')
+  return lines.join('\n')
+}
+
 export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}): string {
   const tiers = presentTiers(bundle)
   // why: group every tier of one mode before the next, matching MTB's emission
@@ -224,9 +246,10 @@ export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}):
       blocks.push(modeBlock(theme, mode, tier))
     }
   }
-  const parts = [
-    'import "package:flutter/material.dart";',
-    '',
+  // why: build the MaterialTheme body open-ended so the optional palette map can
+  // join as a member before the class closes; chart is appended after as its
+  // own class. Both gated, off by default — the lean export is just the theme.
+  const body = [
     'class MaterialTheme {',
     '  final TextTheme textTheme;',
     '',
@@ -235,10 +258,11 @@ export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}):
     blocks.join('\n\n'),
     '',
     THEME_BUILDER,
-    '}',
   ]
-  // why: chart rides alongside MaterialTheme as its own class, gated on the
-  // includeChart option — off by default, so the lean export is just the theme.
+  if (options.includePalette) body.push('', tonalPalettesBlock(bundle.default))
+  body.push('}')
+
+  const parts = ['import "package:flutter/material.dart";', '', body.join('\n')]
   if (options.includeChart) parts.push('', chartColorsClass(bundle.default))
   parts.push('')
   return parts.join('\n')

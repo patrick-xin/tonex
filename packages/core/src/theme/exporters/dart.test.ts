@@ -13,10 +13,11 @@ import { exportDart } from './dart'
 // hold — never a specific color, and deliberately diverging from the sample
 // where the sample is narrower than our roster.
 //
-// Slice scope (agreed): dart-1 shipped the lean default light + dark
-// ColorScheme; dart-2 (this slice) adds the contrast tiers — when the bundle
-// carries medium / high, exportDart emits MTB's full 6-scheme / 6-method form.
-// Chart / palette channels are still dart-3.
+// Slice scope (agreed, cumulative): dart-1 shipped the lean default light +
+// dark ColorScheme; dart-2 added contrast tiers (MTB's 6-scheme / 6-method form
+// when the bundle carries medium / high); dart-3 added the standalone
+// ChartColors class; dart-4 adds the tonalPalettes map. Each channel past dart-1
+// is option-gated and off by default, so the lean export is unchanged.
 //
 // Two deliberate divergences from MTB's sample, both flowing from "we are not a
 // fork of MTB — ship every tonex token Flutter can represent, fix what's
@@ -190,5 +191,51 @@ describe('exportDart — chart channel (slice dart-3)', () => {
     const out = exportDart(bundle, { includeChart: true })
     const all = out.match(/Color\(0xff[0-9a-f]{6}\)/g) ?? []
     expect(all).toHaveLength(COLOR_SCHEME_FIELD_COUNT * 2 + 10)
+  })
+})
+
+// why: the tonal palettes are mode- and contrast-invariant source ramps (the
+// scheme reads tones from them), so dart-4 emits them once as a single
+// `static const Map<String, Map<int, Color>> tonalPalettes` on MaterialTheme,
+// keyed by the kebab emission slug (matching the JSON `palettes` block, #85) and
+// tone int. Gated on includePalette, off by default — dart-1..3 contracts hold.
+// Six MCU families (incl. error, ADR-0029) × eighteen tones = 108 literals.
+const PALETTE_FAMILY_KEYS = [
+  'primary',
+  'secondary',
+  'tertiary',
+  'neutral',
+  'neutral-variant',
+  'error',
+] as const
+const PALETTE_TONE_COUNT = 18
+describe('exportDart — palette channel (slice dart-4)', () => {
+  const bundle: ContrastBundle = { default: deriveTheme(DEFAULT_INPUTS) }
+
+  it('omits tonalPalettes unless includePalette is on', () => {
+    expect(exportDart(bundle)).not.toContain('tonalPalettes')
+    expect(exportDart(bundle, {})).not.toContain('tonalPalettes')
+  })
+
+  it('emits a tonalPalettes map keyed by every family emission slug when on', () => {
+    const out = exportDart(bundle, { includePalette: true })
+    expect(out).toContain('static const Map<String, Map<int, Color>> tonalPalettes = {')
+    for (const family of PALETTE_FAMILY_KEYS) {
+      expect(out).toContain(`'${family}': {`)
+    }
+  })
+
+  it('keys tones by int (lowest 0 and highest 100 present)', () => {
+    const out = exportDart(bundle, { includePalette: true })
+    expect(out).toMatch(/\b0: Color\(0x/)
+    expect(out).toMatch(/\b100: Color\(0x/)
+  })
+
+  it('adds 6 families × 18 tones opaque ARGB literals on top of the scheme', () => {
+    const out = exportDart(bundle, { includePalette: true })
+    const all = out.match(/Color\(0xff[0-9a-f]{6}\)/g) ?? []
+    expect(all).toHaveLength(
+      COLOR_SCHEME_FIELD_COUNT * 2 + PALETTE_FAMILY_KEYS.length * PALETTE_TONE_COUNT,
+    )
   })
 })
