@@ -13,8 +13,10 @@ import { exportDart } from './dart'
 // hold — never a specific color, and deliberately diverging from the sample
 // where the sample is narrower than our roster.
 //
-// Slice scope (agreed): default light + dark ColorScheme only. Contrast tiers
-// (the 6-method form) land in slice dart-2; chart / palette channels in dart-3.
+// Slice scope (agreed): dart-1 shipped the lean default light + dark
+// ColorScheme; dart-2 (this slice) adds the contrast tiers — when the bundle
+// carries medium / high, exportDart emits MTB's full 6-scheme / 6-method form.
+// Chart / palette channels are still dart-3.
 //
 // Two deliberate divergences from MTB's sample, both flowing from "we are not a
 // fork of MTB — ship every tonex token Flutter can represent, fix what's
@@ -101,8 +103,61 @@ describe('exportDart — Flutter MaterialTheme, our tokens (slice dart-1)', () =
     expect(out).toContain('scaffoldBackgroundColor: colorScheme.surface,')
   })
 
-  it('does not emit contrast-tier schemes yet (deferred to slice dart-2)', () => {
+  it('lean bundle (no variants) emits only the two base schemes, no tier methods', () => {
     expect(out).not.toContain('MediumContrast')
     expect(out).not.toContain('HighContrast')
+  })
+})
+
+// why: when includeContrastVariants is on, buildContrastBundle fills medium +
+// high (deriveTheme re-run at the canonical 0.5 / 1.0 contrast levels), and
+// exportDart must emit MTB's full form — a ColorScheme factory plus its
+// ThemeData accessor for each of the six (mode × tier) combinations, grouped
+// mode-first like the sample. Bundle built here the way production does
+// (json.test.ts precedent): tier themes are the same source re-derived at a
+// higher contrastLevel. Same sink rule (ADR-0017): exportDart re-encodes what
+// each tier's deriveTheme already returned — it never recomputes a contrast.
+describe('exportDart — contrast tiers (slice dart-2)', () => {
+  const source = DEFAULT_INPUTS
+  const bundle: ContrastBundle = {
+    default: deriveTheme(source),
+    medium: deriveTheme({ ...source, contrastLevel: 0.5 }),
+    high: deriveTheme({ ...source, contrastLevel: 1 }),
+  }
+  const out = exportDart(bundle)
+
+  it('emits a ColorScheme factory for every mode × tier', () => {
+    for (const name of [
+      'lightScheme',
+      'lightMediumContrastScheme',
+      'lightHighContrastScheme',
+      'darkScheme',
+      'darkMediumContrastScheme',
+      'darkHighContrastScheme',
+    ]) {
+      expect(out).toContain(`static ColorScheme ${name}() {`)
+    }
+  })
+
+  it('emits the matching ThemeData accessor for every tier', () => {
+    for (const name of [
+      'light',
+      'lightMediumContrast',
+      'lightHighContrast',
+      'dark',
+      'darkMediumContrast',
+      'darkHighContrast',
+    ]) {
+      expect(out).toContain(`ThemeData ${name}() {`)
+    }
+  })
+
+  it('groups all light tiers before the dark tiers (MTB emission order)', () => {
+    expect(out.indexOf('lightHighContrastScheme')).toBeLessThan(out.indexOf('darkScheme()'))
+  })
+
+  it('encodes 46 fields × 6 schemes opaque ARGB literals', () => {
+    const literals = out.match(/Color\(0x[0-9a-fA-F]{8}\)/g) ?? []
+    expect(literals).toHaveLength(COLOR_SCHEME_FIELD_COUNT * 6)
   })
 })
