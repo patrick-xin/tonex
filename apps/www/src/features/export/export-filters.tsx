@@ -68,12 +68,13 @@ const JSON_INCLUDES: readonly IncludeItem[] = [
   { key: 'includeContrastVariants', label: 'Contrast' },
 ] as const
 
-// why: Dart's ColorScheme is a fixed-shape Flutter target — the only tier
-// filter it can honor is Contrast (the bundle's medium / high tiers emit as
-// MTB's 6-method form). Extended is always on for Dart, and Chart / Palette
-// have no ColorScheme slot yet (dart-3), so offering them would be dead
-// toggles.
+// why: Dart's ColorScheme is a fixed-shape Flutter target. Contrast emits the
+// medium / high tiers as MTB's 6-method form; Chart emits a standalone
+// ChartColors class (dart-3) — chart has no ColorScheme slot, so it rides
+// alongside MaterialTheme. Extended is always on for Dart. Palette joins as its
+// own channel in dart-4; until then it stays off the tab (no dead toggles).
 const DART_INCLUDES: readonly IncludeItem[] = [
+  { key: 'includeChart', label: 'Chart' },
   { key: 'includeContrastVariants', label: 'Contrast' },
 ] as const
 

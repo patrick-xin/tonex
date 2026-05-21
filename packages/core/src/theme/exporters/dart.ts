@@ -1,8 +1,9 @@
+import type { MdChartTokenName } from '../../chart/schema'
 import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
 import { argbComponents } from '../oklch'
 import type { MdTokenName } from '../schema'
-import type { ContrastBundle } from './bundle'
+import type { ContrastBundle, ExportOptions } from './bundle'
 
 // why: paste-ready Flutter theme shaped like Material Theme Builder's Dart
 // export (ADR-0021 c.9, ADR-0029 — match the target's shape, ship our roster).
@@ -159,7 +160,61 @@ function presentTiers(bundle: ContrastBundle): ReadonlyArray<readonly [DerivedTh
   return tiers
 }
 
-export function exportDart(bundle: ContrastBundle): string {
+// why: chart is a tonex family (ADR-0027) Flutter's ColorScheme has no slot
+// for, so it emits as its own `ChartColors` class — a const constructor over
+// chart1..chart5 with light()/dark() factories, mirroring the JSON/CSS chart
+// block (#89). Explicit [field, token] roster like COLOR_SCHEME_FIELDS: the
+// names map mechanically (`--color-chart-1` → `chart1`) but spelling it out
+// keeps the sink dumb and the field order pinned.
+const CHART_FIELDS: ReadonlyArray<readonly [string, MdChartTokenName]> = [
+  ['chart1', '--color-chart-1'],
+  ['chart2', '--color-chart-2'],
+  ['chart3', '--color-chart-3'],
+  ['chart4', '--color-chart-4'],
+  ['chart5', '--color-chart-5'],
+]
+
+// why: one ChartColors factory body for a single mode. Chart is mode-aware
+// (lightChart / darkChart) but contrast-invariant, so it reads the base tier.
+function chartFactory(name: Mode, chart: DerivedTheme['md']['lightChart']): string {
+  const lines = [`  static ChartColors ${name}() => const ChartColors(`]
+  for (const [field, token] of CHART_FIELDS) {
+    const argb = chart[token]
+    if (argb === undefined) continue
+    lines.push(`    ${field}: ${dartColor(argb)},`)
+  }
+  lines.push('  );')
+  return lines.join('\n')
+}
+
+// why: the standalone ChartColors class, emitted next to MaterialTheme when the
+// chart channel is on. Named fields (not a List) so series read by role; const
+// factories so Flutter folds them at compile time.
+function chartColorsClass(theme: DerivedTheme): string {
+  return [
+    'class ChartColors {',
+    '  const ChartColors({',
+    '    required this.chart1,',
+    '    required this.chart2,',
+    '    required this.chart3,',
+    '    required this.chart4,',
+    '    required this.chart5,',
+    '  });',
+    '',
+    '  final Color chart1;',
+    '  final Color chart2;',
+    '  final Color chart3;',
+    '  final Color chart4;',
+    '  final Color chart5;',
+    '',
+    chartFactory('light', theme.md.lightChart),
+    '',
+    chartFactory('dark', theme.md.darkChart),
+    '}',
+  ].join('\n')
+}
+
+export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}): string {
   const tiers = presentTiers(bundle)
   // why: group every tier of one mode before the next, matching MTB's emission
   // order (light, lightMediumContrast, lightHighContrast, then the dark trio).
@@ -169,7 +224,7 @@ export function exportDart(bundle: ContrastBundle): string {
       blocks.push(modeBlock(theme, mode, tier))
     }
   }
-  return [
+  const parts = [
     'import "package:flutter/material.dart";',
     '',
     'class MaterialTheme {',
@@ -181,6 +236,10 @@ export function exportDart(bundle: ContrastBundle): string {
     '',
     THEME_BUILDER,
     '}',
-    '',
-  ].join('\n')
+  ]
+  // why: chart rides alongside MaterialTheme as its own class, gated on the
+  // includeChart option — off by default, so the lean export is just the theme.
+  if (options.includeChart) parts.push('', chartColorsClass(bundle.default))
+  parts.push('')
+  return parts.join('\n')
 }

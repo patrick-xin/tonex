@@ -90,8 +90,9 @@ export function useExportContent({
 
     // why: Dart joined the bundle-consuming branches in slice dart-1 — it
     // reshapes the same DerivedTheme into a Flutter MaterialTheme (ADR-0021
-    // c.9). Default light + dark only for now; contrast tiers land in dart-2.
-    if (exportTab === 'Dart') return { exportContent: exportDart(bundle), ext: 'dart' }
+    // c.9). options gate the tiers (dart-2 contrast) and the standalone
+    // ChartColors class (dart-3 includeChart).
+    if (exportTab === 'Dart') return { exportContent: exportDart(bundle, options), ext: 'dart' }
 
     // why: ISO yyyy-mm-dd — sortable, locale-free, and the form users expect
     // to see in a generated-file banner. Captured at memo recompute time so
