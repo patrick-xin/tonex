@@ -39,6 +39,16 @@ export const TOUR_STEPS: GuideStep[] = [
     side: 'right',
     learnMore: 'hct',
   },
+  {
+    key: 'surface-adjustment',
+    layers: ['md', 'shadcn'],
+    title: 'Restyle your neutrals',
+    description:
+      'Tune the greys, borders, and (optionally) text behind your content — without touching your brand colors.',
+    anchorKey: 'surface-adjustment',
+    side: 'right',
+    learnMore: 'surface-adjustment',
+  },
 ]
 
 // why: pure so the layer rule is unit-testable without the live registry.

@@ -167,6 +167,53 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             </ul>
           </AccordionPanel>
         </AccordionItem>
+        <AccordionItem id="surface-adjustment" variant="underline" value="surface-adjustment">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            Surface adjustment — your neutral character
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              <span className="font-medium">Surface</span> is your neutral scaffolding — the
+              backgrounds behind your content (background, cards, popovers, muted, sidebar), the
+              hairline borders, and the text on them. It does{' '}
+              <span className="font-medium">not</span> touch your brand colors.
+            </p>
+            <p>You pick one of two operations — there's no "off":</p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">Tint</span> — rebuilds your surfaces and borders from
+                a Tailwind neutral palette you choose (zinc, slate, stone…), blended toward your
+                brand hue by the strength slider.{' '}
+                <span className="font-medium">0% is the plain neutral</span> (no brand character);
+                higher pushes it toward your brand. Selecting Tint changes your surfaces right away.
+                Text stays untouched unless you raise the separate{' '}
+                <span className="font-medium">Text accent</span> slider, which nudges text toward
+                your brand hue.
+              </li>
+              <li>
+                <span className="font-medium">Desaturate</span> — pulls color out of Material's own
+                surfaces toward grey. <span className="font-medium">0% leaves them unchanged</span>,
+                while 100% is pure grey. It greys backgrounds, borders,{' '}
+                <span className="font-medium">and</span> text together, so nothing stays tinted on a
+                grey surface. No palette to pick.
+              </li>
+            </ul>
+            <p>
+              <span className="font-medium">The catch: the two zeros are opposites.</span>{' '}
+              Desaturate at 0% leaves Material's surfaces untouched; Tint at 0% still rebuilds them
+              from the plain neutral palette. Want untouched Material surfaces? Use{' '}
+              <span className="font-medium">Desaturate at 0%</span>.
+            </p>
+            <p>
+              Strength is <span className="font-medium">per-mode</span> (light and dark store
+              separate values), while the algorithm and palette are shared — see{' '}
+              <span className="font-medium">Light &amp; dark — what's shared vs per-mode</span>.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
         <AccordionItem id="contrast-levels" variant="underline" value="contrast-levels">
           <AccordionSummary
             variant="underline"

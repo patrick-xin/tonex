@@ -8,6 +8,7 @@ export const HELP_SECTIONS = {
   hct: 'concepts',
   cmf: 'concepts',
   'scheme-variants': 'concepts',
+  'surface-adjustment': 'concepts',
   'contrast-levels': 'concepts',
   'shadcn-mode': 'concepts',
   'custom-colors': 'concepts',

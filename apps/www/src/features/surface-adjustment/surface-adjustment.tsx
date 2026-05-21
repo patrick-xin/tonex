@@ -3,6 +3,7 @@
 import { useSource } from '@tonex/core'
 import { SURFACE_ALGOS, type SurfaceAlgo } from '@tonex/core/schema'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { GuideAnchor } from '@/features/onboarding-guide'
 import { SurfaceLevelSlider } from './surface-level-slider'
 import { SurfacePaletteSelect } from './surface-palette-select'
 import { SurfaceTextTintSlider } from './surface-text-tint-slider'
@@ -15,34 +16,36 @@ export const SurfaceAdjustment = ({
   const surfaceAlgo = useSource((s) => s.surfaceAlgo)
   const setSurfaceAlgo = useSource((s) => s.actions.setSurfaceAlgo)
   return (
-    <div className="p-2 space-y-3" ref={triggerRef}>
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-on-surface">Surface adjustment</div>
-        <ToggleGroup
-          variant="outline"
-          size="xs"
-          value={[surfaceAlgo]}
-          onValueChange={(value) => {
-            if (value.length === 0) return
-            setSurfaceAlgo(value[0] as SurfaceAlgo)
-          }}
-        >
-          {SURFACE_ALGOS.map((v) => (
-            <ToggleGroupItem className="h-6 capitalize" key={v} value={v}>
-              {v}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+    <GuideAnchor anchorKey="surface-adjustment">
+      <div className="p-2 space-y-3" ref={triggerRef}>
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium text-on-surface">Surface adjustment</div>
+          <ToggleGroup
+            variant="outline"
+            size="xs"
+            value={[surfaceAlgo]}
+            onValueChange={(value) => {
+              if (value.length === 0) return
+              setSurfaceAlgo(value[0] as SurfaceAlgo)
+            }}
+          >
+            {SURFACE_ALGOS.map((v) => (
+              <ToggleGroupItem className="h-6 capitalize" key={v} value={v}>
+                {v}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+        <div className="space-y-3">
+          <SurfaceLevelSlider labelClassName="text-xs" />
+          {surfaceAlgo === 'tint' && (
+            <>
+              <SurfacePaletteSelect />
+              <SurfaceTextTintSlider labelClassName="text-xs" />
+            </>
+          )}
+        </div>
       </div>
-      <div className="space-y-3">
-        <SurfaceLevelSlider labelClassName="text-xs" />
-        {surfaceAlgo === 'tint' && (
-          <>
-            <SurfacePaletteSelect />
-            <SurfaceTextTintSlider labelClassName="text-xs" />
-          </>
-        )}
-      </div>
-    </div>
+    </GuideAnchor>
   )
 }
