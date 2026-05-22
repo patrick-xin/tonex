@@ -49,6 +49,16 @@ export const TOUR_STEPS: GuideStep[] = [
     side: 'right',
     learnMore: 'surface-adjustment',
   },
+  {
+    key: 'export',
+    layers: ['md', 'shadcn'],
+    title: 'Copy your theme as CSS',
+    description:
+      'Your config is the theme — core tokens always export; flip switches to add the tonal palette, charts, or contrast variants. What you see is what you paste.',
+    anchorKey: 'export',
+    side: 'bottom',
+    learnMore: 'export-dialog',
+  },
 ]
 
 // why: pure so the layer rule is unit-testable without the live registry.

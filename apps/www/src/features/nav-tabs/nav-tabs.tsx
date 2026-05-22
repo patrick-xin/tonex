@@ -11,6 +11,7 @@ import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsTab } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ExportButton } from '@/features/export'
+import { GuideAnchor } from '@/features/onboarding-guide'
 import { ResetButton } from '@/features/reset-button'
 import { Settings } from '@/features/settings'
 import { SiteCommandMenu } from '@/features/site-command-menu'
@@ -115,7 +116,9 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
         {extras}
         <SiteCommandMenu pageShortcuts={tabs} />
         <TooltipProvider>
-          <ExportButton tabs={exportTabs} icon />
+          <GuideAnchor anchorKey="export">
+            <ExportButton tabs={exportTabs} icon />
+          </GuideAnchor>
           <Settings layer={config.layer} />
           <ContrastChecker layer={config.layer} />
           <ResetButton />

@@ -13,6 +13,7 @@ export const HELP_SECTIONS = {
   'shadcn-mode': 'concepts',
   'bindings-overrides': 'concepts',
   'custom-colors': 'concepts',
+  'export-dialog': 'concepts',
   // Q&A accordion
   'md3-shadcn-mapping': 'qa',
   'contrast-issues': 'qa',

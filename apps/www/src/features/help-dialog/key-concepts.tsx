@@ -332,6 +332,81 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             </p>
           </AccordionPanel>
         </AccordionItem>
+        <AccordionItem id="export-dialog" variant="underline" value="export-dialog">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            What reaches your export
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              The export dialog turns your live theme into copy-paste CSS —{' '}
+              <span className="font-medium">what the dialog shows is exactly what you paste</span>,
+              byte for byte. Your rail config <span className="font-medium">is</span> the theme; the
+              preview is a faithful render of what exports.
+            </p>
+            <p>
+              <span className="font-medium">Always included (the core theme):</span> your seed
+              color, scheme variant, contrast level, role bindings &amp; overrides, md-token &amp;
+              palette overrides, surface adjustment, custom colors, and the CMF second source when a
+              role uses it. You don't toggle these — they're always in.
+            </p>
+            <p>
+              <span className="font-medium">Off by default — flip a switch to add:</span>
+            </p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">Extended</span> — the extra Material surface and
+                utility tokens.
+              </li>
+              <li>
+                <span className="font-medium">Palette</span> — the full tonal ramp (
+                <code className="font-mono text-xs">
+                  --color-{'{family}'}-{'{tone}'}
+                </code>
+                , e.g. <code className="font-mono text-xs">bg-primary-50</code> through{' '}
+                <code className="font-mono text-xs">-900</code>).
+              </li>
+              <li>
+                <span className="font-medium">Chart</span> — the data-viz tokens (
+                <code className="font-mono text-xs">--chart-1…5</code>). Tuning chart mode or
+                multi-hue shapes these, but they only land in the export when{' '}
+                <span className="font-medium">Chart</span> is on.
+              </li>
+              <li>
+                <span className="font-medium">Contrast</span> — extra{' '}
+                <code className="font-mono text-xs">.contrast-medium</code> /{' '}
+                <code className="font-mono text-xs">.contrast-high</code> rule blocks (distinct from
+                the always-applied contrast <span className="font-medium">level</span>).
+              </li>
+              <li>
+                The shadcn route also has a <span className="font-medium">New project</span> switch
+                — adds the shadcn boilerplate header.
+              </li>
+            </ul>
+            <p>
+              <span className="font-medium">Tabs pick format and layer, not content.</span>{' '}
+              <span className="font-medium">Tailwind</span> emits the full md{' '}
+              <code className="font-mono text-xs">globals.css</code> (
+              <code className="font-mono text-xs">@theme inline</code> +{' '}
+              <code className="font-mono text-xs">:root</code> +{' '}
+              <code className="font-mono text-xs">.dark</code>);{' '}
+              <span className="font-medium">shadcn</span> emits{' '}
+              <code className="font-mono text-xs">:root</code> +{' '}
+              <code className="font-mono text-xs">.dark</code> only (a drop-in over the shadcn CLI);{' '}
+              <span className="font-medium">JSON</span> and{' '}
+              <span className="font-medium">Dart</span> emit the same theme in those formats. An{' '}
+              <span className="font-medium">oklch / hex</span> toggle applies where relevant.
+            </p>
+            <p>
+              Nothing here is a decorative preview-only knob — if you tuned it in the rail, it's in
+              the core export or one switch away. See{' '}
+              <span className="font-medium">Role bindings vs overrides</span> and{' '}
+              <span className="font-medium">Surface adjustment — your neutral character</span>.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
       </Accordion>
     </div>
   )
