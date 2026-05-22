@@ -1,20 +1,24 @@
 import type { VariantName } from '../variants'
+import { hctFromHex } from './hct'
 import {
   type PortableTheme,
+  type Seed,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type SurfaceAlgo,
 } from './schema'
 import type { NeutralPaletteName } from './surface'
 
-// why: ShadcnPreset is an aesthetic recipe — variant + surface treatment +
-// 26-role binding map for both modes — that a consumer can switch to in one
-// action. Per ADR-0026 a preset does NOT include `shadcnRoleOverrides`;
-// overrides are user pins on top of the preset's binding-resolved values
-// and persist orthogonally. Likewise `seedHex` and `contrastLevel` are
-// source-side inputs the user owns separately — switching presets must not
-// move them. Anything that doesn't belong in this interface is, by design,
-// not part of "what makes a preset a preset".
+// why: ShadcnPreset is a theme bundle — the aesthetic recipe (variant +
+// surface treatment + 26-role binding map for both modes) PLUS the curated
+// source inputs it was tuned against (ADR-0031 #2). The recipe is the preset's
+// identity (findActivePreset compares exactly the recipe fields, never the
+// source inputs — ADR-0031 #5). The curated `seed` travels with the preset so
+// "editor's choice" can deliver its color to a user who never picked one; it
+// supersedes only an untouched seed at apply (resolvePresetApply). Per ADR-0026
+// a preset still excludes `shadcnRoleOverrides` — overrides are user pins on
+// top of the binding-resolved values and persist orthogonally. contrastLevel
+// joins seed as a curated source input in a follow-on slice.
 export interface ShadcnPreset {
   variant: VariantName
   surfaceAlgo: SurfaceAlgo
@@ -23,6 +27,20 @@ export interface ShadcnPreset {
   surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
+  // why: curated seed the preset was tuned against (ADR-0031 #2). Stored as the
+  // canonical HCT decomposition with exactHex preserved so the hex display
+  // reads back the curated bytes verbatim, exactly like a user paste (ADR-0028)
+  // — built via `seedOf(hex)` below. Provisional per-preset values land with
+  // the machinery (issue #109); final curation is the promotion slice.
+  seed: Seed
+}
+
+// why: build a curated seed from a hex the same way DEFAULT_INPUTS does —
+// canonical HCT axes plus the exact bytes — so a superseded seed reads back as
+// if the user had pasted that hex. One helper keeps every curated seed on the
+// identical construction path.
+function seedOf(hex: string): Seed {
+  return { ...hctFromHex(hex), exactHex: hex }
 }
 
 // why: durable shipping set — finalized 2026-05-13 in the issue #36 curation
@@ -40,6 +58,10 @@ export interface ShadcnPreset {
 // precedence when two presets happen to share structure.
 export const SHADCN_PRESETS = {
   default: {
+    // why: must equal DEFAULT_INPUTS.seed (#6750a4) — the `default` preset is
+    // the boot-default projection (R5 pins this), so its curated seed is the
+    // app default itself.
+    seed: seedOf('#6750a4'),
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'zinc',
@@ -106,6 +128,9 @@ export const SHADCN_PRESETS = {
     },
   },
   stark: {
+    // why: provisional curated seed — near-neutral cool (zinc) for the stark,
+    // minimal look. Final curation is the promotion slice.
+    seed: seedOf('#3f3f46'),
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -172,6 +197,9 @@ export const SHADCN_PRESETS = {
     },
   },
   soft: {
+    // why: provisional curated seed — muted soft blue. Final curation is the
+    // promotion slice.
+    seed: seedOf('#8fa8c8'),
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'stone',
@@ -238,6 +266,10 @@ export const SHADCN_PRESETS = {
     },
   },
   warm: {
+    // why: provisional curated seed — warm terracotta so "warm" reads warm even
+    // on the faithful cmf family (the seed is the chroma/temperature ceiling,
+    // ADR-0031). Final curation is the promotion slice.
+    seed: seedOf('#c2683a'),
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'taupe',
@@ -304,6 +336,9 @@ export const SHADCN_PRESETS = {
     },
   },
   playful: {
+    // why: provisional curated seed — vivid magenta-pink for the playful look.
+    // Final curation is the promotion slice.
+    seed: seedOf('#d6409f'),
     variant: 'expressive',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'mauve',
@@ -370,6 +405,11 @@ export const SHADCN_PRESETS = {
     },
   },
   monotone: {
+    // why: provisional curated seed — low-chroma grey. monotone runs the
+    // monochrome variant which manufactures its own neutral ramp, so the seed
+    // mainly anchors hue; kept near-neutral. Final curation is the promotion
+    // slice.
+    seed: seedOf('#52525b'),
     variant: 'monochrome',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -436,6 +476,9 @@ export const SHADCN_PRESETS = {
     },
   },
   tech: {
+    // why: provisional curated seed — cool tech blue. Final curation is the
+    // promotion slice.
+    seed: seedOf('#2563eb'),
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',

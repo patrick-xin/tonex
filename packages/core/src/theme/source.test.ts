@@ -62,6 +62,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   variant: 'tonalSpot',
   contrastLevel: 0.5,
   seedHexLock: true,
+  seedTouched: true,
   md3TokenOverrides: {
     light: { '--color-primary-container': '#aabbcc', '--color-secondary': '#445566' },
     dark: { '--color-primary-container': '#112233' },
@@ -876,5 +877,110 @@ describe('setShadcnPreset recipe symmetry', () => {
     expect(useSource.getState().surfaceTintTextLevel).toEqual(
       SHADCN_PRESETS.default.surfaceTintTextLevel,
     )
+  })
+})
+
+// why: ADR-0031 #4 — touched is a recorded signal set inside the user-facing
+// seed setters, defaulting false in the boot defaults and cleared by reset.
+// These store-action tests pin the signal's lifecycle independent of the
+// resolver (which is unit-tested in preset-apply.test.ts).
+describe('seedTouched signal', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('defaults false in the boot defaults', () => {
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('setSeedHex flips the signal true', () => {
+    useSource.getState().actions.setSeedHex('#123456')
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  it.each([
+    'setSeedHue',
+    'setSeedChroma',
+    'setSeedTone',
+  ] as const)('%s flips the signal true', (setter) => {
+    // why: each HCT-axis setter is a user touch. Push a value clearly past
+    // the 5e-3 epsilon gate so the write isn't suppressed as a no-op.
+    const target = { setSeedHue: 200, setSeedChroma: 60, setSeedTone: 25 }[setter]
+    useSource.getState().actions[setter](target)
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  // why: ADR-0031 #4 — choosing a value equal to the current one is still a
+  // touch. The idempotency / epsilon guards suppress the value write but must
+  // not suppress the recorded signal.
+  it('records a touch even on an idempotent re-pick of the current seed', () => {
+    const currentHex = selectSeedHex(useSource.getState())
+    useSource.getState().actions.setSeedHex(currentHex)
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  it('a locked seed setter does not record a touch', () => {
+    useSource.setState({ seedHexLock: true, _hydrated: true })
+    useSource.getState().actions.setSeedHex('#123456')
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('reset clears the signal', () => {
+    useSource.getState().actions.setSeedHex('#123456')
+    useSource.getState().actions.reset()
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('applying a preset leaves the signal false', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+})
+
+// why: ADR-0031 #2/#3 — end-to-end seed supersession through the store action.
+// The resolver is unit-tested in isolation; these assert the store wires it up
+// so the observable seed lands correctly per touched/locked state.
+describe('setShadcnPreset seed supersession', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('replaces an untouched boot-default seed with the preset curated seed', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.warm.seed)
+  })
+
+  it('keeps a user-chosen seed and drops the curated one', () => {
+    useSource.getState().actions.setSeedHex('#ff00aa')
+    const chosen = useSource.getState().seed
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(chosen)
+  })
+
+  it('keeps a locked seed even when untouched', () => {
+    const locked = useSource.getState().seed
+    useSource.setState({ seedHexLock: true, _hydrated: true })
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(locked)
+  })
+
+  // why: ADR-0031 #3 / story 12 — a curated seed must not count as a user
+  // choice, so a second preset still supplies its own curated seed.
+  it('a second preset supersedes the first preset curated seed', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    useSource.getState().actions.setShadcnPreset('tech')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.tech.seed)
   })
 })

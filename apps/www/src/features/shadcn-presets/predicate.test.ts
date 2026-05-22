@@ -43,6 +43,20 @@ describe('isPresetSwitchDirty', () => {
     ).toBe(true)
   })
 
+  // why: ADR-0031 #5/#6 — the seed is a source input, not part of the recipe
+  // identity. A theme on a preset's recipe but carrying a different seed must
+  // NOT read as dirty, so seed supersession on apply opens no confirmation
+  // dialog. This pins the regression alongside the recipe-only detection fix
+  // in issue #108.
+  it('is false when only the seed differs from the matched preset recipe', () => {
+    expect(
+      isPresetSwitchDirty({
+        ...DEFAULT_INPUTS,
+        seed: { hue: 30, chroma: 60, tone: 55, exactHex: '#c2683a' },
+      }),
+    ).toBe(false)
+  })
+
   it('is false when only orthogonal hex overrides are set (no bundle drift)', () => {
     expect(
       isPresetSwitchDirty({

@@ -29,6 +29,7 @@ function projectPreset(theme: PortableTheme): ShadcnPreset {
     surfaceTintTextLevel: theme.surfaceTintTextLevel,
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
+    seed: theme.seed,
   }
 }
 
@@ -134,6 +135,21 @@ describe('R5: Default preset == DEFAULT_INPUTS projection', () => {
 // still meaningfully "on" that preset. Detection must read the recipe only and
 // ignore seed and contrastLevel; pinning it here keeps a future curated-source
 // slice from accidentally folding source inputs into the match.
+// why: ADR-0031 #2 — a theme preset carries the curated source inputs it was
+// tuned against. Issue #109 adds the seed; every shipping preset must declare
+// one so the resolver always has a curated value to supersede an untouched
+// seed with. Final curation is the promotion slice; this only pins presence
+// and shape.
+describe('R7: every preset carries a curated seed', () => {
+  it.each(PRESET_NAMES)('preset "%s" declares a well-formed seed', (name) => {
+    const seed = presets[name]?.seed
+    expect(seed, `preset "${name}" missing seed`).toBeDefined()
+    expect(typeof seed!.hue).toBe('number')
+    expect(typeof seed!.chroma).toBe('number')
+    expect(typeof seed!.tone).toBe('number')
+  })
+})
+
 describe('R6: findActivePreset ignores source inputs (seed, contrast)', () => {
   it.each(
     PRESET_NAMES,
