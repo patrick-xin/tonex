@@ -221,6 +221,34 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             </p>
           </AccordionPanel>
         </AccordionItem>
+        <AccordionItem id="cmf-no-effect-shadcn" variant="underline" value="cmf-no-effect-shadcn">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            I set a CMF second color but nothing changed — why?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              The second source drives the <span className="font-medium">tertiary</span> palette. On
+              the <span className="font-medium">md</span> layer that's always a visible role, so the
+              change shows up immediately.
+            </p>
+            <p>
+              On the <span className="font-medium">shadcn</span> layer, tertiary only reaches your
+              export if the active preset maps a role to it. Most presets —{' '}
+              <span className="font-medium">Default, Stark, Soft, Warm, Monotone</span> — don't, so
+              the second source has no visible effect there.{' '}
+              <span className="font-medium">Playful</span> and{' '}
+              <span className="font-medium">Tech</span> do.
+            </p>
+            <p>
+              To see it on shadcn: switch to a tertiary-driven preset, override a role to a tertiary
+              token yourself (see <span className="font-medium">Role bindings vs overrides</span>),
+              or view the md layer.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
         <AccordionItem id="preserve-brand-color" variant="underline" value="preserve-brand-color">
           <AccordionSummary
             variant="underline"

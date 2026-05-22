@@ -23,6 +23,7 @@ export const HELP_SECTIONS = {
   'dialog-colors-mismatch': 'qa',
   'cmf-safety': 'qa',
   'cmf-colors-different': 'qa',
+  'cmf-no-effect-shadcn': 'qa',
   'preserve-brand-color': 'qa',
   'vs-others': 'qa',
 } as const satisfies Record<string, HelpAccordion>

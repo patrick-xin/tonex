@@ -1,8 +1,9 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon, CaretDownIcon } from '@phosphor-icons/react'
-import { selectSeedHex, useSource } from '@tonex/core'
-import { cmfSecondSourceDisabledReason } from '@tonex/core/schema'
+import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
+import { cmfSecondSourceDisabledReason, findActivePreset } from '@tonex/core/schema'
+import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,6 +15,8 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ColorPicker } from '@/features/color-picker'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
+import { useLayer } from '@/lib/layer-context'
+import { presetUsesTertiary } from './hints'
 
 // why: the second source color is a CMF-only knob (other variants ignore the
 // param, see variants/cmf-second-source.ts). Surface the disabled reason as a tooltip
@@ -35,6 +38,21 @@ export function CmfSecondSourcePicker() {
   const formHex = cmfSecondSourceHex ?? seedHex
 
   const { hexInput, handleChange, inputProps } = useHexFieldState(formHex, setCmfSecondSourceHex)
+
+  // why: the second source drives the tertiary palette. On md that's always a
+  // visible role; on shadcn it only reaches the export if the active preset
+  // binds a role to a --color-tertiary* token (Finding 2). Tell the truth per
+  // layer + preset so a shadcn user on a non-tertiary preset isn't left
+  // wondering why nothing changed — depth lives in the cmf-no-effect-shadcn Q&A.
+  const layer = useLayer()
+  const portable = useSource(useShallow(selectPortable))
+  const activePreset = findActivePreset(portable)
+  const description =
+    layer === 'md'
+      ? 'Drives the tertiary color palette.'
+      : presetUsesTertiary(activePreset)
+        ? 'Drives the tertiary palette — your current preset maps it onto accent and border roles.'
+        : "Drives the tertiary palette, but your current shadcn preset doesn't use tertiary — switch to a tertiary-driven preset (e.g. Playful) or the md layer to see it. Press H for details."
 
   const trigger = (
     <PopoverTrigger
@@ -60,9 +78,7 @@ export function CmfSecondSourcePicker() {
         trigger
       )}
       <PopoverContent className="py-2 w-56" showArrow sideOffset={14}>
-        <PopoverDescription className="text-xs mb-2">
-          Drives the tertiary color palette.
-        </PopoverDescription>
+        <PopoverDescription className="text-xs mb-2">{description}</PopoverDescription>
         <div className="flex items-center gap-2">
           <ColorPicker value={formHex} onChange={handleChange} align="start" />
           <Input
