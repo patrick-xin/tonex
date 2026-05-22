@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { ChromaSlider } from './chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from './gradients'
 import { HctSlider } from './hct-slider'
+import { showsHueDisabledHint } from './hints'
 
 // why: ADR-0028 — HCT is the canonical persisted seed; sliders read seed
 // fields directly from the store and write each axis via the per-axis
@@ -48,6 +49,9 @@ export function HctControlSliders() {
         onValueChange={setSeedHue}
         disabled={hueDisabled}
       />
+      {showsHueDisabledHint(chroma, seedHexLock) && (
+        <p className="text-xs text-on-surface-variant">Add some chroma to adjust hue.</p>
+      )}
       <ChromaSlider
         disabled={seedHexLock}
         value={chroma}

@@ -76,13 +76,42 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           >
             What is HCT?
           </AccordionSummary>
-          <AccordionPanel className="text-sm mb-3 px-0">
-            <span className="font-medium">HCT (Hue, Chroma, Tone)</span> is Google's color model,
-            built for Material Design 3. Unlike RGB or HSL, HCT is designed around how humans
-            actually perceive color — so two colors at the same tone value appear equally bright
-            regardless of hue. This makes it possible to generate color systems that are visually
-            consistent and accessible by design, not by accident. Tonex uses Google's official
-            @material/material-color-utilities library — real HCT math, not an approximation.
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              <span className="font-medium">HCT (Hue, Chroma, Tone)</span> is Google's color model,
+              built for Material Design 3. Unlike RGB or HSL, HCT is designed around how humans
+              actually perceive color — so two colors at the same tone value appear equally bright
+              regardless of hue. Tonex uses Google's official{' '}
+              <code className="font-mono text-xs">@material/material-color-utilities</code> library
+              — real HCT math, not an approximation.
+            </p>
+            <p>
+              The hex field and the three sliders are{' '}
+              <span className="font-medium">the same color — two views, fully two-way</span>. Drag a
+              slider and the hex updates; type a hex and the sliders move to match.
+            </p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">Hue</span> — which color.
+              </li>
+              <li>
+                <span className="font-medium">Chroma</span> — how vivid. Its maximum moves with hue
+                and tone, so the slider can "hit a wall" before the end — some hue/tone combinations
+                physically can't go more saturated.
+              </li>
+              <li>
+                <span className="font-medium">Tone</span> — how light or dark.
+              </li>
+            </ul>
+            <p>
+              <span className="font-medium">Hue disables on a near-grey.</span> When chroma is very
+              low there's no visible hue to adjust, so the Hue slider greys out — add a little
+              chroma to re-enable it.
+            </p>
+            <p>
+              <span className="font-medium">Your pasted hex is preserved exactly.</span> It stays
+              your value until you move a slider, at which point the hex follows the sliders.
+            </p>
           </AccordionPanel>
         </AccordionItem>
         <AccordionItem id="cmf" variant="underline" value="cmf">

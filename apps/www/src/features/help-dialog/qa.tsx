@@ -111,6 +111,28 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             </p>
           </AccordionPanel>
         </AccordionItem>
+        <AccordionItem id="hct-sliders" variant="underline" value="hct-sliders">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            What do the Hue, Chroma, and Tone sliders do?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              The hex field and the three sliders are <span className="font-medium">one color</span>{' '}
+              — edit either and the other follows. <span className="font-medium">Hue</span> is which
+              color, <span className="font-medium">Chroma</span> is how vivid (its maximum moves
+              with hue and tone, so it can stop short of the end), and{' '}
+              <span className="font-medium">Tone</span> is how light or dark.
+            </p>
+            <p>
+              On a near-grey the Hue slider greys out — there's no visible hue to adjust, so add a
+              little chroma to bring it back. Your pasted hex is preserved exactly until you move a
+              slider. See <span className="font-medium">What is HCT?</span> for the full model.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
         <AccordionItem id="md3-vs-shadcn-borders" variant="underline" value="md3-vs-shadcn-borders">
           <AccordionSummary
             variant="underline"

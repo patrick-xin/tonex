@@ -17,6 +17,7 @@ export const HELP_SECTIONS = {
   // Q&A accordion
   'md3-shadcn-mapping': 'qa',
   'contrast-issues': 'qa',
+  'hct-sliders': 'qa',
   'brand-color-not-matching': 'qa',
   'md3-vs-shadcn-borders': 'qa',
   'dialog-colors-mismatch': 'qa',
