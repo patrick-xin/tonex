@@ -6,7 +6,8 @@ import type { Layer } from '@/lib/layer-context'
 // (makeLiveAnchor). layers gates which layer sees the step (you tour your own
 // workspace). learnMore + onEnter are carried but inert this slice: learnMore
 // is the help deep-link (slice 2), onEnter opens a hidden host before the
-// spotlight (later slices). Copy here is placeholder — final copy is slice 9.
+// spotlight (later slices). Each teaser is one tight sentence — canonical depth
+// lives in the linked Help section, not here.
 export type GuideStep = {
   key: string
   layers: Layer[]
@@ -25,7 +26,7 @@ export type GuideStep = {
 export const TOUR_WELCOME = {
   title: "You're theming light and dark at once",
   description:
-    'Set your color, recipe, and contrast once — they apply to both modes. Then tune each mode’s surface and pinned colors separately.',
+    'Set your color, recipe, and contrast once for both modes, then tune each mode’s surface and pinned colors separately.',
   learnMore: 'light-dark-modes',
 } satisfies { title: string; description: string; learnMore: HelpSection }
 
@@ -52,9 +53,9 @@ export const TOUR_STEPS: GuideStep[] = [
   {
     key: 'export',
     layers: ['md', 'shadcn'],
-    title: 'Copy your theme as CSS',
+    title: 'Copy or export your theme',
     description:
-      'Your config is the theme — core tokens always export; flip switches to add the tonal palette, charts, or contrast variants. What you see is what you paste.',
+      'What you see is what you paste — core tokens always export, and switches add the tonal palette, charts, or contrast variants.',
     anchorKey: 'export',
     side: 'bottom',
     learnMore: 'export-dialog',

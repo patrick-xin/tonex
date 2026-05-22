@@ -52,7 +52,7 @@ export function CmfSecondSourcePicker() {
       ? 'Drives the tertiary color palette.'
       : presetUsesTertiary(activePreset)
         ? 'Drives the tertiary palette — your current preset maps it onto accent and border roles.'
-        : "Drives the tertiary palette, but your current shadcn preset doesn't use tertiary — switch to a tertiary-driven preset (e.g. Playful) or the md layer to see it. Press H for details."
+        : "Drives the tertiary palette, but your current shadcn preset doesn't use it — so this won't change your export (press H for options)."
 
   const trigger = (
     <PopoverTrigger

@@ -353,11 +353,28 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           >
             Custom Colors
           </AccordionSummary>
-          <AccordionPanel className="text-sm mb-3 px-0">
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
               Add custom palette slots beyond the six core MD3 roles. Each custom color is
               harmonized (optional) to your seed hue using HCT — so it stays visually coherent with
               the rest of your palette without manual tuning.
+            </p>
+            <p>
+              What it produces depends on your layer. On <span className="font-medium">md</span>,
+              each custom color emits the full Material set —{' '}
+              <code className="font-mono text-xs">--{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--{'{name}'}-container</code>, and{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}-container</code> — and the four
+              swatches in the dialog preview them.
+            </p>
+            <p>
+              On <span className="font-medium">shadcn</span>, it emits a single pair —{' '}
+              <code className="font-mono text-xs">--{'{name}'}</code> +{' '}
+              <code className="font-mono text-xs">--{'{name}'}-foreground</code> (use as{' '}
+              <code className="font-mono text-xs">bg-{'{name}'}</code>). The source-pair picker —
+              the vivid color or the soft container — chooses which generated md pair feeds that
+              token.
             </p>
           </AccordionPanel>
         </AccordionItem>

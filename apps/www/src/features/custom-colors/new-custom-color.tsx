@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useLayer } from '@/lib/layer-context'
-import { CustomColorFormBody } from './custom-color-form'
+import { CustomColorDialogDescription, CustomColorFormBody } from './custom-color-form'
 import { type CustomColorFormInitial, useCustomColorForm } from './use-custom-color-form'
 
 // why: golden-angle rotation around the seed — Nth new color (0-indexed)
@@ -107,6 +107,7 @@ export function NewCustomColor({
       <DialogContent showCloseButton>
         <DialogHeader>
           <DialogTitle>Add custom color</DialogTitle>
+          <CustomColorDialogDescription layer={layer} />
         </DialogHeader>
 
         <CustomColorFormBody form={form} layer={layer} onEnter={handleAdd} />

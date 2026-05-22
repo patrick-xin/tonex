@@ -28,20 +28,20 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             How does Tonex map MD3 tokens to shadcn tokens?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
-            <p>Choose between two presets:</p>
-            <ul className="space-y-2 list-inside list-disc">
-              <li>
-                <span className="font-medium">shadcn preset</span> — Maps MD3 colors to shadcn's
-                expected format. Best for dropping into existing shadcn projects.
-              </li>
-              <li>
-                <span className="font-medium">MD3 preset</span> — Direct MD3 semantic roles. More
-                expressive, but looks different from stock shadcn.
-              </li>
-            </ul>
-            <p className="mt-2">
-              <span className="font-medium">Production ready?</span> Yes. Uses Google's official
-              color utilities. The shadcn preset is designed as a compatible replacement.
+            <p>
+              Tonex always generates the full MD3 palette from your seed, then the active{' '}
+              <span className="font-medium">shadcn preset</span> decides how those MD3 colors bind
+              to shadcn's tokens (<code className="font-mono text-xs">--primary</code>,{' '}
+              <code className="font-mono text-xs">--border</code>, and the rest).
+            </p>
+            <p>
+              The presets — Default, Stark, Soft, Warm, Playful, Monotone, Tech — are different
+              binding styles, from a stock-shadcn look to more expressive, chromatic ones. Pick the
+              one that fits; switch any time in Settings.
+            </p>
+            <p>
+              <span className="font-medium">Production ready?</span> Yes — it uses Google's official
+              color utilities, and Default is designed as a drop-in shadcn replacement.
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -106,8 +106,11 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
               is optimized for readability across light/dark modes.
             </p>
             <p>
-              <span className="font-medium">Need exact match?</span> Use the "Source Color Fidelity"
-              toggle to lock your input color, or override the primary token directly.
+              <span className="font-medium">Need an exact match?</span> Override the primary token
+              directly, or try the <span className="font-medium">Fidelity</span> scheme variant,
+              which keeps the primary close to your source. (The{' '}
+              <span className="font-medium">Lock color</span> button — <span>⌘L</span> — freezes
+              your seed so tweaks don't drift it; it doesn't change how the primary is derived.)
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -261,13 +264,44 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
               <span className="font-medium">Available now:</span>
             </p>
             <ul className="space-y-2 list-inside list-disc">
-              <li>"Source Color Fidelity" toggle locks your input color</li>
+              <li>
+                The <span className="font-medium">Lock color</span> button (⌘L) freezes your seed so
+                tweaks elsewhere don't drift it
+              </li>
               <li>Override individual palettes (secondary, tertiary, neutral) independently</li>
-              <li>Lock feature saves your current theme for safe experimentation</li>
+              <li>
+                The <span className="font-medium">Fidelity</span> scheme variant keeps the primary
+                close to your source
+              </li>
             </ul>
             <p>
               <span className="font-medium">Coming:</span> Fine-tuning individual hues without full
               palette replacement.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="custom-color-tokens" variant="underline" value="custom-color-tokens">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            What does a custom color add to my export?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              It depends on your layer. On <span className="font-medium">md</span> you get the full
+              Material set — <code className="font-mono text-xs">--{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--{'{name}'}-container</code>, and{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}-container</code>.
+            </p>
+            <p>
+              On <span className="font-medium">shadcn</span> you get one pair —{' '}
+              <code className="font-mono text-xs">--{'{name}'}</code> +{' '}
+              <code className="font-mono text-xs">--{'{name}'}-foreground</code> — and the source
+              pair you pick (the vivid color or the soft container) chooses which generated md pair
+              feeds it. Harmonize keeps it coherent with your palette. See{' '}
+              <span className="font-medium">Custom Colors</span> for the full breakdown.
             </p>
           </AccordionPanel>
         </AccordionItem>
