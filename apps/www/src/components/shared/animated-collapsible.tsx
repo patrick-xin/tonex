@@ -14,6 +14,8 @@ export function AnimatedCollapsible({
   className,
   variant = 'secondary',
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
   contentClassName,
   triggerRef,
   overridden = false,
@@ -24,11 +26,22 @@ export function AnimatedCollapsible({
   className?: string
   variant?: ButtonStylesProps['variant']
   defaultOpen?: boolean
+  // why: optional controlled mode. Omit both and the disclosure manages its own
+  // open state (the common case). Pass them to drive it from outside — e.g. the
+  // seed block force-folds itself when the seed locks.
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   contentClassName?: string
   triggerRef?: React.Ref<HTMLButtonElement>
   overridden?: boolean
 }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
@@ -52,8 +65,8 @@ export function AnimatedCollapsible({
             <CaretRightIcon
               weight="bold"
               className={cn(
-                'size-3 transition-[transform,color] duration-200 text-on-surface-variant/60 group-hover:text-on-surface-variant',
-                open && 'rotate-90 text-on-surface',
+                'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
+                open && 'rotate-90',
               )}
             />
           </Button>

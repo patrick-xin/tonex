@@ -10,24 +10,18 @@ import { GuideAnchor } from '@/features/onboarding-guide'
 import { ImagePicker } from './image-picker'
 import { SourceColorSection } from './source-color-section'
 
-// why: md-rail only. Material You is HCT-native, but setting the seed is a
-// set-once gesture even here — tweak HCT, done. So md mirrors shadcn's layout
-// (ShadcnSourceColor): hex always-on at the top as the canonical seed, with
-// HCT/image folded into a "Source control" disclosure that opens to adjust and
-// hides when done, reclaiming rail space for the parts users revisit. The
-// blocks are intentionally kept as two components (ADR-0028) — same structure
-// today, but free to diverge in copy/behavior without disturbing shadcn.
-export const SourceColorTabs = () => {
-  // why: controlled value, not `defaultValue`. base-ui's uncontrolled Tabs
-  // fallback resets value to null when its tab map momentarily empties during a
-  // route-change remount and can't recover a null selection — leaving no active
-  // panel and no indicator. Controlled roots skip that path entirely.
+// why: shadcn users arrive with a brand hex, so hex is the always-on primary —
+// the input sits inline at the top of the rail rather than behind a tab. HCT
+// and image are the *other* ways to set the one canonical seed (ADR-0028: hex,
+// HCT, and image all write the same value), folded into a single "Source
+// control" disclosure so they read as alternate inputs, not a mode-switch that
+// swaps the whole rail. md-rail's SourceColorTabs mirrors this layout — setting
+// the seed is a set-once gesture in both layers, so folding reclaims rail space.
+export function ShadcnSourceColor() {
   const [src, setSrc] = useState('hct')
   // why: a locked seed can't be changed by any path, so the alternate inputs
   // (HCT/image) are inert too — dim and block the whole disclosure, matching the
-  // disabled state SourceColorSection already gives the hex input. The lock
-  // itself lives in SourceColorSection (always-on, outside this wrapper) so it
-  // stays reachable to unlock.
+  // disabled state SourceColorSection already gives the hex input.
   const seedHexLock = useSource((s) => s.seedHexLock)
 
   // why: locking blocks the disclosure (pointer-events-none), so a user who
@@ -52,14 +46,10 @@ export const SourceColorTabs = () => {
           open={open}
           onOpenChange={setOpen}
         >
-          <Tabs
-            value={src}
-            onValueChange={(value) => setSrc(value as string)}
-            className="gap-3 -mx-0.5"
-          >
+          <Tabs value={src} onValueChange={(value) => setSrc(value as string)} className="gap-3">
             <TabsListContent
               indicatorClassName="bg-secondary-container h-full!"
-              className="w-full min-h-0 h-6 bg-secondary-container/40 p-0"
+              className="w-full min-h-0 h-6 bg-secondary-container/40 p-0 -mx-0.5"
             >
               <TabsTab
                 className="text-xs data-active:text-on-secondary-container text-on-surface-variant hover:text-on-surface"
