@@ -7,6 +7,9 @@ import { cn } from 'tailwind-variants'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { ChartPaletteToggle } from '@/features/chart-palette'
+import { ContrastLevelSlider } from '@/features/contrast-level'
 import { CustomColorList } from '@/features/custom-colors'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
 import { SoftBordersToggle } from '@/features/shadcn-soft-border'
@@ -31,39 +34,56 @@ export function ShadcnRailContent() {
       }}
     >
       <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
-        <ShadcnSourceColor />
-        <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
-          <SchemeVariantsToggle />
-        </AnimatedCollapsible>
-        <CustomColorList />
-        <SurfaceAdjustment />
-        <SoftBordersToggle />
-        <Button
-          className="w-full justify-between px-2! group leading-snug"
-          variant="ghost"
-          onClick={() => setMode('overrides')}
-        >
-          Overrides
-          <CaretRightIcon
-            weight="bold"
-            className={cn(
-              'size-3 transition-[transform,color] duration-200 text-on-surface-variant/60 group-hover:text-on-surface-variant',
-            )}
-          />
-        </Button>
-        <Button
-          className="w-full justify-between px-2! group leading-snug"
-          variant="ghost"
-          onClick={() => setMode('bindings')}
-        >
-          Bindings
-          <CaretRightIcon
-            weight="bold"
-            className={cn(
-              'size-3 transition-[transform,color] duration-200 text-on-surface-variant/60 group-hover:text-on-surface-variant',
-            )}
-          />
-        </Button>
+        <div className="space-y-1">
+          <ShadcnSourceColor />
+          <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
+            <SchemeVariantsToggle />
+          </AnimatedCollapsible>
+          <SurfaceAdjustment />
+          <AnimatedCollapsible
+            variant="ghost"
+            title="Refinements"
+            height={0}
+            contentClassName="px-0 space-y-1"
+          >
+            <SoftBordersToggle />
+            <Separator className="opacity-20 mx-2" />
+            <div className="p-2">
+              <ContrastLevelSlider />
+            </div>
+            <Separator className="opacity-20 mx-2" />
+            <div className="p-2">
+              <ChartPaletteToggle />
+            </div>
+          </AnimatedCollapsible>
+          <CustomColorList />
+          <Button
+            className="w-full justify-between px-2! group leading-snug"
+            variant="ghost"
+            onClick={() => setMode('overrides')}
+          >
+            Token Overrides
+            <CaretRightIcon
+              weight="bold"
+              className={cn(
+                'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
+              )}
+            />
+          </Button>
+          <Button
+            className="w-full justify-between px-2! group leading-snug"
+            variant="ghost"
+            onClick={() => setMode('bindings')}
+          >
+            Role Bindings
+            <CaretRightIcon
+              weight="bold"
+              className={cn(
+                'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
+              )}
+            />
+          </Button>
+        </div>
       </ScrollArea>
     </m.div>
   ) : (
@@ -81,8 +101,8 @@ export function ShadcnRailContent() {
           <Button variant="ghost" size="icon-sm" onClick={() => setMode('controls')} title="Back">
             <ArrowLeftIcon />
           </Button>
-          <div className="text-sm font-medium text-on-surface">
-            {mode === 'overrides' ? 'Role overrides' : 'Role bindings'}
+          <div className="text-sm font-medium">
+            {mode === 'overrides' ? 'Token Overrides' : 'Role Bindings'}
           </div>
         </div>
         <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">

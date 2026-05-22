@@ -33,15 +33,16 @@ export function ShadcnSourceColor() {
   }, [seedHexLock])
 
   return (
-    <GuideAnchor anchorKey="seed-color" className="space-y-2 pt-4">
+    <GuideAnchor anchorKey="seed-color" className="space-y-4 pt-4">
       <SourceColorSection />
       <div
         aria-disabled={seedHexLock}
         className={cn(seedHexLock && 'pointer-events-none opacity-50')}
       >
         <AnimatedCollapsible
+          defaultOpen
           variant="ghost"
-          title="Source control"
+          title="Source Control"
           height={0}
           open={open}
           onOpenChange={setOpen}

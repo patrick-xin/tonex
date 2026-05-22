@@ -2,42 +2,25 @@
 
 import { GearSixIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { useSource } from '@tonex/core'
-import { HUE_SPREAD_DEFAULT } from '@tonex/core/schema'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TwPickerEnableToggle } from '@/features/color-picker'
-import { ContrastLevelSlider } from '@/features/contrast-level'
 import { ResetButton } from '@/features/reset-button'
 import { PresetPicker, PresetSwitchDialog } from '@/features/shadcn-presets'
 import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
-const CHART_PALETTE_VALUES = ['single', 'multi', 'polychrome'] as const
-type ChartPaletteValue = (typeof CHART_PALETTE_VALUES)[number]
-
-const CHART_PALETTE_LABELS: Record<ChartPaletteValue, string> = {
-  single: 'Single hue',
-  multi: 'Multi hue',
-  polychrome: 'Polychrome',
-}
-
 export function Settings({ layer }: { layer: Layer }) {
   const [isOpen, setIsOpen] = useState(false)
   useHotkey('S', () => setIsOpen((prev) => !prev))
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
-  const chartScheme = useSource((s) => s.chart.scheme)
-  const chartHueSpread = useSource((s) => s.chart.hueSpread)
-  const setChartScheme = useSource((s) => s.actions.setChartScheme)
-  const setChartHueSpread = useSource((s) => s.actions.setChartHueSpread)
 
   return (
     <>
@@ -85,47 +68,6 @@ export function Settings({ layer }: { layer: Layer }) {
             </>
           )}
           <TwPickerEnableToggle />
-          <Separator className="opacity-50" />
-          <ContrastLevelSlider />
-          <Separator className="opacity-50" />
-          <Field name="chart-scheme" className="gap-1">
-            <FieldLabel className="items-center justify-between w-full">Chart palette</FieldLabel>
-            <FieldDescription className="max-w-5/6">
-              Shades of one hue, multi-hue rotation, or fully distinct colors.
-            </FieldDescription>
-            <ToggleGroup
-              variant="outline"
-              size="xs"
-              className="mt-0.5"
-              value={[
-                chartScheme === 'categorical'
-                  ? 'polychrome'
-                  : chartHueSpread === 0
-                    ? 'single'
-                    : 'multi',
-              ]}
-              onValueChange={(value) => {
-                if (value.length === 0) return
-                const next = value[0] as ChartPaletteValue
-                if (next === 'polychrome') {
-                  setChartScheme('categorical')
-                  return
-                }
-                setChartScheme('sequential')
-                if (next === 'single') {
-                  setChartHueSpread(0)
-                } else if (chartHueSpread === 0) {
-                  setChartHueSpread(HUE_SPREAD_DEFAULT)
-                }
-              }}
-            >
-              {CHART_PALETTE_VALUES.map((v) => (
-                <ToggleGroupItem className="h-6" key={v} value={v}>
-                  {CHART_PALETTE_LABELS[v]}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </Field>
           <Separator className="opacity-50" />
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-medium leading-snug text-on-surface">

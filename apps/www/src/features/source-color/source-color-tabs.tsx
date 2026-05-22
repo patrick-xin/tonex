@@ -39,27 +39,24 @@ export const SourceColorTabs = () => {
   }, [seedHexLock])
 
   return (
-    <GuideAnchor anchorKey="seed-color" className="space-y-2 pt-4">
+    <GuideAnchor anchorKey="seed-color" className="space-y-4 pt-4">
       <SourceColorSection />
       <div
         aria-disabled={seedHexLock}
         className={cn(seedHexLock && 'pointer-events-none opacity-50')}
       >
         <AnimatedCollapsible
+          defaultOpen
           variant="ghost"
-          title="Source control"
+          title="Source Control"
           height={0}
           open={open}
           onOpenChange={setOpen}
         >
-          <Tabs
-            value={src}
-            onValueChange={(value) => setSrc(value as string)}
-            className="gap-3 -mx-0.5"
-          >
+          <Tabs value={src} onValueChange={(value) => setSrc(value as string)} className="gap-3">
             <TabsListContent
               indicatorClassName="bg-secondary-container h-full!"
-              className="w-full min-h-0 h-6 bg-secondary-container/40 p-0"
+              className="w-full min-h-0 h-6 bg-secondary-container/40 p-0 -mx-0.5"
             >
               <TabsTab
                 className="text-xs data-active:text-on-secondary-container text-on-surface-variant hover:text-on-surface"
