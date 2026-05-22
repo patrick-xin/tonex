@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { hctFromHex } from './hct'
 import { DEFAULT_INPUTS, type PortableTheme } from './schema'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPreset } from './shadcn-presets'
 
@@ -28,6 +29,8 @@ function projectPreset(theme: PortableTheme): ShadcnPreset {
     surfaceTintTextLevel: theme.surfaceTintTextLevel,
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
+    seed: theme.seed,
+    contrastLevel: theme.contrastLevel,
   }
 }
 
@@ -125,5 +128,52 @@ describe('R5: Default preset == DEFAULT_INPUTS projection', () => {
 
   it('findActivePreset(DEFAULT_INPUTS) === "default"', () => {
     expect(findActivePreset(DEFAULT_INPUTS)).toBe('default')
+  })
+})
+
+// why: ADR-0031 #5 — curated source inputs apply but never define identity. A
+// user who adopted a preset's recipe and kept their own color (or contrast) is
+// still meaningfully "on" that preset. Detection must read the recipe only and
+// ignore seed and contrastLevel; pinning it here keeps a future curated-source
+// slice from accidentally folding source inputs into the match.
+// why: ADR-0031 #2 — a theme preset carries the curated source inputs it was
+// tuned against. Issue #109 adds the seed; every shipping preset must declare
+// one so the resolver always has a curated value to supersede an untouched
+// seed with. Final curation is the promotion slice; this only pins presence
+// and shape.
+describe('R7: every preset carries a curated seed', () => {
+  it.each(PRESET_NAMES)('preset "%s" declares a well-formed seed', (name) => {
+    const seed = presets[name]?.seed
+    expect(seed, `preset "${name}" missing seed`).toBeDefined()
+    expect(typeof seed!.hue).toBe('number')
+    expect(typeof seed!.chroma).toBe('number')
+    expect(typeof seed!.tone).toBe('number')
+  })
+})
+
+// why: ADR-0031 #2 — contrast joins the seed as a curated source input (issue
+// #110). Every shipping preset declares an in-range contrastLevel so the
+// resolver always has a value to supersede an untouched contrast with. Final
+// curation is the promotion slice; this pins presence and the [0, 1] range.
+describe('R8: every preset carries a curated contrastLevel', () => {
+  it.each(PRESET_NAMES)('preset "%s" declares an in-range contrastLevel', (name) => {
+    const contrastLevel = presets[name]?.contrastLevel
+    expect(contrastLevel, `preset "${name}" missing contrastLevel`).toBeDefined()
+    expect(contrastLevel).toBeGreaterThanOrEqual(0)
+    expect(contrastLevel).toBeLessThanOrEqual(1)
+  })
+})
+
+describe('R6: findActivePreset ignores source inputs (seed, contrast)', () => {
+  it.each(
+    PRESET_NAMES,
+  )('detects "%s" even when seed and contrast differ from the boot default', (name) => {
+    const theme = themeWithPreset(name)
+    const withForeignSource: PortableTheme = {
+      ...theme,
+      seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
+      contrastLevel: 0.5,
+    }
+    expect(findActivePreset(withForeignSource)).toBe(name)
   })
 })

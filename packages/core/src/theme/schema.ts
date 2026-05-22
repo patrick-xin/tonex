@@ -341,6 +341,22 @@ export interface PortableTheme {
   // seed itself isn't mode-keyed. Field name retained from v1 for API
   // continuity; semantics generalise to "lock the canonical seed."
   seedHexLock: boolean
+  // why: ADR-0031 #3/#4 — recorded per-field touched signal for the seed. A
+  // recorded boolean, NOT a value comparison against DEFAULT_INPUTS.seed: a
+  // user who deliberately picks the default value is still "touched." Set true
+  // inside the user-facing seed setters; defaults false in DEFAULT_INPUTS;
+  // cleared by reset. Gates preset apply — an untouched seed adopts a preset's
+  // curated seed, a touched one is preserved (resolvePresetApply). The signal
+  // tracks user choices only, so the resolver never writes it: a curated seed
+  // it supplies stays "untouched" and the next preset can still supersede.
+  seedTouched: boolean
+  // why: ADR-0031 #3/#4 — recorded touched signal for contrast, the sibling of
+  // seedTouched. Set inside setContrastLevel; defaults false; cleared by reset.
+  // Resolved independently of the seed at preset apply (resolvePresetApply): a
+  // user who tuned contrast but never picked a color keeps their contrast and
+  // receives the curated seed, and the mirror. Contrast has no lock — the only
+  // gate is the touched signal. Issue #110.
+  contrastTouched: boolean
   // why: per ADR-0017 commitment 3 — mode-keyed `{ light, dark }` at the top,
   // `Record<MdTokenName, hex>` inside. Mirrors the export's `:root + .dark`
   // block structure one-to-one. Partial because most tokens stay at MCU; an
@@ -461,6 +477,8 @@ export const DEFAULT_INPUTS: PortableTheme = {
   variant: SHADCN_PRESETS.default.variant,
   contrastLevel: 0,
   seedHexLock: false,
+  seedTouched: false,
+  contrastTouched: false,
   md3TokenOverrides: { light: {}, dark: {} },
   shadcnRoleBindings: SHADCN_PRESETS.default.shadcnRoleBindings,
   shadcnRoleOverrides: { light: {}, dark: {} },
@@ -568,6 +586,8 @@ export const PortableThemeSchema = v.object({
   variant: v.picklist(VARIANT_NAMES),
   contrastLevel: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
   seedHexLock: v.boolean(),
+  seedTouched: v.boolean(),
+  contrastTouched: v.boolean(),
   md3TokenOverrides: v.object({
     light: Md3TokenOverridesPerModeSchema,
     dark: Md3TokenOverridesPerModeSchema,

@@ -14,6 +14,7 @@ import {
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
 } from './schema'
+import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
 import { flushPersist, STORAGE_KEY, selectPortable, selectSeedHex, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
@@ -61,6 +62,8 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   variant: 'tonalSpot',
   contrastLevel: 0.5,
   seedHexLock: true,
+  seedTouched: true,
+  contrastTouched: true,
   md3TokenOverrides: {
     light: { '--color-primary-container': '#aabbcc', '--color-secondary': '#445566' },
     dark: { '--color-primary-container': '#112233' },
@@ -821,5 +824,239 @@ describe('useSource persistence round-trip', () => {
         expect(drifters).toEqual([])
       })
     })
+  })
+})
+
+// why: detection (findActivePreset) compares every recipe field, including
+// surfaceTintTextLevel; the apply action (setShadcnPreset) must write every
+// field detection compares, or a freshly applied preset reads as inactive on
+// any field the action skips. This pins the recipe-symmetry contract so the
+// latent gap (apply skipped surfaceTintTextLevel, masked only by every shipped
+// preset using a zero value) cannot silently return. See issue #108 / ADR-0031 #5.
+describe('setShadcnPreset recipe symmetry', () => {
+  const PRESET_NAMES = Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]
+
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it.each(
+    PRESET_NAMES,
+  )('applying "%s" over a fully drifted recipe makes it detect as active', (name) => {
+    // why: pre-dirty every recipe field detection reads, so the apply must
+    // overwrite each one to land on the preset. surfaceTintTextLevel is the
+    // field the bug skipped — set it non-zero here so a skipping apply leaves
+    // a residue and findActivePreset returns null.
+    useSource.setState({
+      variant: 'monochrome',
+      surfaceAlgo: 'tint',
+      surfacePaletteName: 'slate',
+      surfaceTintLevel: { light: 0.42, dark: 0.18 },
+      surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
+      surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
+      shadcnRoleBindings: {
+        light: NONDEFAULT_BINDINGS_LIGHT,
+        dark: NONDEFAULT_BINDINGS_DARK,
+      },
+      _hydrated: true,
+    })
+
+    useSource.getState().actions.setShadcnPreset(name)
+
+    expect(findActivePreset(selectPortable(useSource.getState()))).toBe(name)
+  })
+
+  it('applying a preset writes surfaceTintTextLevel to the preset value', () => {
+    useSource.setState({ surfaceTintTextLevel: { light: 0.55, dark: 0.27 }, _hydrated: true })
+    useSource.getState().actions.setShadcnPreset('default')
+    expect(useSource.getState().surfaceTintTextLevel).toEqual(
+      SHADCN_PRESETS.default.surfaceTintTextLevel,
+    )
+  })
+})
+
+// why: ADR-0031 #4 — touched is a recorded signal set inside the user-facing
+// seed setters, defaulting false in the boot defaults and cleared by reset.
+// These store-action tests pin the signal's lifecycle independent of the
+// resolver (which is unit-tested in preset-apply.test.ts).
+describe('seedTouched signal', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('defaults false in the boot defaults', () => {
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('setSeedHex flips the signal true', () => {
+    useSource.getState().actions.setSeedHex('#123456')
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  it.each([
+    'setSeedHue',
+    'setSeedChroma',
+    'setSeedTone',
+  ] as const)('%s flips the signal true', (setter) => {
+    // why: each HCT-axis setter is a user touch. Push a value clearly past
+    // the 5e-3 epsilon gate so the write isn't suppressed as a no-op.
+    const target = { setSeedHue: 200, setSeedChroma: 60, setSeedTone: 25 }[setter]
+    useSource.getState().actions[setter](target)
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  // why: ADR-0031 #4 — choosing a value equal to the current one is still a
+  // touch. The idempotency / epsilon guards suppress the value write but must
+  // not suppress the recorded signal.
+  it('records a touch even on an idempotent re-pick of the current seed', () => {
+    const currentHex = selectSeedHex(useSource.getState())
+    useSource.getState().actions.setSeedHex(currentHex)
+    expect(useSource.getState().seedTouched).toBe(true)
+  })
+
+  it('a locked seed setter does not record a touch', () => {
+    useSource.setState({ seedHexLock: true, _hydrated: true })
+    useSource.getState().actions.setSeedHex('#123456')
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('reset clears the signal', () => {
+    useSource.getState().actions.setSeedHex('#123456')
+    useSource.getState().actions.reset()
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+
+  it('applying a preset leaves the signal false', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seedTouched).toBe(false)
+  })
+})
+
+// why: ADR-0031 #2/#3 — end-to-end seed supersession through the store action.
+// The resolver is unit-tested in isolation; these assert the store wires it up
+// so the observable seed lands correctly per touched/locked state.
+describe('setShadcnPreset seed supersession', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('replaces an untouched boot-default seed with the preset curated seed', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.warm.seed)
+  })
+
+  it('keeps a user-chosen seed and drops the curated one', () => {
+    useSource.getState().actions.setSeedHex('#ff00aa')
+    const chosen = useSource.getState().seed
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(chosen)
+  })
+
+  it('keeps a locked seed even when untouched', () => {
+    const locked = useSource.getState().seed
+    useSource.setState({ seedHexLock: true, _hydrated: true })
+    useSource.getState().actions.setShadcnPreset('warm')
+    expect(useSource.getState().seed).toEqual(locked)
+  })
+
+  // why: ADR-0031 #3 / story 12 — a curated seed must not count as a user
+  // choice, so a second preset still supplies its own curated seed.
+  it('a second preset supersedes the first preset curated seed', () => {
+    useSource.getState().actions.setShadcnPreset('warm')
+    useSource.getState().actions.setShadcnPreset('tech')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.tech.seed)
+  })
+})
+
+// why: contrast joins the touched-state machinery (ADR-0031, issue #110).
+// Mirrors the seedTouched lifecycle; contrast has no lock so the matrix is
+// touched vs untouched only.
+describe('contrastTouched signal', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('defaults false in the boot defaults', () => {
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+
+  it('setContrastLevel flips the signal true', () => {
+    useSource.getState().actions.setContrastLevel(0.5)
+    expect(useSource.getState().contrastTouched).toBe(true)
+  })
+
+  it('reset clears the signal', () => {
+    useSource.getState().actions.setContrastLevel(0.5)
+    useSource.getState().actions.reset()
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+
+  it('applying a preset leaves the signal false', () => {
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+})
+
+// why: end-to-end contrast supersession through the store action, plus the
+// per-field independence that is the whole point of ADR-0031 #3.
+describe('setShadcnPreset contrast supersession', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('replaces an untouched boot-default contrast with the preset curated contrast', () => {
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+  })
+
+  it('keeps a user-chosen contrast and drops the curated one', () => {
+    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastLevel).toBe(0.7)
+  })
+
+  it('touched contrast only: curated seed adopted, user contrast kept', () => {
+    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.stark.seed)
+    expect(useSource.getState().contrastLevel).toBe(0.7)
+  })
+
+  it('touched seed only: curated contrast adopted, user seed kept', () => {
+    useSource.getState().actions.setSeedHex('#ff00aa')
+    const chosen = useSource.getState().seed
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().seed).toEqual(chosen)
+    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
   })
 })

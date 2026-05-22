@@ -8,6 +8,7 @@ import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
+import { resolvePresetApply } from './preset-apply'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -187,8 +188,14 @@ export const useSource = create<SourceState>()(
         setSeedHex: (hex) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            if (hex === selectSeedHex(s)) return {}
-            return { seed: { ...hctFromHex(hex), exactHex: hex } }
+            // why: ADR-0031 #4 — the touch is a recorded signal of user intent,
+            // independent of whether the value moved. An idempotent re-pick of
+            // the current value still records the touch (a deliberate choice of
+            // the current color), so the value-write short-circuit only drops
+            // the seed write, never the signal. The lock branch above is the
+            // sole no-touch path: a locked seed cannot be chosen.
+            if (hex === selectSeedHex(s)) return { seedTouched: true }
+            return { seed: { ...hctFromHex(hex), exactHex: hex }, seedTouched: true }
           }),
         // why: HCT-axis setters write the canonical axis and rebuild `seed`
         // without `exactHex` — the user has left hex-input mode (ADR-0028).
@@ -202,23 +209,28 @@ export const useSource = create<SourceState>()(
         // axes (Mechanism B from #57). At chroma<4 the visual hue lock
         // matches state because hue is preserved verbatim across a chroma
         // touch instead of being recomputed from the new hex projection.
+        // why: HCT-axis setters record the touch (ADR-0031 #4) on every
+        // unlocked call. The 5e-3 epsilon gate (issue #56) still suppresses the
+        // VALUE write so a button-tap `.toFixed(2)` commit can't drift the
+        // axis, but the touch signal is intent and is recorded regardless —
+        // only the lock branch is no-touch.
         setSeedHue: (hue) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            if (Math.abs(hue - s.seed.hue) < HCT_SETTER_EPSILON) return {}
-            return { seed: { hue, chroma: s.seed.chroma, tone: s.seed.tone } }
+            if (Math.abs(hue - s.seed.hue) < HCT_SETTER_EPSILON) return { seedTouched: true }
+            return { seed: { hue, chroma: s.seed.chroma, tone: s.seed.tone }, seedTouched: true }
           }),
         setSeedChroma: (chroma) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            if (Math.abs(chroma - s.seed.chroma) < HCT_SETTER_EPSILON) return {}
-            return { seed: { hue: s.seed.hue, chroma, tone: s.seed.tone } }
+            if (Math.abs(chroma - s.seed.chroma) < HCT_SETTER_EPSILON) return { seedTouched: true }
+            return { seed: { hue: s.seed.hue, chroma, tone: s.seed.tone }, seedTouched: true }
           }),
         setSeedTone: (tone) =>
           set((s) => {
             if (s.seedHexLock) return {}
-            if (Math.abs(tone - s.seed.tone) < HCT_SETTER_EPSILON) return {}
-            return { seed: { hue: s.seed.hue, chroma: s.seed.chroma, tone } }
+            if (Math.abs(tone - s.seed.tone) < HCT_SETTER_EPSILON) return { seedTouched: true }
+            return { seed: { hue: s.seed.hue, chroma: s.seed.chroma, tone }, seedTouched: true }
           }),
         setVariant: (variant) => set({ variant }),
         // why: clamp at the seam (issue #33). MCU's 2025/2026 spec curves
@@ -230,7 +242,10 @@ export const useSource = create<SourceState>()(
         // still set their own min/max for the slider UX, but no consumer
         // needs to re-derive the contract.
         setContrastLevel: (contrastLevel) =>
-          set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)) }),
+          // why: ADR-0031 #4 — the call records the touch (intent) regardless of
+          // the clamped value, sibling to the seed setters. No lock on contrast,
+          // so every call records.
+          set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)), contrastTouched: true }),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
         // why: hex sets the override for one (mode, token); null deletes the
         // entry so the token returns to MCU. Mode and token are typed so any
@@ -250,20 +265,14 @@ export const useSource = create<SourceState>()(
               [mode]: { ...s.shadcnRoleBindings[mode], [role]: mdToken },
             },
           })),
-        setShadcnPreset: (name) => {
-          const preset = SHADCN_PRESETS[name]
-          set({
-            variant: preset.variant,
-            surfaceAlgo: preset.surfaceAlgo,
-            surfacePaletteName: preset.surfacePaletteName,
-            surfaceTintLevel: { ...preset.surfaceTintLevel },
-            surfaceDesaturateLevel: { ...preset.surfaceDesaturateLevel },
-            shadcnRoleBindings: {
-              light: { ...preset.shadcnRoleBindings.light },
-              dark: { ...preset.shadcnRoleBindings.dark },
-            },
-          })
-        },
+        // why: thin caller of the pure resolvePresetApply deep module
+        // (ADR-0031 #2/#3). The resolver writes every recipe field detection
+        // compares (issue #108) and resolves the seed per the recorded touched
+        // signal and lock — superseding an untouched, unlocked seed with the
+        // preset's curated seed, keeping the user's otherwise. It never returns
+        // a touched signal, so a curated seed stays "untouched" and the next
+        // preset can still supersede (story 12).
+        setShadcnPreset: (name) => set((s) => resolvePresetApply(s, SHADCN_PRESETS[name])),
         setShadcnRoleOverride: (mode, role, hex) =>
           set((s) => {
             const next = { ...s.shadcnRoleOverrides[mode] }
