@@ -2,6 +2,7 @@
 
 import { CHROMA_HUE_LOCK, maxChroma, useSource } from '@tonex/core'
 import { useMemo } from 'react'
+import { cn } from 'tailwind-variants'
 import { ChromaSlider } from './chroma-slider'
 import { chromaGradient, hueGradient, toneGradient } from './gradients'
 import { HctSlider } from './hct-slider'
@@ -15,7 +16,7 @@ import { showsHueDisabledHint } from './hints'
 // cache is redundant — the store IS that cache. seedHexLock gates every
 // setter at the store seam, so locking disables all axes structurally;
 // the UI also disables the inputs cosmetically.
-export function HctControlSliders() {
+export function HctControlSliders({ className }: { className?: string }) {
   const seed = useSource((s) => s.seed)
   const seedHexLock = useSource((s) => s.seedHexLock)
   const setSeedHue = useSource((s) => s.actions.setSeedHue)
@@ -40,7 +41,7 @@ export function HctControlSliders() {
   const hueDisabled = seedHexLock || chroma < CHROMA_HUE_LOCK
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className={cn('flex flex-col space-y-4', className)}>
       <HctSlider
         label="Hue"
         value={hue}
@@ -48,10 +49,12 @@ export function HctControlSliders() {
         gradient={hueG}
         onValueChange={setSeedHue}
         disabled={hueDisabled}
+        disabledHint={
+          showsHueDisabledHint(chroma, seedHexLock)
+            ? 'Adjust chroma/tone to adjust hue.'
+            : undefined
+        }
       />
-      {showsHueDisabledHint(chroma, seedHexLock) && (
-        <p className="text-xs text-on-surface-variant">Add some chroma to adjust hue.</p>
-      )}
       <ChromaSlider
         disabled={seedHexLock}
         value={chroma}

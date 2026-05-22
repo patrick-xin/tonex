@@ -3,11 +3,12 @@
 import { useHotkey } from '@tanstack/react-hotkeys'
 import { useSource } from '@tonex/core'
 import { LockIcon, UnlockIcon } from 'lucide-react'
+import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export const ColorLock = () => {
+export const ColorLock = ({ className }: { className?: string }) => {
   const seedHexLock = useSource((s) => s.seedHexLock)
   const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)
 
@@ -18,7 +19,7 @@ export const ColorLock = () => {
     requireReset: false,
     conflictBehavior: 'replace',
     meta: {
-      name: 'Lock color',
+      name: 'Lock current seed',
       description: 'Press L to lock current color',
     },
   })
@@ -31,7 +32,7 @@ export const ColorLock = () => {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="size-7 group"
+            className={cn('size-7 group', className)}
             onClick={toggle}
             aria-label={seedHexLock ? 'Unlock color' : 'Lock current color'}
           >
@@ -43,8 +44,8 @@ export const ColorLock = () => {
           </Button>
         }
       />
-      <TooltipContent side="right">
-        <p>{seedHexLock ? 'Unlock color' : 'Lock current color'}</p>
+      <TooltipContent>
+        <p>{seedHexLock ? 'unlock seed' : 'lock seed'}</p>
         <KbdGroup className="mt-1">
           <Kbd className="h-4 min-w-4">⌘</Kbd>
           <Kbd className="h-4 min-w-4">L</Kbd>

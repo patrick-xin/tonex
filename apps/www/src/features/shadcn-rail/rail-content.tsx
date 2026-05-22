@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { CustomColorList } from '@/features/custom-colors'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
 import { SoftBordersToggle } from '@/features/shadcn-soft-border'
-import { SourceColorTabs } from '@/features/source-color'
+import { ShadcnSourceColor } from '@/features/source-color'
 import { SurfaceAdjustment } from '@/features/surface-adjustment'
 import { ShadcnBindingsContent } from './bindings-content'
 import { ShadcnOverrideContent } from './override-content'
@@ -31,8 +31,8 @@ export function ShadcnRailContent() {
       }}
     >
       <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
-        <SourceColorTabs />
-        <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
+        <ShadcnSourceColor />
+        <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
           <SchemeVariantsToggle />
         </AnimatedCollapsible>
         <CustomColorList />

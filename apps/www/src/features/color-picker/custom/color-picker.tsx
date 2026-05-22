@@ -16,6 +16,7 @@ interface ColorPickerProps {
   disabled?: boolean
   hideInput?: boolean
   align?: 'end' | 'start'
+  triggerClassName?: string
 }
 
 export function ColorPicker({
@@ -25,6 +26,7 @@ export function ColorPicker({
   disabled,
   hideInput = false,
   align = 'end',
+  triggerClassName,
 }: ColorPickerProps) {
   const [hsva, updateHsva] = useColorManipulation(value, onChange)
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
@@ -32,8 +34,11 @@ export function ColorPicker({
   return (
     <Popover>
       <PopoverTrigger
+        disabled={disabled}
         className={cn(
           'size-8 shrink-0 rounded-md cursor-pointer outline outline-outline-variant data-popup-open:outline-2 data-popup-open:outline-primary',
+          disabled && 'cursor-default opacity-38',
+          triggerClassName,
         )}
         style={{
           backgroundColor: hexInput,

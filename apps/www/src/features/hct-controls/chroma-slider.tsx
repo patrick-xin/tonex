@@ -157,11 +157,10 @@ export function ChromaSlider({
                     />
                   }
                 />
-                <TooltipContent>
+                <TooltipContent variant="inverse">
                   Maximum saturation reached for brightness (max {Math.round(gamutLimit)})
                 </TooltipContent>
               </Tooltip>
-
               <div
                 className="absolute inset-y-0 rounded-r-full pointer-events-none"
                 style={{
@@ -177,10 +176,17 @@ export function ChromaSlider({
                   opacity: 0.7,
                 }}
               />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-1 h-4 rounded-full pointer-events-none bg-tertiary"
-                style={{ left: `${gamutPct}%` }}
-              />
+              {/* why: the tick marks where the gamut wall sits inside the
+                  track. At tone 0/100 the limit collapses to ~0, so there's no
+                  wall to mark — the tick would just pin to the left edge as
+                  noise. Hide it once the rounded max (what the tooltip shows)
+                  reaches 0. */}
+              {Math.round(gamutLimit) > 0 && (
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-1 h-4 rounded-full pointer-events-none bg-tertiary"
+                  style={{ left: `${gamutPct}%` }}
+                />
+              )}
             </TooltipProvider>
           )}
           <SliderIndicator className="absolute h-full rounded-full" />

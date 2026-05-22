@@ -13,6 +13,7 @@ import {
   sliderStyles,
 } from '@/components/ui/slider'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface HctSliderProps {
   label: string
@@ -22,6 +23,12 @@ interface HctSliderProps {
   gradient: string
   onValueChange: (value: number) => void
   disabled?: boolean
+  // why: when the axis is disabled for a *reason the user can act on* (hue goes
+  // inert below CHROMA_HUE_LOCK), the explanation rides a tooltip on the track
+  // instead of an inline line — keeps the slider triplet at a fixed height so
+  // it doesn't overflow the shadcn rail's folded panel. Same pattern as the
+  // chroma gamut-wall tooltip.
+  disabledHint?: string
 }
 
 // why: 0.01 keeps the slider WYSIWYG with the `.toFixed(2)` display below —
@@ -36,6 +43,7 @@ export function HctSlider({
   gradient,
   onValueChange,
   disabled,
+  disabledHint,
 }: HctSliderProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -112,6 +120,18 @@ export function HctSlider({
           className={cx('relative w-full h-2.5 rounded-full', disabled && 'opacity-38')}
           style={{ background: gradient }}
         >
+          {disabled && disabledHint && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <div className="absolute inset-0 rounded-full z-[1] cursor-not-allowed" />
+                  }
+                />
+                <TooltipContent variant="inverse">{disabledHint}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <SliderIndicator className="absolute h-full rounded-full" />
           <SliderThumb className={cx(sliderStore.thumb(), 'size-4.5')} />
         </SliderTrack>
