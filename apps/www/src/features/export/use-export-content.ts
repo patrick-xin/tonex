@@ -6,7 +6,6 @@ import {
   exportCss,
   exportDart,
   exportJson,
-  exportTs,
   selectPortable,
   selectSeedHex,
   useSource,
@@ -14,16 +13,13 @@ import {
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-export type ExportTab = 'Tailwind' | 'shadcn' | 'TS' | 'JSON' | 'Dart'
+export type ExportTab = 'Tailwind' | 'shadcn' | 'JSON' | 'Dart'
 
 // why: Tailwind tab emits the md layer (full globals.css with @theme inline);
 // shadcn tab emits :root + .dark only since the user already owns the @import
 // and @theme inline in their shadcn project. Both go through core's exportCss
 // so the drift-guard (ADR-0017) covers what users actually paste. JSON and Dart
-// now have real formatters in `@tonex/core/exporters/{json,dart}.ts`; TS still
-// ships the visible-from-day-one TODO body (ADR-0021 commitment 9). When a
-// stub's formatter lands its file body swaps and this manager keeps the same
-// call.
+// have real formatters in `@tonex/core/exporters/{json,dart}.ts`.
 
 // why: header is the export's provenance trail. seed + variant always carry
 // signal; date is what users actually find useful when comparing two pasted
@@ -69,8 +65,6 @@ export function useExportContent({
   const contrastLevel = useSource((s) => s.contrastLevel)
 
   return useMemo(() => {
-    if (exportTab === 'TS') return { exportContent: exportTs(), ext: 'ts' }
-
     if (!hydrated) return { exportContent: '/* Loading… */', ext: 'css' }
 
     // why: ADR-0021 commitment 5 — buildContrastBundle is lazy and shared by the
@@ -81,9 +75,9 @@ export function useExportContent({
     // pastes byte-for-byte.
     const bundle = buildContrastBundle(portable, options)
 
-    // why: the JSON branch lives below the hydration guard (#84) — unlike the
-    // TS / Dart stubs it needs the derived bundle + source. exportJson reshapes
-    // the same DerivedTheme the CSS path uses into MTB-shaped JSON (ADR-0029).
+    // why: the JSON branch lives below the hydration guard (#84) — it needs the
+    // derived bundle + source. exportJson reshapes the same DerivedTheme the CSS
+    // path uses into MTB-shaped JSON (ADR-0029).
     if (exportTab === 'JSON') {
       return { exportContent: exportJson(portable, bundle, options), ext: 'json' }
     }

@@ -51,7 +51,6 @@ export {
   exportCss,
   exportDart,
   exportJson,
-  exportTs,
   formatCss,
   formatLayer,
 } from './theme/exporters'
