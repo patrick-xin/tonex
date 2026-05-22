@@ -2,15 +2,9 @@
 
 import { GearSixIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { selectPortable, useSource } from '@tonex/core'
-import {
-  findActivePreset,
-  HUE_SPREAD_DEFAULT,
-  SHADCN_PRESETS,
-  type ShadcnPresetName,
-} from '@tonex/core/schema'
+import { useSource } from '@tonex/core'
+import { HUE_SPREAD_DEFAULT } from '@tonex/core/schema'
 import { useState } from 'react'
-import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -21,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TwPickerEnableToggle } from '@/features/color-picker'
 import { ContrastLevelSlider } from '@/features/contrast-level'
 import { ResetButton } from '@/features/reset-button'
-import { PresetSwitchDialog, requestPresetSwitch } from '@/features/shadcn-preset-switch'
+import { PresetPicker, PresetSwitchDialog } from '@/features/shadcn-presets'
 import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
@@ -35,10 +29,6 @@ const CHART_PALETTE_LABELS: Record<ChartPaletteValue, string> = {
   polychrome: 'Polychrome',
 }
 
-const PRESET_NAMES = Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]
-const PRESET_GROUP_B: ShadcnPresetName[] = ['soft', 'warm', 'playful']
-const PRESET_GROUP_A = PRESET_NAMES.filter((n) => !PRESET_GROUP_B.includes(n))
-
 export function Settings({ layer }: { layer: Layer }) {
   const [isOpen, setIsOpen] = useState(false)
   useHotkey('S', () => setIsOpen((prev) => !prev))
@@ -48,8 +38,6 @@ export function Settings({ layer }: { layer: Layer }) {
   const chartHueSpread = useSource((s) => s.chart.hueSpread)
   const setChartScheme = useSource((s) => s.actions.setChartScheme)
   const setChartHueSpread = useSource((s) => s.actions.setChartHueSpread)
-  const portable = useSource(useShallow(selectPortable))
-  const activePreset = findActivePreset(portable)
 
   return (
     <>
@@ -75,25 +63,8 @@ export function Settings({ layer }: { layer: Layer }) {
                 <FieldDescription className="max-w-5/6">
                   Start from a curated aesthetic recipe.
                 </FieldDescription>
-                <div className="mt-0.5 flex flex-col gap-1.5">
-                  {[PRESET_GROUP_A, PRESET_GROUP_B].map((group) => (
-                    <ToggleGroup
-                      key={group.join()}
-                      variant="outline"
-                      size="xs"
-                      value={activePreset && group.includes(activePreset) ? [activePreset] : []}
-                      onValueChange={(value) => {
-                        if (value.length === 0) return
-                        requestPresetSwitch(value[0] as ShadcnPresetName)
-                      }}
-                    >
-                      {group.map((name) => (
-                        <ToggleGroupItem className="h-6 capitalize" key={name} value={name}>
-                          {name}
-                        </ToggleGroupItem>
-                      ))}
-                    </ToggleGroup>
-                  ))}
+                <div className="mt-0.5">
+                  <PresetPicker />
                 </div>
               </Field>
               <Separator className="opacity-50" />
