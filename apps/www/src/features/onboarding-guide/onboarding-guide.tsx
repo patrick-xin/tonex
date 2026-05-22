@@ -277,9 +277,11 @@ export function OnboardingGuide({
                     )}
                   </div>
                   <div className="flex items-center gap-2 ml-auto">
-                    <Button variant="outline" size="sm" onClick={dismiss}>
-                      Skip
-                    </Button>
+                    {!isLastStep && (
+                      <Button variant="outline" size="sm" onClick={dismiss}>
+                        Skip
+                      </Button>
+                    )}
                     {isLastStep ? (
                       <Button size="sm" onClick={dismiss}>
                         Finish
