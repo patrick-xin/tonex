@@ -15,8 +15,8 @@ import type { ShadcnPreset } from './shadcn-presets'
 // Critically the patch NEVER carries a touched signal: a curated value this
 // resolver supplies must not count as a user choice (ADR-0031 #3, story 12), or
 // a second preset switch would read the previous preset's color as the user's
-// and stop superseding. Contrast joins seed as a resolved source field in a
-// follow-on slice; today only the seed resolves here.
+// and stop superseding. Seed and contrast each resolve against their own
+// touched signal, independently — the per-field point of ADR-0031 #3.
 export function resolvePresetApply(
   theme: PortableTheme,
   preset: ShadcnPreset,
@@ -39,6 +39,14 @@ export function resolvePresetApply(
   // seed supersedes only an untouched seed — a touched one is the user's own.
   if (!theme.seedTouched && !theme.seedHexLock) {
     patch.seed = { ...preset.seed }
+  }
+
+  // why: contrast resolves independently of the seed (ADR-0031 #3) — the whole
+  // point is per-field honoring, so a user who touched only contrast keeps it
+  // while the seed still supersedes, and the mirror. Contrast has no lock, so
+  // the touched signal is the sole gate.
+  if (!theme.contrastTouched) {
+    patch.contrastLevel = preset.contrastLevel
   }
 
   return patch

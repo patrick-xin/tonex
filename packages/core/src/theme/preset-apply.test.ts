@@ -65,6 +65,61 @@ describe('resolvePresetApply — seed source field', () => {
   })
 })
 
+describe('resolvePresetApply — contrast source field', () => {
+  // why: contrast has no lock (only the seed does — CONTEXT: Lock), so its
+  // matrix is just touched vs untouched. 'stark' carries a non-zero curated
+  // contrast, so supersession is observable against the boot default of 0.
+  it('supersedes an untouched contrast with the preset curated contrast', () => {
+    const theme = themeWith({ contrastLevel: 0.7, contrastTouched: false })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+  })
+
+  it('keeps a touched contrast and drops the curated one', () => {
+    const theme = themeWith({ contrastLevel: 0.7, contrastTouched: true })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    expect(patch.contrastLevel).toBeUndefined()
+  })
+
+  // why: ADR-0031 #3 / story — a curated contrast written by the resolver must
+  // not mark the field touched, mirroring the seed rule.
+  it('never marks contrast touched in the returned patch', () => {
+    const untouched = themeWith({ contrastTouched: false })
+    const touched = themeWith({ contrastLevel: 0.7, contrastTouched: true })
+    expect('contrastTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.stark)).toBe(false)
+    expect('contrastTouched' in resolvePresetApply(touched, SHADCN_PRESETS.stark)).toBe(false)
+  })
+})
+
+describe('resolvePresetApply — seed and contrast resolve independently', () => {
+  // why: the per-field point of ADR-0031 #3 — each source input is honored on
+  // its own terms, not all-or-nothing. 'stark' carries both a non-default
+  // curated seed and a non-default curated contrast.
+  it('touched contrast only: curated seed adopted, user contrast kept', () => {
+    const theme = themeWith({
+      seed: USER_SEED,
+      seedTouched: false,
+      contrastLevel: 0.7,
+      contrastTouched: true,
+    })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    expect(patch.seed).toEqual(SHADCN_PRESETS.stark.seed)
+    expect(patch.contrastLevel).toBeUndefined()
+  })
+
+  it('touched seed only: curated contrast adopted, user seed kept', () => {
+    const theme = themeWith({
+      seed: USER_SEED,
+      seedTouched: true,
+      contrastLevel: 0.7,
+      contrastTouched: false,
+    })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    expect(patch.seed).toBeUndefined()
+    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+  })
+})
+
 describe('resolvePresetApply — recipe fields always overwrite', () => {
   // why: regardless of source-field resolution, every recipe field detection
   // compares (issue #108) is written unconditionally, so the just-applied

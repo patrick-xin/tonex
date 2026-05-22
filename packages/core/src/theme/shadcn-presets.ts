@@ -17,8 +17,8 @@ import type { NeutralPaletteName } from './surface'
 // "editor's choice" can deliver its color to a user who never picked one; it
 // supersedes only an untouched seed at apply (resolvePresetApply). Per ADR-0026
 // a preset still excludes `shadcnRoleOverrides` — overrides are user pins on
-// top of the binding-resolved values and persist orthogonally. contrastLevel
-// joins seed as a curated source input in a follow-on slice.
+// top of the binding-resolved values and persist orthogonally. The curated
+// source inputs are the seed and contrastLevel.
 export interface ShadcnPreset {
   variant: VariantName
   surfaceAlgo: SurfaceAlgo
@@ -33,6 +33,12 @@ export interface ShadcnPreset {
   // — built via `seedOf(hex)` below. Provisional per-preset values land with
   // the machinery (issue #109); final curation is the promotion slice.
   seed: Seed
+  // why: curated contrast the preset was tuned against (ADR-0031 #2), sibling
+  // to seed. Range [0, 1] like PortableTheme.contrastLevel. Supersedes only an
+  // untouched contrast at apply, resolved independently of the seed.
+  // Provisional per-preset values land with the machinery (issue #110); final
+  // curation is the promotion slice.
+  contrastLevel: number
 }
 
 // why: build a curated seed from a hex the same way DEFAULT_INPUTS does —
@@ -62,6 +68,9 @@ export const SHADCN_PRESETS = {
     // the boot-default projection (R5 pins this), so its curated seed is the
     // app default itself.
     seed: seedOf('#6750a4'),
+    // why: must equal DEFAULT_INPUTS.contrastLevel (0) — `default` is the boot
+    // projection (R5).
+    contrastLevel: 0,
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'zinc',
@@ -131,6 +140,9 @@ export const SHADCN_PRESETS = {
     // why: provisional curated seed — near-neutral cool (zinc) for the stark,
     // minimal look. Final curation is the promotion slice.
     seed: seedOf('#3f3f46'),
+    // why: provisional — stark leans into legibility, so a lifted contrast.
+    // Final curation is the promotion slice.
+    contrastLevel: 0.3,
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -200,6 +212,9 @@ export const SHADCN_PRESETS = {
     // why: provisional curated seed — muted soft blue. Final curation is the
     // promotion slice.
     seed: seedOf('#8fa8c8'),
+    // why: provisional — soft keeps the baseline contrast. Final curation is
+    // the promotion slice.
+    contrastLevel: 0,
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'stone',
@@ -270,6 +285,9 @@ export const SHADCN_PRESETS = {
     // on the faithful cmf family (the seed is the chroma/temperature ceiling,
     // ADR-0031). Final curation is the promotion slice.
     seed: seedOf('#c2683a'),
+    // why: provisional — warm keeps the baseline contrast. Final curation is
+    // the promotion slice.
+    contrastLevel: 0,
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'taupe',
@@ -339,6 +357,9 @@ export const SHADCN_PRESETS = {
     // why: provisional curated seed — vivid magenta-pink for the playful look.
     // Final curation is the promotion slice.
     seed: seedOf('#d6409f'),
+    // why: provisional — playful keeps the baseline contrast. Final curation is
+    // the promotion slice.
+    contrastLevel: 0,
     variant: 'expressive',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'mauve',
@@ -410,6 +431,9 @@ export const SHADCN_PRESETS = {
     // mainly anchors hue; kept near-neutral. Final curation is the promotion
     // slice.
     seed: seedOf('#52525b'),
+    // why: provisional — a slight contrast lift suits the monochrome ramp.
+    // Final curation is the promotion slice.
+    contrastLevel: 0.15,
     variant: 'monochrome',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -479,6 +503,9 @@ export const SHADCN_PRESETS = {
     // why: provisional curated seed — cool tech blue. Final curation is the
     // promotion slice.
     seed: seedOf('#2563eb'),
+    // why: provisional — tech keeps the baseline contrast. Final curation is
+    // the promotion slice.
+    contrastLevel: 0,
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',

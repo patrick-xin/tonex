@@ -30,6 +30,7 @@ function projectPreset(theme: PortableTheme): ShadcnPreset {
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
     seed: theme.seed,
+    contrastLevel: theme.contrastLevel,
   }
 }
 
@@ -147,6 +148,19 @@ describe('R7: every preset carries a curated seed', () => {
     expect(typeof seed!.hue).toBe('number')
     expect(typeof seed!.chroma).toBe('number')
     expect(typeof seed!.tone).toBe('number')
+  })
+})
+
+// why: ADR-0031 #2 — contrast joins the seed as a curated source input (issue
+// #110). Every shipping preset declares an in-range contrastLevel so the
+// resolver always has a value to supersede an untouched contrast with. Final
+// curation is the promotion slice; this pins presence and the [0, 1] range.
+describe('R8: every preset carries a curated contrastLevel', () => {
+  it.each(PRESET_NAMES)('preset "%s" declares an in-range contrastLevel', (name) => {
+    const contrastLevel = presets[name]?.contrastLevel
+    expect(contrastLevel, `preset "${name}" missing contrastLevel`).toBeDefined()
+    expect(contrastLevel).toBeGreaterThanOrEqual(0)
+    expect(contrastLevel).toBeLessThanOrEqual(1)
   })
 })
 

@@ -63,6 +63,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   contrastLevel: 0.5,
   seedHexLock: true,
   seedTouched: true,
+  contrastTouched: true,
   md3TokenOverrides: {
     light: { '--color-primary-container': '#aabbcc', '--color-secondary': '#445566' },
     dark: { '--color-primary-container': '#112233' },
@@ -982,5 +983,80 @@ describe('setShadcnPreset seed supersession', () => {
     useSource.getState().actions.setShadcnPreset('warm')
     useSource.getState().actions.setShadcnPreset('tech')
     expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.tech.seed)
+  })
+})
+
+// why: contrast joins the touched-state machinery (ADR-0031, issue #110).
+// Mirrors the seedTouched lifecycle; contrast has no lock so the matrix is
+// touched vs untouched only.
+describe('contrastTouched signal', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('defaults false in the boot defaults', () => {
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+
+  it('setContrastLevel flips the signal true', () => {
+    useSource.getState().actions.setContrastLevel(0.5)
+    expect(useSource.getState().contrastTouched).toBe(true)
+  })
+
+  it('reset clears the signal', () => {
+    useSource.getState().actions.setContrastLevel(0.5)
+    useSource.getState().actions.reset()
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+
+  it('applying a preset leaves the signal false', () => {
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastTouched).toBe(false)
+  })
+})
+
+// why: end-to-end contrast supersession through the store action, plus the
+// per-field independence that is the whole point of ADR-0031 #3.
+describe('setShadcnPreset contrast supersession', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it('replaces an untouched boot-default contrast with the preset curated contrast', () => {
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+  })
+
+  it('keeps a user-chosen contrast and drops the curated one', () => {
+    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().contrastLevel).toBe(0.7)
+  })
+
+  it('touched contrast only: curated seed adopted, user contrast kept', () => {
+    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.stark.seed)
+    expect(useSource.getState().contrastLevel).toBe(0.7)
+  })
+
+  it('touched seed only: curated contrast adopted, user seed kept', () => {
+    useSource.getState().actions.setSeedHex('#ff00aa')
+    const chosen = useSource.getState().seed
+    useSource.getState().actions.setShadcnPreset('stark')
+    expect(useSource.getState().seed).toEqual(chosen)
+    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
   })
 })
