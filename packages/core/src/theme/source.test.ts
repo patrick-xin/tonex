@@ -14,6 +14,7 @@ import {
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
 } from './schema'
+import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
 import { flushPersist, STORAGE_KEY, selectPortable, selectSeedHex, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
@@ -821,5 +822,59 @@ describe('useSource persistence round-trip', () => {
         expect(drifters).toEqual([])
       })
     })
+  })
+})
+
+// why: detection (findActivePreset) compares every recipe field, including
+// surfaceTintTextLevel; the apply action (setShadcnPreset) must write every
+// field detection compares, or a freshly applied preset reads as inactive on
+// any field the action skips. This pins the recipe-symmetry contract so the
+// latent gap (apply skipped surfaceTintTextLevel, masked only by every shipped
+// preset using a zero value) cannot silently return. See issue #108 / ADR-0031 #5.
+describe('setShadcnPreset recipe symmetry', () => {
+  const PRESET_NAMES = Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]
+
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it.each(
+    PRESET_NAMES,
+  )('applying "%s" over a fully drifted recipe makes it detect as active', (name) => {
+    // why: pre-dirty every recipe field detection reads, so the apply must
+    // overwrite each one to land on the preset. surfaceTintTextLevel is the
+    // field the bug skipped — set it non-zero here so a skipping apply leaves
+    // a residue and findActivePreset returns null.
+    useSource.setState({
+      variant: 'monochrome',
+      surfaceAlgo: 'tint',
+      surfacePaletteName: 'slate',
+      surfaceTintLevel: { light: 0.42, dark: 0.18 },
+      surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
+      surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
+      shadcnRoleBindings: {
+        light: NONDEFAULT_BINDINGS_LIGHT,
+        dark: NONDEFAULT_BINDINGS_DARK,
+      },
+      _hydrated: true,
+    })
+
+    useSource.getState().actions.setShadcnPreset(name)
+
+    expect(findActivePreset(selectPortable(useSource.getState()))).toBe(name)
+  })
+
+  it('applying a preset writes surfaceTintTextLevel to the preset value', () => {
+    useSource.setState({ surfaceTintTextLevel: { light: 0.55, dark: 0.27 }, _hydrated: true })
+    useSource.getState().actions.setShadcnPreset('default')
+    expect(useSource.getState().surfaceTintTextLevel).toEqual(
+      SHADCN_PRESETS.default.surfaceTintTextLevel,
+    )
   })
 })

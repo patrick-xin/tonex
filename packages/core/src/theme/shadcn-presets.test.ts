@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { hctFromHex } from './hct'
 import { DEFAULT_INPUTS, type PortableTheme } from './schema'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPreset } from './shadcn-presets'
 
@@ -125,5 +126,24 @@ describe('R5: Default preset == DEFAULT_INPUTS projection', () => {
 
   it('findActivePreset(DEFAULT_INPUTS) === "default"', () => {
     expect(findActivePreset(DEFAULT_INPUTS)).toBe('default')
+  })
+})
+
+// why: ADR-0031 #5 — curated source inputs apply but never define identity. A
+// user who adopted a preset's recipe and kept their own color (or contrast) is
+// still meaningfully "on" that preset. Detection must read the recipe only and
+// ignore seed and contrastLevel; pinning it here keeps a future curated-source
+// slice from accidentally folding source inputs into the match.
+describe('R6: findActivePreset ignores source inputs (seed, contrast)', () => {
+  it.each(
+    PRESET_NAMES,
+  )('detects "%s" even when seed and contrast differ from the boot default', (name) => {
+    const theme = themeWithPreset(name)
+    const withForeignSource: PortableTheme = {
+      ...theme,
+      seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
+      contrastLevel: 0.5,
+    }
+    expect(findActivePreset(withForeignSource)).toBe(name)
   })
 })

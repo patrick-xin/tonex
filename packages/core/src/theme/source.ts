@@ -252,11 +252,17 @@ export const useSource = create<SourceState>()(
           })),
         setShadcnPreset: (name) => {
           const preset = SHADCN_PRESETS[name]
+          // why: write EVERY recipe field findActivePreset compares — including
+          // surfaceTintTextLevel, which detection reads but this action used to
+          // skip (masked only by every shipped preset using a zero value). A
+          // skipped field leaves a residue that makes the just-applied preset
+          // read as inactive on that field. See issue #108 / ADR-0031 #5.
           set({
             variant: preset.variant,
             surfaceAlgo: preset.surfaceAlgo,
             surfacePaletteName: preset.surfacePaletteName,
             surfaceTintLevel: { ...preset.surfaceTintLevel },
+            surfaceTintTextLevel: { ...preset.surfaceTintTextLevel },
             surfaceDesaturateLevel: { ...preset.surfaceDesaturateLevel },
             shadcnRoleBindings: {
               light: { ...preset.shadcnRoleBindings.light },
