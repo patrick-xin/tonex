@@ -2,16 +2,37 @@
 
 import { CHROMA_HUE_LOCK, type CustomColorPreviewRoles } from '@tonex/core'
 import { cn } from 'tailwind-variants'
+import { DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Radio, RadioGroup } from '@/components/ui/radio'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker, TwColorPicker } from '@/features/color-picker'
-import { ChromaSlider, HctSlider } from '@/features/hct-controls'
+import { ChromaSlider, HctSlider, showsHueDisabledHint } from '@/features/hct-controls'
 import { useActiveMode } from '@/features/theme-mode'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import type { CustomColorFormState } from './use-custom-color-form'
+
+// why: one copy of the dialog framing so the New + Edit dialogs can't drift.
+// The text is layer-aware because a custom color produces a different export
+// shape per layer (Finding 3): md emits the full Material set, shadcn emits a
+// single --{name}/-foreground pair sourced from the Color/Container pick. The
+// canonical depth lives in the custom-colors Help concept; this is the framing.
+export function CustomColorDialogDescription({ layer }: { layer: Layer }) {
+  return (
+    <DialogDescription className="text-xs text-on-surface-variant">
+      {layer === 'md' ? (
+        <>Exports as a full Material set.</>
+      ) : (
+        <>
+          Exports <code className="font-mono text-xs">background</code> and{' '}
+          <code className="font-mono text-xs">foreground</code> colors.
+        </>
+      )}
+    </DialogDescription>
+  )
+}
 
 // why: shared form JSX for the new + edit dialogs. The hook owns state; this
 // component is a pure render given the hook result + the active layer (which
@@ -37,8 +58,11 @@ export function CustomColorFormBody({
   return (
     <div className="grid gap-4">
       <div className="space-y-1.5">
-        <Label htmlFor="custom-color-name">Name</Label>
+        <Label htmlFor="custom-color-name" aria-required>
+          Name
+        </Label>
         <Input
+          required
           id="custom-color-name"
           inputSize="sm"
           placeholder="e.g. Brand, Warning, Info"
@@ -94,6 +118,9 @@ export function CustomColorFormBody({
           onValueChange={form.setHue}
           disabled={form.chroma < CHROMA_HUE_LOCK}
         />
+        {showsHueDisabledHint(form.chroma, false) && (
+          <p className="text-xs text-on-surface-variant">Add some chroma to adjust hue.</p>
+        )}
         <ChromaSlider
           value={form.chroma}
           gamutLimit={form.gamutLimit}
@@ -113,7 +140,7 @@ export function CustomColorFormBody({
 
       <div className="border-t border-outline-variant/40 pt-4">
         <Label htmlFor="custom-color-blend" className="flex items-center justify-between w-full">
-          <span className="flex flex-col gap-0.5">
+          <span className="flex flex-col gap-1">
             <span>Harmonize</span>
             <span className="text-xs text-on-surface-variant">
               Shift hue toward source color for visual cohesion
@@ -180,6 +207,7 @@ function ShadcnSourcePicker({
 }) {
   return (
     <div className="border-t border-outline-variant/40 pt-4 space-y-2">
+      <Label>Choose a color pair:</Label>
       <RadioGroup
         value={value}
         onValueChange={(v) => onValueChange(v as 'color' | 'container')}
@@ -217,7 +245,7 @@ function SourceCard({
     // biome-ignore lint/a11y/noLabelWithoutControl: the nested Radio (a Base UI <button>, a labelable control) is the associated control
     <label
       className={cn(
-        'flex flex-col gap-2 rounded-lg border p-2 cursor-pointer transition-colors',
+        'flex flex-col gap-2 rounded-md border p-2 cursor-pointer transition-colors',
         selected
           ? 'border-outline-variant bg-primary/8'
           : 'border-outline-variant/60 hover:border-outline-variant',

@@ -1,16 +1,26 @@
+'use client'
+
 import {
   Accordion,
   AccordionItem,
   AccordionPanel,
   AccordionSummary,
 } from '@/components/ui/accordion'
+import type { HelpSection } from './help-sections'
+import { useHelpSectionOpen } from './use-help-section-open'
 
-export const QA = () => {
+export const QA = ({ section }: { section: HelpSection | null }) => {
+  const { value, setValue } = useHelpSectionOpen(section, 'qa', [])
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-semibold">Q&A</h3>
-      <Accordion className="w-full" defaultValue={[]} multiple>
-        <AccordionItem variant="underline" value="md3-shadcn-mapping">
+      <Accordion
+        className="w-full"
+        value={value}
+        onValueChange={(next) => setValue(next as string[])}
+        multiple
+      >
+        <AccordionItem id="md3-shadcn-mapping" variant="underline" value="md3-shadcn-mapping">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -18,47 +28,72 @@ export const QA = () => {
             How does Tonex map MD3 tokens to shadcn tokens?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
-            <p>Choose between two presets:</p>
-            <ul className="space-y-2 list-inside list-disc">
-              <li>
-                <span className="font-medium">shadcn preset</span> — Maps MD3 colors to shadcn's
-                expected format. Best for dropping into existing shadcn projects.
-              </li>
-              <li>
-                <span className="font-medium">MD3 preset</span> — Direct MD3 semantic roles. More
-                expressive, but looks different from stock shadcn.
-              </li>
-            </ul>
-            <p className="mt-2">
-              <span className="font-medium">Production ready?</span> Yes. Uses Google's official
-              color utilities. The shadcn preset is designed as a compatible replacement.
+            <p>
+              Tonex always generates the full MD3 palette from your seed, then the active{' '}
+              <span className="font-medium">shadcn preset</span> decides how those MD3 colors bind
+              to shadcn's tokens (<code className="font-mono text-xs">--primary</code>,{' '}
+              <code className="font-mono text-xs">--border</code>, and the rest).
+            </p>
+            <p>
+              The presets — Default, Stark, Soft, Warm, Playful, Monotone, Tech — are different
+              binding styles, from a stock-shadcn look to more expressive, chromatic ones. Pick the
+              one that fits; switch any time in Settings.
+            </p>
+            <p>
+              <span className="font-medium">Production ready?</span> Yes — it uses Google's official
+              color utilities, and Default is designed as a drop-in shadcn replacement.
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="contrast-issues">
+        <AccordionItem id="contrast-issues" variant="underline" value="contrast-issues">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
           >
-            Why do I see contrast issues with the shadcn preset?
+            What does the contrast audit mean, and how do I fix a fail?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              The shadcn preset samples colors at fixed positions to match shadcn's look. With some
-              source colors (especially vivid ones), this can produce insufficient contrast.
+              It's an <span className="font-medium">audit, not a gate</span> — it reports every
+              color pair against WCAG, it never blocks your export. Most themes pass; the audit
+              opens on "All" so you see the fails in proportion.
             </p>
+            <p>What the colors mean:</p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                <span className="font-medium">Red — text fail</span> (under 4.5:1). A real
+                readability problem; fix before shipping.
+              </li>
+              <li>
+                <span className="font-medium">Amber — UI fail</span> (a border, ring, or fill under
+                3:1). A judgment call — often fine for a faint divider, your decision.
+              </li>
+              <li>
+                <span className="font-medium">Exempt</span> — decorative; WCAG doesn't require it.
+              </li>
+            </ul>
             <p>
-              <span className="font-medium">Solution:</span> Use the built-in contrast checker, then
-              override failing tokens individually. The app supports per-token overrides for exactly
-              this.
+              <span className="font-medium">How to fix one:</span>
             </p>
-            <p>
-              <span className="font-medium">Alternative:</span> Try the MD3 preset — it uses
-              semantic roles designed for contrast.
-            </p>
+            <ul className="space-y-2 list-inside list-disc">
+              <li>
+                Raise the <span className="font-medium">Contrast level</span> in Settings — a global
+                lever that pushes every pair toward AA/AAA.
+              </li>
+              <li>
+                <span className="font-medium">Override</span> the failing role to a higher-contrast
+                hex, or <span className="font-medium">rebind</span> it to a stronger generated color
+                (see <span className="font-medium">Role bindings vs overrides</span>).
+              </li>
+            </ul>
+            <p>There's no auto-fix engine today — these levers are how you act on a fail.</p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="brand-color-not-matching">
+        <AccordionItem
+          id="brand-color-not-matching"
+          variant="underline"
+          value="brand-color-not-matching"
+        >
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -71,12 +106,37 @@ export const QA = () => {
               is optimized for readability across light/dark modes.
             </p>
             <p>
-              <span className="font-medium">Need exact match?</span> Use the "Source Color Fidelity"
-              toggle to lock your input color, or override the primary token directly.
+              <span className="font-medium">Need an exact match?</span> Override the primary token
+              directly, or try the <span className="font-medium">Fidelity</span> scheme variant,
+              which keeps the primary close to your source. (The{' '}
+              <span className="font-medium">Lock color</span> button — <span>⌘L</span> — freezes
+              your seed so tweaks don't drift it; it doesn't change how the primary is derived.)
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="md3-vs-shadcn-borders">
+        <AccordionItem id="hct-sliders" variant="underline" value="hct-sliders">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            What do the Hue, Chroma, and Tone sliders do?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              The hex field and the three sliders are <span className="font-medium">one color</span>{' '}
+              — edit either and the other follows. <span className="font-medium">Hue</span> is which
+              color, <span className="font-medium">Chroma</span> is how vivid (its maximum moves
+              with hue and tone, so it can stop short of the end), and{' '}
+              <span className="font-medium">Tone</span> is how light or dark.
+            </p>
+            <p>
+              On a near-grey the Hue slider greys out — there's no visible hue to adjust, so add a
+              little chroma to bring it back. Your pasted hex is preserved exactly until you move a
+              slider. See <span className="font-medium">What is HCT?</span> for the full model.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="md3-vs-shadcn-borders" variant="underline" value="md3-vs-shadcn-borders">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -89,13 +149,27 @@ export const QA = () => {
               brand hue. Switching presets changes the entire color philosophy.
             </p>
             <p>
-              <span className="font-medium">Want MD3 colors with subtle borders?</span> Turn on the
-              soft borders toggle in the theme settings in control panel. The only downside is this
-              will create <span className="font-medium">contrast issues</span>. Use with caution.
+              <span className="font-medium">Want MD3 colors with shadcn-style subtle borders?</span>{' '}
+              Turn on the soft borders toggle in the theme settings. By design it binds{' '}
+              <code className="font-mono text-xs">--border</code>,{' '}
+              <code className="font-mono text-xs">--input</code>, and{' '}
+              <code className="font-mono text-xs">--sidebar-border</code> to Material's faint{' '}
+              <code className="font-mono text-xs">outline-variant</code> — a near-decorative
+              divider.
+            </p>
+            <p>
+              That pair sits below 3:1, so on the shadcn layer the audit flags it as an{' '}
+              <span className="font-medium">amber UI fail</span> (the same pair is marked Exempt on
+              the md layer). It's an aesthetic tradeoff, not a bug: keep soft borders for the
+              quieter look, or turn them off for higher-contrast edges.
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="dialog-colors-mismatch">
+        <AccordionItem
+          id="dialog-colors-mismatch"
+          variant="underline"
+          value="dialog-colors-mismatch"
+        >
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -110,7 +184,7 @@ export const QA = () => {
             <p>This is a preview limitation, not a theme bug.</p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="cmf-safety">
+        <AccordionItem id="cmf-safety" variant="underline" value="cmf-safety">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -132,7 +206,7 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="cmf-colors-different">
+        <AccordionItem id="cmf-colors-different" variant="underline" value="cmf-colors-different">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -150,7 +224,35 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="preserve-brand-color">
+        <AccordionItem id="cmf-no-effect-shadcn" variant="underline" value="cmf-no-effect-shadcn">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            I set a CMF second color but nothing changed — why?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              The second source drives the <span className="font-medium">tertiary</span> palette. On
+              the <span className="font-medium">md</span> layer that's always a visible role, so the
+              change shows up immediately.
+            </p>
+            <p>
+              On the <span className="font-medium">shadcn</span> layer, tertiary only reaches your
+              export if the active preset maps a role to it. Most presets —{' '}
+              <span className="font-medium">Default, Stark, Soft, Warm, Monotone</span> — don't, so
+              the second source has no visible effect there.{' '}
+              <span className="font-medium">Playful</span> and{' '}
+              <span className="font-medium">Tech</span> do.
+            </p>
+            <p>
+              To see it on shadcn: switch to a tertiary-driven preset, override a role to a tertiary
+              token yourself (see <span className="font-medium">Role bindings vs overrides</span>),
+              or view the md layer.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="preserve-brand-color" variant="underline" value="preserve-brand-color">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
@@ -162,9 +264,15 @@ export const QA = () => {
               <span className="font-medium">Available now:</span>
             </p>
             <ul className="space-y-2 list-inside list-disc">
-              <li>"Source Color Fidelity" toggle locks your input color</li>
+              <li>
+                The <span className="font-medium">Lock color</span> button (⌘L) freezes your seed so
+                tweaks elsewhere don't drift it
+              </li>
               <li>Override individual palettes (secondary, tertiary, neutral) independently</li>
-              <li>Lock feature saves your current theme for safe experimentation</li>
+              <li>
+                The <span className="font-medium">Fidelity</span> scheme variant keeps the primary
+                close to your source
+              </li>
             </ul>
             <p>
               <span className="font-medium">Coming:</span> Fine-tuning individual hues without full
@@ -172,7 +280,32 @@ export const QA = () => {
             </p>
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem variant="underline" value="vs-others">
+        <AccordionItem id="custom-color-tokens" variant="underline" value="custom-color-tokens">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            What does a custom color add to my export?
+          </AccordionSummary>
+          <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
+            <p>
+              It depends on your layer. On <span className="font-medium">md</span> you get the full
+              Material set — <code className="font-mono text-xs">--{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}</code>,{' '}
+              <code className="font-mono text-xs">--{'{name}'}-container</code>, and{' '}
+              <code className="font-mono text-xs">--on-{'{name}'}-container</code>.
+            </p>
+            <p>
+              On <span className="font-medium">shadcn</span> you get one pair —{' '}
+              <code className="font-mono text-xs">--{'{name}'}</code> +{' '}
+              <code className="font-mono text-xs">--{'{name}'}-foreground</code> — and the source
+              pair you pick (the vivid color or the soft container) chooses which generated md pair
+              feeds it. Harmonize keeps it coherent with your palette. See{' '}
+              <span className="font-medium">Custom Colors</span> for the full breakdown.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
+        <AccordionItem id="vs-others" variant="underline" value="vs-others">
           <AccordionSummary
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"

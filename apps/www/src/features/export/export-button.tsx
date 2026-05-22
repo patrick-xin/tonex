@@ -23,11 +23,11 @@ import { ExportFilters } from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
 // why: ADR-0021 commitment 8 — route-agnostic. md routes pass
-// `['Tailwind', 'TS', 'JSON', 'Dart']`; shadcn routes pass `['shadcn']`. Tab
+// `['Tailwind', 'JSON', 'Dart']`; shadcn routes pass `['shadcn']`. Tab
 // choice is a prop, not internal path-sniffing logic. The fallback default
 // mirrors today's md-route behavior so any caller that hasn't migrated still
 // works.
-const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'TS', 'JSON', 'Dart']
+const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'JSON', 'Dart']
 
 // why: toggle state stays React-local, not zustand (UI prefs aren't portable
 // theme). ADR-0021's 2026-05-20 amendment named the JSON formatter the
@@ -98,7 +98,7 @@ export const ExportButton = ({
          * carries to every other — instead of once per TabsPanel. The wrapper
          * keeps the row + content as one flex column so DialogContent's gap-6
          * (dialog-section spacing) doesn't open a gap above the tabs.
-         * ExportFilters itself renders nothing for option-less tabs (TS/Dart). */}
+         * ExportFilters itself renders nothing for option-less tabs (Dart). */}
         <div className="h-full flex flex-col min-h-0 gap-0">
           <ExportFilters tab={exportTab} options={options} onChange={setOptions} />
           {showTabs ? (

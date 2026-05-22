@@ -13,7 +13,7 @@ export const mdNavConfig: NavConfig = {
     { label: 'Dashboard Preview', href: '/theme/dashboard-preview', icon: LayoutDashboard },
     { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
   ],
-  // why: ADR-0021 commitment 8 — md routes pass these four tabs.
-  exportTabs: ['Tailwind', 'TS', 'JSON', 'Dart'],
+  // why: ADR-0021 commitment 8 — md routes pass these three tabs.
+  exportTabs: ['Tailwind', 'JSON', 'Dart'],
   crossLink: { label: 'Shadcn', href: '/theme/shadcn' },
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { HctControlSliders } from '@/features/hct-controls'
+import { GuideAnchor } from '@/features/onboarding-guide'
 import { ColorLock } from './color-lock'
 import { ImagePicker } from './image-picker'
 import { SourceColorSection } from './source-color-section'
@@ -23,9 +24,11 @@ export const SourceColorTabs = () => {
         </TabsListContent>
         <ColorLock />
       </div>
-      <TabsPanel value="source-color" className="space-y-3">
-        <SourceColorSection />
-        <HctControlSliders />
+      <TabsPanel value="source-color">
+        <GuideAnchor anchorKey="seed-color" className="space-y-3">
+          <SourceColorSection />
+          <HctControlSliders />
+        </GuideAnchor>
       </TabsPanel>
       <TabsPanel value="image" keepMounted>
         <ImagePicker />

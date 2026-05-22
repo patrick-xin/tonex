@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -22,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useActiveMode } from '@/features/theme-mode'
 import { useLayer } from '@/lib/layer-context'
-import { CustomColorFormBody } from './custom-color-form'
+import { CustomColorDialogDescription, CustomColorFormBody } from './custom-color-form'
 import { NewCustomColor } from './new-custom-color'
 import { useCustomColorForm } from './use-custom-color-form'
 
@@ -185,7 +184,7 @@ function EditCustomColorDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit custom color</DialogTitle>
-          <DialogDescription />
+          <CustomColorDialogDescription layer={layer} />
         </DialogHeader>
 
         <CustomColorFormBody form={form} layer={layer} onEnter={handleSave} />

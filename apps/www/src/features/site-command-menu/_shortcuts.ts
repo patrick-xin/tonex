@@ -1,5 +1,6 @@
 import type { Dialog as BaseDialog, Popover as BasePopover } from '@base-ui/react'
 import { CircleQuestionMarkIcon, Contrast, CopyIcon, Download, Settings } from 'lucide-react'
+import type { HelpSection } from '@/features/help-dialog/help-sections'
 import {
   checkContrastDialogHandle,
   exportDialogHandle,
@@ -14,7 +15,11 @@ export interface Item {
   disabled?: boolean
   icon: React.ElementType
   shortcut?: string
-  handle?: BaseDialog.Handle<null>
+  // why: most handles carry no payload; the Help handle deep-links to a section
+  // (slice 2). The command menu only ever uses these as no-payload DialogTriggers
+  // (open at top), so the payload type is irrelevant at the call site — the union
+  // just keeps the typed Help handle assignable here.
+  handle?: BaseDialog.Handle<null> | BaseDialog.Handle<HelpSection>
   popoverHandle?: BasePopover.Handle<null>
 }
 

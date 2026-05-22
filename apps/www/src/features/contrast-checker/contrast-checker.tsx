@@ -27,6 +27,7 @@ import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { applyLevel } from './apply-level'
 import { ContrastTable } from './contrast-table'
 import { isDecorative } from './decorative'
+import { summarizeContrast } from './summary'
 import type { Filter, Level, ResultFilter } from './types'
 
 // why: showExtended (UiPrefs) hides MD3 extended roles on the md route — the
@@ -44,7 +45,7 @@ interface BodyProps {
 function Body({ theme, mode, layer }: BodyProps) {
   const [level, setLevel] = useState<Level>('aa')
   const [filter, setFilter] = useState<Filter>('all')
-  const [resultFilter, setResultFilter] = useState<ResultFilter>('fail')
+  const [resultFilter, setResultFilter] = useState<ResultFilter>('all')
   const showExtended = useUiPrefs((s) => s.showExtended)
   const customColors = useSource((s) => s.customColors)
   const report = evaluateThemeContrast(theme, customColors)
@@ -79,6 +80,18 @@ function Body({ theme, mode, layer }: BodyProps) {
   const hasFailures = functional.some((p) => !p.effectivePasses)
   const effectiveResultFilter: ResultFilter =
     resultFilter === 'fail' && !hasFailures ? 'all' : resultFilter
+  // why: opening on "All" with a tally reframes the audit from a wall of
+  // failures to the whole picture (mostly fine). exempt counts the decorative
+  // pairs surfaced in this view; text/UI fails are split because they carry
+  // different severity. The summary string omits zero categories but always
+  // shows pass so the headline reads as reassurance first.
+  const summary = summarizeContrast(functional, decorative.length)
+  const summaryParts = [`${summary.pass} pass`]
+  if (summary.textFail > 0)
+    summaryParts.push(`${summary.textFail} text ${summary.textFail === 1 ? 'fail' : 'fails'}`)
+  if (summary.uiFail > 0)
+    summaryParts.push(`${summary.uiFail} UI ${summary.uiFail === 1 ? 'fail' : 'fails'}`)
+  if (summary.exempt > 0) summaryParts.push(`${summary.exempt} exempt`)
 
   return (
     <>
@@ -95,6 +108,40 @@ function Body({ theme, mode, layer }: BodyProps) {
               </Button>
             }
           />
+        </div>
+        <div className="space-y-2 text-xs text-on-surface-variant">
+          <p className="font-medium text-on-surface">{summaryParts.join(' · ')}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-green-600 dark:bg-green-400" />
+              <span className="font-medium text-on-surface">Pass</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-red-600 dark:bg-red-400" />
+              <span>
+                <span className="font-medium text-on-surface">Text fail</span> — under 4.5:1, fix
+                before shipping
+              </span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-amber-600 dark:bg-amber-400" />
+              <span>
+                <span className="font-medium text-on-surface">UI fail</span> — a border/ring under
+                3:1, judgment call
+              </span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-surface-container ring ring-outline-variant/60" />
+              <span>
+                <span className="font-medium text-on-surface">Exempt</span> — decorative, WCAG
+                doesn't require it
+              </span>
+            </span>
+          </div>
+          <p>
+            This is an audit, not a blocker — fix red (text) fails before shipping; amber (UI) fails
+            are case-by-case. Press H → Q&A for how to fix them.
+          </p>
         </div>
         <div className="flex items-center justify-end gap-4">
           <ToggleGroup
