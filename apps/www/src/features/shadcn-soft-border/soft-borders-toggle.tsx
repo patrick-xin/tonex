@@ -1,7 +1,7 @@
 'use client'
 
 import { HelpCircle } from 'lucide-react'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Field, FieldLabel } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSoftBorder } from './toggle'
@@ -15,25 +15,16 @@ export function SoftBordersToggle() {
         <div className="flex items-center gap-2">
           Soft borders
           <Tooltip>
-            <TooltipTrigger>
-              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            <TooltipTrigger delay={0}>
+              <HelpCircle className="w-4 h-4 text-on-surface-variant" />
             </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              Uses softer colors for borders and inputs. This can reduce accessibility — keep an eye
-              on the contrast checker to ensure your UI stays usable.
+            <TooltipContent className="max-w-xs" variant="inverse">
+              Uses softer colors for borders and inputs. This can reduce accessibility.
             </TooltipContent>
           </Tooltip>
         </div>
-        <Switch
-          size="sm"
-          checked={enabled}
-          onCheckedChange={setEnabled}
-          aria-label="Toggle soft borders"
-        />
+        <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Toggle soft borders" />
       </FieldLabel>
-      <FieldDescription className="max-w-5/6">
-        Replicates the subtle border aesthetic of shadcn/ui.
-      </FieldDescription>
     </Field>
   )
 }

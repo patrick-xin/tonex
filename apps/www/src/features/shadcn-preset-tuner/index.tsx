@@ -47,7 +47,7 @@ export function ShadcnPresetTunerRail() {
                   composition as the production rail Controls view, just
                   collapsed into one scrollable list rather than a
                   takeover-on-click flow. */}
-              <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme variant" height={0}>
+              <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
                 <SchemeVariantsToggle />
               </AnimatedCollapsible>
               <SurfaceAdjustment />

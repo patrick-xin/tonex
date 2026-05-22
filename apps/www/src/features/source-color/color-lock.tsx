@@ -34,7 +34,7 @@ export const ColorLock = ({ className }: { className?: string }) => {
             size="icon-sm"
             className={cn('size-7 group', className)}
             onClick={toggle}
-            aria-label={seedHexLock ? 'Unlock color' : 'Lock current color'}
+            aria-label={seedHexLock ? 'Unlock seed' : 'Lock seed'}
           >
             {seedHexLock ? (
               <LockIcon className="size-4 text-on-surface-variant group-hover:text-on-surface" />
@@ -45,7 +45,7 @@ export const ColorLock = ({ className }: { className?: string }) => {
         }
       />
       <TooltipContent>
-        <p>{seedHexLock ? 'unlock seed' : 'lock seed'}</p>
+        <p>{seedHexLock ? 'Unlock seed' : 'Lock seed'}</p>
         <KbdGroup className="mt-1">
           <Kbd className="h-4 min-w-4">⌘</Kbd>
           <Kbd className="h-4 min-w-4">L</Kbd>

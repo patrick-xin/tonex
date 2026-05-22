@@ -1,5 +1,8 @@
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { ChartPaletteToggle } from '@/features/chart-palette'
+import { ContrastLevelSlider } from '@/features/contrast-level'
 import { CustomColorList } from '@/features/custom-colors'
 import { FineTuneColors } from '@/features/palette-override'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
@@ -9,15 +12,31 @@ import { SurfaceAdjustment } from '@/features/surface-adjustment'
 export function MdRailContent() {
   return (
     <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
-      <SourceColorTabs />
-      <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme variant" height={0}>
-        <SchemeVariantsToggle />
-      </AnimatedCollapsible>
-      <AnimatedCollapsible defaultOpen variant="ghost" title="Palette override" height={0}>
-        <FineTuneColors />
-      </AnimatedCollapsible>
-      <CustomColorList />
-      <SurfaceAdjustment />
+      <div className="space-y-1">
+        <SourceColorTabs />
+        <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
+          <SchemeVariantsToggle />
+        </AnimatedCollapsible>
+        <AnimatedCollapsible variant="ghost" title="Palette Override" height={0}>
+          <FineTuneColors />
+        </AnimatedCollapsible>
+        <SurfaceAdjustment />
+        <AnimatedCollapsible
+          variant="ghost"
+          title="Refinements"
+          height={0}
+          contentClassName="px-0 space-y-1"
+        >
+          <div className="p-2">
+            <ContrastLevelSlider />
+          </div>
+          <Separator className="opacity-20 mx-2" />
+          <div className="p-2">
+            <ChartPaletteToggle />
+          </div>
+        </AnimatedCollapsible>
+        <CustomColorList />
+      </div>
     </ScrollArea>
   )
 }
