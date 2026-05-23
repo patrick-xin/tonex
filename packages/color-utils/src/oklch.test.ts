@@ -1,6 +1,6 @@
 import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { oklchString } from './oklch'
+import { hexFromOklch, oklchString } from './oklch'
 
 const OKLCH = /^oklch\((-?[\d.]+) (-?[\d.]+) (-?[\d.]+)\)$/
 
@@ -60,6 +60,18 @@ describe('canonical-form firewall (ADR-0025 commitment 3)', () => {
       const s = oklchString(argbFromHex(hex))
       expect(s).not.toMatch(/\.0+(?=[\s)])/)
     }
+  })
+
+  it('out-of-gamut OKLCH is chroma-reduced (CSS Color 4), not per-channel clipped', () => {
+    // why: ~33% of TAILWIND_PALETTE_OKLCH falls outside sRGB. Naive per-channel
+    // clip snaps one axis to the gamut wall and shifts perceived hue/lightness;
+    // CSS Color 4 gamut mapping reduces chroma at fixed L/H, matching browsers
+    // and oklch.com. yellow-400 = oklch(0.852 0.199 91.936) renders #fcc800 in
+    // browsers; the old clip path produced #fdc700.
+    expect(hexFromOklch('oklch(0.852 0.199 91.936)')).toBe('#fcc800')
+    expect(hexFromOklch('oklch(0.841 0.238 128.85)')).toBe('#9ae600')
+    expect(hexFromOklch('oklch(0.792 0.209 151.711)')).toBe('#05df72')
+    expect(hexFromOklch('oklch(0.789 0.154 211.53)')).toBe('#00d3f2')
   })
 
   it('chromaless colors snap hue to 0 (canonical neutral)', () => {
