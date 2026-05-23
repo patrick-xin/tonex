@@ -1,12 +1,18 @@
 import { argbFromHex, hexFromArgb } from '@tonex/mcu'
-import { converter } from 'culori'
+import { converter, toGamut } from 'culori'
 
 // why: ADR-0025 commitment 3 — tonex owns the string form. culori does the
 // math (commitment 2); this layer pins precision, trailing-zero behavior, and
 // chromaless hue snap so a culori upgrade can never silently shift emission.
 
 const toOklch = converter('oklch')
-const toRgb = converter('rgb')
+// why: CSS Color Module 4 gamut mapping — reduces chroma at fixed L/H to bring
+// out-of-sRGB OKLCH into gamut, matching browsers and oklch.com. Per-channel
+// clipping (the prior `clamp255` path) snapped one axis to the gamut wall and
+// shifted perceived hue/lightness for the ~33% of TAILWIND_PALETTE_OKLCH
+// swatches outside sRGB. ADR-0025 firewall holds: color-utils stays culori's
+// only consumer.
+const toGamutRgb = toGamut('rgb', 'oklch')
 
 const L_PRECISION = 4
 const C_PRECISION = 4
@@ -58,15 +64,18 @@ export function argbFromOklch(value: string): number {
   const L = Number(match[1])
   const C = Number(match[2])
   const H = Number(match[3])
-  const rgb = toRgb({ mode: 'oklch', l: L, c: C, h: H })
-  const r = clamp255((rgb.r ?? 0) * 255)
-  const g = clamp255((rgb.g ?? 0) * 255)
-  const b = clamp255((rgb.b ?? 0) * 255)
+  const rgb = toGamutRgb({ mode: 'oklch', l: L, c: C, h: H })
+  const r = to255(rgb.r)
+  const g = to255(rgb.g)
+  const b = to255(rgb.b)
   return ((255 << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff)) >>> 0
 }
 
-function clamp255(v: number): number {
-  return Math.max(0, Math.min(255, Math.round(v)))
+// why: toGamutRgb guarantees [0,1] channels, so this is round-and-scale only;
+// the prior clamp was load-bearing against out-of-gamut overflow and is no
+// longer needed. Math.min guards float dust above 1 (e.g. 1.0000002).
+function to255(v: number): number {
+  return Math.min(255, Math.round((v ?? 0) * 255))
 }
 
 export function oklchFromHex(hex: string): string {
