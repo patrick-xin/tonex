@@ -12,3 +12,16 @@ import { findActivePreset, type PortableTheme } from '@tonex/core/schema'
 export function isPresetSwitchDirty(theme: PortableTheme): boolean {
   return findActivePreset(theme) === null
 }
+
+// why: the preset-apply dialog now serves two jobs — confirm a destructive
+// recipe replacement (isPresetSwitchDirty) AND collect the per-field "keep mine
+// vs use preset's" choice for any touched source input. So it must open on
+// either: a drifted recipe, or a touched-and-unlocked seed / touched contrast
+// whose switch needs showing. A locked seed is kept by the resolver no matter
+// what, so it raises no decision on its own. Nothing dirty + nothing touched →
+// the call site applies straight through, no dialog hop.
+export function presetSwitchNeedsDialog(theme: PortableTheme): boolean {
+  return (
+    isPresetSwitchDirty(theme) || (theme.seedTouched && !theme.seedHexLock) || theme.contrastTouched
+  )
+}

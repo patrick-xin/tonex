@@ -8,7 +8,7 @@ import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
 import { createDebouncedStorage } from './persist-storage'
-import { resolvePresetApply } from './preset-apply'
+import { type PresetAdoptChoices, resolvePresetApply } from './preset-apply'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -54,24 +54,18 @@ export interface SourceActions {
   setSeedTone(tone: number): void
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
-  // why: ADR-0031 #6 — the reset-then-adopt path. Returns the source field to
-  // its boot default AND clears the recorded touched signal, so the next preset
-  // apply supersedes it with the curated value. Per-field so resetting the seed
-  // never disturbs contrast and vice versa (issue #111). Distinct from `reset`,
-  // which is the all-or-nothing slate wipe of every source field.
-  untouchSeed(): void
-  untouchContrast(): void
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
-  // why: composite action — applies one preset's variant + surface fields +
-  // 26-role bindings (both modes) in a single atomic store update. Does NOT
-  // touch seedHex, contrastLevel, shadcnRoleOverrides, shadcnChartOverrides,
-  // customColors, or paletteOverrides — those are orthogonal user-owned
-  // axes (ADR-0026: overrides sit on top of bindings, not inside the preset).
-  // Consumers that want overrides cleared on preset switch call
-  // setShadcnRoleOverride(mode, role, null) per entry alongside.
-  setShadcnPreset(name: ShadcnPresetName): void
+  // why: composite action — delegates to resolvePresetApply (ADR-0031) for the
+  // patch, then applies it in a single atomic store update. Recipe fields
+  // (variant + surface + 26-role bindings) always overwrite; seed and contrast
+  // resolve per-field against their touched signals, with `choices` carrying the
+  // dialog's per-field "Use {preset}'s" overrides. Does NOT touch
+  // shadcnRoleOverrides, shadcnChartOverrides, customColors, or paletteOverrides
+  // — those are orthogonal user-owned axes (ADR-0026: overrides sit on top of
+  // bindings, not inside the preset).
+  setShadcnPreset(name: ShadcnPresetName, choices?: PresetAdoptChoices): void
   // why: ADR-0026 — literal pin on a shadcn role. hex sets the entry; null
   // deletes so the role falls back to its binding-resolved value. Mirrors
   // setMd3TokenOverride's per-mode shape so override editors share one
@@ -253,14 +247,6 @@ export const useSource = create<SourceState>()(
           // the clamped value, sibling to the seed setters. No lock on contrast,
           // so every call records.
           set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)), contrastTouched: true }),
-        // why: ADR-0031 #6 — per-field un-touch. Restores the boot default value
-        // and clears the recorded signal in one write, so the next preset apply
-        // supplies the curated value (the inverse of the user-facing setters,
-        // which record the touch). Only the addressed field is written, so the
-        // sibling source field's value and signal are untouched (issue #111).
-        untouchSeed: () => set({ seed: DEFAULT_INPUTS.seed, seedTouched: false }),
-        untouchContrast: () =>
-          set({ contrastLevel: DEFAULT_INPUTS.contrastLevel, contrastTouched: false }),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
         // why: hex sets the override for one (mode, token); null deletes the
         // entry so the token returns to MCU. Mode and token are typed so any
@@ -287,7 +273,8 @@ export const useSource = create<SourceState>()(
         // preset's curated seed, keeping the user's otherwise. It never returns
         // a touched signal, so a curated seed stays "untouched" and the next
         // preset can still supersede (story 12).
-        setShadcnPreset: (name) => set((s) => resolvePresetApply(s, SHADCN_PRESETS[name])),
+        setShadcnPreset: (name, choices) =>
+          set((s) => resolvePresetApply(s, SHADCN_PRESETS[name], choices)),
         setShadcnRoleOverride: (mode, role, hex) =>
           set((s) => {
             const next = { ...s.shadcnRoleOverrides[mode] }

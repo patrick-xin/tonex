@@ -1,18 +1,18 @@
 import { useSource } from '@tonex/core'
 import type { ShadcnPresetName } from '@tonex/core/schema'
-import { presetSwitchAlertHandle } from './dialog'
-import { isPresetSwitchDirty } from './predicate'
+import { presetSwitchNeedsDialog } from './predicate'
+import { presetSwitchDialogHandle } from './preset-dialog'
 
-// why: imperative entry for the preset chip onValueChange handler. Reads the
-// store directly (single snapshot) so dirty-check and dispatch can't tear
-// between renders; gates on isPresetSwitchDirty so the predicate is the one
-// authoritative answer to "would this preset switch wipe user work?". Clean
-// state applies directly with no dialog hop — preset chip clicks stay snappy
-// when the user is on a known recipe.
+// why: imperative entry for a preset chip click. Reads the store directly
+// (single snapshot) so the decision-check and dispatch can't tear between
+// renders. Gates on presetSwitchNeedsDialog — the one authoritative answer to
+// "does applying this preset raise any decision?": a custom recipe to confirm,
+// or a touched source input whose keep-vs-adopt switch must be shown. With
+// nothing to decide, applies straight through so clean clicks stay snappy.
 export function requestPresetSwitch(name: ShadcnPresetName): void {
   const state = useSource.getState()
-  if (isPresetSwitchDirty(state)) {
-    presetSwitchAlertHandle.openWithPayload(name)
+  if (presetSwitchNeedsDialog(state)) {
+    presetSwitchDialogHandle.openWithPayload(name)
   } else {
     state.actions.setShadcnPreset(name)
   }

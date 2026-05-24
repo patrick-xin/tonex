@@ -1,6 +1,6 @@
 import { DEFAULT_INPUTS } from '@tonex/core/schema'
 import { describe, expect, it } from 'vitest'
-import { isPresetSwitchDirty } from './predicate'
+import { isPresetSwitchDirty, presetSwitchNeedsDialog } from './predicate'
 
 // why: predicate gates the confirm dialog on preset chip clicks. "Dirty" means
 // the theme has drifted off every shipped preset on any of the six fields
@@ -66,5 +66,36 @@ describe('isPresetSwitchDirty', () => {
         paletteOverrides: { primary: '#123456' },
       }),
     ).toBe(false)
+  })
+})
+
+// why: presetSwitchNeedsDialog widens isPresetSwitchDirty (recipe loss) to also
+// cover the source-input *choices* the dialog now offers. The dialog opens
+// whenever applying involves any decision: a custom recipe to replace, or a
+// touched-and-unlocked source field whose "keep vs use preset's" switch must be
+// shown. A clean theme with nothing touched still applies straight through.
+describe('presetSwitchNeedsDialog', () => {
+  it('is false for DEFAULT_INPUTS (clean recipe, nothing touched)', () => {
+    expect(presetSwitchNeedsDialog(DEFAULT_INPUTS)).toBe(false)
+  })
+
+  it('is true when the recipe has drifted (delegates to isPresetSwitchDirty)', () => {
+    expect(presetSwitchNeedsDialog({ ...DEFAULT_INPUTS, variant: 'vibrant' })).toBe(true)
+  })
+
+  it('is true when the seed is touched and unlocked (a keep-vs-adopt choice exists)', () => {
+    expect(presetSwitchNeedsDialog({ ...DEFAULT_INPUTS, seedTouched: true })).toBe(true)
+  })
+
+  // why: a locked seed is kept by the resolver regardless, so no switch is
+  // offered and no dialog is owed on its account alone.
+  it('is false when the touched seed is locked and the recipe is clean', () => {
+    expect(
+      presetSwitchNeedsDialog({ ...DEFAULT_INPUTS, seedTouched: true, seedHexLock: true }),
+    ).toBe(false)
+  })
+
+  it('is true when contrast is touched', () => {
+    expect(presetSwitchNeedsDialog({ ...DEFAULT_INPUTS, contrastTouched: true })).toBe(true)
   })
 })
