@@ -49,6 +49,12 @@ export interface ExportOptions {
   // always emit the header (always paste-target globals.css) and ignore
   // this flag.
   includeHeader?: boolean
+  // why: native-CSS toggle. When true (the CSS-tab default), exportNativeCss
+  // emits system tokens under the spec namespace `--md-sys-color-*` so the
+  // output drops into Material Web Components / hand-rolled MD3. Off keeps the
+  // bare `--color-*` names. Only the native-CSS path reads it; the Tailwind /
+  // shadcn / JSON / Dart paths ignore it.
+  mdSysPrefix?: boolean
 }
 
 // why: tier values come from the unified derive cache (issue #20). Each

@@ -4,6 +4,11 @@ Slice-organized history. Each entry corresponds to a vertical-tracer increment p
 
 ## [Unreleased]
 
+### Slice native-css — Framework-agnostic Material CSS export
+
+- `feat(core)`: `exportNativeCss(bundle, options)` — a new sink for the non-Tailwind / Material Web audience. System tokens emit under the MD3 spec namespace `--md-sys-color-*` (toggle `mdSysPrefix`, on by default; only the closed `MD_TOKEN_NAMES` set is renamed, so chart/custom slugs stay `--color-*`). One `:root` block, every token a `light-dark(L, D)` pair under `color-scheme: light dark` — a no-framework page auto-follows the OS, while `.dark` / `[data-theme]` switches flip `color-scheme` for class- and attribute-toggle stacks. `includeExtended` defaults **on** here (Material Web reads `*-fixed` etc.). Contrast tiers stack as `.contrast-medium` / `.contrast-high`. ADR-0017 sink discipline holds — projection-only, no recomputed color.
+- `feat(www)`: **CSS** export tab beside Tailwind/JSON/Dart, with a `md-sys prefix` switch plus Format/Extended/Chart/Contrast. Same provenance header as the other CSS paths.
+
 ### Architecture
 - ADR backlog filled — ADRs 0006–0008, 0010–0016 codify decisions previously held only in memory.
 - ADR-0009 — runtime-validated `PortableTheme` via valibot; post-rehydrate parse with all-or-nothing reset on failure (closes #10).

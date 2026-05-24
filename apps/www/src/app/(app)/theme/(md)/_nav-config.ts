@@ -13,7 +13,9 @@ export const mdNavConfig: NavConfig = {
     { label: 'Dashboard Preview', href: '/theme/dashboard-preview', icon: LayoutDashboard },
     { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
   ],
-  // why: ADR-0021 commitment 8 — md routes pass these three tabs.
-  exportTabs: ['Tailwind', 'JSON', 'Dart'],
+  // why: ADR-0021 commitment 8 — md routes pass these tabs. CSS is the
+  // framework-agnostic native-CSS sibling of Tailwind (--md-sys-color-* +
+  // light-dark()), so it sits next to it for the non-Tailwind audience.
+  exportTabs: ['Tailwind', 'CSS', 'JSON', 'Dart'],
   crossLink: { label: 'Shadcn', href: '/theme/shadcn' },
 }

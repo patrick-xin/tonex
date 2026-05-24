@@ -9,7 +9,8 @@ import type { ExportTab } from './use-export-content'
 // why: the option surface is shared across formats (ADR-0021 amendment
 // 2026-05-20) and rendered once above the tab strip by export-button. This
 // component renders the subset each tab can actually use: Tailwind gets the
-// full tier filters (Extended, Palette, Chart, Contrast); shadcn gets Chart +
+// full tier filters (Extended, Palette, Chart, Contrast); CSS (native Material
+// CSS) gets md-sys prefix + Extended + Chart + Contrast; shadcn gets Chart +
 // New project; JSON gets Extended, Chart, Palette, Contrast — Chart rejoined in
 // #89 (it has a natural slot in the MTB shape, ADR-0029), but `New project`
 // stays off the JSON tab since the shadcn header has no JSON home and the
@@ -37,15 +38,32 @@ type IncludeKey =
   | 'includeChart'
   | 'includeContrastVariants'
   | 'includeHeader'
+  | 'mdSysPrefix'
 
 interface IncludeItem {
   key: IncludeKey
   label: string
+  // why: most flags default off (`?? false`), so an unset option reads as
+  // unchecked. The CSS tab inverts two — mdSysPrefix and Extended default ON in
+  // exportNativeCss — so their switches must read `!== false` to stay WYSIWYG
+  // with the emitted file when the shared options object hasn't been touched.
+  defaultOn?: boolean
 }
 
 const TAILWIND_INCLUDES: readonly IncludeItem[] = [
   { key: 'includeExtended', label: 'Extended' },
   { key: 'includePalette', label: 'Palette' },
+  { key: 'includeChart', label: 'Chart' },
+  { key: 'includeContrastVariants', label: 'Contrast' },
+] as const
+
+// why: native-CSS tab. `md-sys prefix` chooses the `--md-sys-color-*` spec
+// namespace (on) vs bare `--color-*` (off); both it and Extended default ON
+// (Material Web reads the spec names + fixed tokens). Palette has no light-dark
+// home in v1 so it's omitted; Contrast stacks tiers as `.contrast-*` blocks.
+const CSS_INCLUDES: readonly IncludeItem[] = [
+  { key: 'mdSysPrefix', label: 'md-sys prefix', defaultOn: true },
+  { key: 'includeExtended', label: 'Extended', defaultOn: true },
   { key: 'includeChart', label: 'Chart' },
   { key: 'includeContrastVariants', label: 'Contrast' },
 ] as const
@@ -84,6 +102,7 @@ const DART_INCLUDES: readonly IncludeItem[] = [
 // options, so the component renders nothing for it.
 const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeItem[]>> = {
   Tailwind: TAILWIND_INCLUDES,
+  CSS: CSS_INCLUDES,
   shadcn: SHADCN_INCLUDES,
   JSON: JSON_INCLUDES,
   Dart: DART_INCLUDES,
@@ -93,7 +112,12 @@ const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeItem[]>> = {
 // oklch or hex. Dart emits Flutter Color(0xAARRGGBB) literals exclusively, so it
 // is omitted here and the chooser is suppressed on the Dart tab (no dead
 // toggles, ADR-0021 amendment 2026-05-20).
-const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>(['Tailwind', 'shadcn', 'JSON'])
+const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
+  'Tailwind',
+  'CSS',
+  'shadcn',
+  'JSON',
+])
 
 export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
   // why: the TS formatter is a stub with no tunable options, so it maps to no
@@ -131,7 +155,7 @@ export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
             {it.label}
             <Switch
               size="sm"
-              checked={options[it.key] === true}
+              checked={it.defaultOn ? options[it.key] !== false : options[it.key] === true}
               onCheckedChange={(v) => setFlag(it.key, v)}
             />
           </FieldLabel>

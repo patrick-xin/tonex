@@ -27,7 +27,7 @@ import { type ExportTab, useExportContent } from './use-export-content'
 // choice is a prop, not internal path-sniffing logic. The fallback default
 // mirrors today's md-route behavior so any caller that hasn't migrated still
 // works.
-const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'JSON', 'Dart']
+const DEFAULT_TABS: readonly ExportTab[] = ['Tailwind', 'CSS', 'JSON', 'Dart']
 
 // why: toggle state stays React-local, not zustand (UI prefs aren't portable
 // theme). ADR-0021's 2026-05-20 amendment named the JSON formatter the
