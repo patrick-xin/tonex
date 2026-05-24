@@ -99,7 +99,7 @@ function CircularGauge({ percentage }: { percentage: number }) {
 
 export function UsageCard() {
   return (
-    <Card className="w-full max-w-sm gap-4 h-96">
+    <Card className="h-full w-full gap-4">
       <CardHeader>
         <CardTitle className="px-1 text-sm">
           5 days remaining in cycle

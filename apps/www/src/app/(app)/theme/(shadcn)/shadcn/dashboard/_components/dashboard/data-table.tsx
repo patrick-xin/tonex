@@ -589,22 +589,22 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
         </div>
       </TabsContent>
       <TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex flex-wrap justify-center items-center flex-1 rounded-lg border border-border border-dashed gap-6">
-          <AccountAccess/>
-          <UsageCard/>
-          <Shortcuts/>
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2 lg:grid-cols-3">
+          <AccountAccess />
+          <UsageCard />
+          <Shortcuts />
         </div>
       </TabsContent>
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex flex-wrap justify-center items-center flex-1 rounded-lg border border-border border-dashed gap-6">
-          <EmptyExploreCatalog/>
-          <FileUpload/>
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
+          <EmptyExploreCatalog />
+          <FileUpload />
         </div>
       </TabsContent>
       <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-         <div className="aspect-video w-full grid grid-cols-1 sm:grid-cols-2 flex-1 rounded-lg border border-border border-dashed gap-6 p-6">
-          <ClaimableBalance/>
-          <ActivateAgentDialog/>
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
+          <ClaimableBalance />
+          <ActivateAgentDialog />
         </div>
       </TabsContent>
     </Tabs>

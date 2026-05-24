@@ -13,7 +13,7 @@ import { AudioLinesIcon } from "lucide-react"
 
 export function EmptyExploreCatalog() {
   return (
-    <Card className="h-72">
+    <Card className="h-full w-full">
       <CardContent>
         <Empty className="p-4">
           <EmptyMedia variant="icon">

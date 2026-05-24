@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
@@ -19,7 +20,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { exportDialogHandle } from '@/lib/handles'
 import { ExportContentDisplay } from './export-content-display'
 import { ExportControls } from './export-controls'
-import { ExportFilters } from './export-filters'
+import {
+  ExportFilters,
+  ExportFormatChooser,
+  tabHasOptions,
+  tabSupportsFormat,
+} from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
 // why: ADR-0021 commitment 8 — route-agnostic. md routes pass
@@ -51,8 +57,6 @@ export const ExportButton = ({
   const [options, setOptions] = useState<ExportOptions>(LEAN_DEFAULTS)
   const { exportContent, ext } = useExportContent({ exportTab, options })
 
-  // why: command-menu shortcut (E) opens the export dialog from anywhere in
-  // the app via the shared handle. Same pattern as help-dialog.
   useHotkey('E', () => exportDialogHandle.open(null), {
     ignoreInputs: true,
     requireReset: true,
@@ -63,6 +67,7 @@ export const ExportButton = ({
   // tab chrome and render the panel directly. The tab strip is meaningful
   // only when the user has a choice between formats.
   const showTabs = tabs.length > 1
+  const hasOptions = tabHasOptions(exportTab)
 
   return (
     <Dialog handle={exportDialogHandle}>
@@ -87,35 +92,30 @@ export const ExportButton = ({
           Export <Kbd>E</Kbd>
         </TooltipContent>
       </Tooltip>
-      <DialogContent layout="scrollable">
-        <DialogTitle className="sr-only">Export theme</DialogTitle>
-        <DialogDescription className="sr-only">
-          Copy or download the theme for your target framework.
-        </DialogDescription>
-        {/* why: ExportOptions is one shared surface (ADR-0021 amendment
-         * 2026-05-20), so the option row renders ONCE above the tab strip —
-         * keyed to the active tab (exportTab) so a toggle set on any format
-         * carries to every other — instead of once per TabsPanel. The wrapper
-         * keeps the row + content as one flex column so DialogContent's gap-6
-         * (dialog-section spacing) doesn't open a gap above the tabs.
-         * ExportFilters itself renders nothing for option-less tabs (Dart). */}
-        <div className="h-full flex flex-col min-h-0 gap-0">
-          <ExportFilters tab={exportTab} options={options} onChange={setOptions} />
+      <DialogContent className="flex flex-col gap-0 p-0! w-full max-w-3xl max-h-[calc(100dvh-10rem)] sm:max-h-[calc(100dvh-6rem)] overflow-hidden">
+        <DialogHeader className="flex flex-row justify-between p-4 border-b border-outline-variant/40 text-left">
+          <div className="flex flex-col gap-1">
+            <DialogTitle>Export theme</DialogTitle>
+            <DialogDescription>Copy or download your current theme.</DialogDescription>
+          </div>
+          {tabSupportsFormat(exportTab) && (
+            <ExportFormatChooser options={options} onChange={setOptions} />
+          )}
+        </DialogHeader>
+        <div
+          className={cn(
+            'grid min-h-0 flex-1 grid-cols-1',
+            hasOptions && 'lg:grid-cols-[13rem_minmax(0,1fr)]',
+          )}
+        >
+          {hasOptions && <ExportFilters tab={exportTab} options={options} onChange={setOptions} />}
           {showTabs ? (
-            // why: controlled (value, not defaultValue) so `exportTab` is the
-            // single source of truth. `exportTab` lives in ExportButton (stays
-            // mounted); the Tabs strip lives in DialogContent (unmounts on
-            // close). An uncontrolled Tabs reset its visual selection to its
-            // default on every reopen/remount while `exportTab` — which drives
-            // the rendered content via useExportContent — kept the prior tab,
-            // so the indicator and content desynced (#118). Binding value to
-            // exportTab keeps them in lockstep across remounts.
             <Tabs
               value={exportTab}
               onValueChange={(value) => setExportTab(value as ExportTab)}
-              className="flex-1 min-h-0 gap-0"
+              className="flex min-h-0 min-w-0 flex-col gap-0"
             >
-              <TabsList className="border-b border-outline-variant">
+              <TabsList className="border-b border-outline-variant/60">
                 {tabs.map((tab) => (
                   <TabsTab className="data-active:text-on-surface" key={tab} value={tab}>
                     {tab}
@@ -124,14 +124,14 @@ export const ExportButton = ({
                 <TabsIndicator className="bg-primary -bottom-0.5 left-px h-0.5 translate-x-(--active-tab-left) translate-y-0" />
               </TabsList>
               {tabs.map((tab) => (
-                <TabsPanel key={tab} value={tab} className="h-full flex flex-col min-h-0">
+                <TabsPanel key={tab} value={tab} className="flex h-full min-h-0 flex-col">
                   <ExportContentDisplay content={exportContent} />
                   <ExportControls exportContent={exportContent} ext={ext} />
                 </TabsPanel>
               ))}
             </Tabs>
           ) : (
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex min-h-0 min-w-0 flex-col">
               <ExportContentDisplay content={exportContent} />
               <ExportControls exportContent={exportContent} ext={ext} />
             </div>

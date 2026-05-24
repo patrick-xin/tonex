@@ -23,7 +23,7 @@ import { AlertCircleIcon, ArrowRightIcon, LockKeyholeIcon } from "lucide-react"
 
 export function AccountAccess() {
   return (
-    <Card className="h-96">
+    <Card className="h-full w-full">
       <CardHeader>
         <CardTitle>Account Access</CardTitle>
         <CardDescription>
