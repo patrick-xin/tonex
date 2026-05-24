@@ -23,25 +23,25 @@ function themeWith(overrides: Partial<PortableTheme>): PortableTheme {
 describe('resolvePresetApply — seed source field', () => {
   it('supersedes an untouched, unlocked seed with the preset curated seed', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: false, seedHexLock: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.warm)
-    expect(patch.seed).toEqual(SHADCN_PRESETS.warm.seed)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
+    expect(patch.seed).toEqual(SHADCN_PRESETS.grove.seed)
   })
 
   it('keeps a touched seed and drops the curated one', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.warm)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
     expect(patch.seed).toBeUndefined()
   })
 
   it('keeps a locked seed even when untouched', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: false, seedHexLock: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.warm)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
     expect(patch.seed).toBeUndefined()
   })
 
   it('keeps a seed that is touched AND locked', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.warm)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
     expect(patch.seed).toBeUndefined()
   })
 
@@ -50,7 +50,7 @@ describe('resolvePresetApply — seed source field', () => {
   // it; the resolver must read the flag, never compare to DEFAULT_INPUTS.seed.
   it('keeps a seed equal to the boot default when the signal says touched', () => {
     const theme = themeWith({ seedTouched: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.warm)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
     expect(patch.seed).toBeUndefined()
   })
 
@@ -60,24 +60,24 @@ describe('resolvePresetApply — seed source field', () => {
   it('never marks the seed touched in the returned patch', () => {
     const untouched = themeWith({ seedTouched: false, seedHexLock: false })
     const touched = themeWith({ seed: USER_SEED, seedTouched: true })
-    expect('seedTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.warm)).toBe(false)
-    expect('seedTouched' in resolvePresetApply(touched, SHADCN_PRESETS.warm)).toBe(false)
+    expect('seedTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.grove)).toBe(false)
+    expect('seedTouched' in resolvePresetApply(touched, SHADCN_PRESETS.grove)).toBe(false)
   })
 })
 
 describe('resolvePresetApply — contrast source field', () => {
   // why: contrast has no lock (only the seed does — CONTEXT: Lock), so its
-  // matrix is just touched vs untouched. 'stark' carries a non-zero curated
+  // matrix is just touched vs untouched. 'enterprise' carries a non-zero curated
   // contrast, so supersession is observable against the boot default of 0.
   it('supersedes an untouched contrast with the preset curated contrast', () => {
     const theme = themeWith({ contrastLevel: 0.7, contrastTouched: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
-    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
+    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
   })
 
   it('keeps a touched contrast and drops the curated one', () => {
     const theme = themeWith({ contrastLevel: 0.7, contrastTouched: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
     expect(patch.contrastLevel).toBeUndefined()
   })
 
@@ -86,14 +86,16 @@ describe('resolvePresetApply — contrast source field', () => {
   it('never marks contrast touched in the returned patch', () => {
     const untouched = themeWith({ contrastTouched: false })
     const touched = themeWith({ contrastLevel: 0.7, contrastTouched: true })
-    expect('contrastTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.stark)).toBe(false)
-    expect('contrastTouched' in resolvePresetApply(touched, SHADCN_PRESETS.stark)).toBe(false)
+    expect('contrastTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.enterprise)).toBe(
+      false,
+    )
+    expect('contrastTouched' in resolvePresetApply(touched, SHADCN_PRESETS.enterprise)).toBe(false)
   })
 })
 
 describe('resolvePresetApply — seed and contrast resolve independently', () => {
   // why: the per-field point of ADR-0031 #3 — each source input is honored on
-  // its own terms, not all-or-nothing. 'stark' carries both a non-default
+  // its own terms, not all-or-nothing. 'enterprise' carries both a non-default
   // curated seed and a non-default curated contrast.
   it('touched contrast only: curated seed adopted, user contrast kept', () => {
     const theme = themeWith({
@@ -102,8 +104,8 @@ describe('resolvePresetApply — seed and contrast resolve independently', () =>
       contrastLevel: 0.7,
       contrastTouched: true,
     })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
-    expect(patch.seed).toEqual(SHADCN_PRESETS.stark.seed)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
+    expect(patch.seed).toEqual(SHADCN_PRESETS.enterprise.seed)
     expect(patch.contrastLevel).toBeUndefined()
   })
 
@@ -114,9 +116,9 @@ describe('resolvePresetApply — seed and contrast resolve independently', () =>
       contrastLevel: 0.7,
       contrastTouched: false,
     })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stark)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
     expect(patch.seed).toBeUndefined()
-    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.stark.contrastLevel)
+    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
   })
 })
 

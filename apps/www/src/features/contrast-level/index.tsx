@@ -23,9 +23,15 @@ import {
 export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }) {
   const contrastLevel = useSource((s) => s.contrastLevel)
   const setContrastLevel = useSource((s) => s.actions.setContrastLevel)
+  const untouchContrast = useSource((s) => s.actions.untouchContrast)
+  const contrastTouched = useSource((s) => s.contrastTouched)
   const { track, thumb, control, root, indicator } = sliderStyles({ size })
 
-  const isDirty = contrastLevel !== 0
+  // why: ADR-0031 #6 — reset is an *un-touch*, not a snap-to-zero. It clears the
+  // recorded signal so the next preset supplies its curated contrast; gating on
+  // contrastTouched (not value !== 0) means a deliberately-chosen 0 still shows
+  // the affordance, and an untouched 0 (the default) hides it.
+  const isDirty = contrastTouched
 
   return (
     <div className="w-full space-y-3">
@@ -37,7 +43,7 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
               <Button
                 variant="ghost"
                 size="icon-xs"
-                onClick={() => setContrastLevel(0)}
+                onClick={untouchContrast}
                 aria-label="Reset contrast"
                 className={isDirty ? '' : 'opacity-0 pointer-events-none'}
               >

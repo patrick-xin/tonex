@@ -16,6 +16,11 @@ export {
   SHADCN_CHART_TOKEN_NAMES,
   type ShadcnChartTokenName,
 } from './chart'
+export {
+  SHADCN_BINDING_PRESETS,
+  type ShadcnBindingPreset,
+  type ShadcnBindingPresetName,
+} from './theme/binding-presets'
 export { CONTRAST_PAIRS, type ContrastPair } from './theme/contrast'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export {
