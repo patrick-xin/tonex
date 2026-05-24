@@ -21,7 +21,7 @@ const shortcuts = [
 
 export function Shortcuts() {
   return (
-    <Card className="h-96">
+    <Card className="h-full w-full">
       <CardContent>
         <div className="flex flex-col gap-3">
           <div className="text-sm font-medium">Shortcuts</div>

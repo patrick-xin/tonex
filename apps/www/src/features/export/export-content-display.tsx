@@ -27,14 +27,15 @@ export function ExportContentDisplay({ content }: ExportContentDisplayProps) {
     })
   }
 
-  // why: scoped to dialog-open since this component only mounts inside the
-  // export dialog portal. Plain `C` mirrors the legacy shortcut — Mod+C
-  // remains the system clipboard.
-  useHotkey('C', handleCopy, { ignoreInputs: true, requireReset: true })
+  useHotkey('C', handleCopy, {
+    ignoreInputs: true,
+    requireReset: true,
+    conflictBehavior: 'replace',
+  })
 
   return (
-    <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0 h-full relative">
-      <pre className="font-mono m-2 p-4 text-[11px] text-on-surface-variant bg-surface-container-low whitespace-pre">
+    <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0 h-full relative p-1">
+      <pre className="font-mono p-4 text-[11px] text-on-surface-variant whitespace-pre">
         {content}
       </pre>
       <Tooltip>
@@ -52,7 +53,7 @@ export function ExportContentDisplay({ content }: ExportContentDisplayProps) {
             </Button>
           }
         />
-        <TooltipContent side="left">
+        <TooltipContent side="bottom">
           Copy <Kbd>C</Kbd>
         </TooltipContent>
       </Tooltip>

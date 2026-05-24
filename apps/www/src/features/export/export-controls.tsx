@@ -8,9 +8,17 @@ interface ExportControlsProps {
   ext: string
 }
 
+// why: Safari (macOS) ignores the `download` filename and derives the extension
+// from the blob MIME, so a hardcoded `text/css` silently saved JSON/Dart as `.css`.
+const MIME_BY_EXT: Record<string, string> = {
+  css: 'text/css',
+  json: 'application/json',
+  dart: 'text/x-dart',
+}
+
 export function ExportControls({ exportContent, ext }: ExportControlsProps) {
   const handleDownload = () => {
-    const blob = new Blob([exportContent], { type: 'text/css' })
+    const blob = new Blob([exportContent], { type: MIME_BY_EXT[ext] ?? 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -23,7 +31,7 @@ export function ExportControls({ exportContent, ext }: ExportControlsProps) {
   }
 
   return (
-    <div className="p-2 flex gap-2 items-center justify-end border-t border-outline-variant">
+    <div className="p-2 flex gap-2 items-center justify-end border-t border-outline-variant/40">
       <Button size="sm" onClick={handleDownload} variant="ghost">
         <DownloadSimpleIcon weight="bold" />
         Download

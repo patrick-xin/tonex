@@ -1,36 +1,12 @@
 'use client'
 
 import type { ExportOptions } from '@tonex/core'
+import { useEffect, useState } from 'react'
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { ExportTab } from './use-export-content'
-
-// why: the option surface is shared across formats (ADR-0021 amendment
-// 2026-05-20) and rendered once above the tab strip by export-button. This
-// component renders the subset each tab can actually use: Tailwind gets the
-// full tier filters (Extended, Palette, Chart, Contrast); CSS (native Material
-// CSS) gets md-sys prefix + Extended + Chart + Contrast; shadcn gets Chart +
-// New project; JSON gets Extended, Chart, Palette, Contrast — Chart rejoined in
-// #89 (it has a natural slot in the MTB shape, ADR-0029), but `New project`
-// stays off the JSON tab since the shadcn header has no JSON home and the
-// formatter ignores it. Dart gets Contrast only — it's a fixed-shape Flutter
-// target, so the other tier filters have no home, and the Format chooser is
-// suppressed because Dart is ARGB-only (no oklch/hex space to pick; dart-2).
-// TS is still a stub formatter with no options, so it renders nothing (#86).
-//
-// Layout: Format is a single-select chooser (oklch vs hex are mutually
-// exclusive) so it stays a ToggleGroup, shown only for tabs that can serialize
-// either space (see FORMAT_TABS). Include flags are independent
-// booleans so each is its own Field+Switch pair — reads as a settings row
-// rather than a multi-select chip strip and matches the Settings popover
-// pattern.
-
-interface ExportFiltersProps {
-  tab: ExportTab
-  options: ExportOptions
-  onChange: (next: ExportOptions) => void
-}
 
 type IncludeKey =
   | 'includeExtended'
@@ -40,78 +16,55 @@ type IncludeKey =
   | 'includeHeader'
   | 'mdSysPrefix'
 
-interface IncludeItem {
+interface OptionMeta {
   key: IncludeKey
   label: string
-  // why: most flags default off (`?? false`), so an unset option reads as
-  // unchecked. The CSS tab inverts two — mdSysPrefix and Extended default ON in
-  // exportNativeCss — so their switches must read `!== false` to stay WYSIWYG
-  // with the emitted file when the shared options object hasn't been touched.
+  description: string
   defaultOn?: boolean
 }
 
-const TAILWIND_INCLUDES: readonly IncludeItem[] = [
-  { key: 'includeExtended', label: 'Extended' },
-  { key: 'includePalette', label: 'Palette' },
-  { key: 'includeChart', label: 'Chart' },
-  { key: 'includeContrastVariants', label: 'Contrast' },
-] as const
-
-// why: native-CSS tab. `md-sys prefix` chooses the `--md-sys-color-*` spec
-// namespace (on) vs bare `--color-*` (off); both it and Extended default ON
-// (Material Web reads the spec names + fixed tokens). Palette has no light-dark
-// home in v1 so it's omitted; Contrast stacks tiers as `.contrast-*` blocks.
-const CSS_INCLUDES: readonly IncludeItem[] = [
-  { key: 'mdSysPrefix', label: 'md-sys prefix', defaultOn: true },
-  { key: 'includeExtended', label: 'Extended', defaultOn: true },
-  { key: 'includeChart', label: 'Chart' },
-  { key: 'includeContrastVariants', label: 'Contrast' },
-] as const
-
-const SHADCN_INCLUDES: readonly IncludeItem[] = [
-  { key: 'includeChart', label: 'Chart' },
-  { key: 'includeHeader', label: 'New project' },
-] as const
-
-// why: JSON honors color format + Extended / Chart / Palette / Contrast (the
-// options with a natural home in the MTB shape). Chart rejoined the set in #89:
-// chart is part of our wider roster, and the JSON formatter now merges it into
-// each scheme just like Extended (ADR-0029 — wider roster lands in its natural
-// slot). includeHeader stays omitted — it's the shadcn bootstrap incantation,
-// with no JSON home — so offering it would be a toggle that changes nothing.
-const JSON_INCLUDES: readonly IncludeItem[] = [
-  { key: 'includeExtended', label: 'Extended' },
-  { key: 'includeChart', label: 'Chart' },
-  { key: 'includePalette', label: 'Palette' },
-  { key: 'includeContrastVariants', label: 'Contrast' },
-] as const
-
-// why: Dart's ColorScheme is a fixed-shape Flutter target. Contrast emits the
-// medium / high tiers as MTB's 6-method form; Chart emits a standalone
-// ChartColors class (dart-3); Palette emits a tonalPalettes map on MaterialTheme
-// (dart-4). Chart / palette have no ColorScheme slot, so each rides as its own
-// member / class. Extended is always on for Dart — Format stays suppressed
-// (ARGB-only), so the Dart tab honors exactly Chart, Palette, and Contrast.
-const DART_INCLUDES: readonly IncludeItem[] = [
-  { key: 'includeChart', label: 'Chart' },
-  { key: 'includePalette', label: 'Palette' },
-  { key: 'includeContrastVariants', label: 'Contrast' },
-] as const
-
-// why: per-tab subset lookup. A tab absent from this map (TS) has no tunable
-// options, so the component renders nothing for it.
-const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeItem[]>> = {
-  Tailwind: TAILWIND_INCLUDES,
-  CSS: CSS_INCLUDES,
-  shadcn: SHADCN_INCLUDES,
-  JSON: JSON_INCLUDES,
-  Dart: DART_INCLUDES,
+const OPTION_META: Record<IncludeKey, OptionMeta> = {
+  includeExtended: {
+    key: 'includeExtended',
+    label: 'Extended roles',
+    description: 'Surface tints and fixed color roles beyond the core set.',
+  },
+  includePalette: {
+    key: 'includePalette',
+    label: 'Tonal palettes',
+    description: 'The full 0–100 tone ramp for each key color.',
+  },
+  includeChart: {
+    key: 'includeChart',
+    label: 'Chart colors',
+    description: 'Color slots for data-visualization and charts.',
+  },
+  includeContrastVariants: {
+    key: 'includeContrastVariants',
+    label: 'Contrast tiers',
+    description: 'Medium and high-contrast variants alongside the default.',
+  },
+  includeHeader: {
+    key: 'includeHeader',
+    label: 'Project bootstrap',
+    description: 'Include @import and @theme header for a fresh project.',
+  },
+  mdSysPrefix: {
+    key: 'mdSysPrefix',
+    label: 'Spec prefix',
+    description: 'Emit --md-sys-color-* names (off = bare --color-*).',
+    defaultOn: true,
+  },
 }
 
-// why: the Format chooser only makes sense where colors can serialize as either
-// oklch or hex. Dart emits Flutter Color(0xAARRGGBB) literals exclusively, so it
-// is omitted here and the chooser is suppressed on the Dart tab (no dead
-// toggles, ADR-0021 amendment 2026-05-20).
+const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeKey[]>> = {
+  Tailwind: ['includeExtended', 'includePalette', 'includeChart', 'includeContrastVariants'],
+  CSS: ['mdSysPrefix', 'includeExtended', 'includeChart', 'includeContrastVariants'],
+  shadcn: ['includeChart', 'includeHeader'],
+  JSON: ['includeExtended', 'includeChart', 'includePalette', 'includeContrastVariants'],
+  Dart: ['includeChart', 'includePalette', 'includeContrastVariants'],
+}
+
 const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
   'Tailwind',
   'CSS',
@@ -119,48 +72,127 @@ const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
   'JSON',
 ])
 
-export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
-  // why: the TS formatter is a stub with no tunable options, so it maps to no
-  // subset and renders nothing. JSON joined the option-aware tabs in #86; Dart
-  // joined with Contrast in dart-2.
-  const items = INCLUDES_BY_TAB[tab]
-  if (items === undefined) return null
-  const showFormat = FORMAT_TABS.has(tab)
+function isOn(meta: OptionMeta, options: ExportOptions): boolean {
+  return meta.defaultOn ? options[meta.key] !== false : options[meta.key] === true
+}
 
+function countOn(tab: ExportTab, options: ExportOptions): number {
+  const keys = INCLUDES_BY_TAB[tab] ?? []
+  return keys.filter((k) => isOn(OPTION_META[k], options)).length
+}
+
+export function tabHasOptions(tab: ExportTab): boolean {
+  return (INCLUDES_BY_TAB[tab]?.length ?? 0) > 0
+}
+
+export function tabSupportsFormat(tab: ExportTab): boolean {
+  return FORMAT_TABS.has(tab)
+}
+
+export function ExportFormatChooser({
+  options,
+  onChange,
+}: {
+  options: ExportOptions
+  onChange: (next: ExportOptions) => void
+}) {
   const fmt = options.colorFormat ?? 'oklch'
+  return (
+    <ToggleGroup
+      variant="outline"
+      size="xs"
+      aria-label="Color format"
+      value={[fmt]}
+      onValueChange={(next) =>
+        onChange({ ...options, colorFormat: (next[0] ?? 'oklch') as 'oklch' | 'hex' })
+      }
+    >
+      <ToggleGroupItem value="oklch">oklch</ToggleGroupItem>
+      <ToggleGroupItem value="hex">hex</ToggleGroupItem>
+    </ToggleGroup>
+  )
+}
 
-  const onFormatChange = (next: string[]) => {
-    const value = (next[0] ?? 'oklch') as 'oklch' | 'hex'
-    onChange({ ...options, colorFormat: value })
-  }
+interface ExportFiltersProps {
+  tab: ExportTab
+  options: ExportOptions
+  onChange: (next: ExportOptions) => void
+}
 
-  const setFlag = (key: IncludeKey, next: boolean) => {
-    onChange({ ...options, [key]: next })
-  }
+// why: the rail reflows at lg (the grid's `lg:grid-cols-[…]` breakpoint, the
+// 1024px Tailwind default) — neither useIsMobile (768) nor useIsRailVisible
+// (640) gates there. Base UI's Collapsible is JS-controlled, so the lg
+// force-open can't be CSS-only (the panel hides/unmounts when closed); this
+// gate drives `open` directly while the disclosure trigger stays `lg:hidden`.
+const LG_BREAKPOINT = 1024
+
+function useIsDesktop(): boolean {
+  const [isDesktop, setIsDesktop] = useState(
+    () =>
+      typeof window !== 'undefined' && window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`).matches,
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`)
+    const onChange = () => setIsDesktop(mql.matches)
+    onChange()
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+  return isDesktop
+}
+
+export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
+  const isDesktop = useIsDesktop()
+  const [userOpen, setUserOpen] = useState(false)
+  const keys = INCLUDES_BY_TAB[tab] ?? []
+  if (keys.length === 0) return null
+
+  const set = (k: IncludeKey, v: boolean) => onChange({ ...options, [k]: v })
+  const n = countOn(tab, options)
+  // why: open whenever desktop (trigger is hidden there) or the user expanded
+  // the disclosure on mobile.
+  const open = isDesktop || userOpen
 
   return (
-    <div className="border-b border-outline-variant px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-      {showFormat && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-on-surface-variant">Format</span>
-          <ToggleGroup variant="outline" size="xs" value={[fmt]} onValueChange={onFormatChange}>
-            <ToggleGroupItem value="oklch">oklch</ToggleGroupItem>
-            <ToggleGroupItem value="hex">hex</ToggleGroupItem>
-          </ToggleGroup>
+    <aside className="flex min-h-0 flex-col overflow-y-auto border-b border-outline-variant/40 p-4 lg:border-r lg:border-b-0">
+      <Collapsible open={open} onOpenChange={setUserOpen} className="flex min-h-0 flex-col">
+        {/* Mobile-only disclosure; force-open at lg+ via useIsDesktop. */}
+        <CollapsibleTrigger className="flex w-full items-center justify-between text-sm text-on-surface lg:hidden">
+          <span>
+            Including{' '}
+            <span className="font-medium">
+              {n} of {keys.length}
+            </span>{' '}
+            optional sections
+          </span>
+          <span className="text-xs font-medium text-primary">{open ? 'Hide' : 'Customize'}</span>
+        </CollapsibleTrigger>
+        <div className="mb-2 hidden text-sm font-medium uppercase tracking-wide lg:block">
+          Include in export
         </div>
-      )}
-      {items.map((it) => (
-        <Field key={it.key} name={it.key}>
-          <FieldLabel className="text-xs font-normal text-on-surface-variant gap-2">
-            {it.label}
-            <Switch
-              size="sm"
-              checked={it.defaultOn ? options[it.key] !== false : options[it.key] === true}
-              onCheckedChange={(v) => setFlag(it.key, v)}
-            />
-          </FieldLabel>
-        </Field>
-      ))}
-    </div>
+        <CollapsiblePanel>
+          <div className="grid grid-cols-1 gap-x-4 gap-y-3 pt-3 sm:grid-cols-2 lg:grid-cols-1 lg:pt-0">
+            {keys.map((k) => {
+              const m = OPTION_META[k]
+              return (
+                <Field key={k} name={k} className="flex-col items-start gap-1">
+                  <div className="flex w-full items-center justify-between gap-2">
+                    <FieldLabel className="text-sm font-medium">{m.label}</FieldLabel>
+                    <Switch
+                      size="sm"
+                      checked={isOn(m, options)}
+                      onCheckedChange={(v) => set(k, v)}
+                    />
+                  </div>
+                  <span className="text-xs leading-snug text-on-surface-variant">
+                    {m.description}
+                  </span>
+                </Field>
+              )
+            })}
+          </div>
+        </CollapsiblePanel>
+      </Collapsible>
+    </aside>
   )
 }

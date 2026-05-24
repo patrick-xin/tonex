@@ -12,7 +12,7 @@ import { Separator } from "@/components/shadcn/separator"
 
 export function ClaimableBalance() {
   return (
-    <Card className="max-w-lg h-105">
+    <Card className="h-full w-full">
       <CardHeader>
         <CardDescription>Claimable Balance</CardDescription>
         <CardTitle className="text-5xl tabular-nums">$0.00</CardTitle>

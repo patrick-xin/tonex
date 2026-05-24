@@ -21,7 +21,7 @@ import { UploadCloudIcon } from "lucide-react"
 
 export function FileUpload() {
   return (
-    <Card className="h-72">
+    <Card className="h-full w-full">
       <CardHeader>
         <CardTitle>File Upload</CardTitle>
         <CardDescription>Drag and drop or browse</CardDescription>

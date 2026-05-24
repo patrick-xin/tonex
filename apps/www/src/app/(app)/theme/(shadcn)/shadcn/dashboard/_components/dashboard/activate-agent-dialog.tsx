@@ -57,7 +57,7 @@ const agentFeatures = [
 
 export function ActivateAgentDialog() {
   return (
-    <Card className="h-105">
+    <Card className="h-full w-full">
       <CardHeader>
         <CardTitle>Ship faster & safer with Vercel Agent</CardTitle>
         <CardDescription>
