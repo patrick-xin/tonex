@@ -102,8 +102,16 @@ export const ExportButton = ({
         <div className="h-full flex flex-col min-h-0 gap-0">
           <ExportFilters tab={exportTab} options={options} onChange={setOptions} />
           {showTabs ? (
+            // why: controlled (value, not defaultValue) so `exportTab` is the
+            // single source of truth. `exportTab` lives in ExportButton (stays
+            // mounted); the Tabs strip lives in DialogContent (unmounts on
+            // close). An uncontrolled Tabs reset its visual selection to its
+            // default on every reopen/remount while `exportTab` — which drives
+            // the rendered content via useExportContent — kept the prior tab,
+            // so the indicator and content desynced (#118). Binding value to
+            // exportTab keeps them in lockstep across remounts.
             <Tabs
-              defaultValue={initialTab}
+              value={exportTab}
               onValueChange={(value) => setExportTab(value as ExportTab)}
               className="flex-1 min-h-0 gap-0"
             >
