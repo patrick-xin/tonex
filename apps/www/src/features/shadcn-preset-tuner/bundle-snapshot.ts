@@ -22,15 +22,6 @@ export interface PresetBundle {
   shadcnRoleBindings: { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
 }
 
-// why: durable fixture shape — what gets stored in fixtures.ts during the
-// curation phase. Bundle is what ships to core via the engineering slice.
-// Per ADR-0026 the fixture intentionally holds bundle data only — overrides
-// are not part of a preset and are not persisted.
-export interface PresetFixture {
-  name: string
-  bundle: PresetBundle
-}
-
 export interface BundleDiff {
   variantChanged: boolean
   surfaceAlgoChanged: boolean

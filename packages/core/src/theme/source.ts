@@ -54,6 +54,13 @@ export interface SourceActions {
   setSeedTone(tone: number): void
   setVariant(variant: VariantName): void
   setContrastLevel(level: number): void
+  // why: ADR-0031 #6 — the reset-then-adopt path. Returns the source field to
+  // its boot default AND clears the recorded touched signal, so the next preset
+  // apply supersedes it with the curated value. Per-field so resetting the seed
+  // never disturbs contrast and vice versa (issue #111). Distinct from `reset`,
+  // which is the all-or-nothing slate wipe of every source field.
+  untouchSeed(): void
+  untouchContrast(): void
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
@@ -246,6 +253,14 @@ export const useSource = create<SourceState>()(
           // the clamped value, sibling to the seed setters. No lock on contrast,
           // so every call records.
           set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)), contrastTouched: true }),
+        // why: ADR-0031 #6 — per-field un-touch. Restores the boot default value
+        // and clears the recorded signal in one write, so the next preset apply
+        // supplies the curated value (the inverse of the user-facing setters,
+        // which record the touch). Only the addressed field is written, so the
+        // sibling source field's value and signal are untouched (issue #111).
+        untouchSeed: () => set({ seed: DEFAULT_INPUTS.seed, seedTouched: false }),
+        untouchContrast: () =>
+          set({ contrastLevel: DEFAULT_INPUTS.contrastLevel, contrastTouched: false }),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
         // why: hex sets the override for one (mode, token); null deletes the
         // entry so the token returns to MCU. Mode and token are typed so any

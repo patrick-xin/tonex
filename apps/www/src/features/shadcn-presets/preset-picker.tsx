@@ -10,7 +10,7 @@ import { requestPresetSwitch } from './request'
 // bindings (ADR-0026); md has no preset concept. Two visual rows split the
 // shipped names so a single ToggleGroup never wraps awkwardly in the rail width.
 const PRESET_NAMES = Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]
-const PRESET_GROUP_B: ShadcnPresetName[] = ['soft', 'warm', 'playful']
+const PRESET_GROUP_B: ShadcnPresetName[] = ['paper', 'enterprise', 'sunset', 'sage']
 const PRESET_GROUP_A = PRESET_NAMES.filter((n) => !PRESET_GROUP_B.includes(n))
 
 // why: extracted from features/settings so the picker can live in the rail as a

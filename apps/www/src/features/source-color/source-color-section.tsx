@@ -6,6 +6,7 @@ import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ColorLock } from './color-lock'
 import { HexInput } from './hex-input'
+import { SeedReset } from './seed-reset'
 
 export function SourceColorSection() {
   const seedHex = useSource(selectSeedHex)
@@ -34,7 +35,10 @@ export function SourceColorSection() {
               <TwColorPicker currentColor={seedHex} onSelect={setSeedHex} disabled={seedHexLock} />
             )}
           </div>
-          <ColorLock className="-mr-1 ml-0.5" />
+          <div className="flex items-center">
+            <SeedReset />
+            <ColorLock className="-mr-1 ml-0.5" />
+          </div>
         </div>
       </div>
     </div>

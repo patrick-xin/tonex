@@ -4,16 +4,15 @@ import { presetUsesTertiary } from './hints'
 
 describe('presetUsesTertiary', () => {
   it('is true for presets that bind a role to a --color-tertiary* token', () => {
-    expect(presetUsesTertiary('playful')).toBe(true)
-    expect(presetUsesTertiary('tech')).toBe(true)
+    expect(presetUsesTertiary('sunset')).toBe(true)
   })
 
   it('is false for presets that never reference tertiary', () => {
     expect(presetUsesTertiary('default')).toBe(false)
-    expect(presetUsesTertiary('stark')).toBe(false)
-    expect(presetUsesTertiary('soft')).toBe(false)
-    expect(presetUsesTertiary('warm')).toBe(false)
-    expect(presetUsesTertiary('monotone')).toBe(false)
+    expect(presetUsesTertiary('grove')).toBe(false)
+    expect(presetUsesTertiary('breeze')).toBe(false)
+    expect(presetUsesTertiary('enterprise')).toBe(false)
+    expect(presetUsesTertiary('sage')).toBe(false)
   })
 
   it('treats a null (custom/drifted) preset as not-wired', () => {
@@ -25,12 +24,14 @@ describe('presetUsesTertiary', () => {
   it('covers every shipped preset', () => {
     const expected: Record<ShadcnPresetName, boolean> = {
       default: false,
-      stark: false,
-      soft: false,
-      warm: false,
-      playful: true,
-      monotone: false,
-      tech: true,
+      grove: false,
+      lagoon: false,
+      breeze: false,
+      noir: false,
+      paper: false,
+      enterprise: false,
+      sunset: true,
+      sage: false,
     }
     for (const name of Object.keys(SHADCN_PRESETS) as ShadcnPresetName[]) {
       expect(presetUsesTertiary(name)).toBe(expected[name])
