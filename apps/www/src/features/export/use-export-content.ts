@@ -6,6 +6,7 @@ import {
   exportCss,
   exportDart,
   exportJson,
+  exportNativeCss,
   selectPortable,
   selectSeedHex,
   useSource,
@@ -13,13 +14,16 @@ import {
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-export type ExportTab = 'Tailwind' | 'shadcn' | 'JSON' | 'Dart'
+export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart'
 
 // why: Tailwind tab emits the md layer (full globals.css with @theme inline);
 // shadcn tab emits :root + .dark only since the user already owns the @import
-// and @theme inline in their shadcn project. Both go through core's exportCss
-// so the drift-guard (ADR-0017) covers what users actually paste. JSON and Dart
-// have real formatters in `@tonex/core/exporters/{json,dart}.ts`.
+// and @theme inline in their shadcn project. CSS tab emits framework-agnostic
+// Material Design custom properties (`--md-sys-color-*`, one light-dark() pair
+// per token) for non-Tailwind / Material Web consumers. All three go through
+// core's exporters so the drift-guard (ADR-0017) covers what users actually
+// paste. JSON and Dart have real formatters in
+// `@tonex/core/exporters/{json,dart}.ts`.
 
 // why: header is the export's provenance trail. seed + variant always carry
 // signal; date is what users actually find useful when comparing two pasted
@@ -93,6 +97,14 @@ export function useExportContent({
     // the header reflects when the user actually generated this export.
     const date = new Date().toISOString().slice(0, 10)
     const header = formatHeader(seedHex, variant, contrastLevel, date)
+
+    // why: the CSS tab is framework-agnostic native CSS (light-dark() pairs,
+    // optional --md-sys-color-* namespace), a separate exporter from the
+    // Tailwind/shadcn `md`/`shadcn` layers. Same provenance header.
+    if (exportTab === 'CSS') {
+      return { exportContent: header + exportNativeCss(bundle, options), ext: 'css' }
+    }
+
     const layer = exportTab === 'Tailwind' ? 'md' : 'shadcn'
     return { exportContent: header + exportCss(bundle, layer, options), ext: 'css' }
   }, [exportTab, hydrated, portable, options, seedHex, variant, contrastLevel])
