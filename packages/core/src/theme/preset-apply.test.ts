@@ -122,6 +122,58 @@ describe('resolvePresetApply — seed and contrast resolve independently', () =>
   })
 })
 
+describe('resolvePresetApply — explicit adopt choices (dialog switches)', () => {
+  // why: the preset-apply dialog lets the user override the keep-if-touched
+  // default per field ("Use {preset}'s"). A set choice adopts the curated value
+  // even over a touched field, and clears the signal so the adopted value isn't
+  // read as a user choice on the next switch (mirrors the untouched-adopt rule).
+  it('adopts the curated seed over a touched seed when the seed choice is set', () => {
+    const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: false })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true })
+    expect(patch.seed).toEqual(SHADCN_PRESETS.grove.seed)
+    expect(patch.seedTouched).toBe(false)
+  })
+
+  it('adopts the curated contrast over a touched contrast when the contrast choice is set', () => {
+    const theme = themeWith({ contrastLevel: 0.7, contrastTouched: true })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise, { contrast: true })
+    expect(patch.contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
+    expect(patch.contrastTouched).toBe(false)
+  })
+
+  // why: lock outranks the dialog — a locked seed means "do not move this" by
+  // any path (CONTEXT: Lock), so an adopt choice can't override it. The dialog
+  // never offers the switch for a locked seed, but the resolver stays the
+  // authority regardless of what the UI passes.
+  it('keeps a locked seed even when the seed choice is set', () => {
+    const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: true })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true })
+    expect(patch.seed).toBeUndefined()
+  })
+
+  it('keeps a touched field when its choice is absent or false', () => {
+    const theme = themeWith({
+      seed: USER_SEED,
+      seedTouched: true,
+      contrastLevel: 0.7,
+      contrastTouched: true,
+    })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise, { seed: false })
+    expect(patch.seed).toBeUndefined()
+    expect(patch.contrastLevel).toBeUndefined()
+  })
+
+  // why: a choice on an untouched field is a no-op — the field already adopts
+  // the curated value, and the resolver must not start emitting a redundant
+  // `touched: false` that wasn't there before (the existing patch-shape pins).
+  it('does not add a touched signal for an untouched field given a choice', () => {
+    const theme = themeWith({ seedTouched: false, contrastTouched: false })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true, contrast: true })
+    expect('seedTouched' in patch).toBe(false)
+    expect('contrastTouched' in patch).toBe(false)
+  })
+})
+
 describe('resolvePresetApply — recipe fields always overwrite', () => {
   // why: regardless of source-field resolution, every recipe field detection
   // compares (issue #108) is written unconditionally, so the just-applied

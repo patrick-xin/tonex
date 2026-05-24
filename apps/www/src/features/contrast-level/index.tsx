@@ -1,8 +1,6 @@
 'use client'
 
 import { useSource } from '@tonex/core'
-import { RotateCcwIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Fieldset, FieldsetLegend } from '@/components/ui/fieldset'
 import {
@@ -23,15 +21,7 @@ import {
 export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }) {
   const contrastLevel = useSource((s) => s.contrastLevel)
   const setContrastLevel = useSource((s) => s.actions.setContrastLevel)
-  const untouchContrast = useSource((s) => s.actions.untouchContrast)
-  const contrastTouched = useSource((s) => s.contrastTouched)
   const { track, thumb, control, root, indicator } = sliderStyles({ size })
-
-  // why: ADR-0031 #6 — reset is an *un-touch*, not a snap-to-zero. It clears the
-  // recorded signal so the next preset supplies its curated contrast; gating on
-  // contrastTouched (not value !== 0) means a deliberately-chosen 0 still shows
-  // the affordance, and an untouched 0 (the default) hides it.
-  const isDirty = contrastTouched
 
   return (
     <div className="w-full space-y-3">
@@ -39,20 +29,9 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
         <Fieldset className="gap-2">
           <div className="flex justify-between">
             <FieldsetLegend className="text-sm">Contrast level</FieldsetLegend>
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={untouchContrast}
-                aria-label="Reset contrast"
-                className={isDirty ? '' : 'opacity-0 pointer-events-none'}
-              >
-                <RotateCcwIcon />
-              </Button>
-              <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
-                {contrastLevel.toFixed(2)}
-              </span>
-            </div>
+            <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
+              {contrastLevel.toFixed(2)}
+            </span>
           </div>
           <SliderRoot
             thumbAlignment="edge-client-only"

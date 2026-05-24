@@ -942,34 +942,6 @@ describe('seedTouched signal', () => {
     useSource.getState().actions.setShadcnPreset('grove')
     expect(useSource.getState().seedTouched).toBe(false)
   })
-
-  // why: ADR-0031 #6 — the reset-then-adopt path. untouchSeed returns the seed
-  // to its boot default AND clears the recorded signal, so a user who owns a
-  // color can opt back into a preset's curated seed.
-  it('untouchSeed returns the seed to default and clears the signal', () => {
-    useSource.getState().actions.setSeedHex('#123456')
-    useSource.getState().actions.untouchSeed()
-    expect(useSource.getState().seed).toEqual(DEFAULT_INPUTS.seed)
-    expect(useSource.getState().seedTouched).toBe(false)
-  })
-
-  // why: issue #111 AC — resetting one source field must not disturb the other.
-  it('untouchSeed leaves contrast untouched', () => {
-    useSource.getState().actions.setSeedHex('#123456')
-    useSource.getState().actions.setContrastLevel(0.5)
-    useSource.getState().actions.untouchSeed()
-    expect(useSource.getState().contrastLevel).toBe(0.5)
-    expect(useSource.getState().contrastTouched).toBe(true)
-  })
-
-  // why: the whole point of the un-touch — the next preset apply supplies the
-  // curated seed even though the user had chosen their own first.
-  it('after untouchSeed, applying a preset supplies the curated seed', () => {
-    useSource.getState().actions.setSeedHex('#ff00aa')
-    useSource.getState().actions.untouchSeed()
-    useSource.getState().actions.setShadcnPreset('grove')
-    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.grove.seed)
-  })
 })
 
 // why: ADR-0031 #2/#3 — end-to-end seed supersession through the store action.
@@ -1046,34 +1018,6 @@ describe('contrastTouched signal', () => {
   it('applying a preset leaves the signal false', () => {
     useSource.getState().actions.setShadcnPreset('enterprise')
     expect(useSource.getState().contrastTouched).toBe(false)
-  })
-
-  // why: ADR-0031 #6 — the reset-then-adopt path for contrast. untouchContrast
-  // returns contrast to its boot default AND clears the recorded signal.
-  it('untouchContrast returns contrast to default and clears the signal', () => {
-    useSource.getState().actions.setContrastLevel(0.5)
-    useSource.getState().actions.untouchContrast()
-    expect(useSource.getState().contrastLevel).toBe(DEFAULT_INPUTS.contrastLevel)
-    expect(useSource.getState().contrastTouched).toBe(false)
-  })
-
-  // why: issue #111 AC — resetting one source field must not disturb the other.
-  it('untouchContrast leaves the seed untouched', () => {
-    useSource.getState().actions.setSeedHex('#123456')
-    const chosen = useSource.getState().seed
-    useSource.getState().actions.setContrastLevel(0.5)
-    useSource.getState().actions.untouchContrast()
-    expect(useSource.getState().seed).toEqual(chosen)
-    expect(useSource.getState().seedTouched).toBe(true)
-  })
-
-  // why: the whole point of the un-touch — the next preset apply supplies the
-  // curated contrast even though the user had set their own first.
-  it('after untouchContrast, applying a preset supplies the curated contrast', () => {
-    useSource.getState().actions.setContrastLevel(0.7)
-    useSource.getState().actions.untouchContrast()
-    useSource.getState().actions.setShadcnPreset('enterprise')
-    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
   })
 })
 

@@ -23,6 +23,7 @@ export {
 } from './theme/binding-presets'
 export { CONTRAST_PAIRS, type ContrastPair } from './theme/contrast'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
+export { type PresetAdoptChoices, resolvePresetApply } from './theme/preset-apply'
 export {
   type CustomColorEntry,
   DEFAULT_INPUTS,

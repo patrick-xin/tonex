@@ -1,6 +1,12 @@
 import type { PortableTheme } from './schema'
 import type { ShadcnPreset } from './shadcn-presets'
 
+// why: per-field overrides the preset-apply dialog collects from its switches.
+// A `true` adopts the preset's curated value even over a touched field; absent
+// or `false` leaves the keep-if-touched default in force. Keyed only by the
+// source fields a user can drift (seed, contrast) — recipe is never optional.
+export type PresetAdoptChoices = { seed?: boolean; contrast?: boolean }
+
 // why: ADR-0031 #2/#3 — the deep module of theme-preset apply. A pure function
 // of (current theme, target preset) → the patch to apply, isolated from the
 // store and UI so the per-field supersede/keep rule is exhaustively testable.
@@ -20,6 +26,7 @@ import type { ShadcnPreset } from './shadcn-presets'
 export function resolvePresetApply(
   theme: PortableTheme,
   preset: ShadcnPreset,
+  choices: PresetAdoptChoices = {},
 ): Partial<PortableTheme> {
   const patch: Partial<PortableTheme> = {
     variant: preset.variant,
@@ -35,18 +42,28 @@ export function resolvePresetApply(
   }
 
   // why: a locked seed means "do not move this" (CONTEXT: Lock), so lock keeps
-  // the user's seed regardless of the touched signal. Otherwise the curated
-  // seed supersedes only an untouched seed — a touched one is the user's own.
-  if (!theme.seedTouched && !theme.seedHexLock) {
-    patch.seed = { ...preset.seed }
+  // the user's seed regardless of the touched signal or any dialog choice.
+  // Otherwise the curated seed supersedes an untouched seed automatically, or a
+  // touched one when the dialog's "Use {preset}'s" switch opted in — in which
+  // case we also clear the signal so the adopted seed reads as curated, not a
+  // user choice, on the next switch (ADR-0031 #3, story 12).
+  if (!theme.seedHexLock) {
+    if (!theme.seedTouched) {
+      patch.seed = { ...preset.seed }
+    } else if (choices.seed) {
+      patch.seed = { ...preset.seed }
+      patch.seedTouched = false
+    }
   }
 
   // why: contrast resolves independently of the seed (ADR-0031 #3) — the whole
-  // point is per-field honoring, so a user who touched only contrast keeps it
-  // while the seed still supersedes, and the mirror. Contrast has no lock, so
-  // the touched signal is the sole gate.
+  // point is per-field honoring. Same two-tier rule, minus the lock: contrast
+  // has none, so the touched signal and the dialog choice are the only gates.
   if (!theme.contrastTouched) {
     patch.contrastLevel = preset.contrastLevel
+  } else if (choices.contrast) {
+    patch.contrastLevel = preset.contrastLevel
+    patch.contrastTouched = false
   }
 
   return patch
