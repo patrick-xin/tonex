@@ -11,6 +11,7 @@ import {
   SliderTrack,
   sliderStyles,
 } from '@/components/ui/slider'
+import { useActiveMode } from '@/features/theme-mode'
 
 // why: MCU's contrastLevel range is -1..1 per the spec docstring, but in the
 // 2025 and 2026 color specs every ContrastCurve has `low === normal`, so
@@ -18,9 +19,17 @@ import {
 // UI to 0..1 — there's no point exposing a control that does nothing. Base
 // UI Slider needs explicit min/max/step; without them it silently defaults
 // to 0..100.
+//
+// why: contrast is per-mode (#123) — the slider edits whichever mode is
+// active, mirroring surface-adjustment. Pre-mount mode is null; resolve to
+// light for display and disable the slider until next-themes lands so the
+// control's height stays stable across hydration.
 export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }) {
   const contrastLevel = useSource((s) => s.contrastLevel)
   const setContrastLevel = useSource((s) => s.actions.setContrastLevel)
+  const mode = useActiveMode()
+  const resolvedMode = mode ?? 'light'
+  const level = contrastLevel[resolvedMode]
   const { track, thumb, control, root, indicator } = sliderStyles({ size })
 
   return (
@@ -30,7 +39,7 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
           <div className="flex justify-between">
             <FieldsetLegend className="text-sm">Contrast level</FieldsetLegend>
             <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
-              {contrastLevel.toFixed(2)}
+              {level.toFixed(2)}
             </span>
           </div>
           <SliderRoot
@@ -39,8 +48,9 @@ export function ContrastLevelSlider({ size = 'sm' }: { size?: 'sm' | 'default' }
             min={0}
             max={1}
             step={0.05}
-            value={contrastLevel}
-            onValueChange={(v) => setContrastLevel(Number(v))}
+            disabled={mode === null}
+            value={level}
+            onValueChange={(v) => setContrastLevel(resolvedMode, Number(v))}
           >
             <SliderControl className={control()}>
               <SliderTrack className={track()}>

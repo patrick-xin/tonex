@@ -59,10 +59,13 @@ export function resolvePresetApply(
   // why: contrast resolves independently of the seed (ADR-0031 #3) — the whole
   // point is per-field honoring. Same two-tier rule, minus the lock: contrast
   // has none, so the touched signal and the dialog choice are the only gates.
+  // The preset's curated contrast is a single scalar (#123 Decision B); it
+  // supersedes BOTH modes at once — adopting a preset's contrast is one
+  // decision, matching contrastTouched staying a single boolean.
   if (!theme.contrastTouched) {
-    patch.contrastLevel = preset.contrastLevel
+    patch.contrastLevel = { light: preset.contrastLevel, dark: preset.contrastLevel }
   } else if (choices.contrast) {
-    patch.contrastLevel = preset.contrastLevel
+    patch.contrastLevel = { light: preset.contrastLevel, dark: preset.contrastLevel }
     patch.contrastTouched = false
   }
 

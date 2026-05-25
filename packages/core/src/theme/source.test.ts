@@ -60,7 +60,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
   variant: 'tonalSpot',
-  contrastLevel: 0.5,
+  contrastLevel: { light: 0.5, dark: 0.8 },
   seedHexLock: true,
   seedTouched: true,
   contrastTouched: true,
@@ -110,7 +110,9 @@ describe('useSource persistence round-trip', () => {
     const s = useSource.getState()
     s.actions.setSeedHex(selectSeedHex(NONDEFAULT_INPUTS))
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
-    s.actions.setContrastLevel(NONDEFAULT_INPUTS.contrastLevel)
+    for (const mode of ['light', 'dark'] as const) {
+      s.actions.setContrastLevel(mode, NONDEFAULT_INPUTS.contrastLevel[mode])
+    }
     // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
     // seed setter no-ops, so reordering would silently drop the seed write.
     s.actions.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
@@ -546,35 +548,38 @@ describe('useSource persistence round-trip', () => {
   // value that would mislead the export header or any third-party caller.
   // PortableThemeSchema enforces the same range so a stale persisted value
   // outside [0, 1] cannot rehydrate (rehydrate falls back to DEFAULT_INPUTS).
-  describe('setContrastLevel clamps to [0, 1]', () => {
+  describe('setContrastLevel clamps to [0, 1] per mode', () => {
     it('negative values clamp to 0', () => {
       const s = useSource.getState()
-      s.actions.setContrastLevel(-0.5)
-      expect(useSource.getState().contrastLevel).toBe(0)
-      s.actions.setContrastLevel(-1)
-      expect(useSource.getState().contrastLevel).toBe(0)
-      s.actions.setContrastLevel(-1000)
-      expect(useSource.getState().contrastLevel).toBe(0)
+      s.actions.setContrastLevel('light', -0.5)
+      expect(useSource.getState().contrastLevel.light).toBe(0)
+      s.actions.setContrastLevel('light', -1000)
+      expect(useSource.getState().contrastLevel.light).toBe(0)
     })
 
     it('values > 1 clamp to 1', () => {
       const s = useSource.getState()
-      s.actions.setContrastLevel(1.5)
-      expect(useSource.getState().contrastLevel).toBe(1)
-      s.actions.setContrastLevel(2)
-      expect(useSource.getState().contrastLevel).toBe(1)
-      s.actions.setContrastLevel(1000)
-      expect(useSource.getState().contrastLevel).toBe(1)
+      s.actions.setContrastLevel('dark', 1.5)
+      expect(useSource.getState().contrastLevel.dark).toBe(1)
+      s.actions.setContrastLevel('dark', 1000)
+      expect(useSource.getState().contrastLevel.dark).toBe(1)
     })
 
     it('values in [0, 1] pass through unchanged', () => {
       const s = useSource.getState()
-      s.actions.setContrastLevel(0)
-      expect(useSource.getState().contrastLevel).toBe(0)
-      s.actions.setContrastLevel(0.5)
-      expect(useSource.getState().contrastLevel).toBe(0.5)
-      s.actions.setContrastLevel(1)
-      expect(useSource.getState().contrastLevel).toBe(1)
+      s.actions.setContrastLevel('light', 0.5)
+      expect(useSource.getState().contrastLevel.light).toBe(0.5)
+      s.actions.setContrastLevel('dark', 1)
+      expect(useSource.getState().contrastLevel.dark).toBe(1)
+    })
+
+    // why: #123 — per-mode write touches only the addressed mode and arms the
+    // single shared touched signal (Decision B).
+    it('writes only the addressed mode and arms contrastTouched', () => {
+      const s = useSource.getState()
+      s.actions.setContrastLevel('dark', 0.7)
+      expect(useSource.getState().contrastLevel).toEqual({ light: 0, dark: 0.7 })
+      expect(useSource.getState().contrastTouched).toBe(true)
     })
   })
 
@@ -1005,12 +1010,12 @@ describe('contrastTouched signal', () => {
   })
 
   it('setContrastLevel flips the signal true', () => {
-    useSource.getState().actions.setContrastLevel(0.5)
+    useSource.getState().actions.setContrastLevel('light', 0.5)
     expect(useSource.getState().contrastTouched).toBe(true)
   })
 
   it('reset clears the signal', () => {
-    useSource.getState().actions.setContrastLevel(0.5)
+    useSource.getState().actions.setContrastLevel('light', 0.5)
     useSource.getState().actions.reset()
     expect(useSource.getState().contrastTouched).toBe(false)
   })
@@ -1034,29 +1039,35 @@ describe('setShadcnPreset contrast supersession', () => {
     useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
   })
 
-  it('replaces an untouched boot-default contrast with the preset curated contrast', () => {
+  // why: #123 — the preset's scalar contrast supersedes BOTH modes at once.
+  const expandedEnterprise = {
+    light: SHADCN_PRESETS.enterprise.contrastLevel,
+    dark: SHADCN_PRESETS.enterprise.contrastLevel,
+  }
+
+  it('replaces an untouched boot-default contrast with the preset curated contrast on both modes', () => {
     useSource.getState().actions.setShadcnPreset('enterprise')
-    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
+    expect(useSource.getState().contrastLevel).toEqual(expandedEnterprise)
   })
 
   it('keeps a user-chosen contrast and drops the curated one', () => {
-    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setContrastLevel('light', 0.7)
     useSource.getState().actions.setShadcnPreset('enterprise')
-    expect(useSource.getState().contrastLevel).toBe(0.7)
+    expect(useSource.getState().contrastLevel).toEqual({ light: 0.7, dark: 0 })
   })
 
   it('touched contrast only: curated seed adopted, user contrast kept', () => {
-    useSource.getState().actions.setContrastLevel(0.7)
+    useSource.getState().actions.setContrastLevel('light', 0.7)
     useSource.getState().actions.setShadcnPreset('enterprise')
     expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.enterprise.seed)
-    expect(useSource.getState().contrastLevel).toBe(0.7)
+    expect(useSource.getState().contrastLevel).toEqual({ light: 0.7, dark: 0 })
   })
 
-  it('touched seed only: curated contrast adopted, user seed kept', () => {
+  it('touched seed only: curated contrast adopted on both modes, user seed kept', () => {
     useSource.getState().actions.setSeedHex('#ff00aa')
     const chosen = useSource.getState().seed
     useSource.getState().actions.setShadcnPreset('enterprise')
     expect(useSource.getState().seed).toEqual(chosen)
-    expect(useSource.getState().contrastLevel).toBe(SHADCN_PRESETS.enterprise.contrastLevel)
+    expect(useSource.getState().contrastLevel).toEqual(expandedEnterprise)
   })
 })

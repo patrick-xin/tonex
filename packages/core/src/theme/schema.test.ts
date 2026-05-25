@@ -213,14 +213,25 @@ describe('parsePortableTheme', () => {
   // schema rejects so any path that bypasses the setter (rehydration of
   // a stale persisted blob, programmatic state injection) cannot land
   // an inert out-of-range value.
-  it('contrastLevel must be within [0, 1]', () => {
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 0 }).ok).toBe(true)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 }).ok).toBe(true)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 }).ok).toBe(true)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: -0.01 }).ok).toBe(false)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: -1 }).ok).toBe(false)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 1.01 }).ok).toBe(false)
-    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 2 }).ok).toBe(false)
+  // why: #123 — contrastLevel is per-mode `{ light, dark }`; each mode is
+  // bounded [0, 1] independently. A scalar (the pre-#123 shape) must now fail.
+  it('contrastLevel must be a per-mode pair with each mode within [0, 1]', () => {
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0, dark: 0 } }).ok).toBe(
+      true,
+    )
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 1 } }).ok,
+    ).toBe(true)
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: -0.01, dark: 0 } }).ok,
+    ).toBe(false)
+    expect(
+      parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0, dark: 1.01 } }).ok,
+    ).toBe(false)
+    // a bare scalar is the old shape — rejected
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 }).ok).toBe(false)
+    // a half-populated pair is rejected
+    expect(parsePortableTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5 } }).ok).toBe(false)
   })
 
   it('cmfSecondSourceHex accepts null OR a valid hex', () => {

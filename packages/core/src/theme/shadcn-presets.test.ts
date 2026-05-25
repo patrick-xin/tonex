@@ -45,7 +45,10 @@ function projectPreset(theme: PortableTheme): Omit<ShadcnPreset, 'description'> 
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
     seed: theme.seed,
-    contrastLevel: theme.contrastLevel,
+    // why: preset.contrastLevel is a single scalar (#123 Decision B); the
+    // theme's is per-mode. Projection collapses to light — the default boot
+    // theme has light === dark === 0, which matches the default preset's 0.
+    contrastLevel: theme.contrastLevel.light,
   }
 }
 
@@ -54,7 +57,14 @@ function themeWithPreset(name: PresetName): PortableTheme {
   if (!preset) {
     throw new Error(`Preset "${name}" not found in SHADCN_PRESETS`)
   }
-  return { ...DEFAULT_INPUTS, ...preset }
+  // why: expand the preset's scalar contrast to the theme's per-mode shape on
+  // both modes — adopting a preset applies its single curated value uniformly.
+  const { contrastLevel, ...recipe } = preset
+  return {
+    ...DEFAULT_INPUTS,
+    ...recipe,
+    contrastLevel: { light: contrastLevel, dark: contrastLevel },
+  }
 }
 
 describe('R1: SHADCN_PRESETS shape', () => {
@@ -205,7 +215,7 @@ describe('R6: findActivePreset ignores source inputs (seed, contrast)', () => {
     const withForeignSource: PortableTheme = {
       ...theme,
       seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
-      contrastLevel: 0.5,
+      contrastLevel: { light: 0.5, dark: 0.5 },
     }
     expect(findActivePreset(withForeignSource)).toBe(name)
   })

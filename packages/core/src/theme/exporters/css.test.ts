@@ -220,8 +220,8 @@ describe('exportCss with multi-contrast bundle', () => {
   // same html element — no `:root` selector for tiers because the tier class
   // can land on any container, not just html root.
   const defaultTheme = deriveTheme(DEFAULT_INPUTS)
-  const mediumTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
-  const highTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 })
+  const mediumTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } })
+  const highTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 1, dark: 1 } })
   const bundle = { default: defaultTheme, medium: mediumTheme, high: highTheme }
 
   it('md emits exactly 6 rule blocks (2 per tier × 3 tiers)', () => {
@@ -328,8 +328,8 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
     it('multi-contrast + includePalette: palette value declares once across the file', () => {
       const multi = {
         default: theme,
-        medium: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 }),
-        high: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 }),
+        medium: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } }),
+        high: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 1, dark: 1 } }),
       }
       const out = exportCss(multi, 'md', { includePalette: true })
       // why: count VALUE declarations only (`: oklch(` / `: #`), excluding the
@@ -384,8 +384,8 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       // extended coverage).
       const multi = {
         default: theme,
-        medium: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 }),
-        high: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 }),
+        medium: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } }),
+        high: deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 1, dark: 1 } }),
       }
       const out = exportCss(multi, 'md', { includeExtended: true })
       const medium = parseBlock(out, '.contrast-medium')

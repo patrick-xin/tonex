@@ -122,8 +122,8 @@ describe('exportDart — contrast tiers (slice dart-2)', () => {
   const source = DEFAULT_INPUTS
   const bundle: ContrastBundle = {
     default: deriveTheme(source),
-    medium: deriveTheme({ ...source, contrastLevel: 0.5 }),
-    high: deriveTheme({ ...source, contrastLevel: 1 }),
+    medium: deriveTheme({ ...source, contrastLevel: { light: 0.5, dark: 0.5 } }),
+    high: deriveTheme({ ...source, contrastLevel: { light: 1, dark: 1 } }),
   }
   const out = exportDart(bundle)
 

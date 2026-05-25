@@ -121,8 +121,8 @@ describe('exportNativeCss — custom colors stay un-prefixed', () => {
 
 describe('exportNativeCss — multi-contrast bundle', () => {
   const defaultTheme = deriveTheme(DEFAULT_INPUTS)
-  const mediumTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
-  const highTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 })
+  const mediumTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } })
+  const highTheme = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 1, dark: 1 } })
   const bundle = { default: defaultTheme, medium: mediumTheme, high: highTheme }
   const out = exportNativeCss(bundle)
 

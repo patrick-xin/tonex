@@ -34,7 +34,10 @@ describe('presetSwatches with a resolved source override', () => {
     const curated = presetSwatches('grove').light.primary
     const overridden = presetSwatches('grove', {
       seed: SHADCN_PRESETS.default.seed,
-      contrastLevel: SHADCN_PRESETS.default.contrastLevel,
+      contrastLevel: {
+        light: SHADCN_PRESETS.default.contrastLevel,
+        dark: SHADCN_PRESETS.default.contrastLevel,
+      },
     }).light.primary
     expect(overridden).not.toBe(curated)
   })
@@ -43,7 +46,10 @@ describe('presetSwatches with a resolved source override', () => {
     const curated = presetSwatches('grove')
     const explicit = presetSwatches('grove', {
       seed: SHADCN_PRESETS.grove.seed,
-      contrastLevel: SHADCN_PRESETS.grove.contrastLevel,
+      contrastLevel: {
+        light: SHADCN_PRESETS.grove.contrastLevel,
+        dark: SHADCN_PRESETS.grove.contrastLevel,
+      },
     })
     expect(explicit.light.primary).toBe(curated.light.primary)
     expect(explicit.dark.bg).toBe(curated.dark.bg)
@@ -52,7 +58,10 @@ describe('presetSwatches with a resolved source override', () => {
   it('returns valid hex for every role under an override source', () => {
     const s = presetSwatches('grove', {
       seed: SHADCN_PRESETS.default.seed,
-      contrastLevel: SHADCN_PRESETS.default.contrastLevel,
+      contrastLevel: {
+        light: SHADCN_PRESETS.default.contrastLevel,
+        dark: SHADCN_PRESETS.default.contrastLevel,
+      },
     })
     for (const mode of ['light', 'dark'] as const) {
       for (const role of ROLES) {

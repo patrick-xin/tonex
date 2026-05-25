@@ -430,7 +430,7 @@ describe('applyDom (jsdom integration)', () => {
       },
       {
         name: 'contrast level high',
-        source: { ...DEFAULT_INPUTS, contrastLevel: 0.5 },
+        source: { ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } },
       },
       {
         // why: seedHexLock is a source-input gate, not a derived-side flag —

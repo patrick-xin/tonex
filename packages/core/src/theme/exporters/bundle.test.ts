@@ -45,11 +45,14 @@ describe('buildContrastBundle', () => {
     // why: ADR-0021 commitment 5 edge case — user's preview contrast must
     // pass through unchanged on the default tier; medium/high are
     // accessibility additions at canonical 0.5 / 1.0, not overrides.
-    const customSource = { ...DEFAULT_INPUTS, contrastLevel: -0.5 }
+    const customSource = { ...DEFAULT_INPUTS, contrastLevel: { light: -0.5, dark: -0.5 } }
     const bundle = buildContrastBundle(customSource, { includeContrastVariants: true })
     const expectedDefault = deriveTheme(customSource)
-    const expectedMedium = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
-    const expectedHigh = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 1 })
+    const expectedMedium = deriveTheme({
+      ...DEFAULT_INPUTS,
+      contrastLevel: { light: 0.5, dark: 0.5 },
+    })
+    const expectedHigh = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 1, dark: 1 } })
     expect(bundle.default.md.light['--color-primary']).toBe(
       expectedDefault.md.light['--color-primary'],
     )
