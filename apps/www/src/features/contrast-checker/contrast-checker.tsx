@@ -25,8 +25,10 @@ import { checkContrastDialogHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { applyLevel } from './apply-level'
+import { ContrastInfo } from './contrast-info'
 import { ContrastTable } from './contrast-table'
 import { isDecorative } from './decorative'
+import { RESULT } from './result'
 import { summarizeContrast } from './summary'
 import type { Filter, Level, ResultFilter } from './types'
 
@@ -73,33 +75,31 @@ function Body({ theme, mode, layer }: BodyProps) {
     .map((r) => applyLevel(r, level))
   const decorative = all.filter((p) => isDecorative(p.pair))
   const functional = all.filter((p) => !isDecorative(p.pair))
-  // why: 'fail' is the default result filter (the table reads as a triage
-  // list), but it's a dead end when nothing fails — disable it and fall the
-  // active view back to 'all' so the table never renders empty. Keyed on
-  // effectivePasses so it tracks the selected level.
-  const hasFailures = functional.some((p) => !p.effectivePasses)
-  const effectiveResultFilter: ResultFilter =
-    resultFilter === 'fail' && !hasFailures ? 'all' : resultFilter
   // why: opening on "All" with a tally reframes the audit from a wall of
-  // failures to the whole picture (mostly fine). exempt counts the decorative
-  // pairs surfaced in this view; text/UI fails are split because they carry
-  // different severity. The summary string omits zero categories but always
-  // shows pass so the headline reads as reassurance first.
+  // failures to the whole picture (mostly fine). The tally + legend copy lives
+  // in ContrastInfo; Body just supplies the counts.
   const summary = summarizeContrast(functional, decorative.length)
-  const summaryParts = [`${summary.pass} pass`]
-  if (summary.textFail > 0)
-    summaryParts.push(`${summary.textFail} text ${summary.textFail === 1 ? 'fail' : 'fails'}`)
-  if (summary.uiFail > 0)
-    summaryParts.push(`${summary.uiFail} UI ${summary.uiFail === 1 ? 'fail' : 'fails'}`)
-  if (summary.exempt > 0) summaryParts.push(`${summary.exempt} exempt`)
+  // why: a result filter is a dead end when its outcome has no members (e.g.
+  // "Faint" with no failing UI pairs) — the toggle item disables and, if it was
+  // the active view, falls back to 'all' so the table never renders empty.
+  // Derived from the same summary tally the headline shows; tracks the level.
+  const resultAvailable: Record<ResultFilter, boolean> = {
+    all: true,
+    pass: summary.pass > 0,
+    fail: summary.textFail > 0,
+    warn: summary.uiFail > 0,
+  }
+  const effectiveResultFilter: ResultFilter = resultAvailable[resultFilter] ? resultFilter : 'all'
 
   return (
     <>
-      <DialogHeader className="flex-none gap-4">
+      <DialogHeader className="flex-none gap-4 sm:gap-6">
         <div className="flex flex-row justify-between items-start gap-4">
           <div className="space-y-2">
             <DialogTitle>Contrast audit</DialogTitle>
-            <DialogDescription>WCAG check for the current theme.</DialogDescription>
+            <div className="space-y-2">
+              <DialogDescription>WCAG check for the current theme.</DialogDescription>
+            </div>
           </div>
           <DialogClose
             render={
@@ -109,78 +109,52 @@ function Body({ theme, mode, layer }: BodyProps) {
             }
           />
         </div>
-        <div className="space-y-2 text-xs text-on-surface-variant">
-          <p className="font-medium text-on-surface">{summaryParts.join(' · ')}</p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-green-600 dark:bg-green-400" />
-              <span className="font-medium text-on-surface">Pass</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-red-600 dark:bg-red-400" />
-              <span>
-                <span className="font-medium text-on-surface">Text fail</span> — under 4.5:1, fix
-                before shipping
-              </span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-amber-600 dark:bg-amber-400" />
-              <span>
-                <span className="font-medium text-on-surface">UI fail</span> — a border/ring under
-                3:1, judgment call
-              </span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-surface-container ring ring-outline-variant/60" />
-              <span>
-                <span className="font-medium text-on-surface">Exempt</span> — decorative, WCAG
-                doesn't require it
-              </span>
-            </span>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <ContrastInfo hasDecorative={decorative.length > 0} />
+          <div className="flex gap-x-4 gap-y-2 flex-wrap">
+            <ToggleGroup
+              value={[effectiveResultFilter]}
+              onValueChange={(v) => {
+                if (v.length > 0) setResultFilter(v[v.length - 1] as ResultFilter)
+              }}
+              size="xs"
+              variant="outline"
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              <ToggleGroupItem value="pass" disabled={summary.pass === 0}>
+                {RESULT.pass.label}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="fail" disabled={summary.textFail === 0}>
+                {RESULT.fail.label}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="warn" disabled={summary.uiFail === 0}>
+                {RESULT.warn.label}
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <ToggleGroup
+              value={[filter]}
+              onValueChange={(v) => {
+                if (v.length > 0) setFilter(v[v.length - 1] as Filter)
+              }}
+              size="xs"
+              variant="outline"
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              <ToggleGroupItem value="text">Text</ToggleGroupItem>
+              <ToggleGroupItem value="ui">UI</ToggleGroupItem>
+            </ToggleGroup>
+            <ToggleGroup
+              value={[level]}
+              onValueChange={(v) => {
+                if (v.length > 0) setLevel(v[v.length - 1] as Level)
+              }}
+              size="xs"
+              variant="outline"
+            >
+              <ToggleGroupItem value="aa">AA</ToggleGroupItem>
+              <ToggleGroupItem value="aaa">AAA</ToggleGroupItem>
+            </ToggleGroup>
           </div>
-          <p>
-            This is an audit, not a blocker — fix red (text) fails before shipping; amber (UI) fails
-            are case-by-case. Press H → Q&A for how to fix them.
-          </p>
-        </div>
-        <div className="flex items-center justify-end gap-4">
-          <ToggleGroup
-            value={[effectiveResultFilter]}
-            onValueChange={(v) => {
-              if (v.length > 0) setResultFilter(v[v.length - 1] as ResultFilter)
-            }}
-            size="xs"
-            variant="outline"
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            <ToggleGroupItem value="passed">Passed</ToggleGroupItem>
-            <ToggleGroupItem value="fail" disabled={!hasFailures}>
-              Fail
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <ToggleGroup
-            value={[filter]}
-            onValueChange={(v) => {
-              if (v.length > 0) setFilter(v[v.length - 1] as Filter)
-            }}
-            size="xs"
-            variant="outline"
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            <ToggleGroupItem value="text">Text</ToggleGroupItem>
-            <ToggleGroupItem value="ui">UI</ToggleGroupItem>
-          </ToggleGroup>
-          <ToggleGroup
-            value={[level]}
-            onValueChange={(v) => {
-              if (v.length > 0) setLevel(v[v.length - 1] as Level)
-            }}
-            size="xs"
-            variant="outline"
-          >
-            <ToggleGroupItem value="aa">AA</ToggleGroupItem>
-            <ToggleGroupItem value="aaa">AAA</ToggleGroupItem>
-          </ToggleGroup>
         </div>
       </DialogHeader>
       <ScrollArea className="flex-1 min-h-0" gradientScrollFade noScrollBar>
@@ -216,8 +190,16 @@ export function ContrastChecker({ layer }: { layer: Layer }) {
     <Dialog handle={checkContrastDialogHandle}>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogViewport className={styles.viewport({ className: 'pt-20 pb-12 sm:pt-16 sm:pb-8' })}>
-          <DialogPopup className={styles.popup({ class: 'w-[min(60rem,calc(100vw-2rem))]' })}>
+        <DialogViewport
+          className={styles.viewport({
+            className: 'pt-20 pb-12 sm:pt-16 sm:pb-8',
+          })}
+        >
+          <DialogPopup
+            className={styles.popup({
+              class: 'w-[min(60rem,calc(100vw-2rem))]',
+            })}
+          >
             {theme !== null && mode !== null ? (
               <Body theme={theme} mode={mode} layer={layer} />
             ) : null}

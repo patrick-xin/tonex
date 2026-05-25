@@ -74,6 +74,29 @@ describe('familyOf', () => {
     expect(familyOf(pair)).toBe('Card')
   })
 
+  it('groups shadcn --destructive pairs by role, not bg surface', () => {
+    // why: --destructive is the one role checked as both text (4.5) and
+    // non-text (3) against neutral surfaces. Classifying by bg would scatter
+    // its four pairs across Surface and Card; the role grouping keeps them in
+    // one Destructive family so the dual-threshold bundle reads coherently.
+    const textOnBackground: ContrastPair = {
+      fg: '--destructive',
+      bg: '--background',
+      layer: 'shadcn',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    const nonTextOnCard: ContrastPair = {
+      fg: '--destructive',
+      bg: '--card',
+      layer: 'shadcn',
+      intent: 'non-text',
+      threshold: 3,
+    }
+    expect(familyOf(textOnBackground)).toBe('Destructive')
+    expect(familyOf(nonTextOnCard)).toBe('Destructive')
+  })
+
   it('returns "Custom" for md-custom pairs regardless of slug', () => {
     const pair: ContrastPair = {
       fg: '--color-on-brand',

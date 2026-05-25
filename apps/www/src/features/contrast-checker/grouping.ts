@@ -5,7 +5,9 @@ import type { Layer } from '@/lib/layer-context'
 // why: shadcn pairs group by pair.bg (the surface family signal). Order
 // matters — `--sidebar*` must claim its members before the non-prefixed
 // sidebar siblings (e.g. `--sidebar-primary`) would catch on `primary`.
-// Same trick as shadcn-role-override/role-groups.ts.
+// Same trick as shadcn-role-override/role-groups.ts. `--destructive` is
+// absent here on purpose — it's never a background, so it's classified by
+// role (fg) in familyOf, not by this bg table.
 const SHADCN_FAMILY: ReadonlyArray<readonly [RegExp, string]> = [
   [/^--sidebar/, 'Sidebar'],
   [/^--background$|^--foreground$/, 'Surface'],
@@ -15,7 +17,6 @@ const SHADCN_FAMILY: ReadonlyArray<readonly [RegExp, string]> = [
   [/^--secondary/, 'Secondary'],
   [/^--muted/, 'Muted'],
   [/^--accent/, 'Accent'],
-  [/^--destructive/, 'Destructive'],
 ]
 
 // why: chart fg's (`--color-chart-N`, `--chart-N`) read against surface
@@ -29,6 +30,13 @@ export function familyOf(pair: ContrastPair): string {
   if (pair.layer === 'md-chart' || pair.layer === 'shadcn-chart') return 'Chart'
   if (pair.layer === 'md-custom' || pair.layer === 'shadcn-custom') return 'Custom'
   if (pair.layer === 'shadcn') {
+    // why: --destructive is the one role evaluated as both text (4.5) and
+    // non-text (3) against neutral surfaces, so its four pairs would otherwise
+    // scatter into Surface (bg=--background) and Card (bg=--card) — where the
+    // dual-threshold bundle reads as a contradictory pass/fail beside single-
+    // verdict rows. Classify it by role (fg) so all destructive pairs cohere
+    // in their own Destructive family chip.
+    if (pair.fg === '--destructive') return 'Destructive'
     for (const [re, label] of SHADCN_FAMILY) if (re.test(pair.bg)) return label
     return 'Other'
   }
