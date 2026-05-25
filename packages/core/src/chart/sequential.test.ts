@@ -151,14 +151,18 @@ describe('buildMdChartSequentialSamples — tone walk shape', () => {
 })
 
 describe('buildMdChartSequentialSamples — degenerate-partner safe edge', () => {
-  // KNOWN LIMITATION (it.fails — passes while the bug exists, flips to red
-  // when fixed): when no tone clears 3:1 against the partner, findMaxSafeL
-  // returns 0 even though tone 0 does not pass — so the emitted dark-end
-  // token violates the 3:1 floor the function documents (observed ~1.4:1).
-  // Unreachable via the production light path (surfaces sit at tone ~94–98),
-  // but buildSequentialReport (the chart-lab dev route) passes arbitrary
-  // partners. Asserting the *contract*; disposition (clamp/throw vs document
-  // as lab-only) is tracked in #131 — flip it.fails → it when that lands.
+  // ACCEPTED LAB-ONLY LIMITATION (#131, resolved as document-only — this
+  // it.fails marker is permanent, not a TODO): when no tone clears 3:1
+  // against the partner, findMaxSafeL returns 0 even though tone 0 does not
+  // pass — so the emitted dark-end token violates the 3:1 floor the function
+  // documents (observed ~1.4:1). Unreachable via the production light path
+  // (deriveTheme partners sit at tone ~94–98, so passes(0) is always true);
+  // only buildSequentialReport (the chart-lab dev route) can feed a partner
+  // dark enough to trip it. #131 weighed throw / best-effort-flag / document
+  // and chose document: production can't reach it, so we keep this probe red
+  // as the standing record of the contract rather than hardening a branch no
+  // user path exercises. If a future slice routes arbitrary partners into a
+  // production path, reopen the disposition then.
   it.fails('should meet the 3:1 floor when partners are mid-dark', () => {
     const palette = TonalPalette.fromHueAndChroma(280, 48)
     const n = MD_CHART_TOKEN_NAMES.length
