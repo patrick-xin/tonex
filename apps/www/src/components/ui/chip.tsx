@@ -36,6 +36,7 @@ const chipStyles = tv({
       ],
     },
     size: {
+      xs: ['gap-0.5 px-1 py-px text-xs rounded-sm'],
       sm: ['gap-0.5 px-1.5 py-0.5 text-xs'],
       default: ['gap-1 px-2 py-1 text-sm'],
       lg: ['gap-1 px-2.5 py-1 text-[15px]'],
@@ -49,13 +50,13 @@ const chipStyles = tv({
 
 interface ChipProps extends useRender.ComponentProps<'button'>, VariantProps<typeof chipStyles> {}
 
-const Chip = ({ className, variant = 'filled', render, ...props }: ChipProps) => {
+const Chip = ({ className, variant = 'filled', size, render, ...props }: ChipProps) => {
   const element = useRender({
     defaultTagName: 'button',
     render,
     props: mergeProps<'button'>(
       {
-        className: cn(chipStyles({ variant }), className),
+        className: cn(chipStyles({ variant, size }), className),
       },
       props,
     ),

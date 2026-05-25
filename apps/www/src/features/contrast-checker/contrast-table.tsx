@@ -9,7 +9,9 @@ import {
   TableRow,
 } from '@/components/ui/tables'
 import type { Layer } from '@/lib/layer-context'
+import { type DualIntentBundle, type DualIntentTier, dualIntent } from './dual-intent'
 import { familyOf, familyOrder } from './grouping'
+import { RESULT, type Result, resultOf, tierResult } from './result'
 import type { EvaluatedPair, Filter, ResultFilter } from './types'
 
 const COL_COUNT = 6
@@ -99,31 +101,55 @@ function TokenCell({ name, hex }: { name: string; hex: string }) {
   )
 }
 
-function StatusBadge({
-  passes,
-  isText = false,
-  decorative = false,
-}: {
-  passes?: boolean
-  isText?: boolean
-  decorative?: boolean
-}) {
-  if (decorative) {
-    return (
-      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
-        Exempt
-      </span>
-    )
-  }
-  const cls = passes
-    ? 'text-green-600 dark:text-green-400 bg-green-600/10 dark:bg-green-400/10'
-    : isText
-      ? 'text-red-600 dark:text-red-400 bg-red-600/10 dark:bg-red-400/10'
-      : 'text-amber-600 dark:text-amber-400 bg-amber-600/10 dark:bg-amber-400/10'
+// why: the one badge renderer for the whole table — colour AND label both come
+// from RESULT[result], so a status pill can't drift from the legend chips.
+// `label` overrides the canonical word for the single case that keeps bespoke
+// wording: the destructive 'fills-only' tier stays "Fills only" (see TIER_LABEL).
+function ResultBadge({ result, label }: { result: Result; label?: string }) {
+  const meta = RESULT[result]
   return (
-    <span className={cx('text-[11px] font-semibold px-2 py-0.5 rounded-full', cls)}>
-      {passes ? 'Pass' : 'Fail'}
+    <span className={cx('text-[11px] font-semibold px-2 py-0.5 rounded-full', meta.badgeClass)}>
+      {label ?? meta.label}
     </span>
+  )
+}
+
+// why: destructive tiers borrow shared result colours via tierResult, but the
+// amber 'fills-only' band keeps its more specific wording — "Fills only" reads
+// truer than "Faint" for a token that's fine as an icon/border/fill. pass/fail
+// fall through to the canonical RESULT label (undefined = no override).
+const TIER_LABEL: Record<DualIntentTier, string | undefined> = {
+  pass: undefined,
+  'fills-only': 'Fills only',
+  fail: undefined,
+}
+
+// why: a --destructive swatch is checked at both thresholds (text 4.5/7 + fill
+// 3/4.5), but two rows read as redundant Pass/Pass. This collapses the pair
+// into one row: Type "Text/UI", both targets shown as `text / fill`, and a
+// single tiered verdict. ratio is shared across the bundle, so either pair
+// supplies the swatches and number.
+function DualIntentRow({ bundle }: { bundle: DualIntentBundle }) {
+  const { text, nonText, tier } = bundle
+  return (
+    <TableRow className="border-outline-variant/40">
+      <TableCell className="w-64 align-middle">
+        <TokenCell name={text.pair.fg} hex={text.fgHex} />
+      </TableCell>
+      <TableCell className="w-52 align-middle">
+        <TokenCell name={text.pair.bg} hex={text.bgHex} />
+      </TableCell>
+      <TableCell className="text-xs text-on-surface-variant pl-3 w-20">Text/UI</TableCell>
+      <TableCell className="text-right font-mono text-sm tabular-nums pl-3">
+        {text.ratio.toFixed(2)}
+      </TableCell>
+      <TableCell className="text-right font-mono text-sm tabular-nums text-on-surface-variant">
+        {text.effectiveThreshold} / {nonText.effectiveThreshold}
+      </TableCell>
+      <TableCell className="text-right">
+        <ResultBadge result={tierResult(tier)} label={TIER_LABEL[tier]} />
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -173,15 +199,11 @@ function PairRow({
           {pair.ratio.toFixed(2)}
         </TableCell>
       )}
-      <TableCell className="text-right font-mono text-sm tabular-nums text-on-surface-variant">
+      <TableCell className="text-right font-mono text-sm tabular-nums">
         {decorative ? '—' : pair.effectiveThreshold}
       </TableCell>
       <TableCell className="text-right">
-        {decorative ? (
-          <StatusBadge decorative />
-        ) : (
-          <StatusBadge passes={pair.effectivePasses} isText={isText} />
-        )}
+        <ResultBadge result={decorative ? 'none' : resultOf(pair)} />
       </TableCell>
     </TableRow>
   )
@@ -196,7 +218,7 @@ function GroupHeaderRow({ family, note }: { family: string; note?: string }) {
       >
         <span className="text-on-surface">{family}</span>
         {note && (
-          <span className="ml-2 font-normal normal-case text-on-surface-variant/70">{note}</span>
+          <span className="ml-2 font-normal normal-case text-on-surface-variant">{note}</span>
         )}
       </TableCell>
     </TableRow>
@@ -215,10 +237,10 @@ export function ContrastTable({
     const isText = p.pair.intent === 'text'
     return filter === 'text' ? isText : !isText
   }
-  const resultMatches = (p: EvaluatedPair) => {
-    if (resultFilter === 'all') return true
-    return resultFilter === 'fail' ? !p.effectivePasses : p.effectivePasses
-  }
+  // why: match on the same resultOf the badge renders, so a filtered view can
+  // never disagree with the pill it leaves on screen. 'none' (decorative) is
+  // not a ResultFilter value — decorative is handled separately below.
+  const resultMatches = (p: EvaluatedPair) => resultFilter === 'all' || resultOf(p) === resultFilter
 
   const visibleFunctional = functional.filter((p) => typeMatches(p) && resultMatches(p))
   // why: decorative pairs are WCAG-exempt — they have no pass/fail state, so
@@ -234,7 +256,7 @@ export function ContrastTable({
   const decorativeBundles = bundle(visibleDecorative)
 
   return (
-    <Table containerClassName="overflow-x-clip">
+    <Table containerClassName="overflow-x-clip -mx-1.5">
       <TableHeader className="sticky top-0 z-10 bg-surface">
         <TableRow className="hover:bg-surface border-outline-variant/60">
           <TableHead>Foreground</TableHead>
@@ -249,16 +271,23 @@ export function ContrastTable({
         {orderedFamilies.map(([family, familyBundles]) => (
           <Fragment key={family}>
             <GroupHeaderRow family={family} />
-            {familyBundles.map((b) =>
-              b.map((p, idx) => (
+            {familyBundles.map((b) => {
+              // why: a bundle carrying both a text and non-text criterion (only
+              // --destructive does) collapses to one tiered row; everything else
+              // renders per-criterion. A Text/UI filter splits the bundle, so
+              // dualIntent returns null and the surviving row renders normally.
+              const dual = dualIntent(b)
+              if (dual)
+                return <DualIntentRow key={`${b[0].pair.fg}-${b[0].pair.bg}`} bundle={dual} />
+              return b.map((p, idx) => (
                 <PairRow
                   key={`${p.pair.fg}-${p.pair.bg}-${p.pair.intent}`}
                   pair={p}
                   bundleSize={b.length}
                   bundleIndex={idx}
                 />
-              )),
-            )}
+              ))
+            })}
           </Fragment>
         ))}
         {decorativeBundles.length > 0 && (
