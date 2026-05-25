@@ -28,7 +28,7 @@ The live theme pipeline. Most www code imports from here.
 
 **Derive / sinks**:
 - `deriveTheme(source)` — pure function, source → `DerivedTheme`. Single colour-logic site (ADR-0017).
-- `applyDom(layer)` — DOM sink; writes CSS vars on `documentElement`. No colour logic here.
+- `applyDom()` — DOM sink; no args. Reads the singleton source store (`useSource.getState()`) and re-renders on `useSource.subscribe(...)`; returns an unsubscribe. Writes a single shared `<style id="tonex-tokens">` in `document.head` with four fixed class-scoped rules (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`) — not `:root`. SSR-safe (no-op when `window` is undefined); only writes once `_hydrated` (ADR-0015). No colour logic here.
 - `exportCss(theme, opts)` — CSS string export. Siblings `exportDart`, `exportJson`, `exportNativeCss` emit the same bundle in their formats (the export dialog's format tabs).
 - `formatCss`, `formatLayer` — formatting helpers.
 - `buildContrastBundle(input)` — paired light/dark contrast bundle.
