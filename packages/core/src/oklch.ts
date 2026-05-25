@@ -9,6 +9,7 @@
 // internal seam uses so projection drift across consumers is impossible.
 export {
   argbComponents,
+  argbFromHex,
   hexFromOklch,
   hexString,
   oklchString,

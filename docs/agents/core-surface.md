@@ -86,6 +86,7 @@ Pure types, frozen tuples, validators. Free to import widely; cheap.
 Boundary helpers for the argb-canonical `TokenMap` (ADR-0021). Project at the read site rather than storing a projected value.
 
 - `hexString(argb)` — argb → `'#rrggbb'`. Default for swatches and CSS-var output.
+- `argbFromHex(hex)` — hex → argb. Inverse of `hexString`; the hex→argb boundary primitive for read-sites that take a hex literal (swatch luminance, palette previews). Routes through the ADR-0025 firewall so www never imports `@tonex/mcu` directly.
 - `oklchString(argb)` — argb → `'oklch(...)'` CSS string.
 - `hexFromOklch({ l, c, h })` — hex from an oklch triple (oklch-input controls).
 - `argbComponents(argb)` — `{ r, g, b, a }` 0–255.
