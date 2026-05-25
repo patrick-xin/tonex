@@ -63,11 +63,17 @@ export type TeamMember = {
 }
 
 export function TeamManagement() {
-  const menuHandle = createDropdownMenuHandle<TeamMember>()
-  const editMemberDialogHandle = createDialogHandle<TeamMember>()
-  const removeMemberDialogHandle = createDialogHandle<TeamMember>()
-  const confirmDeleteDialogHandle = createAlertDialogHandle<TeamMember>()
-  const closeConfirmDialogHandle = createAlertDialogHandle()
+  // why: Base UI's `useStore` adopts `handle.store` on every render (it's
+  // `externalStore ?? internalStore`, never pinned). Creating handles inline
+  // would hand the Root a fresh, empty store each render — `open` survives via
+  // the controlled prop, but the detached-trigger `payload` (the member) is lost
+  // on the re-render that opening triggers. Lazy `useState` keeps one stable
+  // handle per mount so payload persists.
+  const [menuHandle] = React.useState(() => createDropdownMenuHandle<TeamMember>())
+  const [editMemberDialogHandle] = React.useState(() => createDialogHandle<TeamMember>())
+  const [removeMemberDialogHandle] = React.useState(() => createDialogHandle<TeamMember>())
+  const [confirmDeleteDialogHandle] = React.useState(() => createAlertDialogHandle<TeamMember>())
+  const [closeConfirmDialogHandle] = React.useState(() => createAlertDialogHandle())
   const [members, setMembers] = React.useState<TeamMember[]>(INITIAL_TEAM_MEMBERS)
   const [selectedRole, setSelectedRole] = React.useState<TeamMember['role'] | null>(null)
   const [editingMember, setEditingMember] = React.useState<TeamMember | null>(null)

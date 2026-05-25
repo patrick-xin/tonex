@@ -96,7 +96,10 @@ export function ColorPalettes() {
 }
 
 function HorizontalView({ tones, palettes }: { tones: number[]; palettes: PaletteMap }) {
-  const tooltipHandle = createTooltipHandle<{ tone: number; hex: string }>()
+  // Stable per mount: Base UI's `useStore` adopts `handle.store` every render, so
+  // an inline handle would swap the store (and drop the hovered swatch payload)
+  // on any parent re-render. See team-management for the same fix.
+  const [tooltipHandle] = useState(() => createTooltipHandle<{ tone: number; hex: string }>())
   return (
     <div className="space-y-4 md:space-y-6 flex flex-col size-full">
       {FAMILY_ORDER.map((family) => (
@@ -146,7 +149,8 @@ function HorizontalView({ tones, palettes }: { tones: number[]; palettes: Palett
 }
 
 function VerticalView({ tones, palettes }: { tones: number[]; palettes: PaletteMap }) {
-  const tooltipHandle = createTooltipHandle<{ tone: number; hex: string }>()
+  // Stable per mount — see HorizontalView.
+  const [tooltipHandle] = useState(() => createTooltipHandle<{ tone: number; hex: string }>())
   return (
     <div className="space-y-2 flex flex-wrap justify-start sm:justify-center gap-2 size-full">
       {FAMILY_ORDER.map((family) => (
