@@ -1061,11 +1061,8 @@ describe('setShadcnPreset contrast supersession', () => {
     useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
   })
 
-  // why: #123 — the preset's scalar contrast supersedes BOTH modes at once.
-  const expandedEnterprise = {
-    light: SHADCN_PRESETS.enterprise.contrastLevel,
-    dark: SHADCN_PRESETS.enterprise.contrastLevel,
-  }
+  // why: #123 — the preset's per-mode contrast pair lands on both modes at once.
+  const expandedEnterprise = SHADCN_PRESETS.enterprise.contrastLevel
 
   it('replaces an untouched boot-default contrast with the preset curated contrast on both modes', () => {
     useSource.getState().actions.setShadcnPreset('enterprise')

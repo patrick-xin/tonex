@@ -367,7 +367,7 @@ export interface PortableTheme {
   // receives the curated seed, and the mirror. Contrast has no lock — the only
   // gate is the touched signal. Issue #110. Stays a single boolean even though
   // contrastLevel is now per-mode (#123 Decision B): touching either mode arms
-  // it, and an adopted preset's scalar supersedes both modes at once — the
+  // it, and an adopted preset's per-mode pair lands on both modes at once — the
   // preset dialog keeps one contrast row, matching the user's mental model of
   // contrast as one intent.
   contrastTouched: boolean

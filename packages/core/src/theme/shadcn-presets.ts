@@ -39,12 +39,15 @@ export interface ShadcnPreset {
   // — built via `seedOf(hex)` below. Provisional per-preset values land with
   // the machinery (issue #109); final curation is the promotion slice.
   seed: Seed
-  // why: curated contrast the preset was tuned against (ADR-0031 #2), sibling
-  // to seed. Range [0, 1] like PortableTheme.contrastLevel. Supersedes only an
-  // untouched contrast at apply, resolved independently of the seed.
-  // Provisional per-preset values land with the machinery (issue #110); final
-  // curation is the promotion slice.
-  contrastLevel: number
+  // why: curated per-mode contrast the preset was tuned against (ADR-0031 #2),
+  // sibling to seed. Mirrors PortableTheme.contrastLevel ({ light, dark }, each
+  // [0, 1]) so a preset can carry a distinct dark baseline (e.g. OLED). Adopting
+  // a preset's contrast is still one decision gated by the single contrastTouched
+  // (both modes land together — #123 Decision B's touched granularity stands);
+  // per-mode is only the curated value's shape, not the touched granularity.
+  // Supersedes an untouched contrast at apply, resolved independently of the
+  // seed. Final curation is the promotion slice.
+  contrastLevel: { light: number; dark: number }
 }
 
 // why: build a curated seed from a hex the same way DEFAULT_INPUTS does —
@@ -77,9 +80,9 @@ export const SHADCN_PRESETS = {
     // the boot-default projection (R5 pins this), so its curated seed is the
     // app default itself.
     seed: seedOf('#6750a4'),
-    // why: must equal DEFAULT_INPUTS.contrastLevel (0) — `default` is the boot
-    // projection (R5).
-    contrastLevel: 0,
+    // why: must equal DEFAULT_INPUTS.contrastLevel ({ light: 0, dark: 0 }) —
+    // `default` is the boot projection (R5).
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'zinc',
@@ -157,7 +160,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#3f3f46'),
     // why: provisional — stark leans into legibility, so a lifted contrast.
     // Final curation is the promotion slice.
-    contrastLevel: 0.3,
+    contrastLevel: { light: 0.3, dark: 0.3 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -229,7 +232,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#8fa8c8'),
     // why: provisional — soft keeps the baseline contrast. Final curation is
     // the promotion slice.
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'stone',
@@ -302,7 +305,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#c2683a'),
     // why: provisional — warm keeps the baseline contrast. Final curation is
     // the promotion slice.
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'taupe',
@@ -374,7 +377,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#d6409f'),
     // why: provisional — playful keeps the baseline contrast. Final curation is
     // the promotion slice.
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'expressive',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'mauve',
@@ -448,7 +451,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#52525b'),
     // why: provisional — a slight contrast lift suits the monochrome ramp.
     // Final curation is the promotion slice.
-    contrastLevel: 0.15,
+    contrastLevel: { light: 0.15, dark: 0.15 },
     variant: 'monochrome',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'zinc',
@@ -520,7 +523,7 @@ export const SHADCN_PRESETS = {
     seed: seedOf('#2563eb'),
     // why: provisional — tech keeps the baseline contrast. Final curation is
     // the promotion slice.
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',
@@ -600,7 +603,7 @@ export const SHADCN_PRESETS = {
     description:
       'Grounded jewel-green — trustworthy and organic, for natural or wellness-leaning products',
     seed: seedOf('#27B08B'),
-    contrastLevel: 0.25,
+    contrastLevel: { light: 0.25, dark: 0.25 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',
@@ -675,7 +678,7 @@ export const SHADCN_PRESETS = {
     description:
       'Deep blue-green, cool and composed — steady-reading dashboards, fintech, and data tools',
     seed: seedOf('#12A594'),
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',
@@ -749,7 +752,7 @@ export const SHADCN_PRESETS = {
   breeze: {
     description: 'Bright airy azure on clean neutral — fresh and modern, for SaaS and dev tools',
     seed: seedOf('#3B9EFF'),
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'zinc',
@@ -829,7 +832,7 @@ export const SHADCN_PRESETS = {
     description:
       'Dark-first drama — one electric accent on near-black surfaces, for dev tools, crypto, and media',
     seed: seedOf('#5B57D6'),
-    contrastLevel: 0.2,
+    contrastLevel: { light: 0.2, dark: 0.2 },
     variant: 'vibrant',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'neutral',
@@ -906,7 +909,7 @@ export const SHADCN_PRESETS = {
     description:
       'Warm editorial cream with quiet chrome that lets text lead — blogs, docs, longform reading',
     seed: seedOf('#a86b3c'),
-    contrastLevel: 0.1,
+    contrastLevel: { light: 0.1, dark: 0.1 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'stone',
@@ -982,7 +985,7 @@ export const SHADCN_PRESETS = {
     description:
       'Restrained navy on slate with visible borders — B2B SaaS, fintech, and admin consoles',
     seed: seedOf('#3a5a8c'),
-    contrastLevel: 0.15,
+    contrastLevel: { light: 0.15, dark: 0.15 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'slate',
@@ -1058,7 +1061,7 @@ export const SHADCN_PRESETS = {
     description:
       'Warm coral energy with a second hot accent — consumer, food, events, and lifestyle apps',
     seed: seedOf('#f4633a'),
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'taupe',
@@ -1134,7 +1137,7 @@ export const SHADCN_PRESETS = {
     description:
       'Muted sage held close in value — calm and focused, for wellness, journaling, and mindfulness',
     seed: seedOf('#7c8b6f'),
-    contrastLevel: 0,
+    contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
     surfacePaletteName: 'olive',
