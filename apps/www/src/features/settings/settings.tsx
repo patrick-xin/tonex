@@ -2,7 +2,7 @@
 
 import { GearSixIcon, TrashIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -14,20 +14,28 @@ import { ResetButton } from '@/features/reset-button'
 import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
+import { toggleSettingsPopover } from './toggle-popover'
 
 export function Settings({ layer }: { layer: Layer }) {
-  const [isOpen, setIsOpen] = useState(false)
-  useHotkey('S', () => setIsOpen((prev) => !prev))
+  // why: handle-driven (uncontrolled). The handle's singleton store is the
+  // single source of truth, so the command menu, the `S` hotkey and ResetButton
+  // all act through it. Binding a controlled `open` prop here would tie that
+  // shared store to per-mount React state, which thrashes when NavTabs remounts
+  // on route changes — the "unstable / sometimes can't open" bug.
+  useHotkey('S', () => toggleSettingsPopover(settingsPopoverHandle))
+  // Leave the shared store closed when this instance unmounts (route change), so
+  // the next mount never inherits a stale open state anchored to a gone trigger.
+  useEffect(() => () => settingsPopoverHandle.close(), [])
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
 
   return (
-    <Popover handle={settingsPopoverHandle} open={isOpen} onOpenChange={setIsOpen}>
+    <Popover handle={settingsPopoverHandle}>
       <Tooltip>
         <TooltipTrigger
-          id="settings"
           render={
             <PopoverTrigger
+              id="settings"
               render={<Button variant="secondary" size="icon-sm" aria-label="Settings" />}
             >
               <GearSixIcon />

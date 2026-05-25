@@ -13,4 +13,3 @@ export const checkContrastDialogHandle = createDialogHandle<null>()
 // expands and scrolls to that section.
 export const helpDialogHandle = createDialogHandle<HelpSection>()
 export const settingsPopoverHandle = createPopoverHandle<null>()
-export const md3SettingsPopoverHandle = createPopoverHandle<null>()
