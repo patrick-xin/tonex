@@ -1,6 +1,12 @@
 import { argbFromHex, hexFromArgb } from '@tonex/mcu'
 import { converter, toGamut } from 'culori'
 
+// why: hex→argb boundary primitive. Re-exported so consumers (and the
+// `@tonex/core/oklch` surface above) get hex→argb without importing
+// `@tonex/mcu` directly — the ADR-0025 firewall keeps mcu a dep of this
+// package alone. Pairs with `hexString` as the inverse direction (issue #128).
+export { argbFromHex } from '@tonex/mcu'
+
 // why: ADR-0025 commitment 3 — tonex owns the string form. culori does the
 // math (commitment 2); this layer pins precision, trailing-zero behavior, and
 // chromaless hue snap so a culori upgrade can never silently shift emission.

@@ -7,11 +7,13 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { useThemePreference } from "@/features/theme-mode";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  // ADR-0015: next-themes is confined to features/theme-mode; read the
+  // preference through its named hook instead of useTheme() directly.
+  const theme = useThemePreference();
 
   return (
     <Sonner

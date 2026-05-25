@@ -6,6 +6,7 @@ import {
   HUE_ANCHOR_DEFAULT,
   HUE_SPREAD_DEFAULT,
   type HueAnchor,
+  type Mode,
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
   type SequentialModeOutput,
@@ -56,7 +57,7 @@ interface PartnerRow {
 
 function partnersFor(
   theme: NonNullable<ReturnType<typeof useResolvedTokens>>,
-  mode: 'light' | 'dark',
+  mode: Mode,
 ): PartnerRow[] {
   const md = mode === 'light' ? theme.md.light : theme.md.dark
   const shadcn = mode === 'light' ? theme.shadcn.light : theme.shadcn.dark
@@ -269,7 +270,7 @@ function hueLabel(hues: readonly number[]) {
 }
 
 interface ModeBlockProps {
-  mode: 'light' | 'dark'
+  mode: Mode
   legacyArgbs: readonly number[]
   prototypeChart1: SequentialModeOutput
   prototypeProminent: SequentialModeOutput

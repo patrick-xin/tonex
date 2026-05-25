@@ -62,6 +62,7 @@ export {
   flushPersist,
   type SourceActions,
   type SourceState,
+  selectHydrated,
   selectPortable,
   selectSeedHex,
   useSource,

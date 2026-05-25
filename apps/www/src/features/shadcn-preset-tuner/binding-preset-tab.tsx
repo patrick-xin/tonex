@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react'
-import { selectPortable, useSource } from '@tonex/core'
+import { MODES, selectPortable, useSource } from '@tonex/core'
 import { SHADCN_ROLE_NAMES, type ShadcnRoleName } from '@tonex/core/schema'
 import { useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -93,7 +93,7 @@ function BindingsSummary({ light, dark }: { light: ShadcnRoleName[]; dark: Shadc
         <span className="font-medium text-on-surface">Bindings vs default</span>
       </div>
       <ul className="flex flex-col gap-0.5 text-xs font-mono">
-        {(['light', 'dark'] as const).map((mode) => {
+        {MODES.map((mode) => {
           const roles = mode === 'light' ? light : dark
           const changed = roles.length > 0
           return (

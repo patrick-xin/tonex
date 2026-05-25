@@ -1,9 +1,10 @@
-import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import {
   argbComponents,
+  argbFromHex,
   argbFromOklch,
   hexFromOklch,
+  hexString,
   oklchFromArgb,
   oklchFromHex,
   relativeLuminance,
@@ -65,6 +66,22 @@ describe('oklch conversion', () => {
     const a = oklchFromArgb(argbFromHex('#6750a4'))
     const b = oklchFromArgb(argbFromHex('#6750a4'))
     expect(a).toBe(b)
+  })
+})
+
+describe('argbFromHex boundary helper', () => {
+  // why: ADR-0021/0025 — `argbFromHex` is the hex→argb boundary primitive,
+  // re-exported through this oklch surface so www read-sites (swatch
+  // luminance, palette previews) route through `@tonex/core/oklch` instead of
+  // reaching around it into vendored `@tonex/mcu` (issue #128).
+  it('packs a known hex into full-alpha argb', () => {
+    expect(argbFromHex('#ff0000')).toBe(0xffff0000)
+    expect(argbFromHex('#ffffff')).toBe(0xffffffff)
+    expect(argbFromHex('#000000')).toBe(0xff000000)
+  })
+
+  it('is the exact inverse of hexString', () => {
+    expect(hexString(argbFromHex('#6750a4'))).toBe('#6750a4')
   })
 })
 

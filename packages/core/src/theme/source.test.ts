@@ -15,7 +15,14 @@ import {
   type ShadcnRoleBindings,
 } from './schema'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
-import { flushPersist, STORAGE_KEY, selectPortable, selectSeedHex, useSource } from './source'
+import {
+  flushPersist,
+  STORAGE_KEY,
+  selectHydrated,
+  selectPortable,
+  selectSeedHex,
+  useSource,
+} from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the
@@ -94,6 +101,21 @@ const NONDEFAULT_INPUTS: PortableTheme = {
   cmfSecondSourceHex: '#aabbcc',
   chart: { scheme: 'categorical', hueSpread: 40, hueAnchor: 'prominent-edge' },
 }
+
+describe('selectHydrated', () => {
+  // why: ADR-0015 — `_hydrated` is the source-hydration gate. Routing reads
+  // through this selector keeps the private flag private; gating sites
+  // (export availability, picker inputs) never reach into `_hydrated`
+  // directly (issue #128 P3, the named home for the bypass-candidate class).
+  afterEach(() => useSource.setState({ _hydrated: false }))
+
+  it('reflects the store hydration flag', () => {
+    useSource.setState({ _hydrated: false })
+    expect(selectHydrated(useSource.getState())).toBe(false)
+    useSource.getState().actions.setHydrated()
+    expect(selectHydrated(useSource.getState())).toBe(true)
+  })
+})
 
 describe('useSource persistence round-trip', () => {
   beforeEach(() => {

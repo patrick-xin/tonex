@@ -1,8 +1,8 @@
 'use client'
 
 import { type TokenMap, useResolvedTokens } from '@tonex/core'
+import { hexString } from '@tonex/core/oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
-import { hexFromArgb } from '@tonex/mcu'
 import type { MouseEvent } from 'react'
 import { useState } from 'react'
 import { SectionHeading } from '@/components/shared/section-heading'
@@ -39,7 +39,7 @@ function parsePaletteMap(palette: TokenMap): PaletteMap {
     result[family] = {}
     for (const tone of MD_PALETTE_TONE_NAMES) {
       const argb = palette[`--color-${family}-${tone}`]
-      if (argb !== undefined) result[family][tone] = hexFromArgb(argb)
+      if (argb !== undefined) result[family][tone] = hexString(argb)
     }
   }
   return result

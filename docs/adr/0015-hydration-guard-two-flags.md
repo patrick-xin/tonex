@@ -44,3 +44,12 @@ Removed from the allowlist:
 - `apps/www/src/lib/hooks/use-active-mode.ts` — file deleted; moved to the theme-mode feature folder.
 
 The five numbered Decision points stand verbatim. Commitment 4 still binds: any component reading `'light' | 'dark'` MUST go through `useActiveMode`. Components that need to set the mode in event handlers go through the new `useSetMode`. The drift-sentinel hook in `.claude/settings.json` updates to match.
+
+## Amendment 2026-05-25 (issue #128 P3)
+
+Two bypass-candidate classes the original Consequence named had legitimate-but-unhomed instances. This amendment gives each a named home rather than carving file-level exceptions — the allowlist stays two files, and the bypass greps stay zero in product code.
+
+- **Raw theme *preference* (incl `'system'`)** — `use-active-mode.ts` gains a third export, `useThemePreference()`, returning the unresolved `theme` string. It is the home for cosmetic consumers that mirror the user's *setting* rather than the resolved appearance — the only current caller is the shadcn `sonner` Toaster's `theme` prop, which previously imported `useTheme()` directly (the one real out-of-allowlist call). `next-themes` remains imported by exactly one folder. No mounted-guard: the value is presentational, not SSR-critical token output.
+- **Raw `_hydrated` reads** — the source store now exports `selectHydrated(state)` (sibling to `selectSeedHex` / `selectPortable`). Gating sites that need source hydration before any token is derived — export availability (`features/export/use-export-content.ts`), picker input (`features/testbed/seed-input.tsx`) — read `useSource(selectHydrated)` instead of reaching into the private `_hydrated` field. These were always legitimate (source-state gates, not derived-output bypasses); the selector removes the ambiguity so the "bypass candidate" grep returns zero in `apps/www/src`. (The separate `lib/stores/ui-prefs` store owns its own `_hydrated` + `selectUiPrefs` and is unaffected.)
+
+The five numbered Decision points and Commitment 4 continue to bind verbatim. No `.claude/settings.json` sentinel change: rule #5's two-file allowlist is unchanged (the new export lives inside `use-active-mode.ts`), and `_hydrated` has no mechanical sentinel rule.
