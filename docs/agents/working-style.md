@@ -33,6 +33,15 @@ Within a session, explicit corrections work — "restructure that, don't add ano
 
 The most effective correction is "model your code on file X," not "you violated rule 3." Concrete examples beat abstract rules every time, because the example is read at generation time and the rule is not.
 
+## Worktrees: one per PR, sibling dirs, launched from inside
+
+One branch per PR, one worktree per branch. Never reuse a worktree across PRs.
+
+- **Cut fresh from `origin/master`:** `git worktree add -b feat/<slug> ../tonex-<slug> origin/master`.
+- **Location is a sibling of the main repo** (`/Users/patrickxin/dev/tonex-<slug>`), *not* nested inside it. A worktree that lives under the main-repo path is a descendant of a tree checked out on `master`; any launcher or relative path that resolves to the repo root then silently lands on `master`. Siblings share no ancestor, so no path can cross over. (`.claude/worktrees/` is gitignored and was a false start — don't nest there.)
+- **Launch the agent from inside the worktree** (`cd ../tonex-<slug> && claude`) so the agent's cwd *is* the worktree. Otherwise Bash defaults to the launch dir — if that's the main repo, edits/tests split-brain onto `master` while you think you're on the branch. If you ever find cwd is the main repo mid-session, target the worktree with absolute paths until you can relaunch.
+- **`git worktree remove` after the PR merges.**
+
 ## Subagents start cold
 
 Subagents spawned by a main agent cannot see machine-local memory or session history. Anything load-bearing for a subagent must live in repo files: code with `// why:` comments, ADRs, `CONTEXT.md`, this doc, or be embedded in the subagent's prompt.
