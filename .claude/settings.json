@@ -32,5 +32,30 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(git *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(gh repo *)",
+      "Bash(gh label *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(node *)",
+      "Bash(npx tsc *)",
+      "Bash(npx biome *)",
+      "Read(//tmp/**)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:github.com)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
   }
 }
