@@ -1,6 +1,6 @@
 'use client'
 
-import { GearSixIcon } from '@phosphor-icons/react'
+import { GearSixIcon, TrashIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -54,11 +54,17 @@ export function Settings({ layer }: { layer: Layer }) {
         <TwPickerEnableToggle />
         <Separator className="opacity-50" />
         <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-medium leading-snug text-on-surface">
-            Reset to defaults
-          </span>
-          <ResetButton variant="danger" size="sm" onConfirm={() => settingsPopoverHandle.close()}>
-            Reset
+          <div>
+            <span className="text-sm font-medium leading-snug text-on-surface">Reset</span>
+            <p className="text-xs text-on-surface-variant">Reset current theme to app's default</p>
+          </div>
+
+          <ResetButton
+            variant="danger"
+            size="icon-xs"
+            onConfirm={() => settingsPopoverHandle.close()}
+          >
+            <TrashIcon />
           </ResetButton>
         </div>
       </PopoverContent>

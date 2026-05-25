@@ -33,7 +33,7 @@ export const SourceColorTabs = () => {
   // why: locking blocks the disclosure (pointer-events-none), so a user who
   // locks while it's open would be stranded — unable to fold it without first
   // unlocking. Force it closed on lock so locking always tidies the rail.
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   useEffect(() => {
     if (seedHexLock) setOpen(false)
   }, [seedHexLock])
