@@ -5,7 +5,7 @@ import { applyPaletteOverrides } from '../theme/palette-override'
 import type { PortableTheme } from '../theme/schema'
 import { variants } from '../variants'
 import { cmfSecondSourceDisabledReason } from '../variants/cmf-second-source'
-import { HUE_ANCHOR_DEFAULT, HUE_ANCHORS, HUE_SPREAD_DEFAULT, type HueAnchor } from './schema'
+import type { HueAnchor } from './schema'
 
 // why: monotonic perceptual-uniform sequential chart palette (ADR-0027 c.3).
 // This file hosts BOTH the production sequential path and the dev-route lab:
@@ -200,6 +200,14 @@ export function buildMdChartSequentialSamples(
 // Max L where every partner still hits 3:1. Brackets [0, 100] assume
 // passes(0) is true and passes(100) is false in the common case; degenerate
 // envelopes (both ends pass, or neither) short-circuit before bisection.
+//
+// ACCEPTED GAP (#131, document-only): when neither end passes — no tone
+// clears 3:1 against the partner — we return 0, a tone that does NOT meet
+// the floor this function documents. Unreachable in production (deriveTheme
+// partners sit at tone ~94–98, so passes(0) holds); only the chart-lab dev
+// route via buildSequentialReport can feed a partner dark enough to trip it.
+// #131 chose to document rather than throw/flag, since no user path reaches
+// here. sequential.test.ts pins the violation with a permanent it.fails probe.
 function findMaxSafeL(passes: (L: number) => boolean): number {
   if (!passes(0)) return 0
   if (passes(100)) return 100
@@ -214,7 +222,9 @@ function findMaxSafeL(passes: (L: number) => boolean): number {
 }
 
 // why: dark mode — partner is dark; chart contrast shrinks as L falls.
-// Min L where every partner still hits 3:1. Mirror of findMaxSafeL.
+// Min L where every partner still hits 3:1. Mirror of findMaxSafeL,
+// including its accepted lab-only gap (#131): returns 100 when no tone
+// clears the floor — unreachable in production, documented not hardened.
 function findMinSafeL(passes: (L: number) => boolean): number {
   if (!passes(100)) return 100
   if (passes(0)) return 0
