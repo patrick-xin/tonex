@@ -2,7 +2,7 @@
 
 import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
 import { SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
-import { useId, useState } from 'react'
+import { type ReactNode, useId, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,8 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { RadioCard, RadioGroup } from '@/components/ui/radio'
 import { isPresetSwitchDirty } from './predicate'
 
 // why: imperative handle threads the pending preset name (the payload) from
@@ -26,14 +25,6 @@ import { isPresetSwitchDirty } from './predicate'
 // prop.
 export const presetSwitchDialogHandle = createDialogHandle<ShadcnPresetName>()
 
-// why: contrast is per-mode (#123) but the adoption choice is a single
-// decision (Decision B): one row, the preset's scalar supersedes both modes.
-// Show one value when the user's modes match, `light/dark` when they diverge,
-// so the row stays honest about what "keep mine" preserves.
-function formatContrast(c: { light: number; dark: number }): string {
-  return c.light === c.dark ? c.light.toFixed(2) : `${c.light.toFixed(2)}/${c.dark.toFixed(2)}`
-}
-
 export function PresetSwitchDialog() {
   return (
     <Dialog handle={presetSwitchDialogHandle}>
@@ -42,55 +33,79 @@ export function PresetSwitchDialog() {
   )
 }
 
-// why: one row per touched-and-eligible source input. The switch reads as
-// "keep mine" and defaults ON (replacing the ambient reset buttons): ON holds
-// the user's current value, OFF hands the field to the preset. Both the title
-// and subline track the live switch state — the title states the action that
-// will happen ("Keep current color" vs "Use preset color") and the subline the
-// value that will land, with a swatch when that value is a color. The whole
-// block is a <label> bound to the switch (htmlFor), so it's clickable and the
-// switch is announced with the full text by assistive tech.
-function ChoiceRow({
+// why: one labelled pair of choice cards per touched-and-eligible source input.
+// A switch read ambiguously ("keep mine" vs the preset) because it hid one of
+// the two values behind the off state; two side-by-side cards show both the
+// current and the preset value at once and make the pick explicit. The cards
+// mirror custom-color-form's ShadcnSourcePicker (RadioGroup of <label> cards).
+// `keep === true` selects the user's current value; selecting the preset card
+// hands the field to the preset — the same boolean the Apply handler consumes.
+// The caption is a plain element referenced by `aria-labelledby` (not a
+// <label>, which would imply a single associated control) so the group is
+// named for assistive tech per Base UI's RadioGroup guidance.
+function ChoiceCards({
   noun,
-  currentText,
-  presetText,
-  currentSwatch,
-  presetSwatch,
-  checked,
-  onCheckedChange,
+  current,
+  preset,
+  keep,
+  onKeepChange,
 }: {
   noun: string
-  currentText: string
-  presetText: string
-  currentSwatch?: string
-  presetSwatch?: string
-  checked: boolean
-  onCheckedChange: (next: boolean) => void
+  current: ReactNode
+  preset: ReactNode
+  keep: boolean
+  onKeepChange: (next: boolean) => void
 }) {
-  const id = useId()
-  const swatch = checked ? currentSwatch : presetSwatch
+  const captionId = useId()
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md bg-surface-container-low px-3 py-2">
-      <Label htmlFor={id} className="min-w-0 flex-col items-start gap-0.5">
-        <span className="text-sm font-medium text-on-surface">
-          {checked ? `Keep current ${noun}` : `Use preset ${noun}`}
-        </span>
-        <span className="flex items-center gap-1.5 font-mono text-xs font-normal text-on-surface-variant">
-          {swatch && (
-            <span
-              className="size-3 shrink-0 rounded-sm outline outline-outline-variant"
-              style={{ backgroundColor: swatch }}
-            />
-          )}
-          <span className="truncate">{checked ? currentText : presetText}</span>
-        </span>
-      </Label>
-      <Switch id={id} size="sm" checked={checked} onCheckedChange={onCheckedChange} />
+    <div className="flex flex-col gap-1.5">
+      <div id={captionId} className="text-sm font-medium capitalize text-on-surface">
+        {noun}
+      </div>
+      <RadioGroup
+        aria-labelledby={captionId}
+        value={keep ? 'current' : 'preset'}
+        onValueChange={(v) => onKeepChange(v === 'current')}
+        className="grid-cols-2"
+      >
+        <RadioCard value="current" label="Current" selected={keep}>
+          <div className="font-mono text-xs text-on-surface-variant">{current}</div>
+        </RadioCard>
+        <RadioCard value="preset" label="Preset" selected={!keep}>
+          <div className="font-mono text-xs text-on-surface-variant">{preset}</div>
+        </RadioCard>
+      </RadioGroup>
     </div>
   )
 }
 
-// why: the body is its own component so the switch choices can hold local state
+// why: seed value body — swatch plus the hex it stands for.
+function SeedValue({ hex }: { hex: string }) {
+  return (
+    <span className="flex min-w-0 items-center gap-1.5">
+      <span
+        className="size-3 shrink-0 rounded-sm outline outline-outline-variant"
+        style={{ backgroundColor: hex }}
+      />
+      <span className="truncate">{hex}</span>
+    </span>
+  )
+}
+
+// why: contrast is per-mode (#123), so each card spells out both modes with
+// `light:`/`dark:` labels — the user needs to know which number is which, and
+// the labels carry that even when the two values happen to match. Kept on one
+// line so the contrast cards match the single-line seed cards' height.
+function ContrastValue({ c }: { c: { light: number; dark: number } }) {
+  return (
+    <span className="flex items-center gap-2 tabular-nums">
+      <span>light: {c.light.toFixed(2)}</span>
+      <span>dark: {c.dark.toFixed(2)}</span>
+    </span>
+  )
+}
+
+// why: the body is its own component so the card choices can hold local state
 // across the dialog's lifetime; the render-prop child re-runs each render and
 // can't own hooks directly. Reads the live store to decide which rows to show —
 // only a touched-and-unlocked seed / touched contrast raises a choice, matching
@@ -104,8 +119,8 @@ function PresetSwitchBody({ name }: { name: ShadcnPresetName }) {
   const currentHex = useSource(selectSeedHex)
   const currentContrast = useSource((s) => s.contrastLevel)
 
-  // Switches mean "keep mine" and default ON — the safe choice preserves the
-  // user's tuning; turning one OFF opts that field into the preset.
+  // Cards default to "Current" (keep === true) — the safe choice preserves the
+  // user's tuning; picking the "Preset" card opts that field into the preset.
   const [keepSeed, setKeepSeed] = useState(true)
   const [keepContrast, setKeepContrast] = useState(true)
 
@@ -126,25 +141,23 @@ function PresetSwitchBody({ name }: { name: ShadcnPresetName }) {
       </DialogHeader>
 
       {(seedDecision || contrastTouched) && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           {seedDecision && (
-            <ChoiceRow
-              noun="color"
-              currentText={`Current: ${currentHex}`}
-              presetText={`Preset: ${presetHex}`}
-              currentSwatch={currentHex}
-              presetSwatch={presetHex}
-              checked={keepSeed}
-              onCheckedChange={setKeepSeed}
+            <ChoiceCards
+              noun="seed color"
+              current={<SeedValue hex={currentHex} />}
+              preset={<SeedValue hex={presetHex} />}
+              keep={keepSeed}
+              onKeepChange={setKeepSeed}
             />
           )}
           {contrastTouched && (
-            <ChoiceRow
+            <ChoiceCards
               noun="contrast"
-              currentText={`Current: ${formatContrast(currentContrast)}`}
-              presetText={`Preset: ${preset.contrastLevel.toFixed(2)}`}
-              checked={keepContrast}
-              onCheckedChange={setKeepContrast}
+              current={<ContrastValue c={currentContrast} />}
+              preset={<ContrastValue c={preset.contrastLevel} />}
+              keep={keepContrast}
+              onKeepChange={setKeepContrast}
             />
           )}
         </div>

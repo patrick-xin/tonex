@@ -28,28 +28,28 @@ function emittedRoleOrder(block: string): string[] {
 
 describe('formatPresetEntry', () => {
   it('is deterministic — identical inputs emit byte-identical output', () => {
-    const a = formatPresetEntry('warm', SEED, 0, DEFAULT_BUNDLE)
-    const b = formatPresetEntry('warm', SEED, 0, DEFAULT_BUNDLE)
+    const a = formatPresetEntry('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE)
+    const b = formatPresetEntry('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE)
     expect(a).toBe(b)
   })
 
   it('emits bindings in canonical SHADCN_ROLE_NAMES order, twice (light then dark)', () => {
-    const block = formatPresetEntry('warm', SEED, 0, DEFAULT_BUNDLE)
+    const block = formatPresetEntry('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE)
     const expected = [...SHADCN_ROLE_NAMES]
     expect(emittedRoleOrder(block)).toEqual([...expected, ...expected])
   })
 
   it('wraps the seed in seedOf() and leads with the curated source inputs', () => {
-    const block = formatPresetEntry('warm', SEED, 0.3, DEFAULT_BUNDLE)
+    const block = formatPresetEntry('warm', SEED, { light: 0.3, dark: 0.3 }, DEFAULT_BUNDLE)
     const lines = block.split('\n')
     expect(lines[0]).toBe('  warm: {')
     expect(lines[1]).toBe(`    seed: seedOf('${SEED}'),`)
-    expect(lines[2]).toBe('    contrastLevel: 0.3,')
+    expect(lines[2]).toBe('    contrastLevel: { light: 0.3, dark: 0.3 },')
     expect(lines[3]).toBe(`    variant: '${DEFAULT_BUNDLE.variant}',`)
   })
 
   it('nests at the core file indentation (key @2 spaces, fields @4 spaces)', () => {
-    const block = formatPresetEntry('warm', SEED, 0, DEFAULT_BUNDLE)
+    const block = formatPresetEntry('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE)
     const fieldLines = block
       .split('\n')
       .filter((l) => /^\s+(seed|contrastLevel|variant|surfaceAlgo):/.test(l))
@@ -62,18 +62,24 @@ describe('formatPresetEntry', () => {
 
 describe('formatKey (via emitted record key)', () => {
   it('emits a bare key for a valid JS identifier', () => {
-    expect(formatPresetEntry('warm', SEED, 0, DEFAULT_BUNDLE).split('\n')[0]).toBe('  warm: {')
+    expect(
+      formatPresetEntry('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE).split('\n')[0],
+    ).toBe('  warm: {')
   })
 
   it('single-quotes a key that would not parse as an identifier', () => {
-    expect(formatPresetEntry('my preset', SEED, 0, DEFAULT_BUNDLE).split('\n')[0]).toBe(
-      "  'my preset': {",
-    )
-    expect(formatPresetEntry('123', SEED, 0, DEFAULT_BUNDLE).split('\n')[0]).toBe("  '123': {")
+    expect(
+      formatPresetEntry('my preset', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE).split('\n')[0],
+    ).toBe("  'my preset': {")
+    expect(
+      formatPresetEntry('123', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE).split('\n')[0],
+    ).toBe("  '123': {")
   })
 
   it('falls back to "unnamed" for an empty/whitespace name', () => {
-    expect(formatPresetEntry('   ', SEED, 0, DEFAULT_BUNDLE).split('\n')[0]).toBe('  unnamed: {')
+    expect(
+      formatPresetEntry('   ', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE).split('\n')[0],
+    ).toBe('  unnamed: {')
   })
 })
 
@@ -101,7 +107,7 @@ describe('formatBindingPresetEntry', () => {
 
 describe('copy-output wrappers', () => {
   it('prefixes a paste-target header and ends with a trailing newline', () => {
-    const out = formatCopyOutput('warm', SEED, 0, DEFAULT_BUNDLE)
+    const out = formatCopyOutput('warm', SEED, { light: 0, dark: 0 }, DEFAULT_BUNDLE)
     expect(out.startsWith('// Preset: warm')).toBe(true)
     expect(out).toContain('SHADCN_PRESETS')
     expect(out.endsWith('\n')).toBe(true)

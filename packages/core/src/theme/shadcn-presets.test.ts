@@ -45,10 +45,10 @@ function projectPreset(theme: PortableTheme): Omit<ShadcnPreset, 'description'> 
     surfaceDesaturateLevel: theme.surfaceDesaturateLevel,
     shadcnRoleBindings: theme.shadcnRoleBindings,
     seed: theme.seed,
-    // why: preset.contrastLevel is a single scalar (#123 Decision B); the
-    // theme's is per-mode. Projection collapses to light — the default boot
-    // theme has light === dark === 0, which matches the default preset's 0.
-    contrastLevel: theme.contrastLevel.light,
+    // why: preset.contrastLevel is now per-mode, mirroring the theme's, so the
+    // projection carries the pair through verbatim — the default boot theme's
+    // { light: 0, dark: 0 } matches the default preset's pair.
+    contrastLevel: theme.contrastLevel,
   }
 }
 
@@ -57,13 +57,13 @@ function themeWithPreset(name: PresetName): PortableTheme {
   if (!preset) {
     throw new Error(`Preset "${name}" not found in SHADCN_PRESETS`)
   }
-  // why: expand the preset's scalar contrast to the theme's per-mode shape on
-  // both modes — adopting a preset applies its single curated value uniformly.
+  // why: the preset's per-mode contrast maps straight onto the theme's per-mode
+  // shape — adopting a preset applies each mode's curated value as-is.
   const { contrastLevel, ...recipe } = preset
   return {
     ...DEFAULT_INPUTS,
     ...recipe,
-    contrastLevel: { light: contrastLevel, dark: contrastLevel },
+    contrastLevel: { ...contrastLevel },
   }
 }
 
@@ -184,11 +184,14 @@ describe('R7: every preset carries a curated seed', () => {
 // resolver always has a value to supersede an untouched contrast with. Final
 // curation is the promotion slice; this pins presence and the [0, 1] range.
 describe('R8: every preset carries a curated contrastLevel', () => {
-  it.each(PRESET_NAMES)('preset "%s" declares an in-range contrastLevel', (name) => {
+  it.each(PRESET_NAMES)('preset "%s" declares an in-range per-mode contrastLevel', (name) => {
     const contrastLevel = presets[name]?.contrastLevel
     expect(contrastLevel, `preset "${name}" missing contrastLevel`).toBeDefined()
-    expect(contrastLevel).toBeGreaterThanOrEqual(0)
-    expect(contrastLevel).toBeLessThanOrEqual(1)
+    for (const mode of ['light', 'dark'] as const) {
+      expect(contrastLevel?.[mode], `preset "${name}" missing ${mode} contrast`).toBeDefined()
+      expect(contrastLevel?.[mode]).toBeGreaterThanOrEqual(0)
+      expect(contrastLevel?.[mode]).toBeLessThanOrEqual(1)
+    }
   })
 })
 

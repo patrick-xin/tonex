@@ -1,11 +1,10 @@
 'use client'
 
 import { CHROMA_HUE_LOCK, type CustomColorPreviewRoles } from '@tonex/core'
-import { cn } from 'tailwind-variants'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Radio, RadioGroup } from '@/components/ui/radio'
+import { RadioCard, RadioGroup } from '@/components/ui/radio'
 import { Switch } from '@/components/ui/switch'
 import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import { ChromaSlider, HctSlider, showsHueDisabledHint } from '@/features/hct-controls'
@@ -215,12 +214,14 @@ function ShadcnSourcePicker({
       >
         <SourceCard
           value="color"
+          label="Color"
           selected={value === 'color'}
           bg={roles.color}
           fg={roles.onColor}
         />
         <SourceCard
           value="container"
+          label="Container"
           selected={value === 'container'}
           bg={roles.colorContainer}
           fg={roles.onColorContainer}
@@ -232,26 +233,19 @@ function ShadcnSourcePicker({
 
 function SourceCard({
   value,
+  label,
   selected,
   bg,
   fg,
 }: {
   value: 'color' | 'container'
+  label: string
   selected: boolean
   bg: string
   fg: string
 }) {
   return (
-    // biome-ignore lint/a11y/noLabelWithoutControl: the nested Radio (a Base UI <button>, a labelable control) is the associated control
-    <label
-      className={cn(
-        'flex flex-col gap-2 rounded-md border p-2 cursor-pointer transition-colors',
-        selected
-          ? 'border-outline-variant bg-primary/8'
-          : 'border-outline-variant/60 hover:border-outline-variant',
-      )}
-    >
-      <Radio value={value} />
+    <RadioCard value={value} label={label} selected={selected}>
       <div className="flex gap-2">
         <div className="h-9 flex-1 flex items-end p-1.5 rounded-md" style={{ backgroundColor: bg }}>
           <span className="text-[10px] font-medium leading-none" style={{ color: fg }}>
@@ -264,6 +258,6 @@ function SourceCard({
           </span>
         </div>
       </div>
-    </label>
+    </RadioCard>
   )
 }

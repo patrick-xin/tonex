@@ -72,10 +72,7 @@ describe('resolvePresetApply — contrast source field', () => {
   it('supersedes an untouched contrast with the preset curated contrast', () => {
     const theme = themeWith({ contrastLevel: { light: 0.7, dark: 0.7 }, contrastTouched: false })
     const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
-    expect(patch.contrastLevel).toEqual({
-      light: SHADCN_PRESETS.enterprise.contrastLevel,
-      dark: SHADCN_PRESETS.enterprise.contrastLevel,
-    })
+    expect(patch.contrastLevel).toEqual(SHADCN_PRESETS.enterprise.contrastLevel)
   })
 
   it('keeps a touched contrast and drops the curated one', () => {
@@ -121,10 +118,7 @@ describe('resolvePresetApply — seed and contrast resolve independently', () =>
     })
     const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise)
     expect(patch.seed).toBeUndefined()
-    expect(patch.contrastLevel).toEqual({
-      light: SHADCN_PRESETS.enterprise.contrastLevel,
-      dark: SHADCN_PRESETS.enterprise.contrastLevel,
-    })
+    expect(patch.contrastLevel).toEqual(SHADCN_PRESETS.enterprise.contrastLevel)
   })
 })
 
@@ -143,10 +137,7 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   it('adopts the curated contrast over a touched contrast when the contrast choice is set', () => {
     const theme = themeWith({ contrastLevel: { light: 0.7, dark: 0.7 }, contrastTouched: true })
     const patch = resolvePresetApply(theme, SHADCN_PRESETS.enterprise, { contrast: true })
-    expect(patch.contrastLevel).toEqual({
-      light: SHADCN_PRESETS.enterprise.contrastLevel,
-      dark: SHADCN_PRESETS.enterprise.contrastLevel,
-    })
+    expect(patch.contrastLevel).toEqual(SHADCN_PRESETS.enterprise.contrastLevel)
     expect(patch.contrastTouched).toBe(false)
   })
 

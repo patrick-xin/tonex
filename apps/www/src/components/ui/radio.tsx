@@ -2,6 +2,7 @@
 
 import { Radio as BaseRadio } from '@base-ui/react/radio'
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group'
+import type { ReactNode } from 'react'
 import { cn } from 'tailwind-variants'
 import { focusVisibleRing } from './styles'
 
@@ -48,9 +49,49 @@ function Radio({ className, ...props }: BaseRadio.Root.Props) {
   )
 }
 
+// why: the selectable card shell shared by every "pick one of N" surface (the
+// preset-switch dialog's keep-vs-preset choice, custom-colors' color/container
+// pair). The whole card is a <label> whose associated control is the nested
+// Radio — clicking anywhere selects it, and assistive tech announces the card's
+// `label` plus its body. Centralized so the border/selected styling can't drift
+// between call sites; each site passes its own value body as `children`.
+function RadioCard({
+  value,
+  selected,
+  label,
+  className,
+  children,
+}: {
+  value: string
+  selected: boolean
+  label: ReactNode
+  className?: string
+  children?: ReactNode
+}) {
+  return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: the nested Radio (a Base UI <button>, a labelable control) is the associated control
+    <label
+      className={cn(
+        'flex cursor-pointer flex-col gap-2 rounded-md border p-2 transition-colors',
+        selected
+          ? 'border-outline-variant bg-primary/8'
+          : 'border-outline-variant/60 hover:border-outline-variant',
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-on-surface">{label}</span>
+        <Radio value={value} />
+      </div>
+      {children}
+    </label>
+  )
+}
+
 export {
   // Composite component
   Radio,
+  RadioCard,
   RadioGroup,
   RadioIndicator,
   RadioRoot,

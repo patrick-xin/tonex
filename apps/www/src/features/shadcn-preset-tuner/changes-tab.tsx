@@ -31,21 +31,20 @@ export function ChangesTab() {
   const applyPreset = useApplyPreset()
   const [name, setName] = useState('')
 
-  // why: a preset carries a single scalar contrast (#123 Decision B), so the
-  // curator authors a uniform value — collapse the per-mode rail state to its
-  // light reading for the emitted entry and the diff. (Apply writes the scalar
-  // to both modes, so a curated preset round-trips with light === dark.)
-  const contrastScalar = contrastLevel.light
-
+  // why: a preset now carries a per-mode contrast pair, so the curator emits the
+  // rail's light/dark verbatim — tuning a distinct dark baseline (e.g. OLED) is
+  // exactly the capability the per-mode shape unlocks.
   const bundle = useMemo(() => snapshotBundle(portable), [portable])
   const diff = useMemo(() => diffBundle(bundle, DEFAULT_BUNDLE), [bundle])
   const output = useMemo(
-    () => formatCopyOutput(name, seedHex, contrastScalar, bundle),
-    [name, seedHex, contrastScalar, bundle],
+    () => formatCopyOutput(name, seedHex, contrastLevel, bundle),
+    [name, seedHex, contrastLevel, bundle],
   )
 
   const seedChanged = seedHex !== DEFAULT_INPUTS.seed.exactHex
-  const contrastChanged = contrastScalar !== DEFAULT_INPUTS.contrastLevel.light
+  const contrastChanged =
+    contrastLevel.light !== DEFAULT_INPUTS.contrastLevel.light ||
+    contrastLevel.dark !== DEFAULT_INPUTS.contrastLevel.dark
 
   const { copyToClipboard, isCopied } = useCopyToClipboard({ timeout: 1500 })
 
@@ -83,7 +82,11 @@ export function ChangesTab() {
       <DiffSummary
         diff={diff}
         seed={{ changed: seedChanged, hex: seedHex }}
-        contrast={{ changed: contrastChanged, level: contrastScalar }}
+        contrast={{
+          changed: contrastChanged,
+          light: contrastLevel.light,
+          dark: contrastLevel.dark,
+        }}
       />
 
       <div className="flex items-center gap-2">
@@ -148,13 +151,23 @@ function LoadPresetRow({
 interface DiffSummaryProps {
   diff: ReturnType<typeof diffBundle>
   seed: { changed: boolean; hex: string }
-  contrast: { changed: boolean; level: number }
+  contrast: { changed: boolean; light: number; dark: number }
+}
+
+// why: collapse to one reading when the modes match, show `light/dark` when they
+// diverge — the diff row stays honest about the per-mode value being emitted.
+function formatContrast(light: number, dark: number): string {
+  return light === dark ? light.toFixed(2) : `${light.toFixed(2)}/${dark.toFixed(2)}`
 }
 
 function DiffSummary({ diff, seed, contrast }: DiffSummaryProps) {
   const rows: { label: string; changed: boolean; detail?: string }[] = [
     { label: 'seed', changed: seed.changed, detail: seed.hex },
-    { label: 'contrastLevel', changed: contrast.changed, detail: contrast.level.toFixed(2) },
+    {
+      label: 'contrastLevel',
+      changed: contrast.changed,
+      detail: formatContrast(contrast.light, contrast.dark),
+    },
     { label: 'variant', changed: diff.variantChanged },
     { label: 'surfaceAlgo', changed: diff.surfaceAlgoChanged },
     { label: 'surfacePaletteName', changed: diff.surfacePaletteNameChanged },
@@ -241,9 +254,9 @@ function useApplyPreset() {
     // why: mirror selectSeedHex — prefer the curated exact bytes, fall back to
     // the HCT-derived hex if a preset ever omits exactHex (ADR-0028).
     actions.setSeedHex(preset.seed.exactHex ?? hexFromHct(preset.seed))
-    // why: the preset's scalar contrast applies uniformly to both modes (#123).
-    actions.setContrastLevel('light', preset.contrastLevel)
-    actions.setContrastLevel('dark', preset.contrastLevel)
+    // why: the preset's per-mode contrast applies to each mode as curated.
+    actions.setContrastLevel('light', preset.contrastLevel.light)
+    actions.setContrastLevel('dark', preset.contrastLevel.dark)
     actions.setVariant(preset.variant)
     actions.setSurfaceAlgo(preset.surfaceAlgo)
     actions.setSurfacePaletteName(preset.surfacePaletteName)
