@@ -15,13 +15,13 @@ import type { PresetBundle } from './bundle-snapshot'
 export function formatPresetEntry(
   name: string,
   seedHex: string,
-  contrastLevel: number,
+  contrastLevel: { light: number; dark: number },
   bundle: PresetBundle,
 ): string {
   const lines: string[] = []
   lines.push(`  ${formatKey(name)}: {`)
   lines.push(`    seed: seedOf('${seedHex}'),`)
-  lines.push(`    contrastLevel: ${contrastLevel},`)
+  lines.push(`    contrastLevel: { light: ${contrastLevel.light}, dark: ${contrastLevel.dark} },`)
   lines.push(`    variant: '${bundle.variant}',`)
   lines.push(`    surfaceAlgo: '${bundle.surfaceAlgo}',`)
   lines.push(`    surfacePaletteName: '${bundle.surfacePaletteName}',`)
@@ -68,7 +68,7 @@ function escapeSingleQuotes(s: string): string {
 export function formatCopyOutput(
   name: string,
   seedHex: string,
-  contrastLevel: number,
+  contrastLevel: { light: number; dark: number },
   bundle: PresetBundle,
 ): string {
   const header = `// Preset: ${name || '(unnamed)'} — paste into SHADCN_PRESETS (packages/core/src/theme/shadcn-presets.ts)`
