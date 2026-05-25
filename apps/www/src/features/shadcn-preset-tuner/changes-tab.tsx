@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react'
-import { hexFromHct, selectPortable, selectSeedHex, useSource } from '@tonex/core'
+import { hexFromHct, type Mode, selectPortable, selectSeedHex, useSource } from '@tonex/core'
 import {
   DEFAULT_INPUTS,
   SHADCN_PRESETS,
@@ -207,7 +207,7 @@ function DiffSummary({ diff, seed, contrast }: DiffSummaryProps) {
   )
 }
 
-function BindingsDiffRow({ mode, roles }: { mode: 'light' | 'dark'; roles: ShadcnRoleName[] }) {
+function BindingsDiffRow({ mode, roles }: { mode: Mode; roles: ShadcnRoleName[] }) {
   const changed = roles.length > 0
   return (
     <li className={changed ? 'text-on-surface' : 'text-on-surface-variant/60'}>
