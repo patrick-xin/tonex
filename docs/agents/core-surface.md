@@ -29,10 +29,11 @@ The live theme pipeline. Most www code imports from here.
 **Derive / sinks**:
 - `deriveTheme(source)` — pure function, source → `DerivedTheme`. Single colour-logic site (ADR-0017).
 - `applyDom(layer)` — DOM sink; writes CSS vars on `documentElement`. No colour logic here.
-- `exportCss(theme, opts)` — CSS string export.
+- `exportCss(theme, opts)` — CSS string export. Siblings `exportDart`, `exportJson`, `exportNativeCss` emit the same bundle in their formats (the export dialog's format tabs).
 - `formatCss`, `formatLayer` — formatting helpers.
 - `buildContrastBundle(input)` — paired light/dark contrast bundle.
-- `previewCustomColor(input)` — preview without committing to source.
+- `evaluateThemeContrast(theme, customColors?)` → `ContrastReport` (`{ light, dark }` of `PairResult`) — pure contrast analysis over a `DerivedTheme`, off the spine (ADR-0025 c.8). Backs the role-editor contrast surfaces; `PairResult` is one fg/bg result.
+- `previewCustomColor(input)` → `CustomColorPreview` (`{ light, dark }` of `CustomColorPreviewRoles`) — preview a custom colour's MD roles without committing to source.
 
 **HCT primitives**:
 - `hctFromHex`, `hexFromHct`, `maxChroma`, `CHROMA_HUE_LOCK`, type `HctTriplet` — used by editor-rail and palette pickers.
@@ -41,12 +42,18 @@ The live theme pipeline. Most www code imports from here.
 - `MODES` — tuple `['light', 'dark']`.
 - `Mode` — type `'light' | 'dark'`.
 
-**Source store internals** (reach for only when writing store glue):
-- `selectPortable(state)`, `flushPersist()`, types `SourceActions`, `SourceState`.
+**Source store selectors / internals**:
+- `selectSeedHex(state)` — canonical seed→hex projection (`seed.exactHex ?? hexFromHct(seed)`, ADR-0028). Use this for the seed's hex; never `hctFromHex` a stored hex in product code.
+- `selectPortable(state)`, `flushPersist()`, types `SourceActions`, `SourceState` — reach for only when writing store glue.
 
 **Layer / token types**:
 - `DerivedTheme`, `MdLayer`, `ResolvedLayer`, `ShadcnLayer`, `TokenMap`.
 - `ExportLayer`, `ExportOptions`, `ContrastBundle`.
+
+**Chart sequential** (ADR-0027 prototype surface; consumed by the throwaway `chart-lab` dev page):
+- `buildSequentialReport(source, partners, params)` → `{ light, dark }` of `SequentialModeOutput` — monotonic-sequential chart anchors walked toward their binding partners until contrast holds.
+- `HueAnchor` / `HUE_ANCHOR_DEFAULT` (`'chart-1'`) — which anchor keeps the brand hue.
+- `HUE_SPREAD_DEFAULT`, `PROMINENT_EDGE_LIGHT_DEFAULT` (40), `PROMINENT_EDGE_DARK_DEFAULT` (60) — tuning defaults. `HUE_SPREAD_DEFAULT` is *also* exported from `@tonex/core/schema`; www imports it via both paths.
 
 **Other**:
 - `sourceColorHexFromImage(file)` — extract dominant colour from an uploaded image.
@@ -72,7 +79,7 @@ Pure types, frozen tuples, validators. Free to import widely; cheap.
 - `CHART_MODES` / `ChartMode`, `SURFACE_ALGOS` / `SurfaceAlgo`
 - `PALETTE_NAMES` / `PaletteName`, `PALETTE_FAMILIES`
 - `STORAGE_KEY`, `SCHEMA_VERSION`, `SchemaVersion`
-- `PortableTheme`, `PortableThemeSchema`, `parsePortableTheme`
+- `PortableTheme`, `Seed` (canonical HCT seed + optional `exactHex`, ADR-0028), `PortableThemeSchema`, `parsePortableTheme`
 - `ShadcnRoleBindings`, `CustomColorEntry`
 
 **Disabled-reason helpers** (`string | null`; UI uses for tooltips on disabled inputs):
@@ -80,6 +87,15 @@ Pure types, frozen tuples, validators. Free to import widely; cheap.
 - `paletteOverrideDisabledReason(...)`
 
 **Custom-color helpers**: `slugifyCustomColorName`, `validateCustomColorEntry`, `isValidHex`.
+
+**Shadcn presets** (`theme/shadcn-presets`, `theme/preset-apply`; ADR-0031):
+- `SHADCN_PRESETS` / `ShadcnPresetName`, type `ShadcnPreset` — curated theme-bundle presets (aesthetic recipe + curated source inputs).
+- `findActivePreset(...)` — match current source against a preset by *recipe* fields only (never source inputs).
+- `resolvePresetApply(...)` with `PresetAdoptChoices` (`{ seed?, contrast? }`) — pure resolver for what an apply adopts.
+
+**Contrast (schema-level)**: `CONTRAST_PAIRS` / type `ContrastPair` — the static fg/bg pair definitions `evaluateThemeContrast` walks.
+
+**Chart schema fragments**: `CHART_SCHEMES` / `ChartScheme`, `HUE_ANCHORS` / `HueAnchor`, `HUE_ANCHOR_DEFAULT`, `HUE_SPREAD_DEFAULT` (the chart token tuples above live here too). `HUE_*` are re-exported through the engine barrel as well — see Chart sequential above.
 
 ## `@tonex/core/oklch` — conversion
 
