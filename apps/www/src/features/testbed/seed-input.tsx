@@ -1,13 +1,13 @@
 'use client'
 
-import { selectSeedHex, useSource } from '@tonex/core'
+import { selectHydrated, selectSeedHex, useSource } from '@tonex/core'
 
 export function SeedInput() {
   const seedHex = useSource(selectSeedHex)
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
   const setSeedHexLock = useSource((s) => s.actions.setSeedHexLock)
-  const hydrated = useSource((s) => s._hydrated)
+  const hydrated = useSource(selectHydrated)
 
   return (
     <label className="flex gap-3 items-center flex-wrap">

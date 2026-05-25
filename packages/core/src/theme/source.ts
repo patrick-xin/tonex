@@ -173,6 +173,17 @@ export function selectSeedHex(s: Pick<PortableTheme, 'seed'>): string {
   return s.seed.exactHex ?? hexFromHct(s.seed)
 }
 
+// why: ADR-0015 — the source-hydration gate. `_hydrated` flips once persist
+// rehydrates; SSR/first-paint reads false. `useResolvedTokens` owns the
+// *derived*-output gate, but gating that needs source state before any token
+// is derived (export availability, picker inputs) reads this flag. Routing
+// through one selector keeps `_hydrated` a private field — no read site
+// outside source.ts touches it directly, so the bypass-candidate class the
+// ADR names has a single sanctioned home.
+export function selectHydrated(s: Pick<SourceState, '_hydrated'>): boolean {
+  return s._hydrated
+}
+
 export const useSource = create<SourceState>()(
   persist(
     (set) => ({

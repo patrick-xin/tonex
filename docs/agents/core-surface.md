@@ -44,6 +44,7 @@ The live theme pipeline. Most www code imports from here.
 
 **Source store selectors / internals**:
 - `selectSeedHex(state)` — canonical seed→hex projection (`seed.exactHex ?? hexFromHct(seed)`, ADR-0028). Use this for the seed's hex; never `hctFromHex` a stored hex in product code.
+- `selectHydrated(state)` — the source-hydration gate (`_hydrated`). Named home for gating that needs source state before any token derives (export availability, picker inputs); never read `_hydrated` directly (ADR-0015 amendment 2026-05-25).
 - `selectPortable(state)`, `flushPersist()`, types `SourceActions`, `SourceState` — reach for only when writing store glue.
 
 **Layer / token types**:

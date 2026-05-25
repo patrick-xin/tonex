@@ -7,6 +7,7 @@ import {
   exportDart,
   exportJson,
   exportNativeCss,
+  selectHydrated,
   selectPortable,
   selectSeedHex,
   useSource,
@@ -61,7 +62,7 @@ export function useExportContent({
   exportTab: ExportTab
   options: ExportOptions
 }): ExportContent {
-  const hydrated = useSource((s) => s._hydrated)
+  const hydrated = useSource(selectHydrated)
   // why: useShallow + selectPortable mirrors useResolvedTokens — one stable
   // PortableTheme reference per source change. buildContrastBundle routes
   // through the unified derive cache (issue #20), keyed on (source,
