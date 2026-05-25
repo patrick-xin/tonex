@@ -343,6 +343,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 }
 export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[] }) {
   const [data, setData] = React.useState(() => initialData)
+  // why: lift the active tab to one source of truth so the mobile <Select>
+  // (shown when the @4xl/main TabsList is hidden) actually switches views —
+  // upstream shadcn leaves that select unwired, stranding narrow viewports.
+  const [view, setView] = React.useState('outline')
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -394,13 +398,18 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
   }
   const ref = useShadcn()
   return (
-    <Tabs defaultValue="outline" className="w-full flex-col justify-start gap-6">
+    <Tabs
+      value={view}
+      onValueChange={(v) => setView(v as string)}
+      className="w-full flex-col justify-start gap-6"
+    >
       <div className="flex items-center justify-between px-4 lg:px-6">
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
         <Select
-          defaultValue="outline"
+          value={view}
+          onValueChange={(v) => setView(v as string)}
           items={[
             { label: 'Outline', value: 'outline' },
             { label: 'Past Performance', value: 'past-performance' },
@@ -508,12 +517,12 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
           </DndContext>
         </div>
         <div className="flex items-center justify-between px-4">
-          <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
+          <div className="hidden flex-1 text-sm text-muted-foreground @4xl/main:flex">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
+          <div className="flex w-full items-center gap-8 @4xl/main:w-fit">
+            <div className="hidden items-center gap-2 @4xl/main:flex">
               <Label htmlFor="rows-per-page" className="text-sm font-medium">
                 Rows per page
               </Label>
@@ -544,10 +553,10 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
             <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
             </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <div className="ml-auto flex items-center gap-2 @4xl/main:ml-0">
               <Button
                 variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
+                className="hidden h-8 w-8 p-0 @4xl/main:flex"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
@@ -576,7 +585,7 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
               </Button>
               <Button
                 variant="outline"
-                className="hidden size-8 lg:flex"
+                className="hidden size-8 @4xl/main:flex"
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
@@ -589,20 +598,20 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
         </div>
       </TabsContent>
       <TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
-        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 @xl/main:grid-cols-2 @4xl/main:grid-cols-3">
           <AccountAccess />
           <UsageCard />
           <Shortcuts />
         </div>
       </TabsContent>
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 @xl/main:grid-cols-2">
           <EmptyExploreCatalog />
           <FileUpload />
         </div>
       </TabsContent>
       <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 sm:grid-cols-2">
+        <div className="grid flex-1 items-stretch gap-4 rounded-lg border border-dashed border-border p-4 @xl/main:grid-cols-2">
           <ClaimableBalance />
           <ActivateAgentDialog />
         </div>

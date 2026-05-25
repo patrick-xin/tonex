@@ -40,7 +40,7 @@ export function ColorTile<T>({
         focusVisiblePrimaryRing,
         size === 'sm'
           ? 'outline outline-outline-variant'
-          : 'outline outline-outline-variant w-44 sm:w-60',
+          : 'outline outline-outline-variant w-[calc(50%-0.75rem)] sm:w-60',
       )}
     >
       <div

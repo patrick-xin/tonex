@@ -126,19 +126,19 @@ function HexButton({ hex, className }: { hex: string; className?: string }) {
 
 function PairTile({ bg, fg, bgHex, fgHex }: Pair & { bgHex: string; fgHex: string }) {
   return (
-    <div className="h-32 w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
+    <div className="h-28 sm:h-32 w-[calc(50%-0.5rem)] sm:w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
       <div
-        className="group h-2/3 p-3 text-sm font-medium leading-tight capitalize flex flex-col justify-end relative"
+        className="group h-2/3 p-3 text-xs sm:text-sm font-medium leading-tight capitalize flex flex-col justify-end relative"
         style={{ backgroundColor: bgHex, color: fgHex }}
       >
         <HexButton hex={bgHex} className="absolute top-3 right-3" />
-        {bg.replace(/-/g, ' ')}
+        <span className="truncate">{bg.replace(/-/g, ' ')}</span>
       </div>
       <div
-        className="group h-1/3 px-3 py-2 text-sm font-medium leading-tight capitalize flex items-center justify-between"
+        className="group shrink-0 h-1/3 px-3 py-2 text-xs sm:text-sm font-medium leading-tight capitalize flex items-center justify-between gap-2"
         style={{ backgroundColor: fgHex, color: bgHex }}
       >
-        <span>{fg.replace(/-/g, ' ')}</span>
+        <span className="truncate min-w-0">{fg.replace(/-/g, ' ')}</span>
         <HexButton hex={fgHex} />
       </div>
     </div>
@@ -147,15 +147,15 @@ function PairTile({ bg, fg, bgHex, fgHex }: Pair & { bgHex: string; fgHex: strin
 
 function SoloTile({ token, hex }: { token: RoleSuffix; hex: string }) {
   return (
-    <div className="h-32 w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
+    <div className="h-28 sm:h-32 w-[calc(50%-0.5rem)] sm:w-60 rounded-md overflow-hidden flex flex-col border border-outline-variant/40">
       <div
         className="group h-2/3 p-3 flex flex-col justify-end rounded-md rounded-b-none border-outline-variant/40 relative"
         style={{ backgroundColor: hex }}
       >
         <HexButton hex={hex} className="absolute top-3 right-3" />
       </div>
-      <div className="h-1/3 p-3 text-sm font-medium leading-tight capitalize flex flex-col justify-end border-t border-outline-variant/40 rounded-b-md">
-        {token.replace(/-/g, ' ')}
+      <div className="shrink-0 h-1/3 px-3 py-2 text-xs sm:text-sm font-medium leading-tight capitalize flex flex-col justify-end border-t border-outline-variant/40 rounded-b-md">
+        <span className="truncate">{token.replace(/-/g, ' ')}</span>
       </div>
     </div>
   )

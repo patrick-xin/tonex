@@ -33,7 +33,11 @@ export function ShadcnRailContent() {
         opacity: 1,
       }}
     >
-      <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
+      <ScrollArea
+        gradientScrollFade
+        noScrollBar
+        className="flex-1 min-h-0 w-full max-w-4xl mx-auto"
+      >
         <div className="space-y-1">
           <ShadcnSourceColor />
           <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>

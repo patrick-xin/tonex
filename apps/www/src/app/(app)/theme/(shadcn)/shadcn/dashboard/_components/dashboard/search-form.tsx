@@ -10,7 +10,7 @@ import {
 export function SearchForm({ ...props }: React.ComponentProps<"form">) {
   return (
     <form {...props}>
-      <SidebarGroup className="p-0">
+      <SidebarGroup className="p-0 group-data-[collapsible=icon]:hidden">
         <SidebarGroupContent className="relative">
           <Label htmlFor="search" className="sr-only">
             Search

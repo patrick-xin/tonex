@@ -11,7 +11,7 @@ import { SurfaceAdjustment } from '@/features/surface-adjustment'
 
 export function MdRailContent() {
   return (
-    <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0">
+    <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0 w-full max-w-4xl mx-auto">
       <div className="space-y-1">
         <SourceColorTabs />
         <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
