@@ -14,8 +14,8 @@ function buildSchemes(source: PortableTheme) {
   const variant = variants[source.variant]
   const seedHct = Hct.from(source.seed.hue, source.seed.chroma, source.seed.tone)
   return {
-    light: variant.build(seedHct, false, source.contrastLevel),
-    dark: variant.build(seedHct, true, source.contrastLevel),
+    light: variant.build(seedHct, false, source.contrastLevel.light),
+    dark: variant.build(seedHct, true, source.contrastLevel.dark),
   }
 }
 

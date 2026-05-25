@@ -53,7 +53,7 @@ export interface SourceActions {
   setSeedChroma(chroma: number): void
   setSeedTone(tone: number): void
   setVariant(variant: VariantName): void
-  setContrastLevel(level: number): void
+  setContrastLevel(mode: Mode, level: number): void
   setSeedHexLock(locked: boolean): void
   setMd3TokenOverride(mode: Mode, token: MdTokenName, hex: string | null): void
   setShadcnRoleBinding(mode: Mode, role: ShadcnRoleName, mdToken: MdTokenName): void
@@ -242,11 +242,17 @@ export const useSource = create<SourceState>()(
         // slider, future contrast dialog, programmatic callers); UI inputs
         // still set their own min/max for the slider UX, but no consumer
         // needs to re-derive the contract.
-        setContrastLevel: (contrastLevel) =>
-          // why: ADR-0031 #4 — the call records the touch (intent) regardless of
-          // the clamped value, sibling to the seed setters. No lock on contrast,
+        setContrastLevel: (mode, level) =>
+          // why: per-mode write — only the addressed mode's level moves (#123),
+          // mirroring setSurfaceTintLevel's `(mode, value)` shape. ADR-0031 #4 —
+          // the call records the touch (intent) regardless of the clamped value,
+          // sibling to the seed setters. contrastTouched stays one boolean: a
+          // touch on either mode arms it (#123 Decision B). No lock on contrast,
           // so every call records.
-          set({ contrastLevel: Math.max(0, Math.min(1, contrastLevel)), contrastTouched: true }),
+          set((s) => ({
+            contrastLevel: { ...s.contrastLevel, [mode]: Math.max(0, Math.min(1, level)) },
+            contrastTouched: true,
+          })),
         setSeedHexLock: (seedHexLock) => set({ seedHexLock }),
         // why: hex sets the override for one (mode, token); null deletes the
         // entry so the token returns to MCU. Mode and token are typed so any

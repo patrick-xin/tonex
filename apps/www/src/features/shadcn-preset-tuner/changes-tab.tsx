@@ -31,15 +31,21 @@ export function ChangesTab() {
   const applyPreset = useApplyPreset()
   const [name, setName] = useState('')
 
+  // why: a preset carries a single scalar contrast (#123 Decision B), so the
+  // curator authors a uniform value — collapse the per-mode rail state to its
+  // light reading for the emitted entry and the diff. (Apply writes the scalar
+  // to both modes, so a curated preset round-trips with light === dark.)
+  const contrastScalar = contrastLevel.light
+
   const bundle = useMemo(() => snapshotBundle(portable), [portable])
   const diff = useMemo(() => diffBundle(bundle, DEFAULT_BUNDLE), [bundle])
   const output = useMemo(
-    () => formatCopyOutput(name, seedHex, contrastLevel, bundle),
-    [name, seedHex, contrastLevel, bundle],
+    () => formatCopyOutput(name, seedHex, contrastScalar, bundle),
+    [name, seedHex, contrastScalar, bundle],
   )
 
   const seedChanged = seedHex !== DEFAULT_INPUTS.seed.exactHex
-  const contrastChanged = contrastLevel !== DEFAULT_INPUTS.contrastLevel
+  const contrastChanged = contrastScalar !== DEFAULT_INPUTS.contrastLevel.light
 
   const { copyToClipboard, isCopied } = useCopyToClipboard({ timeout: 1500 })
 
@@ -77,7 +83,7 @@ export function ChangesTab() {
       <DiffSummary
         diff={diff}
         seed={{ changed: seedChanged, hex: seedHex }}
-        contrast={{ changed: contrastChanged, level: contrastLevel }}
+        contrast={{ changed: contrastChanged, level: contrastScalar }}
       />
 
       <div className="flex items-center gap-2">
@@ -235,7 +241,9 @@ function useApplyPreset() {
     // why: mirror selectSeedHex — prefer the curated exact bytes, fall back to
     // the HCT-derived hex if a preset ever omits exactHex (ADR-0028).
     actions.setSeedHex(preset.seed.exactHex ?? hexFromHct(preset.seed))
-    actions.setContrastLevel(preset.contrastLevel)
+    // why: the preset's scalar contrast applies uniformly to both modes (#123).
+    actions.setContrastLevel('light', preset.contrastLevel)
+    actions.setContrastLevel('dark', preset.contrastLevel)
     actions.setVariant(preset.variant)
     actions.setSurfaceAlgo(preset.surfaceAlgo)
     actions.setSurfacePaletteName(preset.surfacePaletteName)

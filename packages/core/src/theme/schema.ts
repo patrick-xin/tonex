@@ -29,13 +29,16 @@ export { type CustomColorEntry, slugifyCustomColorName, validateCustomColorEntry
 
 // why: SCHEMA_VERSION pins the persisted PortableTheme shape contract per
 // ADR-0009. v2 — ADR-0028 flips the canonical seed from `seedHex: string`
-// to `seed: { hue, chroma, tone, exactHex? }`. Pre-launch breaking change
-// per memory/feedback_prelaunch_breaking_changes.md: no forward migration
-// from v1, persisted v1 records fail schema parse and reset to
-// DEFAULT_INPUTS on rehydrate (ADR-0009 c.4). Future bumps follow ADR-
-// 0009's procedure: increment SCHEMA_VERSION AND add a forward-migration
-// branch in source.ts:migrate when there are live users to preserve.
-export const SCHEMA_VERSION = 2 as const
+// to `seed: { hue, chroma, tone, exactHex? }`. v3 — issue #123 splits
+// `contrastLevel: number` to per-mode `{ light, dark }`, mirroring the
+// surface levels (contrast is a per-build() MCU arg, so the split is
+// structural). Pre-launch breaking change per
+// memory/feedback_prelaunch_breaking_changes.md: no forward migration,
+// persisted older records fail schema parse and reset to DEFAULT_INPUTS on
+// rehydrate (ADR-0009 c.4). Future bumps follow ADR-0009's procedure:
+// increment SCHEMA_VERSION AND add a forward-migration branch in
+// source.ts:migrate when there are live users to preserve.
+export const SCHEMA_VERSION = 3 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: canonical list of md tokens deriveTheme emits per mode. Used as the
@@ -325,13 +328,20 @@ export interface PortableTheme {
   // anywhere in product code.
   seed: Seed
   variant: VariantName
-  // why: MCU contrastLevel input — fed straight into variant.build(). Range
-  // [0, 1]: 0 is the baseline, 1 is maximum contrast. MCU's spec range is
-  // [-1, 1] but the 2025/2026 spec curves (which we use) treat any value
-  // < 0 as identical to 0 (every ContrastCurve has `low === normal`) and
-  // > 1 saturates at `high`. Schema rejects out-of-range; setter clamps
-  // (issue #33).
-  contrastLevel: number
+  // why: MCU contrastLevel input — fed straight into variant.build(), now
+  // per-mode (issue #123). MCU takes contrastLevel as a per-build() argument
+  // and deriveTheme already calls build() twice (light + dark), so splitting
+  // is structurally clean — unlike `seed`, which MCU expands from one value.
+  // dark mode often wants a different baseline (e.g. OLED legibility). Range
+  // [0, 1] per mode: 0 is the baseline, 1 is maximum contrast. MCU's spec
+  // range is [-1, 1] but the 2025/2026 spec curves (which we use) treat any
+  // value < 0 as identical to 0 (every ContrastCurve has `low === normal`)
+  // and > 1 saturates at `high`. Schema rejects out-of-range per mode; setter
+  // clamps (issue #33). The touched signal (contrastTouched) stays a single
+  // boolean — per ADR-0031 the preset-adoption decision treats contrast as
+  // one owned input; per-mode is an editing-surface capability, not a
+  // touched-gating granularity (issue #123 Decision B).
+  contrastLevel: { light: number; dark: number }
   // why: source-input gate, not a per-token snapshot. When true, every
   // seed setter (setSeedHex, setSeedHue/Chroma/Tone) becomes a no-op — one
   // structural gate covers every mutation pathway (hex input, HCT slider,
@@ -355,7 +365,11 @@ export interface PortableTheme {
   // Resolved independently of the seed at preset apply (resolvePresetApply): a
   // user who tuned contrast but never picked a color keeps their contrast and
   // receives the curated seed, and the mirror. Contrast has no lock — the only
-  // gate is the touched signal. Issue #110.
+  // gate is the touched signal. Issue #110. Stays a single boolean even though
+  // contrastLevel is now per-mode (#123 Decision B): touching either mode arms
+  // it, and an adopted preset's scalar supersedes both modes at once — the
+  // preset dialog keeps one contrast row, matching the user's mental model of
+  // contrast as one intent.
   contrastTouched: boolean
   // why: per ADR-0017 commitment 3 — mode-keyed `{ light, dark }` at the top,
   // `Record<MdTokenName, hex>` inside. Mirrors the export's `:root + .dark`
@@ -475,7 +489,7 @@ export const DEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seed: { ...hctFromHex(DEFAULT_SEED_HEX), exactHex: DEFAULT_SEED_HEX },
   variant: SHADCN_PRESETS.default.variant,
-  contrastLevel: 0,
+  contrastLevel: { light: 0, dark: 0 },
   seedHexLock: false,
   seedTouched: false,
   contrastTouched: false,
@@ -580,11 +594,19 @@ const ShadcnChartOverridesPerModeSchema = v.record(v.picklist(SHADCN_CHART_TOKEN
 
 const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
 
+// why: contrastLevel is mode-keyed (issue #123) but, unlike the surface
+// levels, each mode is bounded [0, 1] — MCU's spec range is [-1, 1] but the
+// 2025/2026 curves treat <0 as 0 and saturate past 1, so there's no point
+// persisting out-of-range values. The setter clamps; this rejects anything
+// that slips past it on rehydrate (issue #33, now per mode).
+const BoundedNumber = v.pipe(v.number(), v.minValue(0), v.maxValue(1))
+const ContrastLevelSchema = v.object({ light: BoundedNumber, dark: BoundedNumber })
+
 export const PortableThemeSchema = v.object({
   version: v.literal(SCHEMA_VERSION),
   seed: SeedSchema,
   variant: v.picklist(VARIANT_NAMES),
-  contrastLevel: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
+  contrastLevel: ContrastLevelSchema,
   seedHexLock: v.boolean(),
   seedTouched: v.boolean(),
   contrastTouched: v.boolean(),

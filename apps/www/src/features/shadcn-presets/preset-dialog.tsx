@@ -26,6 +26,14 @@ import { isPresetSwitchDirty } from './predicate'
 // prop.
 export const presetSwitchDialogHandle = createDialogHandle<ShadcnPresetName>()
 
+// why: contrast is per-mode (#123) but the adoption choice is a single
+// decision (Decision B): one row, the preset's scalar supersedes both modes.
+// Show one value when the user's modes match, `light/dark` when they diverge,
+// so the row stays honest about what "keep mine" preserves.
+function formatContrast(c: { light: number; dark: number }): string {
+  return c.light === c.dark ? c.light.toFixed(2) : `${c.light.toFixed(2)}/${c.dark.toFixed(2)}`
+}
+
 export function PresetSwitchDialog() {
   return (
     <Dialog handle={presetSwitchDialogHandle}>
@@ -133,7 +141,7 @@ function PresetSwitchBody({ name }: { name: ShadcnPresetName }) {
           {contrastTouched && (
             <ChoiceRow
               noun="contrast"
-              currentText={`Current: ${currentContrast.toFixed(2)}`}
+              currentText={`Current: ${formatContrast(currentContrast)}`}
               presetText={`Preset: ${preset.contrastLevel.toFixed(2)}`}
               checked={keepContrast}
               onCheckedChange={setKeepContrast}

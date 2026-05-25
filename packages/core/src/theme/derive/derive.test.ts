@@ -608,11 +608,23 @@ describe('deriveTheme', () => {
   describe('contrastLevel', () => {
     it('non-zero contrast shifts md tokens away from baseline', () => {
       const baseline = deriveTheme(DEFAULT_INPUTS)
-      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
+      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } })
       // why: MCU's contrastLevel adjusts tone on dynamic colors; at least
       // some primary-family tokens should differ. Asserting !== rather than
       // a specific value because exact tone math is MCU's spec, not ours.
       expect(high.md.light['--color-primary']).not.toBe(baseline.md.light['--color-primary'])
+    })
+
+    // why: #123 — each mode's contrast is fed to its own variant.build(), so
+    // raising only dark's contrast must move dark tokens while light stays at
+    // the baseline. This is the structural payoff of the per-mode split.
+    it('reads light and dark contrast independently', () => {
+      const baseline = deriveTheme(DEFAULT_INPUTS)
+      const darkOnly = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0, dark: 0.5 } })
+      expect(darkOnly.md.light['--color-on-surface']).toBe(baseline.md.light['--color-on-surface'])
+      expect(darkOnly.md.dark['--color-on-surface']).not.toBe(
+        baseline.md.dark['--color-on-surface'],
+      )
     })
   })
 
@@ -851,7 +863,7 @@ describe('deriveTheme', () => {
       // why: palette is contrast-invariant — the tonal ramp is a function of
       // seed + variant, not of contrast level. Pinning this lets inspect UIs
       // cache palette across contrast toggles.
-      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: 0.5 })
+      const high = deriveTheme({ ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } })
       expect(high.md.palette).toEqual(baseline.md.palette)
     })
 

@@ -276,8 +276,8 @@ function buildSchemes(source: PortableTheme): {
     source.cmfSecondSourceHex !== null && cmfSecondSourceDisabledReason(source) === null
       ? Hct.fromInt(argbFromHex(source.cmfSecondSourceHex))
       : undefined
-  const lightScheme = variant.build(seedHct, false, source.contrastLevel, secondHct)
-  const darkScheme = variant.build(seedHct, true, source.contrastLevel, secondHct)
+  const lightScheme = variant.build(seedHct, false, source.contrastLevel.light, secondHct)
+  const darkScheme = variant.build(seedHct, true, source.contrastLevel.dark, secondHct)
   applyPaletteOverrides(lightScheme, darkScheme, source)
   return { lightScheme, darkScheme }
 }

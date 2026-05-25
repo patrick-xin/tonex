@@ -18,22 +18,25 @@ import { type DerivedTheme, deriveTheme } from './derive'
 //      tick that's structurally equal to what consumers see. Falling through
 //      to a key-by-key compare lets applyDom hit the cache too.
 //
-// why: keyed on (source, contrastLevel) — issue #20. buildContrastBundle's
-// medium/high tiers derive at canonical 0.5/1.0 against the same source
-// reference. With a single-cell cache, tier B evicted tier A on every call;
-// with a (source, contrastLevel)-keyed cache they coexist. Cap at 6 covers
-// 2 sources × 3 tiers, the worst realistic working set (preview tier +
-// medium + high during an open export dialog with a recently-changed seed
-// still warm). FIFO eviction (Map insertion order, drop the oldest entry
-// when the next miss would overflow) is sufficient for this access pattern;
-// LRU's complexity isn't justified at N=6.
+// why: keyed on (source, contrast pair) — issue #20, extended for #123.
+// contrastLevel is now per-mode `{ light, dark }`; the default tier carries
+// the authored per-mode baseline, while buildContrastBundle's medium/high
+// tiers override contrast *uniformly* across both modes at canonical 0.5/1.0
+// (a scalar `uniformContrast` arg). The cache key is the effective `{light,
+// dark}` pair either way, so the per-mode default tier and the two uniform
+// tiers coexist instead of evicting each other. Cap at 6 covers 2 sources ×
+// 3 tiers, the worst realistic working set (preview tier + medium + high
+// during an open export dialog with a recently-changed seed still warm).
+// FIFO eviction (Map insertion order, drop the oldest entry when the next
+// miss would overflow) is sufficient for this access pattern; LRU's
+// complexity isn't justified at N=6.
 //
 // Compare iterates Object.keys so new PortableTheme fields flow through
 // without edits here, mirroring how selectPortable + partialize stay
 // maintenance-free.
 //
 // Drift-guard (ADR-0017) holds because the cached value IS deriveTheme's
-// output for the (source, contrastLevel) pair — applyDom and exporters still
+// output for the (source, contrast pair) — applyDom and exporters still
 // consume identical {md, shadcn, warnings} maps; we just compute once
 // instead of N times.
 
@@ -41,27 +44,33 @@ const MAX_CACHE_SIZE = 6
 
 interface CacheEntry {
   source: PortableTheme
-  contrastLevel: number
+  contrast: { light: number; dark: number }
   derived: DerivedTheme
 }
 
 const cache: CacheEntry[] = []
 
-export function getDerivedTheme(source: PortableTheme, contrastLevel?: number): DerivedTheme {
-  const level = contrastLevel ?? source.contrastLevel
+// why: `uniformContrast`, when passed, overrides BOTH modes to one scalar —
+// the export accessibility tiers (medium 0.5 / high 1.0) are uniform by
+// definition, distinct from the authored per-mode baseline (#123 Decision A).
+// Omitted, the default tier uses the source's own per-mode contrast.
+export function getDerivedTheme(source: PortableTheme, uniformContrast?: number): DerivedTheme {
+  const contrast =
+    uniformContrast === undefined
+      ? source.contrastLevel
+      : { light: uniformContrast, dark: uniformContrast }
   for (const entry of cache) {
-    if (entry.contrastLevel !== level) continue
+    if (entry.contrast.light !== contrast.light || entry.contrast.dark !== contrast.dark) continue
     if (entry.source === source) return entry.derived
     if (isShallowEqualPortable(entry.source, source)) return entry.derived
   }
-  // why: when caller passes a contrastLevel that differs from the source's
-  // own field, the spine call needs the override propagated — deriveTheme
+  // why: the uniform-tier call needs the override propagated — deriveTheme
   // reads source.contrastLevel internally, not a separate arg. Spreading is
   // free: deriveTheme doesn't retain the source past return.
   const effectiveSource =
-    level === source.contrastLevel ? source : { ...source, contrastLevel: level }
+    uniformContrast === undefined ? source : { ...source, contrastLevel: contrast }
   const derived = deriveTheme(effectiveSource)
-  cache.push({ source, contrastLevel: level, derived })
+  cache.push({ source, contrast, derived })
   if (cache.length > MAX_CACHE_SIZE) cache.shift()
   return derived
 }

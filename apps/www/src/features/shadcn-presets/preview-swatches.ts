@@ -22,14 +22,17 @@ export type PresetSwatches = Record<Mode, Swatches>
 // a default preset-apply would land on — preset's seed when untouched, the
 // user's when kept) so the preview mirrors the click outcome instead of an
 // identity the live theme no longer has.
-export type PresetSource = { seed: Seed; contrastLevel: number }
+// why: contrastLevel is per-mode (#123) at the theme level. The override
+// carries the resolved per-mode pair (what a preset-apply would land on); the
+// preset's own curated contrast is a single scalar, expanded to both modes.
+export type PresetSource = { seed: Seed; contrastLevel: { light: number; dark: number } }
 
 function presetSource(name: ShadcnPresetName, override?: PresetSource): PortableTheme {
   const p = SHADCN_PRESETS[name]
   return {
     ...DEFAULT_INPUTS,
     seed: { ...(override?.seed ?? p.seed) },
-    contrastLevel: override?.contrastLevel ?? p.contrastLevel,
+    contrastLevel: override?.contrastLevel ?? { light: p.contrastLevel, dark: p.contrastLevel },
     variant: p.variant,
     surfaceAlgo: p.surfaceAlgo,
     surfacePaletteName: p.surfacePaletteName,
@@ -62,7 +65,7 @@ const cache = new Map<string, PresetSwatches>()
 function cacheKey(name: ShadcnPresetName, override?: PresetSource): string {
   if (!override) return name
   const { seed, contrastLevel } = override
-  return `${name}|${seed.hue},${seed.chroma},${seed.tone},${seed.exactHex ?? ''}|${contrastLevel}`
+  return `${name}|${seed.hue},${seed.chroma},${seed.tone},${seed.exactHex ?? ''}|${contrastLevel.light},${contrastLevel.dark}`
 }
 
 export function presetSwatches(name: ShadcnPresetName, override?: PresetSource): PresetSwatches {

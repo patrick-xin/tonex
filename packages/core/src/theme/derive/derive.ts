@@ -272,8 +272,8 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
       ? Hct.fromInt(argbFromHex(source.cmfSecondSourceHex))
       : undefined
 
-  const lightScheme = variant.build(seedHct, false, source.contrastLevel, secondHct)
-  const darkScheme = variant.build(seedHct, true, source.contrastLevel, secondHct)
+  const lightScheme = variant.build(seedHct, false, source.contrastLevel.light, secondHct)
+  const darkScheme = variant.build(seedHct, true, source.contrastLevel.dark, secondHct)
 
   const mdc = new MaterialDynamicColors()
 
