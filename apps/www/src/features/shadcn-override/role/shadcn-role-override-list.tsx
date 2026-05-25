@@ -40,7 +40,7 @@ export function ShadcnRoleOverrideList() {
             {group.kind === 'pair' ? (
               <div className="flex flex-wrap gap-x-4 gap-y-2">
                 {group.columns.map((col, i) => (
-                  <div key={String(i)} className="flex gap-2">
+                  <div key={String(i)} className="flex gap-2 w-full sm:w-auto">
                     {col.map(renderSwatch)}
                   </div>
                 ))}
