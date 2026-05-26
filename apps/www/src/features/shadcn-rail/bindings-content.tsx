@@ -209,7 +209,12 @@ function TokenCombobox({
           </Button>
         }
       />
-      <ComboboxContent align="end" sideOffset={8} matchAnchorWidth={false} className="w-72">
+      <ComboboxContent
+        align="end"
+        sideOffset={8}
+        matchAnchorWidth={false}
+        className="w-[min(18rem,calc(100vw-2rem))]"
+      >
         <div className="flex items-stretch border-b border-outline-variant">
           <ComboboxInputGroupContent
             embedded
