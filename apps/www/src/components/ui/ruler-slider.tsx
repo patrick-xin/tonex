@@ -35,7 +35,7 @@ const rulerSliderStyles = tv({
     ],
     caret: 'absolute top-0 size-1.5 -translate-y-1/2 rotate-45 rounded-[1px]',
     label:
-      'pointer-events-none absolute -translate-x-1/2 text-[10px] text-on-surface-variant tabular-nums',
+      'pointer-events-none absolute -translate-x-1/2 text-xs text-on-surface-variant tabular-nums',
   },
   variants: {
     layout: {

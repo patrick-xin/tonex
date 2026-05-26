@@ -78,7 +78,7 @@ export function BindingPresetTab() {
         {isCopied ? 'Copied' : 'Copy binding preset'}
       </Button>
 
-      <pre className="text-[10px] leading-snug font-mono whitespace-pre rounded-md ring-1 ring-outline-variant/50 bg-surface px-2 py-2 overflow-x-auto max-h-[40dvh]">
+      <pre className="text-xs leading-snug font-mono whitespace-pre rounded-md ring-1 ring-outline-variant/50 bg-surface px-2 py-2 overflow-x-auto max-h-[40dvh]">
         {output}
       </pre>
     </div>

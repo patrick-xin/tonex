@@ -95,7 +95,7 @@ function TokenCell({ name, hex }: { name: string; hex: string }) {
       />
       <div>
         <div className="text-xs font-mono">{name.replace(/^--(color-)?/, '')}</div>
-        <div className="text-[10px] text-on-surface-variant font-mono">{hex}</div>
+        <div className="text-xs text-on-surface-variant font-mono">{hex}</div>
       </div>
     </div>
   )
@@ -108,7 +108,7 @@ function TokenCell({ name, hex }: { name: string; hex: string }) {
 function ResultBadge({ result, label }: { result: Result; label?: string }) {
   const meta = RESULT[result]
   return (
-    <span className={cx('text-[11px] font-semibold px-2 py-0.5 rounded-full', meta.badgeClass)}>
+    <span className={cx('text-xs font-semibold px-2 py-0.5 rounded-full', meta.badgeClass)}>
       {label ?? meta.label}
     </span>
   )

@@ -109,7 +109,7 @@ function Swatch({ argb, label }: { argb: number; label?: string }) {
         className="h-14 w-full rounded-md ring ring-outline-variant/50"
         style={{ background: hexString(argb) }}
       />
-      <div className="flex flex-col leading-tight text-[10px] font-mono text-on-surface-variant">
+      <div className="flex flex-col leading-tight text-xs font-mono text-on-surface-variant">
         {label !== undefined ? <span className="text-on-surface">{label}</span> : null}
         <span>{hexString(argb)}</span>
       </div>
@@ -139,7 +139,7 @@ function ChartColumn({ title, subtitle, argbs, partners, action }: ChartColumnPr
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-on-surface">{title}</h3>
-          {subtitle ? <p className="text-[11px] text-on-surface-variant">{subtitle}</p> : null}
+          {subtitle ? <p className="text-xs text-on-surface-variant">{subtitle}</p> : null}
         </div>
         {action}
       </div>
@@ -149,14 +149,14 @@ function ChartColumn({ title, subtitle, argbs, partners, action }: ChartColumnPr
           <Swatch key={`chart-${i + 1}`} argb={argb} label={`chart-${i + 1}`} />
         ))}
       </div>
-      <div className="text-[11px]">
+      <div className="text-xs">
         <div className="grid gap-x-3 gap-y-1 items-center font-mono" style={matrixCols}>
-          <span className="text-on-surface-variant text-[10px]">partner ↓</span>
+          <span className="text-on-surface-variant text-xs">partner ↓</span>
           {argbs.map((_, i) => (
             <span
               // biome-ignore lint/suspicious/noArrayIndexKey: positional chart anchors
               key={`hdr-${i + 1}`}
-              className="text-on-surface-variant text-[10px] text-right"
+              className="text-on-surface-variant text-xs text-right"
             >
               c-{i + 1}
             </span>
@@ -168,7 +168,7 @@ function ChartColumn({ title, subtitle, argbs, partners, action }: ChartColumnPr
                   className="size-3 rounded-sm shrink-0 ring ring-outline-variant/40"
                   style={{ background: hexString(p.argb) }}
                 />
-                <span className="text-[10px] truncate">{p.name.replace(/^--(color-)?/, '')}</span>
+                <span className="text-xs truncate">{p.name.replace(/^--(color-)?/, '')}</span>
               </div>
               {argbs.map((argb, i) => {
                 const r = contrastRatio(argb, p.argb)
@@ -207,7 +207,7 @@ function ParamSlider({
     <label className="flex flex-col gap-1.5">
       <span className="flex items-baseline justify-between text-xs">
         <span className="font-medium text-on-surface">{label}</span>
-        <span className="font-mono text-[11px] tabular-nums text-on-surface-variant">{value}</span>
+        <span className="font-mono text-xs tabular-nums text-on-surface-variant">{value}</span>
       </span>
       <input
         type="range"
@@ -445,7 +445,7 @@ export default function ChartLabPage() {
         <div className="rounded-lg border border-outline-variant/60 bg-surface-container-low p-4 flex items-center justify-between gap-6">
           <div className="flex flex-col gap-0.5 min-w-0">
             <span className="text-sm font-semibold text-on-surface">Push to live charts</span>
-            <span className="text-[11px] text-on-surface-variant">
+            <span className="text-xs text-on-surface-variant">
               {canApply
                 ? multiHue
                   ? `Apply pushes the selected anchor strategy (${applyAnchor}) to live charts as !important overrides. Persists across navigation; Reset clears.`
@@ -489,7 +489,7 @@ export default function ChartLabPage() {
           <div className="rounded-lg border border-outline-variant/60 bg-surface-container-low p-4 flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-4">
               <span className="text-sm font-semibold text-on-surface">Advanced</span>
-              <span className="text-[11px] text-on-surface-variant max-w-prose">
+              <span className="text-xs text-on-surface-variant max-w-prose">
                 N is preview-only beyond {N_SCHEMA} (schema fixed). Per-anchor L* sliders below each
                 mode override even-spacing per slot — slots you don't touch keep auto-flowing with
                 prominent-edge changes. Hue spread {'>'} 0 renders BOTH anchor strategies

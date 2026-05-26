@@ -181,7 +181,7 @@ function RolePreviewSwatches({ roles }: { roles: CustomColorPreviewRoles }) {
           className="h-12 flex items-end p-1.5 rounded-md"
           style={{ backgroundColor: roles[p.bg] }}
         >
-          <span className="text-[9px] font-medium leading-tight" style={{ color: roles[p.fg] }}>
+          <span className="text-xs font-medium leading-tight" style={{ color: roles[p.fg] }}>
             {p.label}
           </span>
         </div>
@@ -248,12 +248,12 @@ function SourceCard({
     <RadioCard value={value} label={label} selected={selected}>
       <div className="flex gap-2">
         <div className="h-9 flex-1 flex items-end p-1.5 rounded-md" style={{ backgroundColor: bg }}>
-          <span className="text-[10px] font-medium leading-none" style={{ color: fg }}>
+          <span className="text-xs font-medium leading-none" style={{ color: fg }}>
             bg: {bg}
           </span>
         </div>
         <div className="h-9 flex-1 flex items-end p-1.5 rounded-md" style={{ backgroundColor: fg }}>
-          <span className="text-[10px] font-medium leading-none" style={{ color: bg }}>
+          <span className="text-xs font-medium leading-none" style={{ color: bg }}>
             fg: {fg}
           </span>
         </div>

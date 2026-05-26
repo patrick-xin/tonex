@@ -141,7 +141,7 @@ const comboboxChipStyles = tv({
         remove: "[&_svg:not([class*='size-'])]:size-4",
       },
       lg: {
-        chip: 'gap-1 px-2.5 py-1 text-[15px]',
+        chip: 'gap-1 px-2.5 py-1 text-base',
         remove: "[&_svg:not([class*='size-'])]:size-4",
       },
     },

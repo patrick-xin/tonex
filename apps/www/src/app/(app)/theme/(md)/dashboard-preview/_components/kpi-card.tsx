@@ -178,7 +178,7 @@ export function KpiSparkCard({
             ) : null}
           </div>
           {badge ? (
-            <Chip className="h-4 text-[11px] text-on-surface-variant" variant="outline" size="sm">
+            <Chip className="h-4 text-xs text-on-surface-variant" variant="outline" size="sm">
               {badge}
             </Chip>
           ) : null}
