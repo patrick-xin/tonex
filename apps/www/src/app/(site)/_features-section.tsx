@@ -143,7 +143,7 @@ export function FeaturesSection() {
       ref={containerRef}
       className="relative h-[260vh] px-4 sm:h-[450vh] sm:px-12 lg:px-16 xl:px-24"
     >
-      <div className="sticky top-14 h-[calc(100dvh-3.5rem)] overflow-hidden">
+      <div className="sticky top-0 h-dvh overflow-hidden">
         {ANIMATION_SECTIONS.map((section, index) => (
           <StackedFeature
             key={section.id}
