@@ -69,7 +69,7 @@ export function ShadcnPresetTunerRail() {
                 <ContrastLevelSlider />
               </div>
               <Separator className="opacity-20 mx-2" />
-              <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant" height={0}>
+              <AnimatedCollapsible defaultOpen variant="ghost" title="Scheme Variant">
                 <SchemeVariantsToggle />
               </AnimatedCollapsible>
               <SurfaceAdjustment />

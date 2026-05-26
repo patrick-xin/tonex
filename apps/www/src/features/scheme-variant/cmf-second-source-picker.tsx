@@ -3,6 +3,7 @@
 import { ArrowCounterClockwiseIcon, CaretDownIcon } from '@phosphor-icons/react'
 import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
 import { cmfSecondSourceDisabledReason, findActivePreset } from '@tonex/core/schema'
+import { cn } from 'tailwind-variants'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,11 +21,10 @@ import { presetUsesTertiary } from './hints'
 
 // why: the second source color is a CMF-only knob (other variants ignore the
 // param, see variants/cmf-second-source.ts). Surface the disabled reason as a tooltip
-// so non-cmf users see *why* the trigger is inert, matching the
-// palette-override AnimatedButtonColorPicker pattern. Core's
+// so non-cmf users see *why* the trigger is inert. Core's
 // setCmfSecondSourceHex no-ops disabled writes — UI is the friendly seam,
 // core is the backstop.
-export function CmfSecondSourcePicker() {
+export function CmfSecondSourcePicker({ className }: { className?: string }) {
   const seedHex = useSource(selectSeedHex)
   const cmfSecondSourceHex = useSource((s) => s.cmfSecondSourceHex)
   const setCmfSecondSourceHex = useSource((s) => s.actions.setCmfSecondSourceHex)
@@ -51,19 +51,24 @@ export function CmfSecondSourcePicker() {
     layer === 'md'
       ? 'Drives the tertiary color palette.'
       : presetUsesTertiary(activePreset)
-        ? 'Drives the tertiary palette — your current preset maps it onto accent and border roles.'
-        : "Drives the tertiary palette, but your current shadcn preset doesn't use it — so this won't change your export (press H for options)."
+        ? 'Drives the tertiary palette — current preset maps it onto accent and border roles.'
+        : "Drives the tertiary palette, current preset doesn't use it"
 
   const trigger = (
     <PopoverTrigger
       disabled={isDisabled}
       render={
-        <div className="flex items-center">
+        <div
+          className={cn(
+            'flex items-center',
+            isDisabled && 'bg-transparent! border-outline-variant! cursor-not-allowed',
+            className,
+          )}
+        >
           <CaretDownIcon className="size-3" />
         </div>
       }
       nativeButton={false}
-      className="ml-0.5"
     />
   )
 
@@ -77,7 +82,7 @@ export function CmfSecondSourcePicker() {
       ) : (
         trigger
       )}
-      <PopoverContent className="py-2 w-56" showArrow sideOffset={14}>
+      <PopoverContent className="py-2 w-56" showArrow sideOffset={8}>
         <PopoverDescription className="text-xs mb-2">{description}</PopoverDescription>
         <div className="flex items-center gap-2">
           <ColorPicker value={formHex} onChange={handleChange} align="start" />

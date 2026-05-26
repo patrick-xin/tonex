@@ -12,12 +12,7 @@ export const SurfaceAdjustment = () => {
 
   return (
     <GuideAnchor anchorKey="surface-adjustment">
-      <AnimatedCollapsible
-        variant="ghost"
-        title="Surface Adjustment"
-        height={0}
-        contentClassName="mb-2"
-      >
+      <AnimatedCollapsible variant="ghost" title="Surface Adjustment" contentClassName="mb-2">
         <Tabs
           value={m.algo}
           onValueChange={(v) => m.setAlgo(v as 'tint' | 'desaturate')}

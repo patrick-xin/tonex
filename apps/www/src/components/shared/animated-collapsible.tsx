@@ -1,8 +1,7 @@
 'use client'
 
 import { CaretRightIcon } from '@phosphor-icons/react'
-import { m } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { Button, type ButtonStylesProps } from '@/components/ui/button'
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -10,7 +9,6 @@ import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/
 export function AnimatedCollapsible({
   children,
   title,
-  height,
   className,
   variant = 'secondary',
   defaultOpen = false,
@@ -22,7 +20,6 @@ export function AnimatedCollapsible({
 }: {
   children: React.ReactNode
   title: string
-  height: number
   className?: string
   variant?: ButtonStylesProps['variant']
   defaultOpen?: boolean
@@ -42,11 +39,7 @@ export function AnimatedCollapsible({
     if (!isControlled) setUncontrolledOpen(next)
     onOpenChange?.(next)
   }
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  if (!mounted) return null
+
   return (
     <Collapsible className="w-full" onOpenChange={setOpen} open={open}>
       <CollapsibleTrigger
@@ -54,7 +47,7 @@ export function AnimatedCollapsible({
         render={
           <Button
             variant={variant}
-            className={cn('w-full justify-between px-2! group leading-snug', className)}
+            className={cn('w-full justify-between px-2! group leading-snug text-base', className)}
           >
             <span className="flex items-center gap-2">
               {overridden && (
@@ -72,20 +65,9 @@ export function AnimatedCollapsible({
           </Button>
         }
       />
-      <CollapsiblePanel
-        animation="none"
-        keepMounted
-        render={
-          <m.div
-            animate={{ height: open ? 'auto' : height }}
-            className="relative overflow-hidden"
-            hidden={false}
-            initial={false}
-          >
-            <div className={cn('p-2', contentClassName)}>{children}</div>
-          </m.div>
-        }
-      />
+      <CollapsiblePanel>
+        <div className={cn('p-2', contentClassName)}>{children}</div>
+      </CollapsiblePanel>
     </Collapsible>
   )
 }

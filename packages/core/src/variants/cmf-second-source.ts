@@ -22,7 +22,7 @@ export function cmfSecondSourceDisabledReason(source: PortableTheme): string | n
   // to cmf (the value persists across variant flips by design — engine and
   // setter both use this selector).
   if (source.variant !== 'cmf') {
-    return 'Second source color is only used by the CMF variant. Switch to CMF to enable.'
+    return 'Second source color is only used by the CMF variant.'
   }
   return null
 }

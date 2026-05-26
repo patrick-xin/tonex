@@ -11,7 +11,7 @@ const panelVariants = tv({
   },
   variants: {
     animation: {
-      css: 'h-[var(--collapsible-panel-height)] data-[starting-style]:h-0 data-[ending-style]:h-0 transition-all duration-150',
+      css: 'h-(--collapsible-panel-height) data-starting-style:h-0 data-ending-style:h-0 transition-all duration-200',
       none: '',
     },
   },

@@ -1,8 +1,8 @@
 import { Accordion as BaseAccordion } from '@base-ui/react/accordion'
 import type { VariantProps } from 'class-variance-authority'
 import { ChevronRight } from 'lucide-react'
-
 import { cn, tv } from 'tailwind-variants'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
 function Accordion({ ...props }: BaseAccordion.Root.Props) {
   return <BaseAccordion.Root data-slot="accordion" {...props} />
@@ -20,6 +20,7 @@ function AccordionItem({
       className={cn(
         'border-b last:border-b-0 data-disabled:opacity-38',
         variant === 'default' ? 'border-b-outline-variant' : 'border-b-outline-variant',
+        focusVisiblePrimaryRing,
         className,
       )}
       data-slot="accordion-item"
@@ -41,8 +42,9 @@ function AccordionHeader({ className, ...props }: BaseAccordion.Header.Props) {
 const summaryVariants = tv({
   base: [
     'flex flex-1 w-full items-center justify-between text-sm font-medium transition-all text-left',
-    '[&[data-panel-open]>svg]:rotate-90',
+    '[&[data-panel-open]>svg]:rotate-90 outline-transparent',
     '[&>svg]:transition-transform [&>svg]:duration-200 [&>svg]:shrink-0',
+    focusVisiblePrimaryRing,
   ],
   variants: {
     variant: {

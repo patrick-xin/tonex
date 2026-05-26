@@ -58,7 +58,6 @@ export function ShadcnBindingsContent() {
           title={group.label}
           variant="ghost"
           defaultOpen={index === 0}
-          height={0}
           className="text-sm font-semibold capitalize tracking-wider"
           overridden={group.roles.some((role) => bindings[role] !== defaults[role])}
         >

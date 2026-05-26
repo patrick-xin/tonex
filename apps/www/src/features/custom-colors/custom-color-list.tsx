@@ -34,7 +34,7 @@ export function CustomColorList() {
     return (
       <div className="p-2">
         <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-on-surface">Custom colors</div>
+          <div className="font-medium text-on-surface">Custom colors</div>
           <NewCustomColor iconSize="icon-xs" icon />
         </div>
       </div>
@@ -44,7 +44,7 @@ export function CustomColorList() {
   return (
     <div className="p-2 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-on-surface">Custom colors</div>
+        <div className="font-medium text-on-surface">Custom colors</div>
         <NewCustomColor iconSize="icon-xs" icon />
       </div>
       <div className="flex flex-col gap-2">
