@@ -47,7 +47,7 @@ function PresetCardBody({ name }: { name: ShadcnPresetName }) {
           {[recipe.variant, recipe.surfaceAlgo, recipe.surfacePaletteName].map((chip) => (
             <span
               key={chip}
-              className="rounded bg-surface-container-low px-1.5 py-0.5 text-[10px] text-on-surface-variant"
+              className="rounded bg-surface-container-low px-1.5 py-0.5 text-xs text-on-surface-variant"
             >
               {humanizeChip(chip)}
             </span>

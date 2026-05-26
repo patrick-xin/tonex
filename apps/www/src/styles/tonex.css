@@ -1,6 +1,9 @@
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Chrome (Plex Sans) is the default UI/body sans; Mono (Plex Mono) the
+     universal code/numerals face. Loaded in app/layout.tsx. The .shadcn scope
+     re-points --font-chrome at Geist (globals.css) for the preview. */
+  --font-sans: var(--font-chrome);
+  --font-mono: var(--font-mono-plex);
   /* Spacing around window */
   --toast-viewport-padding: 2rem;
   /* Toast width */

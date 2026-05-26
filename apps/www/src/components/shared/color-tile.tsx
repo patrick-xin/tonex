@@ -57,7 +57,7 @@ export function ColorTile<T>({
           {display}
         </p>
         <p
-          className={cx('font-mono', size === 'sm' ? 'text-[10px]' : 'text-xs')}
+          className={cx('font-mono', size === 'sm' ? 'text-xs' : 'text-sm')}
           style={{ color: textColor }}
         >
           {hex}

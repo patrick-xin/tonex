@@ -47,7 +47,10 @@ export function AnimatedCollapsible({
         render={
           <Button
             variant={variant}
-            className={cn('w-full justify-between px-2! group leading-snug text-base', className)}
+            className={cn(
+              'w-full justify-between px-2! group leading-snug font-semibold',
+              className,
+            )}
           >
             <span className="flex items-center gap-2">
               {overridden && (

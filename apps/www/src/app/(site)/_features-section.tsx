@@ -90,7 +90,7 @@ function StackedFeature({
         className="w-full h-[70vh] rounded-md flex flex-col md:flex-row items-center overflow-hidden relative"
       >
         <div className="flex-1 p-4 sm:p-16 flex flex-col justify-center gap-6">
-          <div style={{ color: mutedFg }} className="font-mono text-sm uppercase tracking-[0.18em]">
+          <div style={{ color: mutedFg }} className="font-mono text-sm uppercase">
             Feature {section.id}
           </div>
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{section.title}</h2>

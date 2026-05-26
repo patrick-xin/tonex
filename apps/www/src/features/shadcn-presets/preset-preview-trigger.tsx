@@ -11,7 +11,7 @@ import { usePresetPreview } from './use-preset-preview'
 
 function HexChip({ hex, label }: { hex: string; label?: string }) {
   return (
-    <span className="flex items-center gap-1.5 px-0.5 font-mono text-[10px] text-on-surface-variant">
+    <span className="flex items-center gap-1.5 px-0.5 font-mono text-xs text-on-surface-variant">
       {label && <span>{label}</span>}
       <span
         className="size-2.5 rounded-sm border border-outline-variant/60"

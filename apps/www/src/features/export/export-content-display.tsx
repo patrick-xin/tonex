@@ -35,9 +35,7 @@ export function ExportContentDisplay({ content }: ExportContentDisplayProps) {
 
   return (
     <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0 h-full relative p-1">
-      <pre className="font-mono p-4 text-[11px] text-on-surface-variant whitespace-pre">
-        {content}
-      </pre>
+      <pre className="font-mono p-4 text-xs text-on-surface-variant whitespace-pre">{content}</pre>
       <Tooltip>
         <TooltipTrigger
           render={

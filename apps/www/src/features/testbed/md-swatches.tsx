@@ -200,7 +200,7 @@ function Swatch({ bg, fg, label, md }: SwatchRow & { md: TokenMap }) {
       style={{ backgroundColor: `var(${bg})`, color: `var(${fg})` }}
     >
       <div className="font-medium">{label}</div>
-      <div className="text-[11px] opacity-80 mt-1 font-mono leading-tight">
+      <div className="text-xs opacity-80 mt-1 font-mono leading-tight">
         {bg}: {bgValue ?? '⚠ missing'}
         <br />
         {fg}: {fgValue ?? '⚠ missing'}

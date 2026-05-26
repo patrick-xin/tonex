@@ -61,7 +61,7 @@ export function ShadcnRailContent() {
           </AnimatedCollapsible>
           <CustomColorList />
           <Button
-            className="w-full justify-between px-2! group leading-snug text-base"
+            className="w-full justify-between px-2! group leading-snug"
             variant="ghost"
             onClick={() => setMode('overrides')}
           >
@@ -74,7 +74,7 @@ export function ShadcnRailContent() {
             />
           </Button>
           <Button
-            className="w-full justify-between px-2! group leading-snug text-base"
+            className="w-full justify-between px-2! group leading-snug"
             variant="ghost"
             onClick={() => setMode('bindings')}
           >
@@ -104,7 +104,7 @@ export function ShadcnRailContent() {
           <Button variant="ghost" size="icon-sm" onClick={() => setMode('controls')} title="Back">
             <ArrowLeftIcon />
           </Button>
-          <div className="text-base font-medium">
+          <div className="text-sm font-medium">
             {mode === 'overrides' ? 'Token Overrides' : 'Role Bindings'}
           </div>
         </div>

@@ -94,7 +94,7 @@ export function ShadcnHero() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.55, ease: SMOOTH }}
-          className="mb-6 sm:mb-8 text-[10px] sm:text-xs uppercase tracking-[0.28em] sm:tracking-[0.32em] text-on-surface"
+          className="mb-6 sm:mb-8 text-xs sm:text-xs uppercase tracking-[0.28em] sm:tracking-[0.32em] text-on-surface"
           style={{ fontFamily: 'var(--shadcn-hero-mono)', fontWeight: 500 }}
         >
           Diverging palette · primary ↔ secondary · 2 systems
