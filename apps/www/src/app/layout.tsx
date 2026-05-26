@@ -2,16 +2,36 @@ import { Toaster } from '@/components/ui/toast'
 import '@/styles/globals.css'
 import { domAnimation, LazyMotion } from 'motion/react'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, IBM_Plex_Mono, IBM_Plex_Sans, Vidaloka } from 'next/font/google'
 import { Providers } from './_providers'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+// why: four named type roles. Chrome (Plex Sans) is the app default UI/body
+// sans — it feeds --font-sans in tonex.css. Mono (Plex Mono) is the universal
+// numerals/code face (--font-mono). Voice (Vidaloka) is the display serif,
+// applied to landing headlines only (see (site)/layout.tsx). Geist stays the
+// shadcn-preview sans — its face loads here so it's available, but it's only
+// *applied* inside the .shadcn scope (globals.css), where the preview should
+// read like real shadcn rather than the tonex chrome.
+const chrome = IBM_Plex_Sans({
+  variable: '--font-chrome',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const mono = IBM_Plex_Mono({
+  variable: '--font-mono-plex',
+  subsets: ['latin'],
+  weight: ['400', '500'],
+})
+
+const voice = Vidaloka({
+  variable: '--font-voice',
+  subsets: ['latin'],
+  weight: '400',
+})
+
+const geist = Geist({
+  variable: '--font-geist-sans',
   subsets: ['latin'],
 })
 
@@ -30,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       data-scroll-behavior="smooth"
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${chrome.variable} ${mono.variable} ${voice.variable} ${geist.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="md size-full relative">
