@@ -2,7 +2,7 @@
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs'
 import { cn } from 'tailwind-variants'
-import { focusVisibleRing } from '@/components/ui/styles'
+import { focusVisiblePrimaryRing, focusVisibleRing } from '@/components/ui/styles'
 
 function Tabs({ className, orientation = 'horizontal', ...props }: BaseTabs.Root.Props) {
   return (
@@ -69,11 +69,7 @@ function TabsTab({ className, ...props }: BaseTabs.Tab.Props) {
 function TabsPanel({ className, ...props }: BaseTabs.Panel.Props) {
   return (
     <BaseTabs.Panel
-      className={cn(
-        'flex-1 rounded-md',
-        'focus-visible:outline focus-visible:outline-ring focus-visible:ring-4 focus-visible:ring-ring/10',
-        className,
-      )}
+      className={cn('flex-1 rounded-md', focusVisiblePrimaryRing, className)}
       data-slot="tabs-panel"
       {...props}
     />

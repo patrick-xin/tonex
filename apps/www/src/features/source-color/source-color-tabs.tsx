@@ -49,7 +49,6 @@ export const SourceColorTabs = () => {
           defaultOpen
           variant="ghost"
           title="Source Control"
-          height={0}
           open={open}
           onOpenChange={setOpen}
         >

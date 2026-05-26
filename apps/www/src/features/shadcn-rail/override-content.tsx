@@ -34,7 +34,6 @@ export function ShadcnOverrideContent() {
           title={group.label}
           variant="ghost"
           defaultOpen={index === 0}
-          height={0}
           className="text-sm font-semibold capitalize tracking-wider"
           overridden={group.roles.some((role) => role in roleOverrides)}
         >
@@ -57,7 +56,6 @@ export function ShadcnOverrideContent() {
         title="Chart"
         variant="ghost"
         defaultOpen={false}
-        height={0}
         className="text-sm font-semibold tracking-wider"
         overridden={Object.keys(chartOverrides).length > 0}
       >

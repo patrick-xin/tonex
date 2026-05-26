@@ -40,14 +40,13 @@ export function ShadcnRailContent() {
       >
         <div className="space-y-1">
           <ShadcnSourceColor />
-          <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
+          <AnimatedCollapsible variant="ghost" title="Scheme Variant">
             <SchemeVariantsToggle />
           </AnimatedCollapsible>
           <SurfaceAdjustment />
           <AnimatedCollapsible
             variant="ghost"
             title="Refinements"
-            height={0}
             contentClassName="px-0 space-y-1"
           >
             <SoftBordersToggle />
@@ -62,7 +61,7 @@ export function ShadcnRailContent() {
           </AnimatedCollapsible>
           <CustomColorList />
           <Button
-            className="w-full justify-between px-2! group leading-snug"
+            className="w-full justify-between px-2! group leading-snug text-base"
             variant="ghost"
             onClick={() => setMode('overrides')}
           >
@@ -75,7 +74,7 @@ export function ShadcnRailContent() {
             />
           </Button>
           <Button
-            className="w-full justify-between px-2! group leading-snug"
+            className="w-full justify-between px-2! group leading-snug text-base"
             variant="ghost"
             onClick={() => setMode('bindings')}
           >
@@ -105,7 +104,7 @@ export function ShadcnRailContent() {
           <Button variant="ghost" size="icon-sm" onClick={() => setMode('controls')} title="Back">
             <ArrowLeftIcon />
           </Button>
-          <div className="text-sm font-medium">
+          <div className="text-base font-medium">
             {mode === 'overrides' ? 'Token Overrides' : 'Role Bindings'}
           </div>
         </div>

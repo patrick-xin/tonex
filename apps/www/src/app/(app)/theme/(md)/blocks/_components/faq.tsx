@@ -61,7 +61,7 @@ function QuestionList({ questions }: { questions: { q: string; a: string }[] }) 
       {questions.map((item, index) => (
         <AccordionItem variant="underline" key={String(index)} value={String(index)}>
           <AccordionSummary variant="underline">{item.q}</AccordionSummary>
-          <AccordionPanel>{item.a}</AccordionPanel>
+          <AccordionPanel className="px-0 pt-0">{item.a}</AccordionPanel>
         </AccordionItem>
       ))}
     </Accordion>

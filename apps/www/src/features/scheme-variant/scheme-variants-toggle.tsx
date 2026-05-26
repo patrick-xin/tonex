@@ -7,6 +7,7 @@ import {
   type VariantName,
   variants,
 } from '@tonex/core/variants'
+import { cn } from 'tailwind-variants'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CmfSecondSourcePicker } from './cmf-second-source-picker'
 
@@ -47,10 +48,6 @@ export function SchemeVariantsToggle() {
                 {GROUP_LABELS[group]}
               </div>
             </div>
-            {/* why: nested buttons are invalid HTML — the CMF picker (a button)
-                sits as a sibling of the cmf ToggleGroup rather than inside the
-                cmf ToggleGroupItem. Flex row keeps the chevron visually
-                attached to the cmf variant button. */}
             <div className="flex items-center">
               <ToggleGroup
                 variant="outline"
@@ -65,12 +62,14 @@ export function SchemeVariantsToggle() {
                   <ToggleGroupItem
                     key={v}
                     value={v}
-                    className={`px-1.5 gap-0 text-xs ${group === 'cmf' ? ' rounded-r-none' : ''}`}
+                    className={cn('px-1.5', group === 'cmf' && 'rounded-r-none')}
                   >
                     {VARIANT_LABELS[v]}
-                    {group === 'cmf' && <CmfSecondSourcePicker />}
                   </ToggleGroupItem>
                 ))}
+                {group === 'cmf' && (
+                  <CmfSecondSourcePicker className="border border-l-0 rounded-md rounded-l-none h-7 px-1 bg-secondary-container border-primary/12" />
+                )}
               </ToggleGroup>
             </div>
           </div>

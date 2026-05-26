@@ -14,19 +14,14 @@ export function MdRailContent() {
     <ScrollArea gradientScrollFade noScrollBar className="flex-1 min-h-0 w-full max-w-4xl mx-auto">
       <div className="space-y-1">
         <SourceColorTabs />
-        <AnimatedCollapsible variant="ghost" title="Scheme Variant" height={0}>
+        <AnimatedCollapsible variant="ghost" title="Scheme Variant">
           <SchemeVariantsToggle />
         </AnimatedCollapsible>
-        <AnimatedCollapsible variant="ghost" title="Palette Override" height={0}>
+        <AnimatedCollapsible variant="ghost" title="Palette Override">
           <FineTuneColors />
         </AnimatedCollapsible>
         <SurfaceAdjustment />
-        <AnimatedCollapsible
-          variant="ghost"
-          title="Refinements"
-          height={0}
-          contentClassName="px-0 space-y-1"
-        >
+        <AnimatedCollapsible variant="ghost" title="Refinements" contentClassName="px-0 space-y-1">
           <div className="p-2">
             <ContrastLevelSlider />
           </div>
