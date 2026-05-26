@@ -154,7 +154,7 @@ export function ShaderHero() {
       </div>
 
       <div className="relative z-10 flex flex-1 min-h-0 items-center py-20 sm:py-24">
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-6xl">
           <HeroContent />
         </div>
       </div>

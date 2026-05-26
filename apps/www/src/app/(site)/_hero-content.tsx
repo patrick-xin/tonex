@@ -35,31 +35,25 @@ export function HeroContent() {
     >
       <motion.span
         variants={item}
-        className="mb-8 text-xs font-mono uppercase tracking-[0.18em] text-on-surface-variant"
+        className="mb-8 text-xs font-mono uppercase tracking-widest text-on-surface-variant"
       >
         2026 spec · Open source
       </motion.span>
-
       <motion.h1
         variants={item}
-        className="text-[clamp(40px,6vw,104px)] font-semibold leading-[0.92] tracking-[-0.045em] text-on-surface mb-8"
+        className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8"
       >
-        The MD3 engine.
+        Pro-grade color tools,
         <br />
-        <span>With dials.</span>
+        <span>made for the web.</span>
       </motion.h1>
-
       <motion.p
         variants={item}
-        className="text-[17px] leading-normal max-w-[54ch] mb-10 text-pretty tracking-[-0.005em]"
+        className="text-lg font-medium text-on-surface-variant max-w-[54ch] mb-10 text-pretty"
       >
         Real HCT math, not an approximation. Per-role pins layered on top. Contrast audited across
-        every token pair the page uses.{' '}
-        <strong className="text-on-surface font-medium">
-          shadcn tokens emit alongside the MD3 theme — no second pass.
-        </strong>
+        every token pair the page uses.
       </motion.p>
-
       <motion.div variants={item} className="flex flex-wrap items-center gap-4">
         <Button
           nativeButton={false}
@@ -74,7 +68,7 @@ export function HeroContent() {
           nativeButton={false}
           variant="outline"
           size="lg"
-          className="px-8 h-12 text-base font-medium dark:border-secondary"
+          className="px-8 h-12 text-base font-medium"
           render={<Link href="/theme/shadcn" />}
         >
           shadcn mode
