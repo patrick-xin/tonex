@@ -46,20 +46,12 @@ export function HeroContent() {
       >
         The MD3 engine.
         <br />
-        <span
-          className="inline bg-clip-text pb-1 text-transparent"
-          style={{
-            backgroundImage:
-              'linear-gradient(100deg, var(--color-primary-container) 0%, var(--color-secondary) 40%, var(--color-tertiary-container) 100%)',
-          }}
-        >
-          With dials.
-        </span>
+        <span>With dials.</span>
       </motion.h1>
 
       <motion.p
         variants={item}
-        className="text-[17px] text-on-surface-variant leading-normal max-w-[54ch] mb-10 text-pretty tracking-[-0.005em]"
+        className="text-[17px] leading-normal max-w-[54ch] mb-10 text-pretty tracking-[-0.005em]"
       >
         Real HCT math, not an approximation. Per-role pins layered on top. Contrast audited across
         every token pair the page uses.{' '}
@@ -73,7 +65,7 @@ export function HeroContent() {
           nativeButton={false}
           render={<Link href="/theme" />}
           size="lg"
-          className="rounded-xl px-8 h-12 text-base font-semibold shadow-2xl"
+          className="px-8 h-12 text-base font-semibold shadow-2xl"
         >
           Try tonex
           <ArrowRight className="ml-2 size-5" />
@@ -82,21 +74,12 @@ export function HeroContent() {
           nativeButton={false}
           variant="outline"
           size="lg"
-          className="rounded-xl px-8 h-12 text-base font-medium"
+          className="px-8 h-12 text-base font-medium dark:border-secondary"
           render={<Link href="/theme/shadcn" />}
         >
           shadcn mode
           <ShadcnIcon className="ml-2 size-5" />
         </Button>
-      </motion.div>
-
-      <motion.div
-        variants={item}
-        className="mt-10 flex flex-wrap items-center gap-4 text-sm font-mono text-on-surface-variant"
-      >
-        <span>No signup</span>
-        <div className="size-1 rounded-full bg-outline" />
-        <span>MIT licensed</span>
       </motion.div>
     </motion.div>
   )
