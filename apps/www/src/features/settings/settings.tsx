@@ -44,7 +44,10 @@ export function Settings({ layer }: { layer: Layer }) {
         />
         <TooltipContent>Settings</TooltipContent>
       </Tooltip>
-      <PopoverContent align="end" className="w-80 flex flex-col gap-2">
+      <PopoverContent
+        align="center"
+        className="w-[min(20rem,calc(100vw-2rem))] flex flex-col gap-2"
+      >
         {layer === 'md' && (
           <>
             <Field name="extended-colors" className="gap-1">

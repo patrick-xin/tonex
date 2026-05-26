@@ -1,4 +1,5 @@
 import { createDialogHandle } from '@/components/ui/dialog'
+import { createDrawerHandle } from '@/components/ui/drawer'
 import { createPopoverHandle } from '@/components/ui/popover'
 import type { HelpSection } from '@/features/help-dialog/help-sections'
 /**
@@ -13,3 +14,8 @@ export const checkContrastDialogHandle = createDialogHandle<null>()
 // expands and scrolls to that section.
 export const helpDialogHandle = createDialogHandle<HelpSection>()
 export const settingsPopoverHandle = createPopoverHandle<null>()
+// why: the rail drawer's trigger lives apart from its content on mobile — the
+// "Build theme" button sits in the bottom action bar (features/mobile-action-bar)
+// while the drawer content is mounted by the layout. The handle bridges them,
+// same pattern as the dialog/popover handles above (issue #142).
+export const railDrawerHandle = createDrawerHandle<null>()
