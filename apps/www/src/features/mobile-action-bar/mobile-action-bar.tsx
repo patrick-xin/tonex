@@ -97,6 +97,14 @@ export function MobileActionBar({
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Contrast checker"
+            onClick={() => checkContrastDialogHandle.open(null)}
+          >
+            <CircleHalfIcon />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label="Help"
             onClick={() => helpDialogHandle.open(null)}
           >
@@ -116,17 +124,6 @@ export function MobileActionBar({
                   close button (top-2, size-8) now that the title is sr-only. */}
               <SheetTitle className="sr-only">More</SheetTitle>
               <div className="flex flex-col gap-1">
-                <Button
-                  variant="ghost"
-                  className="justify-start gap-3"
-                  onClick={() => {
-                    moreSheetHandle.close()
-                    checkContrastDialogHandle.open(null)
-                  }}
-                >
-                  <CircleHalfIcon className="size-5" />
-                  Contrast checker
-                </Button>
                 <Button
                   variant="ghost"
                   nativeButton={false}
