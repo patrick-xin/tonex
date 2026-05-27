@@ -2,6 +2,7 @@ import type React from 'react'
 import { TopNav } from '@/components/shared/top-nav'
 import { MobileActionBar } from '@/features/mobile-action-bar'
 import { GuideProvider, OnboardingTour } from '@/features/onboarding-guide'
+import { SettingsDrawer } from '@/features/settings'
 import { ShadcnRailDrawer } from '@/features/shadcn-rail'
 import { LayerProvider } from '@/lib/layer-context'
 import { shadcnNavConfig } from './_nav-config'
@@ -24,6 +25,7 @@ export default function ShadcnLayout({ children }: { children: React.ReactNode }
             <MobileActionBar
               crossLink={shadcnNavConfig.crossLink}
               railDrawer={<ShadcnRailDrawer />}
+              settingsDrawer={<SettingsDrawer layer="shadcn" />}
             />
           </div>
         </div>
