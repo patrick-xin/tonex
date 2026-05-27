@@ -7,3 +7,9 @@ catalog:
   vitest: ^3.0.0
   vite-tsconfig-paths: ^5.0.0
   '@vitejs/plugin-react': ^4.0.0
+
+# pnpm 11 replaced onlyBuiltDependencies with allowBuilds (strictDepBuilds is
+# now on by default, so unlisted build scripts hard-error during install).
+allowBuilds:
+  esbuild: true
+  sharp: true
