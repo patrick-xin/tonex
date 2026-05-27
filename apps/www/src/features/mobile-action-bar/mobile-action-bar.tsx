@@ -61,7 +61,7 @@ export function MobileActionBar({
           brand-tinted one. text-on-surface-variant on the row mutes the rest; each icon
           inherits via currentColor. */}
       <div className="sm:hidden flex-none px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
-        <div className="mx-auto flex w-fit items-center gap-1 rounded-md border border-outline-variant/50 bg-surface-container-high px-1.5 py-1 text-on-surface-variant elevation-2">
+        <div className="mx-auto flex w-fit items-center gap-2 rounded-md border border-outline-variant/50 bg-surface-container-high px-3 py-1 text-on-surface-variant elevation-2">
           <DrawerTrigger
             handle={railDrawerHandle}
             render={
