@@ -14,6 +14,11 @@ export const checkContrastDialogHandle = createDialogHandle<null>()
 // expands and scrolls to that section.
 export const helpDialogHandle = createDialogHandle<HelpSection>()
 export const settingsPopoverHandle = createPopoverHandle<null>()
+// why: below sm the settings popover (anchored to the hidden nav-tabs trigger)
+// is replaced by a bottom drawer. Its trigger lives in the mobile action bar
+// while the content is mounted by the layout, so the handle bridges them — same
+// split as railDrawerHandle.
+export const settingsDrawerHandle = createDrawerHandle<null>()
 // why: the rail drawer's trigger lives apart from its content on mobile — the
 // "Build theme" button sits in the bottom action bar (features/mobile-action-bar)
 // while the drawer content is mounted by the layout. The handle bridges them,

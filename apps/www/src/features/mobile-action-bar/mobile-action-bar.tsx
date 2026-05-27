@@ -15,7 +15,6 @@ import Link from 'next/link'
 import { ThemeModeToggle } from '@/components/shared/theme-mode-toggle'
 import { Button } from '@/components/ui/button'
 import { DrawerTrigger } from '@/components/ui/drawer'
-import { PopoverTrigger } from '@/components/ui/popover'
 import {
   createSheetHandle,
   Sheet,
@@ -28,33 +27,39 @@ import {
   exportDialogHandle,
   helpDialogHandle,
   railDrawerHandle,
-  settingsPopoverHandle,
+  settingsDrawerHandle,
 } from '@/lib/handles'
 
 const moreSheetHandle = createSheetHandle<null>()
 
 // why: ADR-0022 surface feature. The desktop chrome cluster (features/nav-tabs,
 // `hidden sm:flex`) and the desktop rail footer are unreachable below sm; this
-// bar is their `sm:hidden` home (issue #142, variant C). It mounts NO second
-// copies of Export/Settings/Contrast/Help — those single instances live in the
-// (hidden) nav-tabs cluster and are driven here through their handles, exactly
-// as the command menu drives them. So there's one hotkey registration, one
-// `id="settings"`, one dialog per feature — the bar only adds visible triggers.
+// bar is their `sm:hidden` home (issue #142, variant C). Export/Contrast/Help
+// mount NO second dialogs — those single instances live in the (hidden) nav-tabs
+// cluster and are driven here through their handles, exactly as the command menu
+// drives them (one hotkey registration, one dialog per feature; the bar only adds
+// visible triggers). Settings is the exception: the desktop popover anchors to a
+// hidden trigger below sm, so the bar opens a dedicated bottom drawer instead
+// (settingsDrawer / settingsDrawerHandle) that re-renders the same SettingsFields.
 //
-// railDrawer is the layer's drawer content (MdRailDrawer / ShadcnRailDrawer),
-// mounted here so the "Build theme" DrawerTrigger (railDrawerHandle) can open it.
+// railDrawer is the layer's drawer content (MdRailDrawer / ShadcnRailDrawer) and
+// settingsDrawer the layer's SettingsDrawer, both mounted here so their triggers
+// (railDrawerHandle / settingsDrawerHandle) can open content the layout owns.
 // crossLink comes straight from NavConfig (serializable), so the layout passes it
 // without the RSC icon-bridge that nav-tabs needs.
 export function MobileActionBar({
   crossLink,
   railDrawer,
+  settingsDrawer,
 }: {
   crossLink: { label: string; href: string }
   railDrawer: React.ReactNode
+  settingsDrawer: React.ReactNode
 }) {
   return (
     <>
       {railDrawer}
+      {settingsDrawer}
       {/* Floating icon pill: content-width, centered, lifted off the bottom edge by a
           transparent gutter so it reads as floating above the canvas (issue #142,
           variant C polish). All actions are equal-weight ghost icons; Build is the only
@@ -83,12 +88,12 @@ export function MobileActionBar({
           >
             <DownloadIcon />
           </Button>
-          <PopoverTrigger
-            handle={settingsPopoverHandle}
+          <DrawerTrigger
+            handle={settingsDrawerHandle}
             render={<Button variant="ghost" size="icon" aria-label="Settings" />}
           >
             <GearSixIcon />
-          </PopoverTrigger>
+          </DrawerTrigger>
           <Button
             variant="ghost"
             size="icon"
