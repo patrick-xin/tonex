@@ -8,6 +8,7 @@ import { Kbd, KbdGroup } from '@/components/shadcn/kbd'
 import { Progress } from '@/components/shadcn/progress'
 import { ToggleGroup, ToggleGroupItem } from '@/components/shadcn/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { useShadcn } from '../_provider'
 import { ButtonGroupDemo } from './button-group'
 import { BreadcrumbDemo, CalendarDemo } from './calendar'
@@ -26,6 +27,7 @@ import { TableDemo } from './tables'
 
 export function ShadcnComponentsDemo() {
   const ref = useShadcn()
+  const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const [progress, setProgress] = React.useState(13)
   React.useEffect(() => {
     const timer = setTimeout(() => setProgress(66), 500)
@@ -40,6 +42,13 @@ export function ShadcnComponentsDemo() {
           Buttons <div className="h-px flex-1 bg-border" />
         </h2>
         <div className="flex flex-wrap gap-2">
+          {/* why: brand button appears only when the brand toggle is on
+              (ADR-0032) — the single switch governs demo, audit, and export. */}
+          {brandEnabled && (
+            <Button type="button" variant="brand">
+              Brand
+            </Button>
+          )}
           <Button type="button">Primary</Button>
           <Button disabled type="button">
             Disabled

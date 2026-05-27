@@ -80,8 +80,19 @@ function projectTheme(theme: ReturnType<typeof deriveTheme>): {
       dark: projectLayer({ ...theme.md.dark, ...theme.md.darkChart }),
     },
     shadcn: {
-      light: projectLayer({ ...theme.shadcn.light, ...theme.shadcn.lightChart }),
-      dark: projectLayer({ ...theme.shadcn.dark, ...theme.shadcn.darkChart }),
+      // why: brand is mode-invariant (one map) and previewable in the live DOM,
+      // so it merges into BOTH .shadcn blocks — same pattern as chart, which
+      // applyDom always emits even though export gates it.
+      light: projectLayer({
+        ...theme.shadcn.light,
+        ...theme.shadcn.lightChart,
+        ...theme.shadcn.brand,
+      }),
+      dark: projectLayer({
+        ...theme.shadcn.dark,
+        ...theme.shadcn.darkChart,
+        ...theme.shadcn.brand,
+      }),
     },
   }
 }
@@ -130,6 +141,22 @@ describe('applyDom (jsdom integration)', () => {
     expect(Object.keys(written.shadcn.dark).length).toBeGreaterThan(0)
     expect(written.md.light['--color-primary']).toBeDefined()
     expect(written.shadcn.light['--primary']).toBeDefined()
+  })
+
+  it('emits the brand pair into both .shadcn blocks, mode-invariant', () => {
+    // why: brand must be previewable in the editor (a brand button resolves
+    // bg-brand) — so applyDom writes it to the live DOM in both modes with the
+    // same value, even though export keeps it opt-in.
+    useSource.setState({ _hydrated: true })
+    unsubscribe = applyDom()
+    const written = readTokensFromStyle()
+
+    expect(written.shadcn.light['--brand']).toBeDefined()
+    expect(written.shadcn.light['--brand-foreground']).toBeDefined()
+    expect(written.shadcn.dark['--brand']).toBe(written.shadcn.light['--brand'])
+    expect(written.shadcn.dark['--brand-foreground']).toBe(
+      written.shadcn.light['--brand-foreground'],
+    )
   })
 
   // why: remount must reuse the existing scaffold instead of rewriting

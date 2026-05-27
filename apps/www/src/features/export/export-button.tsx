@@ -18,6 +18,7 @@ import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { exportDialogHandle } from '@/lib/handles'
+import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ExportContentDisplay } from './export-content-display'
 import { ExportControls } from './export-controls'
 import {
@@ -55,7 +56,15 @@ export const ExportButton = ({
   const initialTab = tabs[0]
   const [exportTab, setExportTab] = useState<ExportTab>(initialTab)
   const [options, setOptions] = useState<ExportOptions>(LEAN_DEFAULTS)
-  const { exportContent, ext } = useExportContent({ exportTab, options })
+  // why: brand emission has no export-dialog toggle of its own (ADR-0032) —
+  // one editor switch governs it. Overlay the brand pref onto the core
+  // includeBrand param here; the shadcn exporter is the only reader, md/JSON/
+  // Dart ignore it, so overlaying unconditionally is harmless on every tab.
+  const brandEnabled = useUiPrefs((s) => s.brandEnabled)
+  const { exportContent, ext } = useExportContent({
+    exportTab,
+    options: { ...options, includeBrand: brandEnabled },
+  })
 
   useHotkey('E', () => exportDialogHandle.open(null), {
     ignoreInputs: true,

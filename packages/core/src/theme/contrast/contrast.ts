@@ -2,7 +2,12 @@ import { contrastRatio } from '@tonex/color-utils'
 import type { CustomColorEntry } from '../custom-color/entry'
 import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
-import { CONTRAST_PAIRS, type ContrastPair, customColorContrastPairs } from './pairs'
+import {
+  BRAND_CONTRAST_PAIRS,
+  CONTRAST_PAIRS,
+  type ContrastPair,
+  customColorContrastPairs,
+} from './pairs'
 
 // why: ADR-0025 commitment 8 — `evaluateThemeContrast` is downstream of
 // `DerivedTheme`, never on the spine. The spine continues to produce token
@@ -42,16 +47,28 @@ const staticReportCache = new WeakMap<DerivedTheme, ContrastReport>()
 // invariant holds; a mismatched call throws in evaluatePair (missing token)
 // rather than returning a wrong number. Defaults to [] so the role-editor
 // surfaces keep seeing exactly the static spec list.
+// why: `opts.includeBrand` opt-in mirrors the customColors append — the brand
+// pair (ADR-0032) is always derivable but only the contrast dialog (driven by
+// the editor's single brand toggle) wants it audited; the 14 role-editor
+// surfaces call with neither arg and keep seeing exactly the static spec list.
+// Brand pairs are cheap (5) and recomputed per call like custom pairs, so the
+// theme-keyed static cache stays brand-free and can't leak a brand-aware report
+// into a plain caller.
 export function evaluateThemeContrast(
   theme: DerivedTheme,
   customColors: readonly CustomColorEntry[] = [],
+  opts: { includeBrand?: boolean } = {},
 ): ContrastReport {
   const staticReport = getStaticReport(theme)
-  if (customColors.length === 0) return staticReport
-  const customReport = buildReport(theme, customColorContrastPairs(customColors))
+  const extraPairs: ContrastPair[] = [
+    ...customColorContrastPairs(customColors),
+    ...(opts.includeBrand ? BRAND_CONTRAST_PAIRS : []),
+  ]
+  if (extraPairs.length === 0) return staticReport
+  const extraReport = buildReport(theme, extraPairs)
   return {
-    light: [...staticReport.light, ...customReport.light],
-    dark: [...staticReport.dark, ...customReport.dark],
+    light: [...staticReport.light, ...extraReport.light],
+    dark: [...staticReport.dark, ...extraReport.dark],
   }
 }
 
@@ -84,18 +101,32 @@ function buildReport(theme: DerivedTheme, pairs: readonly ContrastPair[]): Contr
   const mdChartDark = { ...mdDark, ...theme.md.darkChart }
   const shadcnChartLight = { ...theme.shadcn.light, ...theme.shadcn.lightChart }
   const shadcnChartDark = { ...theme.shadcn.dark, ...theme.shadcn.darkChart }
+  // why: ADR-0032 — brand pairs read --brand / --brand-foreground from the
+  // mode-invariant theme.shadcn.brand map, and the neutral-surface partners
+  // (--background, --card) from the per-mode shadcn map. Merging both into one
+  // map per mode keeps evaluatePair's one-TokenMap signature; brand wins key
+  // collisions on its own tokens, the surfaces carry their per-mode values.
+  const shadcnBrandLight = { ...theme.shadcn.light, ...theme.shadcn.brand }
+  const shadcnBrandDark = { ...theme.shadcn.dark, ...theme.shadcn.brand }
   return {
     light: pairs.map((pair) =>
       evaluatePair(
         pair,
-        layerMapFor(pair, mdLight, mdChartLight, theme.shadcn.light, shadcnChartLight),
+        layerMapFor(
+          pair,
+          mdLight,
+          mdChartLight,
+          theme.shadcn.light,
+          shadcnChartLight,
+          shadcnBrandLight,
+        ),
         'light',
       ),
     ),
     dark: pairs.map((pair) =>
       evaluatePair(
         pair,
-        layerMapFor(pair, mdDark, mdChartDark, theme.shadcn.dark, shadcnChartDark),
+        layerMapFor(pair, mdDark, mdChartDark, theme.shadcn.dark, shadcnChartDark, shadcnBrandDark),
         'dark',
       ),
     ),
@@ -108,6 +139,7 @@ function layerMapFor(
   mdChart: TokenMap,
   shadcn: TokenMap,
   shadcnChart: TokenMap,
+  shadcnBrand: TokenMap,
 ): TokenMap {
   // why: md-custom slugs land in the core md.{light,dark} bucket (ADR-0021
   // c.3) that `md` already merges; shadcn-custom slugs land in
@@ -115,6 +147,7 @@ function layerMapFor(
   if (pair.layer === 'md' || pair.layer === 'md-custom') return md
   if (pair.layer === 'md-chart') return mdChart
   if (pair.layer === 'shadcn' || pair.layer === 'shadcn-custom') return shadcn
+  if (pair.layer === 'shadcn-brand') return shadcnBrand
   return shadcnChart
 }
 

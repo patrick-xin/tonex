@@ -79,6 +79,14 @@
   --color-chart-4: var(--color-chart-4);
   --color-chart-5: var(--color-chart-5);
 
+  /* why: brand utility generation. --brand is the stable literal-seed pair
+     (core derive, opt-in on export via includeBrand). applyDom always writes
+     --brand / --brand-foreground into .shadcn so the editor previews a brand
+     button WYSIWYG; this registration generates bg-brand / text-brand-foreground,
+     and the .shadcn bridge below resolves them to the runtime tokens. */
+  --color-brand: var(--color-brand);
+  --color-brand-foreground: var(--color-brand-foreground);
+
   /* shadcn-only utility names not present in md */
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);
@@ -153,6 +161,8 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);

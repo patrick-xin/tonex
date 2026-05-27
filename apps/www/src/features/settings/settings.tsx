@@ -28,6 +28,8 @@ export function Settings({ layer }: { layer: Layer }) {
   useEffect(() => () => settingsPopoverHandle.close(), [])
   const showExtended = useUiPrefs((s) => s.showExtended)
   const setShowExtended = useUiPrefs((s) => s.actions.setShowExtended)
+  const brandEnabled = useUiPrefs((s) => s.brandEnabled)
+  const setBrandEnabled = useUiPrefs((s) => s.actions.setBrandEnabled)
 
   return (
     <Popover handle={settingsPopoverHandle}>
@@ -56,7 +58,21 @@ export function Settings({ layer }: { layer: Layer }) {
                 <Switch size="sm" checked={showExtended} onCheckedChange={setShowExtended} />
               </FieldLabel>
               <FieldDescription className="max-w-5/6">
-                Show additional color roles for tokens.
+                Show additional color roles for tokens
+              </FieldDescription>
+            </Field>
+            <Separator className="opacity-50" />
+          </>
+        )}
+        {layer === 'shadcn' && (
+          <>
+            <Field name="brand-color" className="gap-1">
+              <FieldLabel className="items-center justify-between w-full">
+                Brand color
+                <Switch size="sm" checked={brandEnabled} onCheckedChange={setBrandEnabled} />
+              </FieldLabel>
+              <FieldDescription className="max-w-5/6">
+                Export brand color pair (current seed)
               </FieldDescription>
             </Field>
             <Separator className="opacity-50" />

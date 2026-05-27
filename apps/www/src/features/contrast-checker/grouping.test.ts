@@ -1,6 +1,7 @@
 import type { ContrastPair } from '@tonex/core/schema'
 import { describe, expect, it } from 'vitest'
-import { familyOf } from './grouping'
+import type { Layer } from '@/lib/layer-context'
+import { familyOf, familyOrder } from './grouping'
 
 describe('familyOf', () => {
   it('returns "Chart" for md-chart pairs regardless of bg surface', () => {
@@ -117,5 +118,41 @@ describe('familyOf', () => {
       threshold: 4.5,
     }
     expect(familyOf(pair)).toBe('Custom')
+  })
+
+  it('returns "Brand" for shadcn-brand pairs regardless of bg or threshold', () => {
+    // why: like --destructive, the brand pair is checked as both text (4.5)
+    // and non-text (3) against neutral surfaces, so bg-based grouping would
+    // scatter it. The layer short-circuit keeps all brand pairs in one chip.
+    const fgRoot: ContrastPair = {
+      fg: '--brand-foreground',
+      bg: '--brand',
+      layer: 'shadcn-brand',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    const textOnBackground: ContrastPair = {
+      fg: '--brand',
+      bg: '--background',
+      layer: 'shadcn-brand',
+      intent: 'text',
+      threshold: 4.5,
+    }
+    const nonTextOnCard: ContrastPair = {
+      fg: '--brand',
+      bg: '--card',
+      layer: 'shadcn-brand',
+      intent: 'non-text',
+      threshold: 3,
+    }
+    expect(familyOf(fgRoot)).toBe('Brand')
+    expect(familyOf(textOnBackground)).toBe('Brand')
+    expect(familyOf(nonTextOnCard)).toBe('Brand')
+  })
+})
+
+describe('familyOrder', () => {
+  it('shadcn order includes Brand', () => {
+    expect(familyOrder('shadcn' as Layer)).toContain('Brand')
   })
 })

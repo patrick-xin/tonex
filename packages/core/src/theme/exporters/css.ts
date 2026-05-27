@@ -102,6 +102,7 @@ interface ResolvedOptions {
   includeExtended: boolean
   includePalette: boolean
   includeChart: boolean
+  includeBrand: boolean
   includeHeader: boolean
 }
 
@@ -111,6 +112,7 @@ function resolveOptions(options: ExportOptions): ResolvedOptions {
     includeExtended: options.includeExtended ?? false,
     includePalette: options.includePalette ?? false,
     includeChart: options.includeChart ?? false,
+    includeBrand: options.includeBrand ?? false,
     includeHeader: options.includeHeader ?? false,
   }
 }
@@ -142,9 +144,21 @@ function buildShadcnRuleTokens(
   opts: ResolvedOptions,
 ): TokenMap {
   const core = mode === 'light' ? theme.shadcn.light : theme.shadcn.dark
-  const chart = mode === 'light' ? theme.shadcn.lightChart : theme.shadcn.darkChart
-  if (!opts.includeChart) return core
-  return { ...core, ...chart }
+  if (!opts.includeChart && !opts.includeBrand) return core
+  const out: TokenMap = { ...core }
+  if (opts.includeChart) {
+    Object.assign(out, mode === 'light' ? theme.shadcn.lightChart : theme.shadcn.darkChart)
+  }
+  if (opts.includeBrand) {
+    // why: brand is mode-invariant (same map in both blocks). Merge only keys
+    // the layer doesn't already carry, so a user's custom color named "brand"
+    // (already emitting --brand via the custom path) wins over the injected pair
+    // — no duplicate declaration.
+    for (const [name, argb] of Object.entries(theme.shadcn.brand)) {
+      if (!(name in core)) out[name] = argb
+    }
+  }
+  return out
 }
 
 // why: @theme inline lists every Tailwind utility name. Toggling extended,
@@ -202,6 +216,14 @@ export function exportCss(
   const customSlugTokens = Object.keys(defaultTheme.shadcn.light).filter(
     (k) => !SHADCN_ROLE_SET.has(k),
   )
+  // why: the opt-in brand pair registers its Tailwind utilities the same way
+  // custom slugs do (--brand → --color-brand). Append deduped so a custom color
+  // already named "brand" isn't registered twice.
+  if (opts.includeBrand) {
+    for (const k of Object.keys(defaultTheme.shadcn.brand)) {
+      if (!customSlugTokens.includes(k)) customSlugTokens.push(k)
+    }
+  }
   const parts: string[] = []
   if (opts.includeHeader) {
     parts.push('@import "tailwindcss";', '', '@custom-variant dark (&:is(.dark *));', '')

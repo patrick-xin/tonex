@@ -7,13 +7,26 @@ export const UI_PREFS_SCHEMA_VERSION = 1
 interface UiPrefs {
   showExtended: boolean
   twPickerEnabled: boolean
+  // why: single source of truth for "I use the brand token" (ADR-0032). One
+  // editor-view switch (shadcn settings) gates all three brand surfaces — the
+  // showcase brand button, the brand rows in the contrast audit, and (wired at
+  // the export seam) whether the export emits --brand. Default off so the
+  // showcase, audit, and baked globals.css baseline are unchanged for everyone
+  // not using brand. Distinct from showExtended only in scope: extended is many
+  // roles worth a separate export choice; brand is one pair, so one switch.
+  brandEnabled: boolean
 }
 
-const DEFAULT_UI_PREFS: UiPrefs = { showExtended: false, twPickerEnabled: true }
+const DEFAULT_UI_PREFS: UiPrefs = {
+  showExtended: false,
+  twPickerEnabled: true,
+  brandEnabled: false,
+}
 
 interface UiPrefsActions {
   setShowExtended(next: boolean): void
   setTwPickerEnabled(next: boolean): void
+  setBrandEnabled(next: boolean): void
   setHydrated(): void
   reset(): void
 }
@@ -48,6 +61,7 @@ export const useUiPrefs = create<UiPrefsState>()(
       actions: {
         setShowExtended: (next) => set({ showExtended: next }),
         setTwPickerEnabled: (next) => set({ twPickerEnabled: next }),
+        setBrandEnabled: (next) => set({ brandEnabled: next }),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_UI_PREFS }),
       },

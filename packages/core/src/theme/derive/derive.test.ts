@@ -1,3 +1,4 @@
+import { contrastRatio } from '@tonex/color-utils'
 import { argbFromHex, Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '../../chart/schema'
@@ -1080,6 +1081,48 @@ describe('deriveTheme', () => {
       expect(overridden.md.palette['--color-neutral-50']).toBe(
         baseline.md.palette['--color-neutral-50'],
       )
+    })
+  })
+
+  describe('brand pair (stable literal-seed)', () => {
+    // why: shadcn binds --primary to the soft primary-container in light, so the
+    // user's actual brand color (the seed) has no AA-safe vivid filled token.
+    // The brand pair re-surfaces it: --brand is the literal seed (both modes
+    // identical, immune to the MCU variant×mode tone flip) and --brand-foreground
+    // is a computed AA-safe foreground. Emission is gated by ExportOptions.
+
+    it('binds --brand to the literal seed (exactHex) in both modes', () => {
+      const { shadcn } = deriveTheme(DEFAULT_INPUTS)
+      // DEFAULT_INPUTS.seed.exactHex === '#6750a4'
+      expect(shadcn.brand['--brand']).toBe(argbFromHex('#6750a4'))
+    })
+
+    it('brand is mode-invariant (one value, no light/dark divergence)', () => {
+      // why: the whole point — a brand color stays the brand color regardless of
+      // mode, unlike MCU role tones which lighten in dark. A single field, not a
+      // light/dark pair, encodes that structurally.
+      const { shadcn } = deriveTheme(DEFAULT_INPUTS)
+      expect(shadcn.brand['--brand']).toEqual(expect.any(Number))
+      expect(shadcn.brand['--brand-foreground']).toEqual(expect.any(Number))
+    })
+
+    it('tracks the seed (literal pin moves with the source)', () => {
+      const red = deriveTheme({
+        ...DEFAULT_INPUTS,
+        seed: { ...hctFromHex('#ff0000'), exactHex: '#ff0000' },
+      })
+      expect(red.shadcn.brand['--brand']).toBe(argbFromHex('#ff0000'))
+    })
+
+    it('computes a foreground that clears the 4.5:1 AA text floor against the fill', () => {
+      for (const hex of ['#6750a4', '#ff0000', '#ffd400', '#0a0a0a', '#f5f5f5']) {
+        const { shadcn } = deriveTheme({
+          ...DEFAULT_INPUTS,
+          seed: { ...hctFromHex(hex), exactHex: hex },
+        })
+        const ratio = contrastRatio(shadcn.brand['--brand-foreground'], shadcn.brand['--brand'])
+        expect(ratio).toBeGreaterThanOrEqual(4.5)
+      }
     })
   })
 })

@@ -1,3 +1,4 @@
+import { contrastRatio } from '@tonex/color-utils'
 import {
   argbFromHex,
   type DynamicColor,
@@ -71,6 +72,16 @@ export interface ShadcnLayer {
   dark: TokenMap
   lightChart: TokenMap
   darkChart: TokenMap
+  // why: stable literal-seed brand pair (`--brand` / `--brand-foreground`).
+  // Mode-INVARIANT by design — a single map, not a light/dark pair — because a
+  // brand color must stay the brand color in both modes, unlike MCU role tones
+  // which flip light-vivid/dark-pale per variant. `--brand` is the literal seed
+  // (immune to the variant×mode tone dance); `--brand-foreground` is a computed
+  // AA-safe on-color. Always derived (cheap); emission is opt-in via
+  // ExportOptions.includeBrand, so it never enters applyDom or the baked
+  // globals.css baseline. Kept OUT of light/dark so the `:root === shadcn.light`
+  // export contract stays intact.
+  brand: TokenMap
 }
 
 export interface ResolvedLayer {
@@ -325,6 +336,17 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
     }),
   }))
 
+  // why: ADR-0028 — the brand fill is the user's literal pasted bytes
+  // (seed.exactHex) when present, falling back to the canonical in-gamut seed
+  // argb. Mirrors selectSeedHex's `exactHex ?? hexFromHct` precedence so brand
+  // reads back the pick verbatim, immune to the variant×mode tone flip.
+  const brandArgb =
+    source.seed.exactHex !== undefined ? argbFromHex(source.seed.exactHex) : seedArgb
+  const brand: TokenMap = {
+    '--brand': brandArgb,
+    '--brand-foreground': brandForeground(brandArgb),
+  }
+
   const customMdLight = buildCustomColorsMd(customGroups, 'light')
   const customMdDark = buildCustomColorsMd(customGroups, 'dark')
   const mergedLight = { ...treatedLight, ...customMdLight }
@@ -387,6 +409,7 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
         rebrandChart(mdDarkChart),
         source.shadcnChartOverrides.dark,
       ),
+      brand,
     },
     warnings: [],
   }
@@ -447,6 +470,28 @@ function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): TokenMa
 // future sink-side hooks) propagate. Pair selector is per-entry shadcnSource:
 // 'color' → --{slug}/--{slug}-foreground ← --color-{slug}/--color-on-{slug};
 // 'container' → ← --color-{slug}-container/--color-on-{slug}-container.
+// why: a stable, mode-invariant on-color for the literal brand fill. The fill
+// doesn't follow MCU's per-mode tonal flip, so one foreground is picked for max
+// AA against it. MD3-style: a hue-matched near-white / near-black (tinted toward
+// the brand hue at low chroma) rather than flat #fff/#000 — but only if the tint
+// still clears the 4.5:1 text floor; otherwise fall back to pure white/black so
+// AA is never sacrificed for the tint.
+const BRAND_FG_TINT_CHROMA = 8
+const BRAND_FG_LIGHT_TONE = 98
+const BRAND_FG_DARK_TONE = 12
+const AA_TEXT_RATIO = 4.5
+const BRAND_FG_WHITE = argbFromHex('#ffffff')
+const BRAND_FG_BLACK = argbFromHex('#000000')
+
+function brandForeground(fillArgb: number): number {
+  const fill = Hct.fromInt(fillArgb)
+  const goLight = contrastRatio(BRAND_FG_WHITE, fillArgb) >= contrastRatio(BRAND_FG_BLACK, fillArgb)
+  const tone = goLight ? BRAND_FG_LIGHT_TONE : BRAND_FG_DARK_TONE
+  const tinted = Hct.from(fill.hue, Math.min(fill.chroma, BRAND_FG_TINT_CHROMA), tone).toInt()
+  if (contrastRatio(tinted, fillArgb) >= AA_TEXT_RATIO) return tinted
+  return goLight ? BRAND_FG_WHITE : BRAND_FG_BLACK
+}
+
 function buildCustomColorsShadcn(groups: ResolvedCustomGroup[], mdLayer: TokenMap): TokenMap {
   const out: TokenMap = {}
   for (const { entry, slug } of groups) {

@@ -2,6 +2,7 @@ node_modules
 .next
 dist
 .turbo
+.pnpm-store
 *.tsbuildinfo
 .DS_Store
 coverage

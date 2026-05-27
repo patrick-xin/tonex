@@ -49,8 +49,13 @@ function Body({ theme, mode, layer }: BodyProps) {
   const [filter, setFilter] = useState<Filter>('all')
   const [resultFilter, setResultFilter] = useState<ResultFilter>('all')
   const showExtended = useUiPrefs((s) => s.showExtended)
+  const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const customColors = useSource((s) => s.customColors)
-  const report = evaluateThemeContrast(theme, customColors)
+  // why: brand is shadcn-only (ADR-0032) — gate the opt-in eval on both the
+  // layer and the editor's brand toggle. On the md route brandLayer never
+  // matches the route filter anyway, but gating the eval keeps the report lean.
+  const includeBrand = layer === 'shadcn' && brandEnabled
+  const report = evaluateThemeContrast(theme, customColors, { includeBrand })
   // why: each route owns one layer's pairs AND its chart + custom siblings. md
   // route surfaces `md` + `md-chart` + `md-custom`; shadcn route surfaces the
   // `shadcn`-prefixed trio. Chart and custom pairs land in their own family
@@ -58,13 +63,21 @@ function Body({ theme, mode, layer }: BodyProps) {
   // c.5; custom pairs per ADR-0025's anticipated pair-union widening.
   const chartLayer = `${layer}-chart` as const
   const customLayer = `${layer}-custom` as const
+  // why: brand pairs (ADR-0032) ride alongside chart/custom on the shadcn
+  // route. Only present in the report when includeBrand above; the filter just
+  // lets them through to their Brand family chip (grouping.familyOf).
+  const brandLayer = 'shadcn-brand'
   // why: `level` drives the WCAG threshold every pair is evaluated against —
   // applyLevel bakes effectivePasses/effectiveThreshold for the selected level
   // so the table stays in sync with the AA/AAA toggle. The showExtended gate
   // drops md extended-role pairs in lockstep with the inspect role list.
   const all = report[mode]
     .filter(
-      (r) => r.pair.layer === layer || r.pair.layer === chartLayer || r.pair.layer === customLayer,
+      (r) =>
+        r.pair.layer === layer ||
+        r.pair.layer === chartLayer ||
+        r.pair.layer === customLayer ||
+        r.pair.layer === brandLayer,
     )
     .filter(
       (r) =>

@@ -193,6 +193,57 @@ describe('exportCss(bundle, "shadcn") with customColors', () => {
   })
 })
 
+describe('exportCss(bundle, "shadcn") with includeBrand', () => {
+  // why: opt-in stable brand pair. Off by default (keeps the baked globals.css
+  // drift-guard baseline byte-identical); on, the literal-seed brand surfaces as
+  // --brand / --brand-foreground so shadcn users can author a brand button
+  // variant. Mode-invariant: same value in :root and .dark.
+  const theme = deriveTheme(DEFAULT_INPUTS)
+
+  it('omits --brand entirely by default', () => {
+    const out = exportCss({ default: theme }, 'shadcn')
+    expect(out).not.toContain('--brand:')
+    expect(out).not.toContain('--color-brand:')
+  })
+
+  it('emits the brand pair in :root and .dark with identical (mode-invariant) values', () => {
+    const out = exportCss({ default: theme }, 'shadcn', { includeBrand: true })
+    const root = parseBlock(out, ':root')
+    const dark = parseBlock(out, '.dark')
+    const brand = projectLayer(theme.shadcn.brand)
+    expect(root['--brand']).toBe(brand['--brand'])
+    expect(root['--brand-foreground']).toBe(brand['--brand-foreground'])
+    expect(dark['--brand']).toBe(brand['--brand'])
+    expect(dark['--brand-foreground']).toBe(brand['--brand-foreground'])
+  })
+
+  it('registers --color-brand utilities in @theme inline so bg-brand resolves', () => {
+    const out = exportCss({ default: theme }, 'shadcn', { includeBrand: true })
+    expect(out).toMatch(/@theme inline\s*\{/)
+    expect(out).toContain('--color-brand: var(--brand);')
+    expect(out).toContain('--color-brand-foreground: var(--brand-foreground);')
+  })
+})
+
+describe('exportCss(bundle, "shadcn") includeBrand + a custom color named "brand"', () => {
+  // why: a user may legitimately name a custom color "Brand" (slug → brand),
+  // which already emits --brand via the custom path. With includeBrand also on,
+  // the injected brand must NOT double-emit; the user's explicit custom color
+  // wins and only one --brand declaration appears per block.
+  const theme = deriveTheme(withCustomColor)
+  const out = exportCss({ default: theme }, 'shadcn', { includeBrand: true })
+
+  it('emits --brand exactly once per block (no duplicate from injection)', () => {
+    // two blocks (:root, .dark), one declaration each = 2 total
+    expect(out.match(/--brand:/g) ?? []).toHaveLength(2)
+  })
+
+  it('keeps the custom color value (custom wins over injected brand)', () => {
+    const root = parseBlock(out, ':root')
+    expect(root['--brand']).toBe(oklchString(theme.shadcn.light['--brand']))
+  })
+})
+
 describe('exportCss(bundle, "md") with customColors', () => {
   const theme = deriveTheme(withCustomColor)
   const out = exportCss({ default: theme }, 'md')

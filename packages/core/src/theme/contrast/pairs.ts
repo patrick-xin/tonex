@@ -23,7 +23,14 @@ import type { MdTokenName, ShadcnRoleName } from '../schema'
 export interface ContrastPair {
   fg: string
   bg: string
-  layer: 'md' | 'md-chart' | 'shadcn' | 'shadcn-chart' | 'md-custom' | 'shadcn-custom'
+  layer:
+    | 'md'
+    | 'md-chart'
+    | 'shadcn'
+    | 'shadcn-chart'
+    | 'md-custom'
+    | 'shadcn-custom'
+    | 'shadcn-brand'
   intent: 'text' | 'non-text'
   threshold: number
 }
@@ -622,6 +629,60 @@ export const CONTRAST_PAIRS = [
     threshold: NON_TEXT_THRESHOLD,
   },
 ] as const satisfies readonly StaticContrastPair[]
+
+// why: the stable literal-seed brand pair (ADR-0032). Brand tokens (--brand,
+// --brand-foreground) are not in any role/chart union — they're an override-
+// shaped pin, not a binding — so these live in their own const typed as the
+// wide ContrastPair, OUTSIDE the type-checked CONTRAST_PAIRS tuple (same reason
+// custom-color pairs do). evaluateThemeContrast appends them only under
+// `includeBrand`, never into the static report the role-editor surfaces read.
+//
+// Five pairs, two intents:
+// - --brand-foreground / --brand (text 4.5): the button label. Guaranteed AA
+//   by derive's white/black floor — included for completeness, never the
+//   failure signal.
+// - --brand vs --background and --card (text 4.5): brand AS text/link on the
+//   two universal neutral surfaces — the role-as-text shape (cf. --primary's
+//   link-variant pairs). A pale brand fails here; this is the real signal.
+// - --brand vs --background and --card (non-text 3): brand as a fill/border/
+//   icon edge (WCAG 1.4.11) — a low-contrast brand fails as a chip outline.
+export const BRAND_CONTRAST_PAIRS: readonly ContrastPair[] = [
+  {
+    fg: '--brand-foreground',
+    bg: '--brand',
+    layer: 'shadcn-brand',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--brand',
+    bg: '--background',
+    layer: 'shadcn-brand',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--brand',
+    bg: '--card',
+    layer: 'shadcn-brand',
+    intent: 'text',
+    threshold: TEXT_THRESHOLD,
+  },
+  {
+    fg: '--brand',
+    bg: '--background',
+    layer: 'shadcn-brand',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+  {
+    fg: '--brand',
+    bg: '--card',
+    layer: 'shadcn-brand',
+    intent: 'non-text',
+    threshold: NON_TEXT_THRESHOLD,
+  },
+]
 
 // why: the dynamic sibling of CONTRAST_PAIRS — custom-color slugs are runtime
 // values, so their pairs cannot live in the closed tuple. Each entry emits the
