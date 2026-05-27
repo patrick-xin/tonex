@@ -66,13 +66,20 @@ export function applyDom(): () => void {
         ...theme.md.dark,
         ...theme.md.darkChart,
       })
+      // why: brand merges into BOTH .shadcn blocks with the SAME (mode-invariant)
+      // values so a brand button previews correctly in light and dark. Always
+      // applied — like chart — so the editor is WYSIWYG; export still gates it
+      // via includeBrand. Brand is kept out of shadcn.light/dark, so it's spread
+      // in explicitly here rather than riding the core map.
       applyDiff(rules['.shadcn'], lastTokens['.shadcn'], {
         ...theme.shadcn.light,
         ...theme.shadcn.lightChart,
+        ...theme.shadcn.brand,
       })
       applyDiff(rules['html.dark .shadcn'], lastTokens['html.dark .shadcn'], {
         ...theme.shadcn.dark,
         ...theme.shadcn.darkChart,
+        ...theme.shadcn.brand,
       })
     } catch (err) {
       // why: annotate the failure with applyDom's identity so a stack trace

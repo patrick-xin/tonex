@@ -41,6 +41,13 @@ export interface ExportOptions {
   includeExtended?: boolean
   includePalette?: boolean
   includeChart?: boolean
+  // why: opt-in stable brand pair (shadcn layer only). When true, the shadcn
+  // exporter emits `--brand` / `--brand-foreground` — the literal seed plus a
+  // computed AA on-color, mode-invariant — and registers their `--color-brand`
+  // utilities. Off by default so DEFAULT_INPUTS emits nothing new and the baked
+  // globals.css drift-guard baseline stays byte-identical. Only the shadcn path
+  // reads it; md/CSS/JSON/Dart ignore it (md users get the full custom set).
+  includeBrand?: boolean
   includeContrastVariants?: boolean
   // why: shadcn bootstrap toggle. When true, the shadcn exporter prepends
   // the Tailwind v4 incantation (`@import "tailwindcss"`, `@custom-variant

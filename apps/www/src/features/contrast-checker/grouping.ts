@@ -29,6 +29,11 @@ const SHADCN_FAMILY: ReadonlyArray<readonly [RegExp, string]> = [
 export function familyOf(pair: ContrastPair): string {
   if (pair.layer === 'md-chart' || pair.layer === 'shadcn-chart') return 'Chart'
   if (pair.layer === 'md-custom' || pair.layer === 'shadcn-custom') return 'Custom'
+  // why: brand (ADR-0032) is checked as both text (4.5) and non-text (3)
+  // against --background/--card, like --destructive — bg-based grouping would
+  // scatter it across Surface/Card. Short-circuit on layer so all brand pairs
+  // cohere in one Brand chip.
+  if (pair.layer === 'shadcn-brand') return 'Brand'
   if (pair.layer === 'shadcn') {
     // why: --destructive is the one role evaluated as both text (4.5) and
     // non-text (3) against neutral surfaces, so its four pairs would otherwise
@@ -59,6 +64,7 @@ const FAMILY_ORDER_SHADCN = [
   'Muted',
   'Accent',
   'Destructive',
+  'Brand',
   'Sidebar',
   'Custom',
   'Chart',

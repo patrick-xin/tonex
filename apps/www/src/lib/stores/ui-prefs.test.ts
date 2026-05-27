@@ -11,22 +11,41 @@ import {
 describe('useUiPrefs', () => {
   beforeEach(() => {
     localStorage.clear()
-    useUiPrefs.setState({ showExtended: false, twPickerEnabled: true, _hydrated: false })
+    useUiPrefs.setState({
+      showExtended: false,
+      twPickerEnabled: true,
+      brandEnabled: false,
+      _hydrated: false,
+    })
   })
 
   afterEach(() => {
     localStorage.clear()
-    useUiPrefs.setState({ showExtended: false, twPickerEnabled: true, _hydrated: false })
+    useUiPrefs.setState({
+      showExtended: false,
+      twPickerEnabled: true,
+      brandEnabled: false,
+      _hydrated: false,
+    })
   })
 
-  it('default state: showExtended false, twPickerEnabled true, _hydrated false, actions defined', () => {
+  it('default state: showExtended false, twPickerEnabled true, brandEnabled false, _hydrated false, actions defined', () => {
     const s = useUiPrefs.getState()
     expect(s.showExtended).toBe(false)
     expect(s.twPickerEnabled).toBe(true)
+    expect(s.brandEnabled).toBe(false)
     expect(s._hydrated).toBe(false)
     expect(typeof s.actions.setShowExtended).toBe('function')
     expect(typeof s.actions.setTwPickerEnabled).toBe('function')
+    expect(typeof s.actions.setBrandEnabled).toBe('function')
     expect(typeof s.actions.reset).toBe('function')
+  })
+
+  it('setBrandEnabled(true) updates brandEnabled; false restores it', () => {
+    useUiPrefs.getState().actions.setBrandEnabled(true)
+    expect(useUiPrefs.getState().brandEnabled).toBe(true)
+    useUiPrefs.getState().actions.setBrandEnabled(false)
+    expect(useUiPrefs.getState().brandEnabled).toBe(false)
   })
 
   it('setShowExtended(true) updates showExtended', () => {
@@ -51,19 +70,22 @@ describe('useUiPrefs', () => {
     expect(useUiPrefs.getState().twPickerEnabled).toBe(true)
   })
 
-  it('reset() restores showExtended to false and twPickerEnabled to true', () => {
+  it('reset() restores showExtended false, twPickerEnabled true, brandEnabled false', () => {
     useUiPrefs.getState().actions.setShowExtended(true)
     useUiPrefs.getState().actions.setTwPickerEnabled(false)
+    useUiPrefs.getState().actions.setBrandEnabled(true)
     useUiPrefs.getState().actions.reset()
     expect(useUiPrefs.getState().showExtended).toBe(false)
     expect(useUiPrefs.getState().twPickerEnabled).toBe(true)
+    expect(useUiPrefs.getState().brandEnabled).toBe(false)
   })
 
   it('selectUiPrefs returns only pref fields — no _hydrated, no actions', () => {
     useUiPrefs.getState().actions.setShowExtended(true)
     useUiPrefs.getState().actions.setTwPickerEnabled(false)
+    useUiPrefs.getState().actions.setBrandEnabled(true)
     const prefs = selectUiPrefs(useUiPrefs.getState())
-    expect(prefs).toEqual({ showExtended: true, twPickerEnabled: false })
+    expect(prefs).toEqual({ showExtended: true, twPickerEnabled: false, brandEnabled: true })
     expect('_hydrated' in prefs).toBe(false)
     expect('actions' in prefs).toBe(false)
   })

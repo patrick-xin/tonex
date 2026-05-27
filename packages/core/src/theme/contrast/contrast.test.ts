@@ -4,7 +4,7 @@ import type { CustomColorEntry } from '../custom-color/entry'
 import { deriveTheme } from '../derive'
 import { DEFAULT_INPUTS } from '../schema'
 import { evaluateThemeContrast } from './contrast'
-import { CONTRAST_PAIRS, customColorContrastPairs } from './pairs'
+import { BRAND_CONTRAST_PAIRS, CONTRAST_PAIRS, customColorContrastPairs } from './pairs'
 
 describe('evaluateThemeContrast (ADR-0025 commitment 8)', () => {
   it('reports both modes with 73 pair results each post issue #47 sweep', () => {
@@ -484,6 +484,103 @@ describe('custom-color contrast (ADR-0025 anticipated pair-union widening)', () 
       const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [brand] })
       evaluateThemeContrast(theme, [brand])
       expect(evaluateThemeContrast(theme).light).toHaveLength(73)
+    })
+  })
+})
+
+describe('brand contrast (stable literal-seed brand, opt-in via includeBrand)', () => {
+  // why: the brand pair (--brand / --brand-foreground, ADR-0032) is always
+  // derivable but contrast-audited only on demand — the editor's single brand
+  // settings toggle drives it, the role-editor surfaces never want it. So it
+  // mirrors the custom-color append: opt-in via the third arg, NOT baked into
+  // the static report (which the 14 always-on callers depend on).
+  describe('BRAND_CONTRAST_PAIRS', () => {
+    it('is 5 shadcn-brand pairs: 3 text @4.5 + 2 non-text @3', () => {
+      expect(BRAND_CONTRAST_PAIRS).toHaveLength(5)
+      for (const p of BRAND_CONTRAST_PAIRS) expect(p.layer).toBe('shadcn-brand')
+      expect(BRAND_CONTRAST_PAIRS.filter((p) => p.intent === 'text')).toHaveLength(3)
+      expect(BRAND_CONTRAST_PAIRS.filter((p) => p.intent === 'non-text')).toHaveLength(2)
+      for (const p of BRAND_CONTRAST_PAIRS) {
+        expect(p.threshold).toBe(p.intent === 'text' ? 4.5 : 3)
+      }
+    })
+
+    it('covers brand-foreground/brand (text) plus brand vs background+card at both thresholds', () => {
+      const set = new Set(BRAND_CONTRAST_PAIRS.map((p) => `${p.intent}:${p.fg}/${p.bg}`))
+      expect(set).toEqual(
+        new Set([
+          'text:--brand-foreground/--brand',
+          'text:--brand/--background',
+          'text:--brand/--card',
+          'non-text:--brand/--background',
+          'non-text:--brand/--card',
+        ]),
+      )
+    })
+  })
+
+  describe('evaluateThemeContrast with includeBrand', () => {
+    it('omitting includeBrand leaves the report brand-free (static-set preserving)', () => {
+      const theme = deriveTheme(DEFAULT_INPUTS)
+      const report = evaluateThemeContrast(theme)
+      expect(report.light.some((r) => r.pair.layer === 'shadcn-brand')).toBe(false)
+      expect(report.light).toHaveLength(73)
+    })
+
+    it('includeBrand appends the 5 brand pairs in both modes', () => {
+      const theme = deriveTheme(DEFAULT_INPUTS)
+      const report = evaluateThemeContrast(theme, [], { includeBrand: true })
+      expect(report.light.filter((r) => r.pair.layer === 'shadcn-brand')).toHaveLength(5)
+      expect(report.dark.filter((r) => r.pair.layer === 'shadcn-brand')).toHaveLength(5)
+      expect(report.light).toHaveLength(78)
+    })
+
+    it('reads brand from theme.shadcn.brand and the neutral surfaces from shadcn[mode]', () => {
+      const theme = deriveTheme(DEFAULT_INPUTS)
+      const report = evaluateThemeContrast(theme, [], { includeBrand: true })
+      const fgPair = report.light.find((r) => r.pair.fg === '--brand-foreground')
+      expect(fgPair?.fgArgb).toBe(theme.shadcn.brand['--brand-foreground'])
+      expect(fgPair?.bgArgb).toBe(theme.shadcn.brand['--brand'])
+      const onBg = report.light.find(
+        (r) => r.pair.fg === '--brand' && r.pair.bg === '--background' && r.pair.intent === 'text',
+      )
+      expect(onBg?.fgArgb).toBe(theme.shadcn.brand['--brand'])
+      expect(onBg?.bgArgb).toBe(theme.shadcn.light['--background'])
+    })
+
+    it('brand-foreground/brand clears AA — the white/black floor guarantees it', () => {
+      const theme = deriveTheme(DEFAULT_INPUTS)
+      const report = evaluateThemeContrast(theme, [], { includeBrand: true })
+      const fgPair = report.light.find((r) => r.pair.fg === '--brand-foreground')
+      expect(fgPair?.passes).toBe(true)
+    })
+
+    it('the brand fill is mode-invariant — same --brand argb in light and dark rows', () => {
+      const theme = deriveTheme(DEFAULT_INPUTS)
+      const report = evaluateThemeContrast(theme, [], { includeBrand: true })
+      const lightFg = report.light.find((r) => r.pair.fg === '--brand-foreground')
+      const darkFg = report.dark.find((r) => r.pair.fg === '--brand-foreground')
+      expect(lightFg?.bgArgb).toBe(darkFg?.bgArgb)
+    })
+
+    it('includeBrand composes with customColors — both appended', () => {
+      const custom: CustomColorEntry = {
+        id: 'id-x',
+        name: 'Accent',
+        hex: '#22c55e',
+        blend: false,
+        shadcnSource: 'color',
+      }
+      const theme = deriveTheme({ ...DEFAULT_INPUTS, customColors: [custom] })
+      const report = evaluateThemeContrast(theme, [custom], { includeBrand: true })
+      // 73 static + 3 custom + 5 brand
+      expect(report.light).toHaveLength(81)
+      expect(report.light.filter((r) => r.pair.layer === 'shadcn-brand')).toHaveLength(5)
+      expect(
+        report.light.filter(
+          (r) => r.pair.layer === 'md-custom' || r.pair.layer === 'shadcn-custom',
+        ),
+      ).toHaveLength(3)
     })
   })
 })
