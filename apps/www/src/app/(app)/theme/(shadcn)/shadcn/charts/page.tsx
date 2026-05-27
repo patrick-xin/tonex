@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShadcnCharts } from './_components'
 
 export const metadata: Metadata = {
-  title: 'Charts | Tonex',
+  title: 'Charts',
   description: 'Shadcn charts',
 }
 

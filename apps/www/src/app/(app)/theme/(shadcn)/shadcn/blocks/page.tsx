@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { BlocksDemo } from './_components'
 
 export const metadata: Metadata = {
-  title: 'Blocks | Tonex',
+  title: 'Blocks',
   description: 'Shadcn blocks',
 }
 
