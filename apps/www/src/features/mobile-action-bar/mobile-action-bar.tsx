@@ -12,6 +12,8 @@ import {
   XLogoIcon,
 } from '@phosphor-icons/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useRef } from 'react'
 import { ThemeModeToggle } from '@/components/shared/theme-mode-toggle'
 import { Button } from '@/components/ui/button'
 import { DrawerTrigger } from '@/components/ui/drawer'
@@ -56,6 +58,15 @@ export function MobileActionBar({
   railDrawer: React.ReactNode
   settingsDrawer: React.ReactNode
 }) {
+  const router = useRouter()
+  // why: the cross-link navigates to the sibling layer's route group, which
+  // tears down THIS layout (and the open Sheet) on click. Navigating straight
+  // from inside the open modal unmounts it mid-close, before Base UI releases
+  // its scroll lock / inert state — leaving the destination page frozen until a
+  // refresh (mobile-shadcn-freeze). So we close first and defer the push to
+  // onOpenChangeComplete, after the lock is released. The ref distinguishes a
+  // navigate-intent close from a plain dismiss (backdrop, close button).
+  const pendingHref = useRef<string | null>(null)
   return (
     <>
       {railDrawer}
@@ -110,7 +121,15 @@ export function MobileActionBar({
           >
             <QuestionIcon />
           </Button>
-          <Sheet handle={moreSheetHandle}>
+          <Sheet
+            handle={moreSheetHandle}
+            onOpenChangeComplete={(open) => {
+              if (open || !pendingHref.current) return
+              const href = pendingHref.current
+              pendingHref.current = null
+              router.push(href)
+            }}
+          >
             <SheetTrigger render={<Button variant="ghost" size="icon" aria-label="More tools" />}>
               <DotsThreeIcon />
             </SheetTrigger>
@@ -128,7 +147,16 @@ export function MobileActionBar({
                   variant="ghost"
                   nativeButton={false}
                   className="justify-start gap-3"
-                  render={<Link href={crossLink.href} onClick={() => moreSheetHandle.close()} />}
+                  render={
+                    <Link
+                      href={crossLink.href}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        pendingHref.current = crossLink.href
+                        moreSheetHandle.close()
+                      }}
+                    />
+                  }
                 >
                   <ArrowsLeftRightIcon className="size-5" />
                   Switch to {crossLink.label}
