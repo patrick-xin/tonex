@@ -35,8 +35,31 @@ const geist = Geist({
   subsets: ['latin'],
 })
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+const siteTitle = 'tonex — Pro-grade color tools, made for the web'
+const siteDescription =
+  'Pro-grade color tools, made for the web. Real HCT math, per-role pins, and contrast audited across every token pair — ship to Material Design and shadcn from one source.'
+
 export const metadata: Metadata = {
-  title: 'tonex',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteTitle,
+    template: '%s · tonex',
+  },
+  description: siteDescription,
+  applicationName: 'tonex',
+  openGraph: {
+    type: 'website',
+    siteName: 'tonex',
+    title: siteTitle,
+    description: siteDescription,
+    url: siteUrl,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteTitle,
+    description: siteDescription,
+  },
 }
 
 // why: <body class="md"> sets the app default layer. The shadcn sub-scope

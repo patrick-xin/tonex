@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ShadcnDashboardLoader } from '../dashboard/_components'
 
 export const metadata: Metadata = {
-  title: 'Tuner | Tonex',
+  title: 'Tuner',
   description: 'Dev surface for shadcn preset curation',
 }
 

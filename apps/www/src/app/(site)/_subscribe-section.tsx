@@ -6,7 +6,7 @@ export function SubscribeSection() {
     <section>
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          Hear when Tonex ships something new
+          Hear when tonex ships something new
         </h2>
         <p className="mt-5 text-balance text-on-surface-variant">
           One email when a meaningful feature lands — and a quick line welcoming you in.

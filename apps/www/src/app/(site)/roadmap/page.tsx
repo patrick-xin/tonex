@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Roadmap',
+  description: "What's shipped and what's next for tonex.",
+}
+
 export default function RoadmapPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-20 text-center">

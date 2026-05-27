@@ -9,7 +9,7 @@ import {
 } from './_components'
 
 export const metadata: Metadata = {
-  title: 'Blocks | Tonex',
+  title: 'Blocks',
   description: 'Component blocks',
 }
 

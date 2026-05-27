@@ -47,7 +47,7 @@ export function HelpDialog() {
         <DialogOutsideScrollContent>
           <DialogHeader className="mb-4">
             <DialogTitle className="text-xl font-semibold">Help</DialogTitle>
-            <DialogDescription>Key concepts and usage guide about Tonex</DialogDescription>
+            <DialogDescription>Key concepts and usage guide about tonex</DialogDescription>
           </DialogHeader>
           <div className="h-full min-h-screen space-y-6">
             <KeyConcepts section={section ?? null} />

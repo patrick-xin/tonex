@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ShadcnDashboardLoader } from './_components'
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Tonex',
+  title: 'Dashboard',
   description: 'Shadcn dashboard',
 }
 

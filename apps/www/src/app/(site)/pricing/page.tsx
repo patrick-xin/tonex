@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { Plans } from './_plans'
+
+export const metadata: Metadata = {
+  title: 'Pricing',
+  description: 'tonex is free while in preview.',
+}
 
 export default function PricingPage() {
   return (
