@@ -21,7 +21,7 @@ export function ColorSwatch({
   return (
     <div
       className={cx(
-        'group relative rounded-md ring-1 ring-inset ring-foreground/15',
+        'group relative rounded-md ring-1 ring-inset ring-scrim/10',
         isTransparent
           ? 'bg-[linear-gradient(45deg,#ccc_25%,transparent_25%),linear-gradient(-45deg,#ccc_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#ccc_75%),linear-gradient(-45deg,transparent_75%,#ccc_75%)] bg-size-[8px_8px] bg-position-[0_0,0_4px,4px_-4px,-4px_0px]'
           : 'bg-(--color)',
