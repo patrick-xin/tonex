@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         from: `tonex <onboarding@${emailDomain}>`,
         to: [email],
         subject: 'Welcome to tonex',
-        react: <WelcomeEmail url={`${appUrl}/roadmap`} companyName="Tonex" />,
+        react: <WelcomeEmail url={`${appUrl}/roadmap`} companyName="tonex" />,
       },
       // why: idempotency key prevents duplicate sends if the route retries
       // the same request within Resend's 24h key window.

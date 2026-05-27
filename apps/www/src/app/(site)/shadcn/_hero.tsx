@@ -143,7 +143,7 @@ export function ShadcnHero() {
             size="lg"
             className="rounded-xl px-6 sm:px-8 h-11 sm:h-12 text-sm sm:text-base"
           >
-            Try Tonex
+            Try tonex
             <Image
               loading="eager"
               src="/logo.png"

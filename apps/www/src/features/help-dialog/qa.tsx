@@ -25,11 +25,11 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
           >
-            How does Tonex map MD3 tokens to shadcn tokens?
+            How does tonex map MD3 tokens to shadcn tokens?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              Tonex always generates the full MD3 palette from your seed, then the active{' '}
+              tonex always generates the full MD3 palette from your seed, then the active{' '}
               <span className="font-medium">shadcn preset</span> decides how those MD3 colors bind
               to shadcn's tokens (<code className="font-mono text-xs">--primary</code>,{' '}
               <code className="font-mono text-xs">--border</code>, and the rest).
@@ -310,11 +310,11 @@ export const QA = ({ section }: { section: HelpSection | null }) => {
             variant="underline"
             className="text-base hover:text-primary hover:decoration-0"
           >
-            Why choose Tonex instead of other theme generators?
+            Why choose tonex instead of other theme generators?
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              <span className="font-medium">Tonex Color:</span> Algorithmic themes from your brand
+              <span className="font-medium">tonex Color:</span> Algorithmic themes from your brand
               color. Unique to you, scales with rebrands, built-in accessibility, first-class dark
               mode.
             </p>

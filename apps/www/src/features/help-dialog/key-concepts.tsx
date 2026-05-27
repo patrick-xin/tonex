@@ -29,7 +29,7 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              Tonex writes <span className="font-medium">both</span> themes from one seed — a light
+              tonex writes <span className="font-medium">both</span> themes from one seed — a light
               (<code className="font-mono text-xs">:root</code>) and a dark (
               <code className="font-mono text-xs">.dark</code>) block. The mode toggle (press{' '}
               <span className="font-medium">D</span>) is the same switch your users' OS flips.
@@ -81,7 +81,7 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
               <span className="font-medium">HCT (Hue, Chroma, Tone)</span> is Google's color model,
               built for Material Design 3. Unlike RGB or HSL, HCT is designed around how humans
               actually perceive color — so two colors at the same tone value appear equally bright
-              regardless of hue. Tonex uses Google's official{' '}
+              regardless of hue. tonex uses Google's official{' '}
               <code className="font-mono text-xs">@material/material-color-utilities</code> library
               — real HCT math, not an approximation.
             </p>
@@ -126,7 +126,7 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
               <span className="font-medium">CMF</span> is Google's next-generation color algorithm,
               part of the Material Color Utilities 2026 spec — sourced directly from Google's
               repository before npm release. It's the most advanced scheme available in any color
-              tool, and it's Tonex's default.
+              tool, and it's tonex's default.
             </p>
             <p>
               What makes it different: CMF takes two source colors. Your primary, secondary, and

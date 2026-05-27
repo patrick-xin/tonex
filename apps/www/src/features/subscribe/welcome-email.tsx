@@ -184,7 +184,7 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
 
                   <Row align="left">
                     <Column className="w-full pt-8 align-top">
-                      <Text className="font-11 font-inter text-fg-2 m-0">Tonex</Text>
+                      <Text className="font-11 font-inter text-fg-2 m-0">tonex</Text>
                     </Column>
                   </Row>
 
