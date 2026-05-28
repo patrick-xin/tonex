@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShadcnCharts } from './_components'
 
 export const metadata: Metadata = {
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function ShadcnChartsPage() {
-  return (
-    <ScrollArea noScrollBar gradientScrollFade>
-      <ShadcnCharts />
-    </ScrollArea>
-  )
+  return <ShadcnCharts />
 }

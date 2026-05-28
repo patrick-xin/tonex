@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { BlocksDemo } from './_components'
 
 export const metadata: Metadata = {
@@ -7,10 +6,13 @@ export const metadata: Metadata = {
   description: 'Shadcn blocks',
 }
 
+// why: BlocksDemo is `min-w-max` — intentionally wider than the viewport. The
+// horizontal scroll has to live on this section, not the page, otherwise the
+// whole document gets a horizontal scrollbar.
 export default function ShadcnBlocksPage() {
   return (
-    <ScrollArea noScrollBar gradientScrollFade>
+    <div className="overflow-x-auto">
       <BlocksDemo />
-    </ScrollArea>
+    </div>
   )
 }

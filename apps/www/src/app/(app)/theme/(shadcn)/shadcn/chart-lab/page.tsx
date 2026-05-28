@@ -429,7 +429,7 @@ export default function ChartLabPage() {
   }
 
   return (
-    <div className="h-full overflow-auto px-6 py-6">
+    <div className="px-6 py-6">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         <div>
           <h1 className="text-xl font-semibold">Chart sequential lab</h1>
