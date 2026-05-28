@@ -10,35 +10,9 @@ import {
 import { MD_TOKEN_ITEM_GROUPS } from '@/features/color-picker'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
+import { collapseFixedGroups, type TokenItem, type TokenItemGroup } from './collapse-fixed-groups'
 
-export interface TokenItem {
-  token: MdTokenName
-  label: string
-  hex: string
-}
-
-export interface TokenItemGroup {
-  label: string
-  items: ReadonlyArray<TokenItem>
-}
-
-// why: MD3 splits Primary/Secondary/Tertiary into Fixed siblings; for the
-// binding picker that just doubles headers. Merged into the parent group
-// here — md-snapshot-picker keeps the original split.
-function collapseFixedGroups(groups: ReadonlyArray<TokenItemGroup>): ReadonlyArray<TokenItemGroup> {
-  const merged = new Map<string, TokenItem[]>()
-  const order: string[] = []
-  for (const g of groups) {
-    const parent = g.label.replace(/ Fixed$/, '')
-    if (!merged.has(parent)) {
-      merged.set(parent, [])
-      order.push(parent)
-    }
-    const bucket = merged.get(parent)
-    if (bucket !== undefined) bucket.push(...g.items)
-  }
-  return order.map((label) => ({ label, items: merged.get(label) ?? [] }))
-}
+export type { TokenItem, TokenItemGroup }
 
 // why: rail-local hook, parallel to `useOverrideData`. Preps the picker's
 // token domain once per render and binds the store setter to the active mode

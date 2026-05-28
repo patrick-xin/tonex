@@ -12,6 +12,7 @@ import { validateCustomColorEntry } from '@tonex/core/schema'
 import { useCallback, useState } from 'react'
 import { chromaGradient, hueGradient, toneGradient } from '@/features/hct-controls'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
+import { visibleCustomColorError } from './visible-error'
 
 export interface CustomColorFormInitial {
   name: string
@@ -64,12 +65,7 @@ export function useCustomColorForm(initial: CustomColorFormInitial, existingSlug
   } = useHexFieldState(colorHex, setFromHex)
 
   const draftError = validateCustomColorEntry({ name, hex: colorHex }, existingSlugs)
-  // why: gate draft error TEXT on a non-empty name — opening the dialog with
-  // an empty name (the add path) shouldn't immediately read "name must
-  // contain…". The submit button still keys off draftError directly, so an
-  // empty name keeps it disabled; only the red text waits. A caught `error`
-  // from the submit handler always shows.
-  const visibleError = error ?? (name.trim() ? draftError : null)
+  const visibleError = visibleCustomColorError(error, name, draftError)
 
   const reset = useCallback((next: CustomColorFormInitial) => {
     setName(next.name)
