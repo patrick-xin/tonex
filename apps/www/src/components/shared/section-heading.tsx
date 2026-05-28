@@ -26,12 +26,11 @@ type SectionHeadingStylesProps = VariantProps<typeof sectionHeadingStyles>
 
 interface SectionHeadingProps extends useRender.ComponentProps<'p'>, SectionHeadingStylesProps {}
 
-// why: the three md theme pages each hand-rolled their own group-label markup,
-// which drifted apart (text-xl h2 / uppercase eyebrow p / medium p). This owns
-// the typography as composable variant (weight/tracking/case) and size axes so
-// they can't drift again; the default label/base covers the common case with no
-// props. useRender keeps the tag independent of styling (h2 for the page section
-// title, p for inline group labels) without forcing a wrapper element.
+// why: owns the group-label markup the md theme pages would otherwise hand-roll,
+// as composable variant (weight/tracking/case) + size axes so they can't drift
+// apart; the default label/base covers the common case with no props. useRender
+// keeps the tag independent of styling (h2 for the page section title, p for
+// inline group labels) without forcing a wrapper element.
 export function SectionHeading({
   render,
   variant,

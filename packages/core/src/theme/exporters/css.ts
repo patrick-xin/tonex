@@ -34,9 +34,9 @@ import { mergeMdEmission } from './format'
 // blocks (composed with `.dark` for the dark axis). Iteration is bundle-
 // driven so emission auto-includes any tier the bundle carries.
 //
-// Slice 4: ExportOptions filters wired here. Defaults reflect the lean
-// dialog output (extended/palette/chart all off, oklch). Filter combinations
-// are applied per rule block before stringification — toggling a flag in the
+// ExportOptions filters are wired here. Defaults reflect the lean dialog
+// output (extended/palette/chart all off, oklch). Filter combinations are
+// applied per rule block before stringification — toggling a flag in the
 // dialog produces exact byte-equal output to what the user pastes.
 
 export type ExportLayer = 'md' | 'shadcn'

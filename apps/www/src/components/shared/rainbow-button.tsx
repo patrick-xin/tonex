@@ -4,27 +4,9 @@ import type { ReactNode } from 'react'
 import { cn } from 'tailwind-variants'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
-// PROTOTYPE — "Announcing …" rainbow-border pill (Resend Forward style).
-//
-// The look is a 1px gradient ring that slowly rotates around a solid pill. The
-// trick is a conic-ish linear-gradient whose angle is a custom property; we
-// register --angle with @property so the browser can interpolate it (plain CSS
-// vars don't animate), then drive it 0→360deg on a long linear loop.
-//
-// Two layers share that one gradient + animation so they stay phase-locked:
-//   1. the ring — gradient as the anchor's background, with a 1px-inset solid
-//      pill (bg-surface) sitting on top, leaving only the rim showing.
-//   2. the glow — an aria-hidden copy behind (-z-10), blurred + dimmed, so the
-//      rim bleeds a soft halo onto the page.
-//
-// Inner fill is bg-surface (not a hardcoded color) so the pill reads correctly
-// in light/dark and survives the chameleon recolor. The gradient stops below
-// are the iconic cyan→amber→violet; swap them for var(--color-chart-N) to make
-// the rim track the picked palette.
-//
-// Pure CSS animation (no motion/react) — respects prefers-reduced-motion by
-// freezing the angle in the style block, so reduced-motion users get a static
-// gradient rim instead of a spinning one.
+// PROTOTYPE — rainbow-border pill: a rotating gradient ring around a solid pill.
+// why: the rim angle is an @property-registered custom prop so the browser can
+// interpolate it — plain CSS vars don't animate. Reduced-motion freezes it.
 
 const GRADIENT = 'linear-gradient(var(--rb-angle), #02fcef 0%, #ffb52b 50%, #a02bfe 100%)'
 
