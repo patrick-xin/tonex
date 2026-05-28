@@ -4,6 +4,7 @@ import { GearSixIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Kbd } from '@/components/ui/kbd'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { settingsPopoverHandle } from '@/lib/handles'
@@ -35,7 +36,12 @@ export function Settings({ layer }: { layer: Layer }) {
             </PopoverTrigger>
           }
         />
-        <TooltipContent>Settings</TooltipContent>
+        <TooltipContent>
+          <div className="flex items-center gap-1">
+            Settings
+            <Kbd>S</Kbd>
+          </div>
+        </TooltipContent>
       </Tooltip>
       <PopoverContent
         align="center"
