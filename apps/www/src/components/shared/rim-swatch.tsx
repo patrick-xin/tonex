@@ -6,22 +6,10 @@ import type { MdTokenName } from '@tonex/core/schema'
 import { tv, type VariantProps } from 'tailwind-variants'
 import { useActiveMode } from '@/features/theme-mode/use-active-mode'
 
-// A flat color swatch inside an asymmetric tonal rim. The rim gradient runs
-// corner → middle → corner, so the top-left and bottom-right corners match
-// while the middle band crosses the other diagonal.
-//
-// The rim is derived from the swatch's *own fill color*, not a fixed family
-// ramp — we read the fill token's resolved OKLCH and shift its lightness by a
-// fixed span to make a lighter + darker stop. Two consequences fall out of
-// that: (1) any role token works (primary, primary-container, surface-…), not
-// just the few families that own a tonal ramp; (2) the rim stays visible no
-// matter how light or dark the fill is, because its contrast is measured
-// against the fill rather than a hardcoded tone that may collide with it.
-//
-// motion="spin" rotates the rim: the gradient angle becomes an @property-
-// registered custom prop the browser can interpolate (plain CSS vars don't
-// animate), driven 0→360° on a slow loop. Root + glow both run the same
-// animation so they stay phase-locked, and reduced-motion freezes it.
+// A flat color swatch inside an asymmetric tonal rim (corner → middle → corner).
+// why: the rim is derived from the swatch's *own* resolved OKLCH fill, shifted
+// ±RIM_SPAN, not from a fixed family ramp — so any role token works (not just
+// families with a tonal ramp) and the rim stays visible against any fill.
 
 const rimSwatch = tv({
   slots: {
@@ -105,11 +93,10 @@ export function RimSwatch({ token = 'primary', size, motion, className }: RimSwa
   const lighter = hexFromOklch(`oklch(${center + RIM_SPAN / 2} ${c} ${h})`)
   const darker = hexFromOklch(`oklch(${center - RIM_SPAN / 2} ${c} ${h})`)
 
-  // The corner stop faces the page surface, so it takes the end that contrasts
-  // the surface: lighter on a dark surface, darker on a light one. The middle
-  // band takes the other end. Both differ from the fill, so the rim reads
-  // against the swatch too. Spinning swaps the fixed angle for the animated
-  // custom property; the stops stay put so only the sweep direction rotates.
+  // why: the corner stop faces the page surface, so it takes the end that
+  // contrasts it — lighter on a dark surface, darker on a light one; the middle
+  // band takes the other end. Both differ from the fill, so the rim also reads
+  // against the swatch.
   const [corner, middle] = mode === 'dark' ? [lighter, darker] : [darker, lighter]
   const angle = motion === 'spin' ? 'var(--rim-angle)' : `${RIM_ANGLE}deg`
   const rim = `linear-gradient(${angle}, ${corner}, ${middle}, ${corner})`

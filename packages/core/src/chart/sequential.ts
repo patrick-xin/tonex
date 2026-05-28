@@ -10,23 +10,18 @@ import type { HueAnchor } from './schema'
 // why: monotonic perceptual-uniform sequential chart palette (ADR-0027 c.3).
 // This file hosts BOTH the production sequential path and the dev-route lab:
 //   - Production: `derive.ts` calls `buildMdChartSequentialSamples` with the
-//     schema's chart.hueSpread + chart.hueAnchor (defaults 80 / 'chart-1'
-//     after slice 3), N=MD_CHART_TOKEN_NAMES.length, and no manual L*
-//     overrides, then writes argbs into the 5 chart tokens. Slice 2
-//     promotion replaced the hand-picked CHART_TONES_*  constants with this
-//     algorithmic walk so the 3:1 floor against partners holds across all
-//     variants/seeds by construction; slice 3 promoted multi-hue rotation
-//     as the new default.
+//     schema's chart.hueSpread + chart.hueAnchor (defaults 80 / 'chart-1'),
+//     N=MD_CHART_TOKEN_NAMES.length, and no manual L* overrides, then writes
+//     argbs into the 5 chart tokens. The algorithmic walk holds the 3:1 floor
+//     against partners across all variants/seeds by construction.
 //   - Lab: `buildSequentialReport` is the dev-route entry. Same core math
 //     but exposed knobs (hueSpread, hueAnchor, variable N, per-slot manual
-//     L* anchors). Used by /shadcn/chart-lab to prototype slice-4 polychrome
-//     and adjacent variations without touching production.
-// The file retires when polychrome (slice 4) lands and the chart-lab page
-// closes; until then, both paths share one place.
+//     L* anchors), for /shadcn/chart-lab to prototype variations off
+//     production.
 //
 // Algorithm:
-//   1. prominent edge = brand-presentation tone (default 40 light / 60 dark
-//      after slice 3, caller can pass per-mode override). In light mode this
+//   1. prominent edge = brand-presentation tone (default 40 light / 60 dark,
+//      caller can pass per-mode override). In light mode this
 //      is the DARK end of the band; in dark mode the LIGHT end. It's the L*
 //      furthest from the safe edge — i.e. highest contrast against the
 //      partner.
@@ -64,14 +59,11 @@ import type { HueAnchor } from './schema'
 
 const TARGET_CONTRAST = 3
 
-// why: prominent edges define the L* anchor furthest from the partner. Slice
-// 3 tightened these from 30/70 to 40/60: under multi-hue defaults the hue
-// rotation provides additional visual separation, so the L* spread can be
-// narrower without losing series distinguishability. Narrower spread keeps
-// chart-N closer to the brand hue (less darkened/lightened) at the cost of
-// less perceptual distance between chart-1 and chart-N — acceptable trade
-// because hue rotation now carries part of that load. Exposed for the lab
-// so the dev route can sweep these per-mode.
+// why: prominent edges define the L* anchor furthest from the partner. The
+// narrow 40/60 spread holds because under multi-hue defaults the hue rotation
+// carries part of the series separation, so chart-N stays closer to the brand
+// hue (less darkened/lightened) without losing distinguishability. Exposed for
+// the lab so the dev route can sweep these per-mode.
 export const PROMINENT_EDGE_LIGHT_DEFAULT = 40
 export const PROMINENT_EDGE_DARK_DEFAULT = 60
 

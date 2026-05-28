@@ -6,10 +6,9 @@ import type { ContrastWarning } from '@/features/contrast-checker/warning'
 // don't show the partner on screen, can see its colour without opening the
 // audit dialog); line 2 is ratio + required threshold (mono, tabular). The
 // status word is derived from the canonical (passes, decorative) tuple — same
-// tuple the export table uses — so no surface can drift the labelling. The
-// pre-unification color-tile lied "needs 4.5:1" for every pair; this body
-// reads `warning.threshold` so a non-text pair (border vs background at 3:1)
-// renders the truth.
+// tuple the export table uses — so no surface can drift the labelling, and the
+// body reads `warning.threshold` so a non-text pair (border vs background at
+// 3:1) shows its real requirement rather than a blanket 4.5:1.
 export function ContrastWarningTooltipBody({ warning }: { warning: ContrastWarning }) {
   const partnerLabel = warning.partner.replace(/^--(?:color-)?/, '')
   const intentLabel = warning.intent === 'text' ? 'Text' : 'UI'

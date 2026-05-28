@@ -176,6 +176,16 @@ Repo convention is `// why:` only — but the *placement* matters. Four patterns
 
 JSDoc blocks (`/** … */`) on internal helpers retire — they dilute the why-comment signal CLAUDE.md preserves. Why-lines stay terse, single-purpose, placed adjacent to the line they explain.
 
+### A why-line is not a narrative: three drift shapes that read like why
+
+The why-line rule has a failure mode the `what-comment` rule doesn't catch: prose that *sounds* like why but is actually narration. It slips past a what-detector because it isn't describing the code on the next line — it's telling a story. Three named shapes, each removable without losing any invariant a future edit must preserve:
+
+1. **History narration** — past-tense storytelling about how the code got here. *"Slice 2 promotion replaced the hand-picked constants"*, *"which drifted apart (text-xl h2 / uppercase p)"*, *"the pre-unification color-tile lied '4.5:1'"*. The invariant ("the 3:1 floor holds by construction"; "threshold is read, not assumed") is the why — state it in the present tense and drop the history. The one exception is a **rejected alternative** that prevents re-introducing a known-bad approach ("we resample rather than snap to literal shades, which can't scale to MD's tone band") — keep that as a present-tense *why-not*, one clause, not a blow-by-blow of the old behavior.
+2. **Roadmap-in-comment** — future plans: *"the file retires when slice 4 lands"*, *"swap these for var(--color-chart-N) later"*. Belongs in the issue/PRD or an ADR, not the file — code comments are read at generation time and a roadmap there just ages into a lie. Slice labels (`Slice 4:`, `after slice 3`) are the tell.
+3. **Tutorial prose** — teaching how a general technique works rather than why *this* choice here: *"the trick is a conic-ish gradient whose angle is a custom property; plain CSS vars don't animate, so we register it with @property…"* spread over a paragraph. Compress to the one non-obvious why (`@property` so the angle interpolates) and trust the reader to know CSS. UI primitives are the usual host — they have no terse sibling to pattern-match, so an agent fills the vacuum with a paragraph.
+
+The smell across all three: length without a preserved invariant. If you can delete a sentence and no future edit becomes more likely to break a contract, it was narration.
+
 ### Why these rules
 
 The component file is the smallest unit of agent locality. Locate-test resolves *which file* an agent opens; these rules resolve *what an agent finds when it opens the file*. Each rule above was either (a) a bug closure (nested buttons, refs-in-render) or (b) a file-shrink that made the parent's intent legible (CMF picker extraction cut `scheme-variants-toggle.tsx` from 185 → 71 lines, ~60%). Either justification is sufficient; the rules without a precedent like that don't get added.
