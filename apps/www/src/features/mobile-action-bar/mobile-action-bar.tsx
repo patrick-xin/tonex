@@ -4,6 +4,7 @@ import {
   CircleHalfIcon,
   DownloadIcon,
   GearSixIcon,
+  PaintBrushIcon,
   PaletteIcon,
   QuestionIcon,
 } from '@phosphor-icons/react'
@@ -13,6 +14,7 @@ import {
   checkContrastDialogHandle,
   exportDialogHandle,
   helpDialogHandle,
+  mobilePresetDrawerHandle,
   railDrawerHandle,
   settingsDrawerHandle,
 } from '@/lib/handles'
@@ -35,29 +37,35 @@ import {
 export function MobileActionBar({
   railDrawer,
   settingsDrawer,
+  presetDrawer,
 }: {
   railDrawer: React.ReactNode
   settingsDrawer: React.ReactNode
+  // why: shadcn-only — md has no preset concept (ADR-0026). Layouts opt in by
+  // passing the drawer + its trigger lights up; the md layout omits both.
+  presetDrawer?: React.ReactNode
 }) {
   return (
     <>
       {railDrawer}
       {settingsDrawer}
+      {presetDrawer}
       <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
         <div className="mx-auto flex w-fit items-center gap-2 rounded-md border border-outline-variant/50 bg-surface-container-high px-3 py-1 text-on-surface-variant elevation-2">
           <DrawerTrigger
             handle={railDrawerHandle}
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Build theme"
-                className="text-primary"
-              />
-            }
+            render={<Button variant="ghost" size="icon" aria-label="Build theme" />}
           >
             <PaletteIcon />
           </DrawerTrigger>
+          {presetDrawer && (
+            <DrawerTrigger
+              handle={mobilePresetDrawerHandle}
+              render={<Button variant="ghost" size="icon" aria-label="Preset" />}
+            >
+              <PaintBrushIcon />
+            </DrawerTrigger>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -66,12 +74,6 @@ export function MobileActionBar({
           >
             <DownloadIcon />
           </Button>
-          <DrawerTrigger
-            handle={settingsDrawerHandle}
-            render={<Button variant="ghost" size="icon" aria-label="Settings" />}
-          >
-            <GearSixIcon />
-          </DrawerTrigger>
           <Button
             variant="ghost"
             size="icon"
@@ -80,6 +82,12 @@ export function MobileActionBar({
           >
             <CircleHalfIcon />
           </Button>
+          <DrawerTrigger
+            handle={settingsDrawerHandle}
+            render={<Button variant="ghost" size="icon" aria-label="Settings" />}
+          >
+            <GearSixIcon />
+          </DrawerTrigger>
           <Button
             variant="ghost"
             size="icon"

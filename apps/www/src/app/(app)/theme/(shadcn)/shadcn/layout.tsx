@@ -4,6 +4,7 @@ import { TopNav } from '@/components/shared/top-nav'
 import { MobileActionBar } from '@/features/mobile-action-bar'
 import { GuideProvider, OnboardingTour } from '@/features/onboarding-guide'
 import { SettingsDrawer } from '@/features/settings'
+import { MobilePresetDrawer } from '@/features/shadcn-presets'
 import { ShadcnRailDrawer } from '@/features/shadcn-rail'
 import { LayerProvider } from '@/lib/layer-context'
 import { ShadcnProvider } from './_provider'
@@ -22,6 +23,7 @@ export default function ShadcnLayout({ children }: { children: React.ReactNode }
             <MobileActionBar
               railDrawer={<ShadcnRailDrawer />}
               settingsDrawer={<SettingsDrawer layer="shadcn" />}
+              presetDrawer={<MobilePresetDrawer />}
             />
           }
         >
