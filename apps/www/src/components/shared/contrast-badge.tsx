@@ -28,7 +28,7 @@ export function ContrastBadge({ warning, render }: ContrastBadgeProps) {
   return (
     <Tooltip>
       <TooltipTrigger delay={0} render={trigger} />
-      <TooltipContent variant="inverse" side="top">
+      <TooltipContent side="top">
         <ContrastWarningTooltipBody warning={warning} />
       </TooltipContent>
     </Tooltip>

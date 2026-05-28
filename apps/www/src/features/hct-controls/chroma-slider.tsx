@@ -157,7 +157,7 @@ export function ChromaSlider({
                     />
                   }
                 />
-                <TooltipContent variant="inverse">
+                <TooltipContent>
                   Maximum saturation reached for brightness (max {Math.round(gamutLimit)})
                 </TooltipContent>
               </Tooltip>

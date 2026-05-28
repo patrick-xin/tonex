@@ -20,7 +20,7 @@ export function SettingsDrawer({ layer }: { layer: Layer }) {
       <DrawerContent side="bottom">
         <DrawerDragHandle className="mt-1 mb-3" />
         <DrawerHeader className="text-left">
-          <DrawerTitle>Settings</DrawerTitle>
+          <DrawerTitle className="sr-only">Settings</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-2">
           <SettingsFields layer={layer} onAfterReset={() => settingsDrawerHandle.close()} />

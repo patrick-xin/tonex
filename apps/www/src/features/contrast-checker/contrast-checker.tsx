@@ -108,7 +108,7 @@ function Body({ theme, mode, layer }: BodyProps) {
     <>
       <DialogHeader className="flex-none gap-4 sm:gap-6">
         <div className="flex flex-row justify-between items-start gap-4">
-          <div className="space-y-2">
+          <div className="space-y-2 text-left">
             <DialogTitle>Contrast audit</DialogTitle>
             <div className="space-y-2">
               <DialogDescription>WCAG check for the current theme.</DialogDescription>
