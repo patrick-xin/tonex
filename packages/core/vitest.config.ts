@@ -6,5 +6,11 @@ export default defineConfig({
   test: {
     globals: false,
     passWithNoTests: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/*.config.ts'],
+    },
   },
 })

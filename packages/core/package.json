@@ -13,6 +13,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@tonex/typescript-config": "workspace:*",
     "@types/react": "^19.0.0",
+    "@vitest/coverage-v8": "catalog:",
     "jsdom": "^29.1.1",
     "react": "^19.0.0",
     "typescript": "catalog:",
