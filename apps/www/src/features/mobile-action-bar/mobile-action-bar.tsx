@@ -12,6 +12,7 @@ import {
   XLogoIcon,
 } from '@phosphor-icons/react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { ThemeModeToggle } from '@/components/shared/theme-mode-toggle'
 import { Button } from '@/components/ui/button'
 import { DrawerTrigger } from '@/components/ui/drawer'
@@ -29,8 +30,6 @@ import {
   railDrawerHandle,
   settingsDrawerHandle,
 } from '@/lib/handles'
-
-const moreSheetHandle = createSheetHandle<null>()
 
 // why: ADR-0022 surface feature. The desktop chrome cluster (features/nav-tabs,
 // `hidden sm:flex`) and the desktop rail footer are unreachable below sm; this
@@ -56,6 +55,11 @@ export function MobileActionBar({
   railDrawer: React.ReactNode
   settingsDrawer: React.ReactNode
 }) {
+  // why: handle is per-instance, not module-scope. Each route group's
+  // MobileActionBar gets its own handle; cross-layer navigation unmounts the
+  // tree, the handle is GC'd, and Base UI's `inert`/`aria-hidden` cleanup runs
+  // in unmount — no shared state can leak across the route transition.
+  const [moreSheetHandle] = useState(() => createSheetHandle<null>())
   return (
     <>
       {railDrawer}
@@ -65,7 +69,7 @@ export function MobileActionBar({
           variant C polish). All actions are equal-weight ghost icons; Build is the only
           brand-tinted one. text-on-surface-variant on the row mutes the rest; each icon
           inherits via currentColor. */}
-      <div className="sm:hidden flex-none px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
         <div className="mx-auto flex w-fit items-center gap-2 rounded-md border border-outline-variant/50 bg-surface-container-high px-3 py-1 text-on-surface-variant elevation-2">
           <DrawerTrigger
             handle={railDrawerHandle}

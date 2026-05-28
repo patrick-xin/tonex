@@ -7,7 +7,7 @@ export function ShadcnRail() {
   return (
     <aside
       className={cn(
-        'w-64 lg:w-80 h-[calc(100dvh-16px)] my-auto ml-2 overflow-hidden rounded-2xl hidden sm:flex flex-col shadow-sm bg-surface-container px-2',
+        'w-64 lg:w-80 h-[calc(100dvh-16px)] m-2 overflow-hidden rounded-2xl hidden sm:flex flex-col shadow-sm bg-surface-container px-2 sticky top-2 self-start shrink-0',
       )}
     >
       <ShadcnRailContent />

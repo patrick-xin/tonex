@@ -1,4 +1,3 @@
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShadcnChartOverrideList, ShadcnRoleOverrideList } from '@/features/shadcn-override'
 
 // why: ADR-0026 slice override-3 promoted the role override editor here;
@@ -7,11 +6,9 @@ import { ShadcnChartOverrideList, ShadcnRoleOverrideList } from '@/features/shad
 // field, distinct override store axis).
 export default function ShadcnPalettesPage() {
   return (
-    <ScrollArea noScrollBar gradientScrollFade>
-      <div className="flex flex-col gap-6 py-2">
-        <ShadcnRoleOverrideList />
-        <ShadcnChartOverrideList />
-      </div>
-    </ScrollArea>
+    <div className="flex flex-col gap-6 py-2">
+      <ShadcnRoleOverrideList />
+      <ShadcnChartOverrideList />
+    </div>
   )
 }

@@ -1,4 +1,5 @@
 import type React from 'react'
+import { AppShell } from '@/components/shared/app-shell'
 import { TopNav } from '@/components/shared/top-nav'
 import { MobileActionBar } from '@/features/mobile-action-bar'
 import { GuideProvider, OnboardingTour } from '@/features/onboarding-guide'
@@ -14,21 +15,20 @@ export default function ShadcnLayout({ children }: { children: React.ReactNode }
   return (
     <LayerProvider value="shadcn">
       <GuideProvider>
-        <div className="flex h-dvh overflow-hidden">
-          <ShadcnRailSwitcher />
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-2">
-            <TopNav layer="shadcn" />
-            <ShadcnNavTabs />
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <ShadcnProvider>{children}</ShadcnProvider>
-            </div>
+        <AppShell
+          rail={<ShadcnRailSwitcher />}
+          topNav={<TopNav layer="shadcn" />}
+          navTabs={<ShadcnNavTabs />}
+          mobileActionBar={
             <MobileActionBar
               crossLink={shadcnNavConfig.crossLink}
               railDrawer={<ShadcnRailDrawer />}
               settingsDrawer={<SettingsDrawer layer="shadcn" />}
             />
-          </div>
-        </div>
+          }
+        >
+          <ShadcnProvider>{children}</ShadcnProvider>
+        </AppShell>
         <OnboardingTour />
       </GuideProvider>
     </LayerProvider>
