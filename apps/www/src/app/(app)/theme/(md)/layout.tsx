@@ -6,7 +6,6 @@ import { GuideProvider, OnboardingTour } from '@/features/onboarding-guide'
 import { SettingsDrawer } from '@/features/settings'
 import { LayerProvider } from '@/lib/layer-context'
 import { MdNavTabs } from './_md-nav-tabs'
-import { mdNavConfig } from './_nav-config'
 
 export default function MdThemeLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +17,6 @@ export default function MdThemeLayout({ children }: { children: React.ReactNode 
           navTabs={<MdNavTabs />}
           mobileActionBar={
             <MobileActionBar
-              crossLink={mdNavConfig.crossLink}
               railDrawer={<MdRailDrawer />}
               settingsDrawer={<SettingsDrawer layer="md" />}
             />

@@ -1,7 +1,7 @@
 import Link from 'next/link'
+import { SiteLogo } from '@/components/shared/site-logo'
 import { Button } from '@/components/ui/button'
 import type { Layer } from '@/lib/layer-context'
-import { SiteLogo } from '../../../components/shared/site-logo'
 
 export function SiteHeader({ layer }: { layer: Layer }) {
   return (
