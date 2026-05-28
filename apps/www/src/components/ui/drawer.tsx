@@ -182,7 +182,7 @@ const drawerContentStyles = tv({
   slots: {
     viewport: 'fixed inset-0 flex',
     popup: [
-      'relative flex flex-col gap-2 bg-surface dark:bg-surface-container-high text-on-surface outline outline-outline-variant',
+      'relative flex flex-col gap-2 surface-dialog',
       'drawer-popup overflow-y-auto overscroll-contain group/drawer-content *:data-[slot=scroll-area-root]:min-h-0',
     ],
   },
@@ -301,7 +301,7 @@ function SnapDrawerContent({
       >
         <BaseDrawer.Popup
           className={cn(
-            'relative flex flex-col bg-surface-container-high text-on-surface outline outline-outline-variant',
+            'relative flex flex-col surface-dialog',
             'drawer-snap-popup w-full',
             layout === 'inset' && 'rounded-2xl',
             layout === 'fullBleed' && 'rounded-t-2xl',
@@ -343,7 +343,7 @@ function StackedDrawerContent({
         <BaseDrawer.Popup
           className={cn(
             'drawer-stacked-popup group/popup',
-            'relative flex flex-col gap-4 bg-surface-container-high text-on-surface outline outline-outline-variant w-full',
+            'relative flex flex-col gap-4 surface-dialog w-full',
             'px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px)+var(--drawer-bleed))]',
             'sm:px-6 sm:pt-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--drawer-bleed))]',
             'overflow-y-auto overscroll-contain',
