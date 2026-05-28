@@ -31,41 +31,32 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             <p>
               tonex writes <span className="font-medium">both</span> themes from one seed — a light
               (<code className="font-mono text-xs">:root</code>) and a dark (
-              <code className="font-mono text-xs">.dark</code>) block. The mode toggle (press{' '}
-              <span className="font-medium">D</span>) is the same switch your users' OS flips.
+              <code className="font-mono text-xs">.dark</code>) block. Toggle modes with{' '}
+              <span className="font-medium">D</span>.
             </p>
             <p>
-              <span className="font-medium">Shared controls</span> — one value, used for both modes;
-              editing changes light and dark together: seed color, scheme variant, contrast level,
-              custom-color definitions, surface algorithm + neutral palette, palette overrides, CMF
-              second source, chart settings.
+              <span className="font-medium">Shared</span> (one value for both modes): seed color,
+              scheme variant, contrast level, custom colors, surface algorithm + neutral palette,
+              palette overrides, CMF second source, chart settings.
             </p>
             <p>
-              <span className="font-medium">Per-mode controls</span> — stored separately for light
-              and dark; editing one leaves the other untouched: surface strength (Tint / Desaturate
-              level), the Tint text accent level, role bindings, role overrides, md-token overrides,
-              chart overrides.
+              <span className="font-medium">Per-mode</span> (stored separately): surface strength
+              (Tint / Desaturate level), Tint text accent, role bindings, role overrides, md-token
+              overrides, chart overrides.
             </p>
             <p>
-              <span className="font-medium">Surface adjustment is split:</span> its algorithm and
-              palette are shared, but all three strength sliders are per-mode. Set Tint to 50% in
-              dark, switch to light, and the slider snaps to light's value (often 0%) — nothing was
-              lost, your 50% is still on the dark side.
+              <span className="font-medium">Surface adjustment is split:</span> algorithm and
+              palette are shared, the three strength sliders are per-mode. Set Tint to 50% in dark,
+              switch to light, and the slider shows light's value — your dark 50% is intact.
             </p>
             <p className="font-medium">The order that works:</p>
             <ul className="space-y-2 list-inside list-disc">
+              <li>Set the shared foundation first (color, recipe, contrast, custom colors).</li>
               <li>
-                Set your shared foundation first — color, recipe, contrast, custom colors — in
-                whatever mode you're in; it applies to both.
+                Polish one mode at a time: pick a mode, set surface strength + pinned colors,
+                switch, repeat.
               </li>
-              <li>
-                Then polish one mode at a time: pick a mode, set its surface strength + any pinned
-                colors, switch, repeat.
-              </li>
-              <li>
-                Audit both modes before shipping — the contrast audit only reads the mode you're in,
-                so a dark-only pass ships an unchecked light theme.
-              </li>
+              <li>Audit both modes — the contrast audit only reads the mode you're in.</li>
             </ul>
           </AccordionPanel>
         </AccordionItem>
@@ -78,17 +69,16 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              <span className="font-medium">HCT (Hue, Chroma, Tone)</span> is Google's color model,
-              built for Material Design 3. Unlike RGB or HSL, HCT is designed around how humans
-              actually perceive color — so two colors at the same tone value appear equally bright
-              regardless of hue. tonex uses Google's official{' '}
-              <code className="font-mono text-xs">@material/material-color-utilities</code> library
-              — real HCT math, not an approximation.
+              <span className="font-medium">HCT (Hue, Chroma, Tone)</span> is Google's color model
+              for Material Design 3. Unlike RGB or HSL, it's built around human perception — colors
+              at the same tone appear equally bright across hues. tonex uses Google's official{' '}
+              <code className="font-mono text-xs">@material/material-color-utilities</code> — real
+              HCT math, not an approximation.
             </p>
             <p>
               The hex field and the three sliders are{' '}
-              <span className="font-medium">the same color — two views, fully two-way</span>. Drag a
-              slider and the hex updates; type a hex and the sliders move to match.
+              <span className="font-medium">one color, fully two-way</span>: drag a slider and the
+              hex updates; type a hex and the sliders follow.
             </p>
             <ul className="space-y-2 list-inside list-disc">
               <li>
@@ -96,21 +86,16 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
               </li>
               <li>
                 <span className="font-medium">Chroma</span> — how vivid. Its maximum moves with hue
-                and tone, so the slider can "hit a wall" before the end — some hue/tone combinations
-                physically can't go more saturated.
+                and tone, so the slider can stop short of the end — some combinations can't go more
+                saturated.
               </li>
               <li>
                 <span className="font-medium">Tone</span> — how light or dark.
               </li>
             </ul>
             <p>
-              <span className="font-medium">Hue disables on a near-grey.</span> When chroma is very
-              low there's no visible hue to adjust, so the Hue slider greys out — add a little
-              chroma to re-enable it.
-            </p>
-            <p>
-              <span className="font-medium">Your pasted hex is preserved exactly.</span> It stays
-              your value until you move a slider, at which point the hex follows the sliders.
+              On a near-grey the Hue slider greys out (no visible hue to adjust) — add a little
+              chroma to re-enable it. Your pasted hex stays exact until you move a slider.
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -123,19 +108,15 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              <span className="font-medium">CMF</span> is Google's next-generation color algorithm,
-              part of the Material Color Utilities 2026 spec — sourced directly from Google's
-              repository before npm release. It's the most advanced scheme available in any color
-              tool, and it's tonex's default.
+              <span className="font-medium">CMF</span> is Google's next-generation color algorithm
+              from the Material Color Utilities 2026 spec, and tonex's default.
             </p>
             <p>
-              What makes it different: CMF takes two source colors. Your primary, secondary, and
-              neutral palettes derive from the first seed; your tertiary palette derives from the
-              second, creating a richer two-color system that harmonizes automatically. CMF also
-              applies higher chroma to surfaces — backgrounds carry real color, not near-neutral
-              grey — while maintaining full accessibility through dynamic contrast curves. The
-              primary tone follows your actual input rather than a fixed reference, so the result
-              stays faithful to what you chose.
+              It takes two source colors: primary, secondary, and neutral palettes derive from the
+              first seed; tertiary derives from the second, for a two-color system that harmonizes
+              automatically. CMF also gives surfaces real color rather than near-neutral grey — kept
+              accessible by dynamic contrast — and the primary tone follows your input rather than a
+              fixed reference.
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -148,9 +129,8 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0">
             <p className="mb-2">
-              Each variant applies a different algorithm to your seed color, producing a distinct
-              palette character. Try a few — the same seed color behaves very differently across
-              them.
+              Each variant runs a different algorithm on your seed, for a distinct palette
+              character. Try a few — the same seed behaves very differently across them.
             </p>
             <ul className="space-y-2 list-inside list-disc">
               <li>
@@ -213,32 +193,28 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             <p>You pick one of two operations — there's no "off":</p>
             <ul className="space-y-2 list-inside list-disc">
               <li>
-                <span className="font-medium">Tint</span> — rebuilds your surfaces and borders from
-                a Tailwind neutral palette you choose (zinc, slate, stone…), blended toward your
-                brand hue by the strength slider.{' '}
-                <span className="font-medium">0% is the plain neutral</span> (no brand character);
-                higher pushes it toward your brand. Selecting Tint changes your surfaces right away.
-                Text stays untouched unless you raise the separate{' '}
-                <span className="font-medium">Text accent</span> slider, which nudges text toward
-                your brand hue.
+                <span className="font-medium">Tint</span> — rebuilds surfaces and borders from a
+                Tailwind neutral palette you choose (zinc, slate, stone…), blended toward your brand
+                hue by the strength slider. <span className="font-medium">0% is plain neutral</span>
+                ; higher pushes toward your brand. Text stays untouched unless you raise the
+                separate <span className="font-medium">Text accent</span> slider.
               </li>
               <li>
                 <span className="font-medium">Desaturate</span> — pulls color out of Material's own
                 surfaces toward grey. <span className="font-medium">0% leaves them unchanged</span>,
-                while 100% is pure grey. It greys backgrounds, borders,{' '}
-                <span className="font-medium">and</span> text together, so nothing stays tinted on a
-                grey surface. No palette to pick.
+                100% is pure grey. Greys backgrounds, borders, and text together. No palette to
+                pick.
               </li>
             </ul>
             <p>
               <span className="font-medium">The catch: the two zeros are opposites.</span>{' '}
-              Desaturate at 0% leaves Material's surfaces untouched; Tint at 0% still rebuilds them
-              from the plain neutral palette. Want untouched Material surfaces? Use{' '}
+              Desaturate 0% leaves Material's surfaces untouched; Tint 0% still rebuilds them from
+              the plain neutral. Want untouched Material surfaces? Use{' '}
               <span className="font-medium">Desaturate at 0%</span>.
             </p>
             <p>
-              Strength is <span className="font-medium">per-mode</span> (light and dark store
-              separate values), while the algorithm and palette are shared — see{' '}
+              Strength is <span className="font-medium">per-mode</span>; algorithm and palette are
+              shared — see{' '}
               <span className="font-medium">Light &amp; dark — what's shared vs per-mode</span>.
             </p>
           </AccordionPanel>
@@ -281,14 +257,12 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           <AccordionPanel className="text-sm mb-3 px-0">
             <p className="mb-2">
               Shadcn mode maps MD3 color roles to shadcn CSS variables (--primary, --background,
-              --muted, etc.) so the output drops straight into any shadcn project. Some tokens
-              intentionally share the same source tone — switch to MD3 mode for full independent
-              control over every role.
+              --muted, etc.) so the output drops straight into any shadcn project. Some tokens share
+              a source tone — switch to MD3 mode for independent control over every role.
             </p>
             <p>
-              MD3 mode exposes the complete token system: all tonal palettes, every color role,
-              per-token overrides, and native MD3 export formats. It's the full engine with no
-              shortcuts.
+              MD3 mode exposes the full token system: all tonal palettes, every color role,
+              per-token overrides, and native MD3 export formats.
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -303,8 +277,7 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             <p>
               Two power-user editors on the shadcn rail —{' '}
               <span className="font-medium">Bindings</span> and{' '}
-              <span className="font-medium">Overrides</span>. They do different jobs, and you can
-              use them together.
+              <span className="font-medium">Overrides</span>. Different jobs; use them together.
             </p>
             <ul className="space-y-2 list-inside list-disc">
               <li>
@@ -313,35 +286,32 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
                 </span>{' '}
                 Each shadcn role follows one generated MD color; a binding changes{' '}
                 <em>which one</em> (e.g. make <code className="font-mono text-xs">--accent</code>{' '}
-                follow your secondary). It stays auto-generated — change your seed, variant, or
-                contrast and the role re-derives with it. Defaults come from the active preset.
+                follow your secondary). It stays auto-generated — change seed, variant, or contrast
+                and the role re-derives. Defaults come from the active preset.
               </li>
               <li>
                 <span className="font-medium">Override — lock a role to an exact color.</span> Pins
-                the role to a fixed hex (hex field, color picker, a Tailwind swatch, or by
-                snapshotting a generated color). It stops auto-generating — the seed can change,
-                this stays put.
+                it to a fixed hex (hex field, color picker, Tailwind swatch, or a snapshot of a
+                generated color). Stops auto-generating — the seed can change, this stays put.
               </li>
             </ul>
             <p>
               <span className="font-medium">They compose, and the override wins.</span> A role
-              resolves to its override hex if it has one, otherwise its binding-resolved color. If
-              you both rebind and override a role, the override shows; the binding sits underneath,
-              dormant, and comes back the moment you clear the override (the per-row reset).
+              resolves to its override hex if it has one, otherwise its binding. Clear the override
+              (the per-row reset) and the binding comes back.
             </p>
             <p>
-              <span className="font-medium">Both are per-mode</span>, and{' '}
+              <span className="font-medium">Both are per-mode</span> and{' '}
               <span className="font-medium">both land in your export exactly as you see them</span>{' '}
               — pin light <code className="font-mono text-xs">--ring</code> while dark stays on its
               binding, and the export matches the preview.
             </p>
             <p>
               <span className="font-medium">What survives what:</span> switching the{' '}
-              <span className="font-medium">scheme variant</span> keeps both (bound colors just
+              <span className="font-medium">scheme variant</span> keeps both (bound colors
               re-derive); switching a <span className="font-medium">shadcn preset</span> replaces
               your <span className="font-medium">bindings</span> but keeps your{' '}
-              <span className="font-medium">overrides</span>. Strength, binding, and override are
-              all per-mode — see{' '}
+              <span className="font-medium">overrides</span>. See{' '}
               <span className="font-medium">Light &amp; dark — what's shared vs per-mode</span>.
             </p>
           </AccordionPanel>
@@ -355,26 +325,24 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           </AccordionSummary>
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
-              Add custom palette slots beyond the six core MD3 roles. Each custom color is
-              harmonized (optional) to your seed hue using HCT — so it stays visually coherent with
-              the rest of your palette without manual tuning.
+              Add palette slots beyond the six core MD3 roles. Each custom color is optionally
+              harmonized to your seed hue via HCT, so it stays coherent with the rest of your
+              palette.
             </p>
             <p>
-              What it produces depends on your layer. On <span className="font-medium">md</span>,
-              each custom color emits the full Material set —{' '}
-              <code className="font-mono text-xs">--{'{name}'}</code>,{' '}
+              Output depends on your layer. On <span className="font-medium">md</span>, each emits
+              the full Material set — <code className="font-mono text-xs">--{'{name}'}</code>,{' '}
               <code className="font-mono text-xs">--on-{'{name}'}</code>,{' '}
               <code className="font-mono text-xs">--{'{name}'}-container</code>, and{' '}
-              <code className="font-mono text-xs">--on-{'{name}'}-container</code> — and the four
-              swatches in the dialog preview them.
+              <code className="font-mono text-xs">--on-{'{name}'}-container</code> — and the dialog
+              previews all four.
             </p>
             <p>
-              On <span className="font-medium">shadcn</span>, it emits a single pair —{' '}
+              On <span className="font-medium">shadcn</span>, it emits one pair —{' '}
               <code className="font-mono text-xs">--{'{name}'}</code> +{' '}
               <code className="font-mono text-xs">--{'{name}'}-foreground</code> (use as{' '}
-              <code className="font-mono text-xs">bg-{'{name}'}</code>). The source-pair picker —
-              the vivid color or the soft container — chooses which generated md pair feeds that
-              token.
+              <code className="font-mono text-xs">bg-{'{name}'}</code>). The source-pair picker (the
+              vivid color or the soft container) chooses which generated md pair feeds it.
             </p>
           </AccordionPanel>
         </AccordionItem>
@@ -388,15 +356,14 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
           <AccordionPanel className="text-sm mb-3 px-0 space-y-2">
             <p>
               The export dialog turns your live theme into copy-paste CSS —{' '}
-              <span className="font-medium">what the dialog shows is exactly what you paste</span>,
-              byte for byte. Your rail config <span className="font-medium">is</span> the theme; the
-              preview is a faithful render of what exports.
+              <span className="font-medium">what it shows is exactly what you paste</span>, byte for
+              byte. Your rail config <span className="font-medium">is</span> the theme.
             </p>
             <p>
-              <span className="font-medium">Always included (the core theme):</span> your seed
-              color, scheme variant, contrast level, role bindings &amp; overrides, md-token &amp;
-              palette overrides, surface adjustment, custom colors, and the CMF second source when a
-              role uses it. You don't toggle these — they're always in.
+              <span className="font-medium">Always included (the core theme):</span> seed color,
+              scheme variant, contrast level, role bindings &amp; overrides, md-token &amp; palette
+              overrides, surface adjustment, custom colors, and the CMF second source when a role
+              uses it.
             </p>
             <p>
               <span className="font-medium">Off by default — flip a switch to add:</span>
@@ -444,12 +411,6 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
               <span className="font-medium">JSON</span> and{' '}
               <span className="font-medium">Dart</span> emit the same theme in those formats. An{' '}
               <span className="font-medium">oklch / hex</span> toggle applies where relevant.
-            </p>
-            <p>
-              Nothing here is a decorative preview-only knob — if you tuned it in the rail, it's in
-              the core export or one switch away. See{' '}
-              <span className="font-medium">Role bindings vs overrides</span> and{' '}
-              <span className="font-medium">Surface adjustment — your neutral character</span>.
             </p>
           </AccordionPanel>
         </AccordionItem>
