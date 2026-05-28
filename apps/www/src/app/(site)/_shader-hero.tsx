@@ -7,6 +7,7 @@ import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { MenuColorPicker } from '@/features/color-picker/custom/menu-color-picker'
 import { useActiveMode } from '@/features/theme-mode'
+import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
 import { HeroContent } from './_hero-content'
 
 type Stop = readonly [family: string, tone: number]
@@ -101,6 +102,7 @@ export function ShaderHero() {
   const mode = useActiveMode()
   const reduceMotion = useReducedMotion()
   const [shaderRef, offsetY] = useAspectOffsetY(RAY_CONVERGENCE_Y)
+  const noiseReady = useShaderNoiseReady()
 
   // why: both hooks gate on a null pre-hydration state (identical contract).
   // Rendering the shader only once both resolve avoids a first-paint flash in
@@ -116,7 +118,7 @@ export function ShaderHero() {
           fixed lvh keeps the convergence point put; the bar just clips the
           bottom of an ambient background. */}
       <div ref={shaderRef} className="absolute inset-x-0 top-0 z-0 h-[100lvh]">
-        {colors && (
+        {colors && noiseReady && (
           <GodRays
             colorBack={colors.back}
             colorBloom={colors.bloom}

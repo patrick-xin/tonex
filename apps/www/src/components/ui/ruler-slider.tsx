@@ -14,7 +14,7 @@ import { cn, tv, type VariantProps } from 'tailwind-variants'
 const rulerSliderStyles = tv({
   slots: {
     root: [
-      'relative w-full touch-none select-none rounded-md border border-outline-variant bg-surface-container-high px-3',
+      'relative w-full touch-none select-none rounded-md border border-outline-variant/60 bg-surface-container-high px-3',
       'data-disabled:pointer-events-none data-disabled:opacity-50',
     ],
     control: 'relative flex h-full w-full',
@@ -23,7 +23,7 @@ const rulerSliderStyles = tv({
     // only positions and shapes the panel. `-left-3` cancels the root's px-3 so
     // the panel bleeds flush to the container's inner edge; `rounded-md` matches
     // the container so the panel nests into its corners at max.
-    fill: 'absolute inset-y-0 -left-3 rounded-md',
+    fill: 'absolute inset-y-0 -left-3 rounded-xs',
     thumb: [
       'group absolute top-1/2 flex h-full w-5 -translate-y-1/2 items-center justify-center outline-none',
       'cursor-grab active:cursor-grabbing data-disabled:cursor-default',
@@ -51,12 +51,14 @@ const rulerSliderStyles = tv({
     size: {
       default: { bar: 'h-7' },
       sm: { bar: 'h-4' },
+      xs: { bar: 'h-3' },
     },
   },
   compoundVariants: [
     // height only applies in the centered layout; the ruler layout sets its own.
     { layout: 'centered', size: 'default', class: { root: 'h-14' } },
     { layout: 'centered', size: 'sm', class: { root: 'h-10' } },
+    { layout: 'centered', size: 'xs', class: { root: 'h-7' } },
   ],
   defaultVariants: { layout: 'centered', tone: 'primary', size: 'default' },
 })
@@ -81,13 +83,16 @@ const rulerTickStyles = tv({
     size: {
       default: '',
       sm: '',
+      xs: '',
     },
   },
   compoundVariants: [
     { anchor: 'center', tier: 'minor', size: 'default', class: 'h-3' },
     { anchor: 'center', tier: 'minor', size: 'sm', class: 'h-3' },
+    { anchor: 'center', tier: 'minor', size: 'xs', class: 'h-2' },
     { anchor: 'center', tier: 'center', size: 'default', class: 'h-6' },
     { anchor: 'center', tier: 'center', size: 'sm', class: 'h-4.5' },
+    { anchor: 'center', tier: 'center', size: 'xs', class: 'h-3' },
     // ruler layout (top anchor) isn't sized down — C isn't used in compact rails.
     { anchor: 'top', tier: 'minor', class: 'h-2.5' },
     { anchor: 'top', tier: 'major', class: 'h-5' },
@@ -98,7 +103,7 @@ const rulerTickStyles = tv({
 // token-driven so the panel adapts to light/dark instead of the prototype's
 // hardcoded rgba. Subtle top→bottom falloff, like image 2.
 const FILL_GRADIENT =
-  'linear-gradient(oklch(from var(--color-on-surface) l c h / 0.07), oklch(from var(--color-on-surface) l c h / 0.03))'
+  'linear-gradient(oklch(from var(--color-on-surface) l c h / 0.09), oklch(from var(--color-on-surface) l c h / 0.06))'
 
 type RulerSliderVariants = VariantProps<typeof rulerSliderStyles>
 
@@ -155,6 +160,7 @@ function RulerSlider({
   const isControlled = value !== undefined
   const [internal, setInternal] = React.useState(defaultValue ?? value ?? min)
   const current = isControlled ? (value as number) : internal
+  const [hoverValue, setHoverValue] = React.useState<number | null>(null)
 
   const handleChange = React.useCallback(
     (raw: number | number[]) => {
@@ -183,6 +189,40 @@ function RulerSlider({
   const lo = Math.min(origin, current)
   const hi = Math.max(origin, current)
 
+  const handleTrackMouseMove = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (disabled) return
+      // why: held button = drag, not hover. Drag-back especially leaves a
+      // phantom preview between the dragging thumb and the previous hover tick.
+      if (e.buttons & 1) {
+        setHoverValue((prev) => (prev === null ? prev : null))
+        return
+      }
+      const rect = e.currentTarget.getBoundingClientRect()
+      if (rect.width === 0) return
+      const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+      const raw = min + fraction * (max - min)
+      const snapped = Math.round((raw - min) / stepUnit) * stepUnit + min
+      const clamped = Math.max(min, Math.min(max, Number(snapped.toFixed(6))))
+      setHoverValue((prev) => (prev === clamped ? prev : clamped))
+    },
+    [disabled, min, max, stepUnit],
+  )
+  const handleTrackMouseLeave = React.useCallback(() => setHoverValue(null), [])
+
+  // Preview overlay — only when fill is enabled and the hovered tick lies
+  // outside [lo, hi]. Extends the mask from the nearer active edge to the
+  // hover tick at half opacity, reading as "this is where you'd land". Inside
+  // [lo, hi] there's nothing to preview (the area is already covered).
+  const previewEdges: readonly [number, number] | null =
+    fill && hoverValue != null
+      ? hoverValue > hi
+        ? [hi, hoverValue]
+        : hoverValue < lo
+          ? [hoverValue, lo]
+          : null
+      : null
+
   return (
     <BaseSlider.Root
       className={cn(styles.root(), className)}
@@ -196,16 +236,40 @@ function RulerSlider({
       value={current}
     >
       <BaseSlider.Control className={styles.control()} data-slot="ruler-slider-control">
-        <BaseSlider.Track className={styles.track()} data-slot="ruler-slider-track">
-          {/* hidden at the start so an empty panel doesn't sit at min. width =
-              value fraction + 24px (12px for the padding escape, 12px to clear
-              the thumb's half-width and reach the container's inner edge at max)
-              so the bar sits inside the frosted region with no gap at the end. */}
+        <BaseSlider.Track
+          className={styles.track()}
+          data-slot="ruler-slider-track"
+          onMouseLeave={handleTrackMouseLeave}
+          onMouseMove={handleTrackMouseMove}
+        >
+          {/* why: +12px keeps the panel's right edge on the thumb's bar
+              (overshooting reads as "value lags panel"); +24px only at max,
+              to nest into the container's right corner instead of stranding
+              a surface-container-high gap behind the thumb. */}
           {fill && current > min && (
             <div
               className={styles.fill()}
               style={{
-                width: `calc(${pct(current)}% + 24px)`,
+                width: `calc(${pct(current)}% + ${current >= max ? 24 : 12}px)`,
+                background: FILL_GRADIENT,
+              }}
+            />
+          )}
+
+          {previewEdges && (
+            <div
+              aria-hidden
+              className={cn(styles.fill(), 'pointer-events-none opacity-50')}
+              // why: mirror the actual-fill bleeds — -12px past container-left
+              // when previewing the min tick, +12px past container-right when
+              // previewing the max tick. Without these, the preview lands a
+              // padding-width short of the corner the actual mask will fill on
+              // click, which reads as a gap on the container edge.
+              style={{
+                left: `calc(${pct(previewEdges[0])}% - ${previewEdges[0] <= min ? 12 : 0}px)`,
+                width: `calc(${pct(previewEdges[1]) - pct(previewEdges[0])}% + ${
+                  (previewEdges[0] <= min ? 12 : 0) + (previewEdges[1] >= max ? 12 : 0)
+                }px)`,
                 background: FILL_GRADIENT,
               }}
             />

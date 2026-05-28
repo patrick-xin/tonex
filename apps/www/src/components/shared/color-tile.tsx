@@ -73,7 +73,7 @@ export function ColorTile<T>({
                 </div>
               }
             />
-            <TooltipContent variant="inverse" side="top">
+            <TooltipContent side="top">
               <ContrastWarningTooltipBody warning={warning} />
             </TooltipContent>
           </Tooltip>

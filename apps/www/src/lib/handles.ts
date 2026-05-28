@@ -24,3 +24,8 @@ export const settingsDrawerHandle = createDrawerHandle<null>()
 // while the drawer content is mounted by the layout. The handle bridges them,
 // same pattern as the dialog/popover handles above (issue #142).
 export const railDrawerHandle = createDrawerHandle<null>()
+// why: shadcn-only. The desktop preset picker is a popover in nav-tabs'
+// `hidden sm:flex` cluster; below sm the trigger moves to the mobile action bar
+// and the preset list opens as a bottom drawer. Mounted by the shadcn layout
+// (md has no preset concept), driven from the action bar through this handle.
+export const mobilePresetDrawerHandle = createDrawerHandle<null>()

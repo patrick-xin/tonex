@@ -47,9 +47,7 @@ export function NeutralPaletteChips() {
                   </Chip>
                 }
               />
-              <TooltipContent variant="inverse" className="capitalize">
-                {n}
-              </TooltipContent>
+              <TooltipContent className="capitalize">{n}</TooltipContent>
             </Tooltip>
           ))}
         </div>

@@ -39,7 +39,7 @@ export function ContrastLevelSlider() {
             max={1}
             min={0}
             onValueChange={(v) => setContrastLevel(resolvedMode, v)}
-            size="sm"
+            size="xs"
             step={0.05}
             tickStep={0.05}
             value={level}

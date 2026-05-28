@@ -18,8 +18,8 @@ export function SoftBordersToggle() {
             <TooltipTrigger delay={0}>
               <HelpCircle className="w-4 h-4 text-on-surface-variant" />
             </TooltipTrigger>
-            <TooltipContent className="max-w-xs" variant="inverse">
-              Uses softer colors for borders and inputs. This can reduce accessibility.
+            <TooltipContent className="w-56">
+              <div>Uses softer colors for borders and inputs. This can reduce accessibility.</div>
             </TooltipContent>
           </Tooltip>
         </div>

@@ -4,7 +4,7 @@ import { cn } from 'tailwind-variants'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import type { Layer } from '@/lib/layer-context'
 
-export function SiteLogo({ className, layer }: { className?: string; layer: Layer }) {
+export function SiteLogo({ className, layer }: { className?: string; layer?: Layer }) {
   return (
     <div className={cn('flex items-center justify-center size-8', className)}>
       <Link

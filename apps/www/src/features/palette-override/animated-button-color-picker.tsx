@@ -105,7 +105,7 @@ export function AnimatedButtonColorPicker({
       {disabled && disabledReason !== null ? (
         <Tooltip>
           <TooltipTrigger delay={100} render={trigger} />
-          <TooltipContent variant="inverse">{disabledReason}</TooltipContent>
+          <TooltipContent>{disabledReason}</TooltipContent>
         </Tooltip>
       ) : (
         trigger
@@ -206,7 +206,7 @@ function ResetOverrideButton({ onReset }: { onReset: () => void }) {
           </Button>
         }
       />
-      <TooltipContent variant="inverse">Reset palette</TooltipContent>
+      <TooltipContent>Reset palette</TooltipContent>
     </Tooltip>
   )
 }

@@ -18,6 +18,7 @@ export function ColorRolesList() {
     const warning = warnings.get(role)
     return (
       <ColorTile
+        size="md"
         key={role}
         payload={role}
         popoverHandle={popoverHandle}

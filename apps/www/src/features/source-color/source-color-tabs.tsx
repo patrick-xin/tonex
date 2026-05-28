@@ -55,7 +55,7 @@ export const SourceColorTabs = () => {
           <Tabs value={src} onValueChange={(value) => setSrc(value as string)} className="gap-3">
             <TabsListContent
               indicatorClassName="bg-secondary-container h-full!"
-              className="w-full min-h-0 h-6 bg-secondary-container/40 p-0 -mx-0.5"
+              className="w-full min-h-0 h-6 bg-surface-container-high p-0 -mx-0.5"
             >
               <TabsTab
                 className="text-xs data-active:text-on-secondary-container text-on-surface-variant hover:text-on-surface"

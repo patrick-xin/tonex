@@ -98,7 +98,9 @@ export const ExportButton = ({
           }
         />
         <TooltipContent>
-          Export <Kbd>E</Kbd>
+          <div className="flex items-center gap-1">
+            Export <Kbd>E</Kbd>
+          </div>
         </TooltipContent>
       </Tooltip>
       <DialogContent className="flex flex-col gap-0 p-0! w-full max-w-3xl max-h-[calc(100dvh-10rem)] sm:max-h-[calc(100dvh-6rem)] overflow-hidden">

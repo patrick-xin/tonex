@@ -1,8 +1,8 @@
 'use client'
 
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
+import { RulerSlider } from '@/components/ui/ruler-slider'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
-import { HctSlider } from '@/features/hct-controls'
 import { GuideAnchor } from '@/features/onboarding-guide'
 import { NeutralPaletteChips } from './neutral-palette-chips'
 import { useSurfaceModel } from './use-surface-model'
@@ -20,7 +20,7 @@ export const SurfaceAdjustment = () => {
         >
           <TabsListContent
             indicatorClassName="bg-secondary-container h-full!"
-            className="w-full min-h-0 h-6 bg-secondary-container/40 p-0"
+            className="w-full min-h-0 h-6 bg-surface-container-high p-0"
           >
             <TabsTab
               className="text-xs data-active:text-on-secondary-container text-on-surface-variant hover:text-on-surface"
@@ -37,35 +37,65 @@ export const SurfaceAdjustment = () => {
           </TabsListContent>
           <TabsPanel value="tint" className="space-y-4 pt-1">
             <NeutralPaletteChips />
-            <HctSlider
-              label="Tint level"
-              value={m.tintLevel}
-              max={1}
-              step={0.1}
-              gradient={m.tintG}
-              disabled={m.isPending}
-              onValueChange={(v) => m.setTint(m.resolvedMode, v)}
-            />
-            <HctSlider
-              label="Text accent"
-              value={m.textLevel}
-              max={1}
-              step={0.1}
-              gradient={m.textG}
-              disabled={m.isPending}
-              onValueChange={(v) => m.setText(m.resolvedMode, v)}
-            />
+            <div className="w-full space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-on-surface-variant">Tint level</span>
+                <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
+                  {m.tintLevel.toFixed(2)}
+                </span>
+              </div>
+              <RulerSlider
+                aria-label="Tint level"
+                disabled={m.isPending}
+                fill
+                max={1}
+                min={0}
+                onValueChange={(v) => m.setTint(m.resolvedMode, v)}
+                size="xs"
+                step={0.1}
+                value={m.tintLevel}
+              />
+            </div>
+            <div className="w-full space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-on-surface-variant">Text accent</span>
+                <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
+                  {m.textLevel.toFixed(2)}
+                </span>
+              </div>
+              <RulerSlider
+                aria-label="Text accent"
+                disabled={m.isPending}
+                fill
+                max={1}
+                min={0}
+                onValueChange={(v) => m.setText(m.resolvedMode, v)}
+                size="xs"
+                step={0.1}
+                value={m.textLevel}
+              />
+            </div>
           </TabsPanel>
           <TabsPanel value="desaturate" className="space-y-4 pt-1">
-            <HctSlider
-              label="Desaturate level"
-              value={m.desatLevel}
-              max={1}
-              step={0.1}
-              gradient={m.desatG}
-              disabled={m.isPending}
-              onValueChange={(v) => m.setDesat(m.resolvedMode, v)}
-            />
+            <div className="w-full space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-on-surface-variant">Desaturate level</span>
+                <span className="font-mono text-xs tabular-nums text-on-surface-variant w-9 text-right">
+                  {m.desatLevel.toFixed(2)}
+                </span>
+              </div>
+              <RulerSlider
+                aria-label="Desaturate level"
+                disabled={m.isPending}
+                fill
+                max={1}
+                min={0}
+                onValueChange={(v) => m.setDesat(m.resolvedMode, v)}
+                size="xs"
+                step={0.1}
+                value={m.desatLevel}
+              />
+            </div>
           </TabsPanel>
         </Tabs>
       </AnimatedCollapsible>

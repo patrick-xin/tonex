@@ -45,7 +45,7 @@ export function HelpDialog() {
     >
       {({ payload: section }) => (
         <DialogOutsideScrollContent>
-          <DialogHeader className="mb-4">
+          <DialogHeader className="mb-4 text-left">
             <DialogTitle className="text-xl font-semibold">Help</DialogTitle>
             <DialogDescription>Key concepts and usage guide about tonex</DialogDescription>
           </DialogHeader>

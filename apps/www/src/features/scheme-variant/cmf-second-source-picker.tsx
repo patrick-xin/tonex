@@ -77,7 +77,7 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
       {isDisabled ? (
         <Tooltip>
           <TooltipTrigger delay={100} render={trigger} />
-          <TooltipContent variant="inverse">{disabledReason}</TooltipContent>
+          <TooltipContent>{disabledReason}</TooltipContent>
         </Tooltip>
       ) : (
         trigger
@@ -111,7 +111,7 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
                   </Button>
                 }
               />
-              <TooltipContent variant="inverse">Reset</TooltipContent>
+              <TooltipContent>Reset</TooltipContent>
             </Tooltip>
           )}
         </div>

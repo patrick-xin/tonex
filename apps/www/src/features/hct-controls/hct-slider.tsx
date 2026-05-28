@@ -128,7 +128,7 @@ export function HctSlider({
                     <div className="absolute inset-0 rounded-full z-[1] cursor-not-allowed" />
                   }
                 />
-                <TooltipContent variant="inverse">{disabledHint}</TooltipContent>
+                <TooltipContent>{disabledHint}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
