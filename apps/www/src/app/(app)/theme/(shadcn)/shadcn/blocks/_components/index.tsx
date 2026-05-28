@@ -21,29 +21,29 @@ import { SocialLinks } from './social-links'
 export function BlocksDemo() {
   const ref = useShadcn()
   return (
-    <div className="flex min-w-max gap-6 m-px">
-      <div className="flex w-[360px] flex-col gap-6">
+    <div className="flex flex-col sm:flex-row sm:min-w-max gap-6 m-px">
+      <div className="flex sm:w-[360px] flex-col gap-6">
         <ContributionHistory />
         <SavingsProgress />
         <DividendIncome />
       </div>
-      <div className="flex w-[360px] flex-col gap-6">
+      <div className="hidden sm:flex sm:w-[360px] flex-col gap-6">
         <IndexInvesting />
         <NotificationSettings />
         <ReceivingMethod />
         <SocialLinks />
       </div>
-      <div className="flex w-[360px] flex-col gap-6">
+      <div className="flex sm:w-[360px] flex-col gap-6">
         <LoginForm />
         <Preferences ref={ref} />
         <Faq />
       </div>
-      <div className="flex w-[360px] flex-col gap-6">
+      <div className="hidden sm:flex sm:w-[360px] flex-col gap-6">
         <SignupForm />
         <KitchenIsland />
         <PayoutThreshold ref={ref} />
       </div>
-      <div className="flex w-[420px] flex-col gap-6">
+      <div className="flex sm:w-[420px] flex-col gap-6">
         <ReleaseCatalog />
         <RecentTransactions ref={ref} />
         <CoverArt />
