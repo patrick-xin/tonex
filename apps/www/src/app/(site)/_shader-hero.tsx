@@ -5,7 +5,6 @@ import { type Mode, useResolvedTokens } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import { MenuColorPicker } from '@/features/color-picker/custom/menu-color-picker'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
 import { HeroContent } from './_hero-content'
@@ -148,12 +147,6 @@ export function ShaderHero() {
             'linear-gradient(90deg, color-mix(in oklch, var(--color-surface) 80%, transparent) 0%, color-mix(in oklch, var(--color-surface) 32%, transparent) 55%, transparent 100%)',
         }}
       />
-
-      {/* live color picker — edits the source seed, so the rays recolor in real
-          time (the shader reads the resolved palette above) */}
-      <div className="absolute top-4 right-4 z-20 sm:top-6 sm:right-6 md:top-8 md:right-8">
-        <MenuColorPicker />
-      </div>
 
       <div className="relative z-10 flex flex-1 min-h-0 items-center py-20 sm:py-24">
         <div className="w-full max-w-6xl">

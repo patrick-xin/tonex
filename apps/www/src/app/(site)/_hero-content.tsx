@@ -5,6 +5,8 @@ import { m as motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { ShadcnIcon } from '@/components/icons/shadcn'
 import { Button } from '@/components/ui/button'
+import { PresetsRow } from './_presets-row'
+import { SeedTrigger } from './_seed-trigger'
 
 const container: Variants = {
   hidden: {},
@@ -35,24 +37,25 @@ export function HeroContent() {
     >
       <motion.span
         variants={item}
-        className="mb-8 text-xs font-mono uppercase tracking-widest text-on-surface-variant"
+        className="mb-5 inline-flex items-center flex-wrap text-xs font-mono uppercase tracking-widest text-on-surface-variant gap-4"
       >
-        2026 spec · Open source
+        <PresetsRow />
+        <SeedTrigger />
       </motion.span>
       <motion.h1
         variants={item}
         className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8"
       >
-        Pro-grade color tools,
+        Pro-grade color system.
         <br />
-        <span>made for the web.</span>
+        Yours only.
       </motion.h1>
       <motion.p
         variants={item}
-        className="text-lg font-medium text-on-surface-variant max-w-[54ch] mb-10 text-pretty"
+        className="text-xl text-on-surface-variant max-w-[54ch] mb-10 text-pretty"
       >
-        Real HCT math, not an approximation. Per-role pins layered on top. Contrast audited across
-        every token pair the page uses.
+        Built on perceptual color science.
+        <br /> One seed, one coherent palette, one identity across every product.
       </motion.p>
       <motion.div variants={item} className="flex flex-wrap items-center gap-4">
         <Button
