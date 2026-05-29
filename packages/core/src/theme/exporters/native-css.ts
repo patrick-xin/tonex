@@ -1,4 +1,5 @@
 import type { DerivedTheme, TokenMap } from '../derive'
+import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { MD_TOKEN_NAMES } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
@@ -68,7 +69,7 @@ function resolveOptions(options: ExportOptions): ResolvedOptions {
 // in canonical order, custom slugs appended (mergeMdEmission), chart optional.
 // Palette is omitted here: it's mode/contrast-invariant, so a light-dark() pair
 // would be `light-dark(x, x)` — handled separately as flat declarations.
-function modeTokens(theme: DerivedTheme, mode: 'light' | 'dark', opts: ResolvedOptions): TokenMap {
+function modeTokens(theme: DerivedTheme, mode: Mode, opts: ResolvedOptions): TokenMap {
   const core = mode === 'light' ? theme.md.light : theme.md.dark
   const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
   const merged = mergeMdEmission(core, opts.includeExtended ? extended : null)

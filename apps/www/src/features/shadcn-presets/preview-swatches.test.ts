@@ -1,3 +1,4 @@
+import { MODES } from '@tonex/core'
 import { SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
 import { describe, expect, it } from 'vitest'
 import { presetSwatches } from './preview-swatches'
@@ -10,7 +11,7 @@ describe('presetSwatches', () => {
   it('returns a valid hex for every role, in both modes, for every preset', () => {
     for (const name of NAMES) {
       const swatches = presetSwatches(name)
-      for (const mode of ['light', 'dark'] as const) {
+      for (const mode of MODES) {
         for (const role of ROLES) {
           expect(swatches[mode][role], `${name}.${mode}.${role}`).toMatch(HEX)
         }
@@ -54,7 +55,7 @@ describe('presetSwatches with a resolved source override', () => {
       seed: SHADCN_PRESETS.default.seed,
       contrastLevel: SHADCN_PRESETS.default.contrastLevel,
     })
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       for (const role of ROLES) {
         expect(s[mode][role], `grove.${mode}.${role}`).toMatch(HEX)
       }

@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ShadcnChartTokenName } from '../chart/schema'
 import { hctFromHex } from './hct'
+import { MODES } from './mode'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
@@ -132,35 +133,35 @@ describe('useSource persistence round-trip', () => {
     const s = useSource.getState()
     s.actions.setSeedHex(selectSeedHex(NONDEFAULT_INPUTS))
     s.actions.setVariant(NONDEFAULT_INPUTS.variant)
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       s.actions.setContrastLevel(mode, NONDEFAULT_INPUTS.contrastLevel[mode])
     }
     // why: setSeedHexLock must run AFTER setSeedHex above; once locked, the
     // seed setter no-ops, so reordering would silently drop the seed write.
     s.actions.setSeedHexLock(NONDEFAULT_INPUTS.seedHexLock)
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.md3TokenOverrides[mode])) {
         s.actions.setMd3TokenOverride(mode, token as MdTokenName, hex)
       }
     }
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       for (const role of SHADCN_ROLE_NAMES) {
         s.actions.setShadcnRoleBinding(mode, role, NONDEFAULT_INPUTS.shadcnRoleBindings[mode][role])
       }
     }
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       for (const [role, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnRoleOverrides[mode])) {
         s.actions.setShadcnRoleOverride(mode, role as (typeof SHADCN_ROLE_NAMES)[number], hex)
       }
     }
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       for (const [token, hex] of Object.entries(NONDEFAULT_INPUTS.shadcnChartOverrides[mode])) {
         s.actions.setShadcnChartOverride(mode, token as ShadcnChartTokenName, hex)
       }
     }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
     s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       s.actions.setSurfaceTintLevel(mode, NONDEFAULT_INPUTS.surfaceTintLevel[mode])
       s.actions.setSurfaceTintTextLevel(mode, NONDEFAULT_INPUTS.surfaceTintTextLevel[mode])
       s.actions.setSurfaceDesaturateLevel(mode, NONDEFAULT_INPUTS.surfaceDesaturateLevel[mode])

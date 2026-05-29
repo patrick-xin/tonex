@@ -1,6 +1,6 @@
 import type { MdChartTokenName } from '../../chart/schema'
 import type { DerivedTheme, TokenMap } from '../derive'
-import type { Mode } from '../mode'
+import { MODES, type Mode } from '../mode'
 import { argbComponents } from '../oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES, type MdTokenName } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
@@ -241,7 +241,7 @@ export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}):
   // why: group every tier of one mode before the next, matching MTB's emission
   // order (light, lightMediumContrast, lightHighContrast, then the dark trio).
   const blocks: string[] = []
-  for (const mode of ['light', 'dark'] as const) {
+  for (const mode of MODES) {
     for (const [theme, tier] of tiers) {
       blocks.push(modeBlock(theme, mode, tier))
     }

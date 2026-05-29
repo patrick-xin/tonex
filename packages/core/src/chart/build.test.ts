@@ -2,6 +2,7 @@ import { Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../theme/derive'
 import { hctFromHex } from '../theme/hct'
+import type { Mode } from '../theme/mode'
 import { DEFAULT_INPUTS } from '../theme/schema'
 import { applyShadcnChartOverrides, rebrandChart } from './build'
 import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from './schema'
@@ -27,7 +28,7 @@ function expectNear(actual: number, expected: number) {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(SNAP_TOLERANCE)
 }
 
-function categoricalChart(hex: string, mode: 'light' | 'dark') {
+function categoricalChart(hex: string, mode: Mode) {
   const theme = deriveTheme({
     ...DEFAULT_INPUTS,
     seed: { ...hctFromHex(hex), exactHex: hex },

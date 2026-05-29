@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MD_CHART_TOKEN_NAMES } from '../../chart/schema'
 import { deriveTheme } from '../derive'
+import { MODES } from '../mode'
 import {
   DEFAULT_INPUTS,
   MD_CORE_TOKEN_NAMES,
@@ -64,7 +65,7 @@ describe('buildMaterialThemeJson — MTB shape, our tokens (ADR-0029)', () => {
     })
 
     it('emits only light + dark schemes', () => {
-      expect(Object.keys(result.schemes)).toEqual(['light', 'dark'])
+      expect(Object.keys(result.schemes)).toEqual([...MODES])
     })
 
     it('keys each scheme with our core roster, camelCased, in MD_TOKEN_NAMES order', () => {

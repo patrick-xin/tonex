@@ -2,6 +2,7 @@ import { Hct } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
 import { hctFromHex } from '../hct'
+import { MODES } from '../mode'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceDesaturate } from './desaturate'
 
@@ -67,7 +68,7 @@ describe('applySurfaceDesaturate', () => {
     // glowed red on a fully-drained (c≈3) surface. Borders are structural, not
     // accents — they drain with the surface, automatically (no knob), the same
     // coherence call desaturate already makes for on-surface text.
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       const layer = deriveTheme({
         ...DEFAULT_INPUTS,
         seed: { ...hctFromHex('#ff0000'), exactHex: '#ff0000' },

@@ -1,11 +1,12 @@
 import { describe, expect, test } from 'vitest'
+import { MODES } from '../mode'
 import { previewCustomColor } from './custom-color'
 
 describe('previewCustomColor', () => {
   test('returns 6-digit hex strings for all 4 roles in both modes', () => {
     const preview = previewCustomColor('#6750a4', { hex: '#22c55e', blend: true })
     const hexRe = /^#[0-9a-f]{6}$/
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       expect(preview[mode].color).toMatch(hexRe)
       expect(preview[mode].onColor).toMatch(hexRe)
       expect(preview[mode].colorContainer).toMatch(hexRe)
