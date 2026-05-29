@@ -8,12 +8,14 @@
     "coverage": "turbo run coverage",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
+    "check:conventions": "node scripts/check-conventions.mjs",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+    "*.{js,jsx,ts,tsx,json,css}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
+    "*.{ts,tsx}": "node scripts/check-conventions.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.14",
