@@ -1,6 +1,6 @@
 'use client'
 
-import type { ExportOptions } from '@tonex/core'
+import type { ExportOptions, Mode } from '@tonex/core'
 import { useEffect, useState } from 'react'
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Field, FieldLabel } from '@/components/ui/field'
@@ -63,6 +63,9 @@ const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeKey[]>> = {
   shadcn: ['includeChart', 'includeHeader'],
   JSON: ['includeExtended', 'includeChart', 'includePalette', 'includeContrastVariants'],
   Dart: ['includeChart', 'includePalette', 'includeContrastVariants'],
+  // why: DESIGN.md is a flat hex color block — extended roles is its only
+  // meaningful include (mode is picked separately in the rail, below).
+  'Design.md': ['includeExtended'],
 }
 
 const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
@@ -71,6 +74,12 @@ const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
   'shadcn',
   'JSON',
 ])
+
+// why: DESIGN.md has no light/dark axis (the format carries one set of colors),
+// so its tab picks a single mode where the CSS tabs co-emit both. No other tab
+// needs the chooser; Design.md is also absent from FORMAT_TABS (it is hex-only,
+// so the oklch/hex chooser would be a no-op).
+const MODE_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>(['Design.md'])
 
 function isOn(meta: OptionMeta, options: ExportOptions): boolean {
   return meta.defaultOn ? options[meta.key] !== false : options[meta.key] === true
@@ -87,6 +96,35 @@ export function tabHasOptions(tab: ExportTab): boolean {
 
 export function tabSupportsFormat(tab: ExportTab): boolean {
   return FORMAT_TABS.has(tab)
+}
+
+export function tabUsesMode(tab: ExportTab): boolean {
+  return MODE_TABS.has(tab)
+}
+
+// why: single-mode picker for the Design.md tab. Lives in the export rail (not
+// the header) so the tab's controls — mode + extended roles — sit together;
+// Design.md is not a FORMAT_TAB, so the header's oklch/hex chooser never
+// applies to it. Mirrors that chooser's shape.
+export function ExportModeChooser({
+  mode,
+  onChange,
+}: {
+  mode: Mode
+  onChange: (mode: Mode) => void
+}) {
+  return (
+    <ToggleGroup
+      variant="outline"
+      size="xs"
+      aria-label="Export mode"
+      value={[mode]}
+      onValueChange={(next) => onChange((next[0] ?? mode) as Mode)}
+    >
+      <ToggleGroupItem value="light">light</ToggleGroupItem>
+      <ToggleGroupItem value="dark">dark</ToggleGroupItem>
+    </ToggleGroup>
+  )
 }
 
 export function ExportFormatChooser({
@@ -117,6 +155,8 @@ interface ExportFiltersProps {
   tab: ExportTab
   options: ExportOptions
   onChange: (next: ExportOptions) => void
+  mode: Mode
+  onModeChange: (mode: Mode) => void
 }
 
 // why: the rail reflows at lg (the grid's `lg:grid-cols-[…]` breakpoint, the
@@ -141,7 +181,7 @@ function useIsDesktop(): boolean {
   return isDesktop
 }
 
-export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
+export function ExportFilters({ tab, options, onChange, mode, onModeChange }: ExportFiltersProps) {
   const isDesktop = useIsDesktop()
   const [userOpen, setUserOpen] = useState(false)
   const keys = INCLUDES_BY_TAB[tab] ?? []
@@ -155,6 +195,12 @@ export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
 
   return (
     <aside className="flex min-h-0 flex-col overflow-y-auto border-b border-outline-variant/40 p-4 lg:border-r lg:border-b-0">
+      {tabUsesMode(tab) && (
+        <div className="mb-4 flex flex-col gap-1.5">
+          <span className="text-sm font-medium uppercase tracking-wide">Mode</span>
+          <ExportModeChooser mode={mode} onChange={onModeChange} />
+        </div>
+      )}
       <Collapsible open={open} onOpenChange={setUserOpen} className="flex min-h-0 flex-col">
         {/* Mobile-only disclosure; force-open at lg+ via useIsDesktop. */}
         <CollapsibleTrigger className="flex w-full items-center justify-between text-sm text-on-surface lg:hidden">

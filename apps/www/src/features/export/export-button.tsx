@@ -2,7 +2,7 @@
 
 import { DownloadIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
-import type { ExportOptions } from '@tonex/core'
+import type { ExportOptions, Mode } from '@tonex/core'
 import { useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import {
 import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useActiveMode } from '@/features/theme-mode'
 import { exportDialogHandle } from '@/lib/handles'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ExportContentDisplay } from './export-content-display'
@@ -56,6 +57,13 @@ export const ExportButton = ({
   const initialTab = tabs[0]
   const [exportTab, setExportTab] = useState<ExportTab>(initialTab)
   const [options, setOptions] = useState<ExportOptions>(LEAN_DEFAULTS)
+  // why: the Design.md tab emits one mode. Default to the mode the user is
+  // viewing (WYSIWYG), with an explicit override via ExportModeChooser. null
+  // pickedMode = follow the active mode; useActiveMode is null pre-mount, so
+  // fall back to 'dark' until it resolves.
+  const activeMode = useActiveMode()
+  const [pickedMode, setPickedMode] = useState<Mode | null>(null)
+  const mode: Mode = pickedMode ?? activeMode ?? 'dark'
   // why: brand emission has no export-dialog toggle of its own (ADR-0032) —
   // one editor switch governs it. Overlay the brand pref onto the core
   // includeBrand param here; the shadcn exporter is the only reader, md/JSON/
@@ -63,6 +71,7 @@ export const ExportButton = ({
   const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const { exportContent, ext } = useExportContent({
     exportTab,
+    mode,
     options: { ...options, includeBrand: brandEnabled },
   })
 
@@ -119,7 +128,15 @@ export const ExportButton = ({
             hasOptions && 'lg:grid-cols-[13rem_minmax(0,1fr)]',
           )}
         >
-          {hasOptions && <ExportFilters tab={exportTab} options={options} onChange={setOptions} />}
+          {hasOptions && (
+            <ExportFilters
+              tab={exportTab}
+              options={options}
+              onChange={setOptions}
+              mode={mode}
+              onModeChange={setPickedMode}
+            />
+          )}
           {showTabs ? (
             <Tabs
               value={exportTab}

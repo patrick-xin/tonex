@@ -14,6 +14,15 @@ const MIME_BY_EXT: Record<string, string> = {
   css: 'text/css',
   json: 'application/json',
   dart: 'text/x-dart',
+  md: 'text/markdown',
+}
+
+// why: each tab saves as the canonical filename its target tool expects —
+// globals.css (shadcn-cli / Tailwind v4) and DESIGN.md (the @google/design.md
+// file whose colors block this replaces); others fall back to theme.<ext>.
+const FILENAME_BY_EXT: Record<string, string> = {
+  css: 'globals.css',
+  md: 'DESIGN.md',
 }
 
 export function ExportControls({ exportContent, ext }: ExportControlsProps) {
@@ -22,10 +31,7 @@ export function ExportControls({ exportContent, ext }: ExportControlsProps) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    // why: CSS tabs (Tailwind / shadcn) save as `globals.css` — the canonical
-    // shadcn-cli / Tailwind v4 filename — so the file drops straight in.
-    // Stub formatters (TS/JSON/Dart) fall back to `theme.<ext>`.
-    a.download = ext === 'css' ? 'globals.css' : `theme.${ext}`
+    a.download = FILENAME_BY_EXT[ext] ?? `theme.${ext}`
     a.click()
     URL.revokeObjectURL(url)
   }
