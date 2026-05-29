@@ -94,15 +94,11 @@ export function useExportContent({
 
     // why: DESIGN.md (@google/design.md) interop — a bare `colors:` YAML block
     // for one mode, no provenance header (the user pastes it over the colors
-    // block of their own DESIGN.md, commonly Stitch-authored). includeExtended
-    // is forced on: a faithful replacement carries the fixed/extended roles, so
-    // a lean core-only block would silently drop colors the user already had.
-    // The format's Color type is sRGB hex, so the exporter ignores colorFormat.
+    // block of their own DESIGN.md, commonly Stitch-authored). Mode and the
+    // extended-roles include come from the export rail like any other tab; the
+    // format's Color type is sRGB hex, so the exporter ignores colorFormat.
     if (exportTab === 'Design.md') {
-      return {
-        exportContent: exportDesignMd(bundle, mode, { ...options, includeExtended: true }),
-        ext: 'md',
-      }
+      return { exportContent: exportDesignMd(bundle, mode, options), ext: 'md' }
     }
 
     // why: the JSON branch lives below the hydration guard (#84) — it needs the

@@ -25,10 +25,8 @@ import { ExportControls } from './export-controls'
 import {
   ExportFilters,
   ExportFormatChooser,
-  ExportModeChooser,
   tabHasOptions,
   tabSupportsFormat,
-  tabUsesMode,
 } from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
@@ -123,7 +121,6 @@ export const ExportButton = ({
           {tabSupportsFormat(exportTab) && (
             <ExportFormatChooser options={options} onChange={setOptions} />
           )}
-          {tabUsesMode(exportTab) && <ExportModeChooser mode={mode} onChange={setPickedMode} />}
         </DialogHeader>
         <div
           className={cn(
@@ -131,7 +128,15 @@ export const ExportButton = ({
             hasOptions && 'lg:grid-cols-[13rem_minmax(0,1fr)]',
           )}
         >
-          {hasOptions && <ExportFilters tab={exportTab} options={options} onChange={setOptions} />}
+          {hasOptions && (
+            <ExportFilters
+              tab={exportTab}
+              options={options}
+              onChange={setOptions}
+              mode={mode}
+              onModeChange={setPickedMode}
+            />
+          )}
           {showTabs ? (
             <Tabs
               value={exportTab}
