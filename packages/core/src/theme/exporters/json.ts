@@ -37,6 +37,17 @@ import type { ContrastBundle, ExportOptions } from './bundle'
 
 type ColorFormat = 'oklch' | 'hex'
 
+// why: one custom-color entry as MTB lists it under `extendedColors`. Maps
+// 1:1 from tonex's CustomColorEntry: hex → color, blend → harmonized (MTB's
+// "harmonize" IS our blend-toward-seed flag), description defaults to ''. Key
+// order matches MTB's sample (name, color, description, harmonized).
+export interface MaterialExtendedColor {
+  name: string
+  color: string
+  description: string
+  harmonized: boolean
+}
+
 // why: MTB's top-level shape. `schemes` keys by tier (light / dark plus contrast
 // tiers when present); each scheme maps a camelCase token key to an encoded
 // color. `palettes` is the optional trailing block (palette toggle).
@@ -44,11 +55,11 @@ export interface MaterialThemeJson {
   description: string
   seed: string
   coreColors: { primary: string }
-  // why: MTB lists custom colors here. Slice json-1 (#85) defers custom-color
-  // mapping until we have an MTB sample WITH a custom color to match their entry
-  // shape (issue #84 Out of Scope) — always []. Typed `unknown[]` rather than a
-  // guessed entry interface we cannot yet verify (ADR-0029 — never fabricate).
-  extendedColors: unknown[]
+  // why: MTB lists the user's custom colors here as definition entries (source
+  // color + harmonize flag), distinct from the derived per-mode tokens those
+  // colors emit — which ride in `core` and surface inside each scheme (#85,
+  // derive.ts). Empty when the source has no custom colors.
+  extendedColors: MaterialExtendedColor[]
   schemes: Record<string, Record<string, string>>
   palettes?: Record<string, Record<string, string>>
 }
@@ -186,6 +197,20 @@ function buildPalettes(
   return palettes
 }
 
+// why: the user's custom colors as MTB definition entries, in store order.
+// `color` is always the entry's source hex (uppercased to MTB's #RRGGBB
+// convention, like the seed) — never colorFormat-projected, since this is an
+// input color, not a derived token. ADR-0017: pure re-encoding of the source,
+// no recompute. The derived md tokens these entries emit live in `schemes`.
+function buildExtendedColors(source: PortableTheme): MaterialExtendedColor[] {
+  return source.customColors.map((entry) => ({
+    name: entry.name,
+    color: entry.hex.toUpperCase(),
+    description: entry.description ?? '',
+    harmonized: entry.blend,
+  }))
+}
+
 // why: the seed color — the exact bytes the user pasted (seed.exactHex) or the
 // canonical projection of the HCT triplet once they have moved an axis. This is
 // selectSeedHex's rule (source.ts), inlined here so the exporter stays a pure
@@ -217,7 +242,7 @@ export function buildMaterialThemeJson(
     description: provenance(source, seed),
     seed,
     coreColors: { primary: seed },
-    extendedColors: [],
+    extendedColors: buildExtendedColors(source),
     schemes: buildSchemes(bundle, roster, opts.colorFormat, opts.includeChart),
   }
   // why: palettes is the trailing key, present only when toggled. Assigned after
