@@ -66,18 +66,27 @@ function projectLayer(layer: TokenMap): Record<string, string> {
   return out
 }
 
-// why: DOM holds core + chart merged per ADR-0021 commitment 4. Extended and
-// palette stay data-only — never written by applyDom — so this projection
-// helper deliberately omits them; any future regression that emits extended
-// would surface here as an unexpected key.
+// why: DOM holds md core + extended + chart merged (ADR-0021 c.4, amended
+// 2026-05-29 — extended is DOM-emitted so showcase demos get live extended
+// tokens). Palette stays data-only and is omitted here; shadcn has no extended
+// analog. A regression that drops extended from applyDom — or starts emitting
+// palette — surfaces here as a key mismatch.
 function projectTheme(theme: ReturnType<typeof deriveTheme>): {
   md: ProjectedLayer
   shadcn: ProjectedLayer
 } {
   return {
     md: {
-      light: projectLayer({ ...theme.md.light, ...theme.md.lightChart }),
-      dark: projectLayer({ ...theme.md.dark, ...theme.md.darkChart }),
+      light: projectLayer({
+        ...theme.md.light,
+        ...theme.md.lightExtended,
+        ...theme.md.lightChart,
+      }),
+      dark: projectLayer({
+        ...theme.md.dark,
+        ...theme.md.darkExtended,
+        ...theme.md.darkChart,
+      }),
     },
     shadcn: {
       // why: brand is mode-invariant (one map) and previewable in the live DOM,

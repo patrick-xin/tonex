@@ -56,14 +56,20 @@ export function applyDom(): () => void {
     if (!s._hydrated) return
     try {
       const theme = getDerivedTheme(selectPortable(s))
-      // why: ADR-0021 commitment 4 — DOM-relevant subset only. Core role
-      // tokens + chart merge into the existing 4 scope rules; extended
-      // tokens and palette stay data-only (consumed by inspect UIs via
-      // useResolvedTokens). Per-tick setProperty count drops because the
-      // 22-token extended tier and 108-tone palette never enter the diff.
-      applyDiff(rules['.md'], lastTokens['.md'], { ...theme.md.light, ...theme.md.lightChart })
+      // why: ADR-0021 c.4 (amended 2026-05-29) — the .md scope carries core +
+      // extended + chart so live `var(--color-*-fixed)` / `bg-inverse-surface`
+      // track the seed for showcase demos, not a frozen globals.css default.
+      // Palette (78 tones, no @theme bridge, no CSS-utility consumer) stays
+      // data-only — read via useResolvedTokens. The extra extended setProperty
+      // calls per tick are the accepted cost for live extended tokens.
+      applyDiff(rules['.md'], lastTokens['.md'], {
+        ...theme.md.light,
+        ...theme.md.lightExtended,
+        ...theme.md.lightChart,
+      })
       applyDiff(rules['html.dark .md'], lastTokens['html.dark .md'], {
         ...theme.md.dark,
+        ...theme.md.darkExtended,
         ...theme.md.darkChart,
       })
       // why: brand merges into BOTH .shadcn blocks with the SAME (mode-invariant)
