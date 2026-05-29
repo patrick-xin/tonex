@@ -41,7 +41,7 @@ Most slots are created on demand. The features/ + components/ + app/_providers.t
 - Tempted to leave a hook bare at `features/` root → refuse; place under a `features/<name>/` folder (promote to `lib/` only when 2+ features consume it).
 - Tempted to create `features/shared/` → refuse; promote to `components/` if 2+ features need it, otherwise keep private.
 - Tempted to add a `<Layer>` context → refuse; route-level segmentation is the layer mechanism (ADR-0019).
-- Doc surface for these rules: `docs/agents/www-structure.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
+- Doc surface for these rules: `apps/www/CLAUDE.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
 
 ## Amendment 2026-05-08 — rule 5 superseded; rule 6 added (see ADR-0022)
 

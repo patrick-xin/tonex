@@ -28,6 +28,6 @@ ADR-0014 set five rules for `apps/www/src/` based on legacy-prototype failure mo
 
 - ADR-0014 rules 1–4 stand unchanged. Rule 5 is **superseded** by this ADR's commitment 1: workflow features remain layer-agnostic; surface features may be layer-keyed. Rule 6 (locate-test) is added by this ADR's commitment 2.
 - ADR-0019's "no in-app layer toggle" stands. The route is still the layer label. `<LayerContext>` (commitment 3) provides layer info to features for behavior, not for primitive selection — primitive selection remains route-level per ADR-0019 commitments 4–5. See ADR-0019 amendment of this date for the matching note.
-- `docs/agents/www-structure.md` (living) updates to match; it holds the worked examples that resolve the locate-test for current surfaces.
+- `apps/www/CLAUDE.md` (living) updates to match; it holds the worked examples that resolve the locate-test for current surfaces.
 
 **Doc lifecycle note:** This ADR exists because the original (ADR-0014) was a *pre-feature* directional commitment. Rewriting its decision and rationale would erase the pre-feature reasoning that's still useful as audit trail. Future evolutions of these rules should follow the same shape: new ADR, amendment back-pointer, living doc updated, code follows.
