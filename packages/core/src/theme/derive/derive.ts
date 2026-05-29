@@ -14,7 +14,6 @@ import type { Mode } from '../mode'
 import { applyPaletteOverrides } from '../palette-override'
 import {
   type CustomColorEntry,
-  MD_CORE_TOKEN_NAMES,
   MD_EXTENDED_TOKEN_NAMES,
   MD_PALETTE_TONE_NAMES,
   MD_TOKEN_NAMES,
@@ -48,9 +47,9 @@ export type TokenMap = Record<string, number>
 //                          into the same scope rule as core for free use
 //                          inside the editor).
 //   lightExtended/...    — 22 extended role tokens (fixed/dim/inverse/
-//                          surface-tint/shadow/scrim). Mode-aware. Data only
-//                          (consumed by inspect UIs via useResolvedTokens);
-//                          NOT emitted by applyDom — see commitment 4.
+//                          surface-tint/shadow/scrim). Mode-aware. DOM-emitted
+//                          by applyDom (ADR-0021 c.4, amended 2026-05-29) AND
+//                          read by inspect UIs via useResolvedTokens.
 //   palette              — 78 palette tones (13 × 6). Mode/contrast-invariant.
 //                          Data only.
 //
@@ -100,7 +99,6 @@ export interface DerivedTheme {
   warnings: string[]
 }
 
-const MD_CORE_TOKEN_SET: ReadonlySet<string> = new Set(MD_CORE_TOKEN_NAMES)
 const MD_EXTENDED_TOKEN_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
 
 // why: explicit MdTokenName → MCU getter table. Verbose but the mapping is

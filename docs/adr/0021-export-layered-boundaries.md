@@ -140,3 +140,19 @@ Commitment 6 framed `ExportOptions` as per-tab filter rows (md surfaces four fil
 
 **Consequence:** the original "lift toggle state to a UI store when a second consumer appears" line is now live — the JSON formatter is that second consumer. Whether the lift happens or React-local state still suffices is an implementation call for the wiring slice, not a commitment here.
 
+---
+
+## Amendment 2026-05-29 — extended role tokens are DOM-emitted
+
+Commitment 4 excluded `*Extended` (and `palette`) from `applyDom` on the rationale that "app components and the editor only consume core role tokens + chart," so emitting the extended tier cost ~200 setProperty calls per source change "for zero render benefit." A second consumer breaks that premise: the marketing/showcase pages drive the live mood-shift demo (the product wedge) off extended tokens — `bg-inverse-surface`, `var(--color-primary-fixed)`, the fixed/dim/inverse families — as live CSS variables. Under commitment 4 those resolve only to the frozen `globals.css` default (baked from `DEFAULT_INPUTS`) and silently fail to track the seed, because `applyDom` never rewrites them. The `@theme inline` bridge for all 22 extended tokens already exists in `globals.css`; the only missing piece was live emission.
+
+**Decision:** `applyDom` emits the md extended tier into the `.md` / `html.dark .md` scope rules, merged alongside core + chart (`{ ...light, ...lightExtended, ...lightChart }`). Extended role tokens become live, seed-reactive CSS variables wherever a `.md` scope applies. This reverses commitment 4's *extended* exclusion only; commitments 1–3 and 5–10 stand.
+
+**Palette stays data-only.** The palette tones remain excluded from `applyDom` — they have no `@theme` bridge and no CSS utility consumes them; they are inspect-data, read via `useResolvedTokens()`. The reversal is scoped to extended.
+
+**Cost is accepted.** Per-tick `setProperty` count rises by the 22-token extended tier × the two md mode blocks. Commitment 4's issue-#9 optimization traded this away; we trade it back knowingly because live showcase tokens are now a real requirement. Slider-drag cost stays bounded by `applyDiff` (unchanged values skip projection), and the extended roster is fixed so it never churns the diff's key set.
+
+**Why:** commitment 4's "zero render benefit" premise held when the only extended consumer was the inspect surface, which reads the derived object directly. The showcase demo is a second consumer with a different access pattern — live CSS variables — that the data-only path cannot serve. This aligns with commitment 7 ("`applyDom` always emits the full functional theme"): the extended tier is part of that functional theme, and carving it out was a performance lean, not a semantic one. The lean no longer pays.
+
+**Consequence:** the `applyDom` drift-guard test widens its `projectTheme` helper to include `lightExtended` / `darkExtended` in the md projection — the data-level contract is now "applyDom's md tokens = core + extended + chart." Inspect UIs reading extended via `useResolvedTokens()` are unaffected (the data path is unchanged). The latent staleness in `apps/www`'s `Button` `inverse` variant — which referenced `var(--color-inverse-*)` against the frozen default — is resolved as a side effect.
+
