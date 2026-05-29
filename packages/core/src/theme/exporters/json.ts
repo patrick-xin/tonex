@@ -122,8 +122,7 @@ function tiersOf(bundle: ContrastBundle): Array<[ContrastTier, DerivedTheme]> {
 // and encoded. core + extended partition MD_TOKEN_NAMES disjointly; merge them
 // into one lookup and iterate the explicit roster. Iterating the roster (not
 // mergeMdEmission) deliberately excludes custom-color slugs that ride in `core`
-// — MTB carries custom colors in extendedColors (deferred, #85), never inside
-// schemes.
+// — MTB carries custom colors in extendedColors, never inside schemes.
 function buildScheme(
   theme: DerivedTheme,
   mode: Mode,
