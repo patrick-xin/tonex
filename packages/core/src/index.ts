@@ -45,11 +45,13 @@ export {
 } from './theme/derive'
 export {
   buildContrastBundle,
+  buildDesignMdColors,
   type ContrastBundle,
   type ExportLayer,
   type ExportOptions,
   exportCss,
   exportDart,
+  exportDesignMd,
   exportJson,
   exportNativeCss,
   formatCss,
