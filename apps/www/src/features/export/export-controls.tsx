@@ -14,6 +14,7 @@ const MIME_BY_EXT: Record<string, string> = {
   css: 'text/css',
   json: 'application/json',
   dart: 'text/x-dart',
+  md: 'text/markdown',
 }
 
 export function ExportControls({ exportContent, ext }: ExportControlsProps) {

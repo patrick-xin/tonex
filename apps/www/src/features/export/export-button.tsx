@@ -2,7 +2,7 @@
 
 import { DownloadIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
-import type { ExportOptions } from '@tonex/core'
+import type { ExportOptions, Mode } from '@tonex/core'
 import { useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import {
 import { Kbd } from '@/components/ui/kbd'
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useActiveMode } from '@/features/theme-mode'
 import { exportDialogHandle } from '@/lib/handles'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ExportContentDisplay } from './export-content-display'
@@ -24,8 +25,10 @@ import { ExportControls } from './export-controls'
 import {
   ExportFilters,
   ExportFormatChooser,
+  ExportModeChooser,
   tabHasOptions,
   tabSupportsFormat,
+  tabUsesMode,
 } from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
@@ -56,6 +59,13 @@ export const ExportButton = ({
   const initialTab = tabs[0]
   const [exportTab, setExportTab] = useState<ExportTab>(initialTab)
   const [options, setOptions] = useState<ExportOptions>(LEAN_DEFAULTS)
+  // why: the Design.md tab emits one mode. Default to the mode the user is
+  // viewing (WYSIWYG), with an explicit override via ExportModeChooser. null
+  // pickedMode = follow the active mode; useActiveMode is null pre-mount, so
+  // fall back to 'dark' until it resolves.
+  const activeMode = useActiveMode()
+  const [pickedMode, setPickedMode] = useState<Mode | null>(null)
+  const mode: Mode = pickedMode ?? activeMode ?? 'dark'
   // why: brand emission has no export-dialog toggle of its own (ADR-0032) —
   // one editor switch governs it. Overlay the brand pref onto the core
   // includeBrand param here; the shadcn exporter is the only reader, md/JSON/
@@ -63,6 +73,7 @@ export const ExportButton = ({
   const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const { exportContent, ext } = useExportContent({
     exportTab,
+    mode,
     options: { ...options, includeBrand: brandEnabled },
   })
 
@@ -112,6 +123,7 @@ export const ExportButton = ({
           {tabSupportsFormat(exportTab) && (
             <ExportFormatChooser options={options} onChange={setOptions} />
           )}
+          {tabUsesMode(exportTab) && <ExportModeChooser mode={mode} onChange={setPickedMode} />}
         </DialogHeader>
         <div
           className={cn(

@@ -16,6 +16,8 @@ export const mdNavConfig: NavConfig = {
   // why: ADR-0021 commitment 8 — md routes pass these tabs. CSS is the
   // framework-agnostic native-CSS sibling of Tailwind (--md-sys-color-* +
   // light-dark()), so it sits next to it for the non-Tailwind audience.
-  exportTabs: ['Tailwind', 'CSS', 'JSON', 'Dart'],
+  // Design.md emits the md color surface as a @google/design.md `colors:`
+  // block (md-only — the shadcn route keeps its single shadcn tab).
+  exportTabs: ['Tailwind', 'CSS', 'JSON', 'Dart', 'Design.md'],
   crossLink: { label: 'Shadcn', href: '/theme/shadcn' },
 }

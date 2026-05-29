@@ -1,6 +1,6 @@
 'use client'
 
-import type { ExportOptions } from '@tonex/core'
+import type { ExportOptions, Mode } from '@tonex/core'
 import { useEffect, useState } from 'react'
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Field, FieldLabel } from '@/components/ui/field'
@@ -72,6 +72,12 @@ const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
   'JSON',
 ])
 
+// why: DESIGN.md has no light/dark axis (the format carries one set of colors),
+// so its tab picks a single mode where the CSS tabs co-emit both. No other tab
+// needs the chooser; Design.md is also absent from FORMAT_TABS (it is hex-only,
+// so the oklch/hex chooser would be a no-op).
+const MODE_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>(['Design.md'])
+
 function isOn(meta: OptionMeta, options: ExportOptions): boolean {
   return meta.defaultOn ? options[meta.key] !== false : options[meta.key] === true
 }
@@ -87,6 +93,35 @@ export function tabHasOptions(tab: ExportTab): boolean {
 
 export function tabSupportsFormat(tab: ExportTab): boolean {
   return FORMAT_TABS.has(tab)
+}
+
+export function tabUsesMode(tab: ExportTab): boolean {
+  return MODE_TABS.has(tab)
+}
+
+// why: single-mode picker for the Design.md tab, sitting in the same header
+// slot as ExportFormatChooser (the two are mutually exclusive — Design.md is
+// not a FORMAT_TAB). Mirrors the oklch/hex toggle's shape so the header reads
+// consistently.
+export function ExportModeChooser({
+  mode,
+  onChange,
+}: {
+  mode: Mode
+  onChange: (mode: Mode) => void
+}) {
+  return (
+    <ToggleGroup
+      variant="outline"
+      size="xs"
+      aria-label="Export mode"
+      value={[mode]}
+      onValueChange={(next) => onChange((next[0] ?? mode) as Mode)}
+    >
+      <ToggleGroupItem value="light">light</ToggleGroupItem>
+      <ToggleGroupItem value="dark">dark</ToggleGroupItem>
+    </ToggleGroup>
+  )
 }
 
 export function ExportFormatChooser({

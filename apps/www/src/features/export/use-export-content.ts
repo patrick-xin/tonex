@@ -5,8 +5,10 @@ import {
   type ExportOptions,
   exportCss,
   exportDart,
+  exportDesignMd,
   exportJson,
   exportNativeCss,
+  type Mode,
   selectHydrated,
   selectPortable,
   selectSeedHex,
@@ -15,7 +17,7 @@ import {
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart'
+export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart' | 'Design.md'
 
 // why: Tailwind tab emits the md layer (full globals.css with @theme inline);
 // shadcn tab emits :root + .dark only since the user already owns the @import
@@ -57,9 +59,14 @@ export interface ExportContent {
 
 export function useExportContent({
   exportTab,
+  mode,
   options,
 }: {
   exportTab: ExportTab
+  // why: DESIGN.md has no light/dark axis (unlike the CSS tabs, which co-emit
+  // both), so the dialog picks one mode and threads it here. Ignored by every
+  // other tab. See export-button.tsx's ExportModeChooser.
+  mode: Mode
   options: ExportOptions
 }): ExportContent {
   const hydrated = useSource(selectHydrated)
@@ -84,6 +91,19 @@ export function useExportContent({
     // commitment 7 — the string we hand to the dialog pane equals what the user
     // pastes byte-for-byte.
     const bundle = buildContrastBundle(portable, options)
+
+    // why: DESIGN.md (@google/design.md) interop — a bare `colors:` YAML block
+    // for one mode, no provenance header (the user pastes it over the colors
+    // block of their own DESIGN.md, commonly Stitch-authored). includeExtended
+    // is forced on: a faithful replacement carries the fixed/extended roles, so
+    // a lean core-only block would silently drop colors the user already had.
+    // The format's Color type is sRGB hex, so the exporter ignores colorFormat.
+    if (exportTab === 'Design.md') {
+      return {
+        exportContent: exportDesignMd(bundle, mode, { ...options, includeExtended: true }),
+        ext: 'md',
+      }
+    }
 
     // why: the JSON branch lives below the hydration guard (#84) — it needs the
     // derived bundle + source. exportJson reshapes the same DerivedTheme the CSS
@@ -113,5 +133,5 @@ export function useExportContent({
 
     const layer = exportTab === 'Tailwind' ? 'md' : 'shadcn'
     return { exportContent: header + exportCss(bundle, layer, options), ext: 'css' }
-  }, [exportTab, hydrated, portable, options, seedHex, variant, contrastLevel])
+  }, [exportTab, mode, hydrated, portable, options, seedHex, variant, contrastLevel])
 }
