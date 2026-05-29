@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { hctFromHex } from './hct'
+import { MODES } from './mode'
 import { DEFAULT_INPUTS, type PortableTheme } from './schema'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPreset } from './shadcn-presets'
 
@@ -187,7 +188,7 @@ describe('R8: every preset carries a curated contrastLevel', () => {
   it.each(PRESET_NAMES)('preset "%s" declares an in-range per-mode contrastLevel', (name) => {
     const contrastLevel = presets[name]?.contrastLevel
     expect(contrastLevel, `preset "${name}" missing contrastLevel`).toBeDefined()
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       expect(contrastLevel?.[mode], `preset "${name}" missing ${mode} contrast`).toBeDefined()
       expect(contrastLevel?.[mode]).toBeGreaterThanOrEqual(0)
       expect(contrastLevel?.[mode]).toBeLessThanOrEqual(1)

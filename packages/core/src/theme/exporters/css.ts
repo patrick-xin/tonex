@@ -1,4 +1,5 @@
 import type { DerivedTheme, TokenMap } from '../derive'
+import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { SHADCN_ROLE_NAMES } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
@@ -123,7 +124,7 @@ function resolveOptions(options: ExportOptions): ResolvedOptions {
 // declares once); other (mode, tier) pairs skip it.
 function buildMdRuleTokens(
   theme: DerivedTheme,
-  mode: 'light' | 'dark',
+  mode: Mode,
   tier: ContrastTier,
   opts: ResolvedOptions,
 ): TokenMap {
@@ -138,11 +139,7 @@ function buildMdRuleTokens(
   return merged
 }
 
-function buildShadcnRuleTokens(
-  theme: DerivedTheme,
-  mode: 'light' | 'dark',
-  opts: ResolvedOptions,
-): TokenMap {
+function buildShadcnRuleTokens(theme: DerivedTheme, mode: Mode, opts: ResolvedOptions): TokenMap {
   const core = mode === 'light' ? theme.shadcn.light : theme.shadcn.dark
   if (!opts.includeChart && !opts.includeBrand) return core
   const out: TokenMap = { ...core }

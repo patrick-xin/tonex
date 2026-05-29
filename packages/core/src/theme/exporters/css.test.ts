@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme, type TokenMap } from '../derive'
+import type { Mode } from '../mode'
 import { oklchString } from '../oklch'
 import { DEFAULT_INPUTS, type PortableTheme } from '../schema'
 import { exportCss } from './css'
@@ -32,7 +33,7 @@ function projectLayer(layer: TokenMap): Record<string, string> {
 
 function projectMergedMd(
   theme: ReturnType<typeof deriveTheme>,
-  mode: 'light' | 'dark',
+  mode: Mode,
 ): Record<string, string> {
   // why: helper for tests that pass `includeExtended: true` explicitly.
   // Slice 4 default is lean (core only); the bake / drift-guard preserves

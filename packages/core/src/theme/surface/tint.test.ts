@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
 import { hctFromHex } from '../hct'
+import { MODES } from '../mode'
 import { hexString } from '../oklch'
 import { DEFAULT_INPUTS } from '../schema'
 import { applySurfaceTint } from './tint'
@@ -64,7 +65,7 @@ describe('applySurfaceTint', () => {
     // to neutral — light AND dark. Threshold 4.0 sits between the ~2.8 chroma
     // an achromatic grey can read back as at the t100/t0 extremes (8-bit sRGB
     // round-trip noise) and MCU's 6.5+ brand chroma the bug left behind.
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       const layer = deriveTheme(withSeed('#6750A4')).md[mode]
       const tinted = applySurfaceTint(layer, 0, 'neutral')
       for (const tok of SURFACE_BG) {
@@ -178,7 +179,7 @@ describe('applySurfaceTint', () => {
     // outline rides surfaceTintLevel (level=0 → pure chosen neutral, like the 8
     // backgrounds), is primary-independent there, and is NOT moved by textLevel
     // (borders are coherence-coupled to the surface, not part of the text accent).
-    for (const mode of ['light', 'dark'] as const) {
+    for (const mode of MODES) {
       const vivid = deriveTheme(withSeed('#6750A4')).md[mode]
       for (const tok of OUTLINE) {
         expect(chromaOf(vivid[tok])).toBeGreaterThan(8) // MCU really hands us a brand border

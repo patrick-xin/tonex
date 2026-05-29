@@ -57,7 +57,7 @@ When picking a www target, prefer hooks and lib helpers with clear invariants ov
 `deriveTheme` tests are **THE canonical pattern for core** — read `packages/core/src/theme/derive.test.ts` for the live reference. Every other core unit test pattern-matches against it.
 
 Three commitments embedded:
-1. **`DEFAULT_INPUTS` + inline spread for overrides.** Tests use `deriveTheme(DEFAULT_INPUTS)` for the baseline case and `deriveTheme({ ...DEFAULT_INPUTS, seedHex: '#xxxxxx' })` when a field needs overriding. No fixture builder until 3+ tests share boilerplate.
+1. **`DEFAULT_INPUTS` + inline spread for overrides.** Tests use `deriveTheme(DEFAULT_INPUTS)` for the baseline case and `deriveTheme({ ...DEFAULT_INPUTS, seed: { ...hctFromHex('#xxxxxx'), exactHex: '#xxxxxx' } })` when overriding the seed (HCT-canonical per ADR-0028 — there is no top-level `seedHex` field). No fixture builder until 3+ tests share boilerplate.
 2. **Explicit assertions on output fields.** `result.shadcn.light['--primary']` is the contract. Tests-as-spec.
 3. **No mocks.** `deriveTheme` is pure (ADR-0005). Mocking would mean mocking math.
 

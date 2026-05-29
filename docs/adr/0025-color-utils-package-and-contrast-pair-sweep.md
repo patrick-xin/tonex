@@ -59,7 +59,7 @@ Adding a pair is a one-row schema edit. Removing one breaks any test asserting c
 
 `--destructive` does not gain a shadcn pair; destructive's contrast partner is bound through `--color-on-error` at the underlying md level, already covered by the md `on-error / error` pair.
 
-**Why:** the pairs encode M3 spec semantics (`on-X` always pairs with `X`) and shadcn role-pair conventions (`-foreground` always pairs with the unsuffixed root). Both are domain knowledge per code-conventions.md. Allowing pair definitions to live in www would split domain across packages.
+**Why:** the pairs encode M3 spec semantics (`on-X` always pairs with `X`) and shadcn role-pair conventions (`-foreground` always pairs with the unsuffixed root). Both are domain knowledge per `apps/www/CLAUDE.md` (types live in `@tonex/core`). Allowing pair definitions to live in www would split domain across packages.
 
 ## 7. Pair shape bakes `intent` and `threshold` from day one
 

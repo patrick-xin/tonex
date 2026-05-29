@@ -136,7 +136,7 @@ Commitment 6 framed `ExportOptions` as per-tab filter rows (md surfaces four fil
 
 **Why:** the per-tab framing was an artifact of only one real formatter existing when commitment 6 was written. Options describe *the theme the user is handing off*, not the tab they happen to be on — so they sit above the format choice, with one action propagating everywhere. A format ignoring an option it can't use is strictly simpler than maintaining disjoint per-tab option sets.
 
-**Convention, not decision:** where the shared control row physically renders (e.g. above the tab strip) is a www-structure concern, recorded there — not in this ADR.
+**Convention, not decision:** where the shared control row physically renders (e.g. above the tab strip) is an `apps/www` structure concern, recorded in `apps/www/CLAUDE.md` — not in this ADR.
 
 **Consequence:** the original "lift toggle state to a UI store when a second consumer appears" line is now live — the JSON formatter is that second consumer. Whether the lift happens or React-local state still suffices is an implementation call for the wiring slice, not a commitment here.
 

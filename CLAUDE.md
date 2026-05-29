@@ -2,7 +2,7 @@
 
 ## Agent context
 
-Agent context (working style, conventions, durable rules) lives in `docs/agents/`. Promote stable rules to repo; keep memory for transient observations only.
+Agent context (working style, conventions, durable rules) lives in `docs/agents/`. Subtree code rules auto-load from nested `CLAUDE.md` — `packages/core/CLAUDE.md` (engine) and `apps/www/CLAUDE.md` (app) — when you touch those trees. Promote stable rules to repo; keep memory for transient observations only.
 
 Starting work? Read `docs/agents/session-flow.md` for the reading order.
 
@@ -15,4 +15,4 @@ Issues live in GitHub Issues at `patrick-xin/tonex`. See `docs/agents/issue-trac
 Default canonical label strings (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
 
 ### Domain docs
-Single-context repo — one `CONTEXT.md` and `docs/adr/` at the root. See `docs/agents/domain.md`.
+Single-context repo — one `CONTEXT.md` (vocabulary) and `docs/adr/` (decisions) at the root. Use `CONTEXT.md` terms; skim ADR filenames and read those touching your area.

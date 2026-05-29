@@ -6,8 +6,8 @@ Thanks for wanting to help. Tonex is a small project with strong conventions —
 
 1. [`docs/vision.md`](./docs/vision.md) — what the project is.
 2. [`docs/agents/session-flow.md`](./docs/agents/session-flow.md) — how a working session is structured.
-3. [`docs/agents/code-conventions.md`](./docs/agents/code-conventions.md) — code rules.
-4. [`docs/adr/`](./docs/adr/) — architectural decisions of record. ADRs are frozen; new decisions get new ADRs, existing ADRs get amendment blocks.
+3. Code rules — auto-loaded from the nearest `CLAUDE.md`: [`packages/core/CLAUDE.md`](./packages/core/CLAUDE.md) (engine) and [`apps/www/CLAUDE.md`](./apps/www/CLAUDE.md) (app).
+4. [`docs/adr/`](./docs/adr/) — architectural decisions of record. ADRs hold living rationale: the decision and its why don't change without a new ADR (or an append-only amendment); bodies may be cleaned as code moves.
 
 ## Dev setup
 
