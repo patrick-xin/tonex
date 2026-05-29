@@ -7,6 +7,7 @@ import {
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
   MD_TOKEN_NAMES,
+  type PortableTheme,
 } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
 import { buildMaterialThemeJson, exportJson } from './json'
@@ -92,7 +93,7 @@ describe('buildMaterialThemeJson — MTB shape, our tokens (ADR-0029)', () => {
       expect(result.coreColors).toEqual({ primary: '#6750A4' })
     })
 
-    it('emits an empty extendedColors (custom-color mapping deferred)', () => {
+    it('emits an empty extendedColors when the source has no custom colors', () => {
       expect(result.extendedColors).toEqual([])
     })
 
@@ -132,6 +133,41 @@ describe('buildMaterialThemeJson — MTB shape, our tokens (ADR-0029)', () => {
       expect(result.schemes.light).toHaveProperty('primaryDim')
       expect(result.schemes.light).toHaveProperty('surfaceTint')
       expect(result.schemes.light).toHaveProperty('shadow')
+    })
+  })
+
+  describe('extendedColors — custom-color mapping (#85)', () => {
+    // why: MTB lists each custom color as { name, color, description, harmonized }.
+    // tonex's CustomColorEntry maps directly: hex → color (uppercased to MTB's
+    // #RRGGBB convention, like the seed), description defaults to '' when unset,
+    // and blend → harmonized (MTB's "harmonize" IS our blend-toward-seed flag).
+    const sourceWithCustom: PortableTheme = {
+      ...DEFAULT_INPUTS,
+      customColors: [
+        { id: 'c1', name: 'Custom Color 1', hex: '#1b3f90', blend: false, shadcnSource: 'color' },
+        {
+          id: 'c2',
+          name: 'Brand Teal',
+          description: 'hero accent',
+          hex: '#0a7e8c',
+          blend: true,
+          shadcnSource: 'container',
+        },
+      ],
+    }
+    const bundle: ContrastBundle = { default: deriveTheme(sourceWithCustom) }
+
+    it('maps each entry to MTB shape, in entry order, with key order name/color/description/harmonized', () => {
+      const result = buildMaterialThemeJson(sourceWithCustom, bundle, {})
+      expect(result.extendedColors).toEqual([
+        { name: 'Custom Color 1', color: '#1B3F90', description: '', harmonized: false },
+        { name: 'Brand Teal', color: '#0A7E8C', description: 'hero accent', harmonized: true },
+      ])
+    })
+
+    it('always encodes color as uppercase hex, regardless of colorFormat (the entry is an input color)', () => {
+      const result = buildMaterialThemeJson(sourceWithCustom, bundle, { colorFormat: 'oklch' })
+      expect(result.extendedColors[0]?.color).toBe('#1B3F90')
     })
   })
 
