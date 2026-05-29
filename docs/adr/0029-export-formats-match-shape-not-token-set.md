@@ -17,3 +17,12 @@ ADR-0021 c.9 committed to non-CSS formatters (JSON, TS, Dart) without stating th
 - A formatter may read any field `deriveTheme` returns and reshape, rename, or re-encode it — that is formatting. It may not compute a color, infer a role-to-tone mapping, or invent a token absent from the derived theme — that is derivation, and stays upstream (ADR-0017, ADR-0021 c.1).
 - Faithfulness is judged against the target's *schema*, not a captured file. A reference export is a shape fixture, not a value oracle: our colors will differ from any given sample (different seed default, variant, possibly MCU revision), and that divergence is expected.
 - Divergence between our roster and the target's is visible by construction — extra keys present, absent keys absent — never hidden behind fabricated values. The artifact reads as a target-shaped tonex theme, which is exactly what it is.
+
+## Amendment — 2026-05-29: DESIGN.md, the first non-CSS / non-Material target (ADR-0033)
+
+The `@google/design.md` color export is the first formatter whose target is neither CSS nor a Material-derived JSON — a role-keyed YAML document authored for coding agents. It confirms the shape-match contract binds that far out, and surfaces two refinements of "match the shape":
+
+- **The target may lack an axis we always carry.** DESIGN.md has no light/dark dimension, but `deriveTheme` co-derives both modes (ADR-0017 c.2). Shape-match therefore extends from "omit the tokens the target lacks" to "project the always-co-derived pair down to the single mode the caller selects." The mode pick is a choice made at the export seam, not a re-derivation.
+- **The target may dictate value encoding, overriding a user option.** DESIGN.md's Color type is sRGB hex, so the exporter emits hex regardless of the `colorFormat` (oklch) export option — the target's encoding wins over the toggle. This is "match the value encoding" taken to its end: a format-mandated encoding overrides a user-facing option rather than honoring it.
+
+Both stay pure formatting (ADR-0008) — selecting a mode and encoding hex read fields `deriveTheme` already returns; no color is computed at the seam. Why DESIGN.md is *only* a color export, and never an inbound source, is ADR-0033.
