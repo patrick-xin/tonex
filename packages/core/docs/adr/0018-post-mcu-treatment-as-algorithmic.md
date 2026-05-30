@@ -70,3 +70,9 @@ Two consequences worth recording:
 - **Outline now obeys the pipeline's treatment-over-pin order.** md3 token pins land before `applyTreatment` (derive.ts), so a pin on a treated token is then subject to the active treatment — long-standing for the surface backgrounds, now also true for outline. This is consistent, not a new rule: the surgical-pin guarantee was always "beats MCU and palette regen", never "beats the surface treatment".
 
 Contrast-safe to make automatic: outline×surface pairs already sit in `CONTRAST_PAIRS` at the 3:1 structural floor, and chroma scaling preserves tone, so the live audit guards user-pushed levels. The body invariant (treatment touches the md surface family, primary stays MCU) is unchanged — outline is part of that family.
+
+## Amendment — 2026-05-30
+
+The Decision lists `surfaceAlgo: 'none' | 'tint' | 'desaturate'` and rationale #4 frames `'none'` as the zero-cost default. As shipped, `SURFACE_ALGOS = ['tint', 'desaturate']` — there is no `'none'` member. The no-op (identity) is `desaturate` at `surfaceDesaturateLevel = 0`, which is why the Consequence section already counts only two algorithms ("adding a *third*").
+
+Rationale #4's zero-cost baseline holds unchanged: the drift-guard baseline (`globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))`) stays green because level-0 desaturate *is* the identity transform — the no-op moved from a `'none'` branch to the level-0 short-circuit. A future algorithm must short-circuit its own level 0 to identity rather than rely on a `'none'` member.

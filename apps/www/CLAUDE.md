@@ -1,6 +1,6 @@
 # `apps/www` — working rules
 
-Engine-side rules live in `packages/core/CLAUDE.md`; the `@tonex/core` export index is `docs/agents/core-surface.md`. Authoritative decisions are in `docs/adr/` — follow a citation only when you need the trade.
+Engine-side rules live in `packages/core/CLAUDE.md`; the `@tonex/core` export index is `packages/core/docs/agents/api/core-surface.md`. Authoritative decisions are in `docs/adr/` — follow a citation only when you need the trade.
 
 ## Where types live — the CLI test
 Domain types/constants live in `@tonex/core`; **never inline-define them in www.** Test: *would a CLI or future second app care about this?* yes → `@tonex/core` (import via a declared subpath — see `core-surface.md`); no → app-only is fine in www's `types.ts` / `constants.ts` / inline.

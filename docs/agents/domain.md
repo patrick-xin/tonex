@@ -25,6 +25,10 @@ Multi-context repo:
     │   └── docs/adr/                  ← context-specific decisions
 ```
 
+## ADR numbers are the join key
+
+Code cites ADRs by number (`ADR-0018`, `ADR-0009 c.4`), never by path or title. The number is the contract; path, title, and directory are mutable metadata. **Never renumber an ADR** — moving the file is free, but renumbering (even `0014`→`0015`) silently severs every code reference. New decision → next free number; a superseded decision keeps its number and is marked superseded.
+
 ## Use the glossary's vocabulary
 
 When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.

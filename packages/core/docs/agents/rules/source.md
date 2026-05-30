@@ -29,4 +29,5 @@ Governs `theme/source.ts` and `theme/schema.ts`.
 - **Validation runs post-rehydrate inside `onRehydrateStorage`.** Migrate runs first; schema validates the result, never a `Partial<>`. _(ADR-0009 c.3)_
 - **Field-level predicates are shared.** A new constraint adds a `v.check` refinement and the setter calls the same predicate. _(ADR-0009 c.5)_
 - **Recovery is all-or-nothing reset.** On parse failure the handler calls `state.actions.reset()` then flips `_hydrated`. No per-field fallback. _(ADR-0009 c.4)_
+- **No forward migrations while there are no live users to preserve.** A `SCHEMA_VERSION` bump currently leans on the reset above rather than a `migrate` branch — older persisted records fail schema parse and reset to `DEFAULT_INPUTS`. Add a forward-migration branch in `migrate` once persisted user state must survive a bump. _(ADR-0009 c.4)_
 - **Schema is the truth-source for allowed-value tuples** (`VARIANT_NAMES`, `SURFACE_ALGOS`, `NEUTRAL_PALETTE_NAMES`, …); restating the values is the drift class. _(ADR-0009)_

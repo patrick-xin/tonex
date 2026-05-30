@@ -1,4 +1,13 @@
-Check [./CONTEXT-MAP.md](./CONTEXT-MAP.md) for terminology questions.
+# tonex
+
+This is a tool that turns a seed hex color into a theme via Material Color Utilities.
+
+## Agent context
+
+Multi-context repo:
+- Core Engine → `packages/core/CLAUDE.md`
+- Web app → `apps/www/CLAUDE.md`
+- System-wide `decision → docs/adr/`
 
 ## Agent skills
 
@@ -9,5 +18,5 @@ Issues live in GitHub Issues at `patrick-xin/tonex`. See `docs/agents/issue-trac
 Default canonical labels. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
-Muti-context layout: `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Multi-context layout: ADRs live per layer — system-wide in `docs/adr/`, engine in `packages/core/docs/adr/`, web app in `apps/www/docs/adr/`. See `docs/agents/domain.md`.
 

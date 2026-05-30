@@ -6,7 +6,7 @@ Reading order when an agent starts work here. Designed so the user doesn't recit
 
 ## Auto-loaded (no read action)
 - `CLAUDE.md` (repo root) — entry pointer.
-- **Nested `CLAUDE.md`** — the working rules for a subtree load when you touch it: `packages/core/CLAUDE.md` (engine, schema, sinks, seed), `apps/www/CLAUDE.md` (app structure, state boundaries, component conventions), `apps/www/src/features/md-rail/CLAUDE.md` (rail UI standard, governs both rails). You don't fetch these — they come with the files.
+- **Nested `CLAUDE.md`** — the working rules for a subtree load when you touch it: `packages/core/CLAUDE.md` (engine, schema, sinks, seed), `apps/www/CLAUDE.md` (app structure, state boundaries, component conventions) You don't fetch these — they come with the files.
 - (Claude Code main agents only) machine-local memory at `~/.claude/projects/<repo>/memory/`.
 - `SessionStart` hook output — branch, recent commits, uncommitted state.
 
@@ -30,7 +30,7 @@ Before writing or editing code:
 Recent commits are already in the `SessionStart` output above — glance there for where the code actually is, no separate `git log` needed. When you open files under `packages/core/` or `apps/www/`, that subtree's `CLAUDE.md` arrives automatically — the working rules come with the code.
 
 ## Read when relevant
-- `docs/agents/core-surface.md` — what `@tonex/core` exposes, by subpath. Read before importing from `@tonex/core` in www.
+- `packages/core/docs/agents/api/core-surface.md` — what `@tonex/core` exposes, by subpath. Read before importing from `@tonex/core` in www.
 - `docs/agents/issue-tracker.md` / `triage-labels.md` — how issues are organized; triage label vocabulary.
 - `docs/agents/{slice-strategy,tdd,decision-flow,memory-lifecycle}.md` — slice discipline, the test-first contract, how decisions are captured, memory lifecycle.
 

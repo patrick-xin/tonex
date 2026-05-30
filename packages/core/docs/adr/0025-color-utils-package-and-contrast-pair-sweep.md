@@ -100,7 +100,7 @@ When APCA lands:
 ## Consequences
 
 - `apps/www/src/features/color-roles-list/contrast-utils.ts` shrinks to UI helpers (`isDarkSwatch`, `roleDisplayName`); `relativeLuminance`, `contrastRatio`, `ROLE_CONTRAST_PAIRS`, `AA_THRESHOLD` retire. Consumers (`color-roles-list.tsx`, `role-editor.tsx`) read from `evaluateThemeContrast`.
-- `@tonex/core/oklch` subpath stays as a public import path but re-exports from `@tonex/color-utils` (or shifts entirely; consumer-side import path may move). Subpath stability is a www-side concern; `docs/agents/core-surface.md` updates with the migration.
+- `@tonex/core/oklch` subpath stays as a public import path but re-exports from `@tonex/color-utils` (or shifts entirely; consumer-side import path may move). Subpath stability is a www-side concern; `docs/agents/api/core-surface.md` updates with the migration.
 - The `ContrastPair` type's `MdTokenName | ShadcnRoleName` union is the first place outside `derive.ts` that crosses the md/shadcn name surfaces. If a future schema change widens those name spaces (chart token contrast, custom-color contrast), the pair union widens too.
 - Drift-guard tests continue to pass byte-identical post-migration. The canonical-form pinning test in the color-utils package becomes the upstream-monitoring contract.
 - ADR-0023 commitment 1's anticipated `contrastAlgorithm` and `showContrastWarnings` fields stay anticipated; ADR-0023 needs no amendment until APCA actually ships and an algorithm pref earns its second consumer.

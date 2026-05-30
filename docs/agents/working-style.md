@@ -21,6 +21,8 @@ Use `// why:` to record:
 
 Do not use `// why:` for what code already says. If removing the comment wouldn't confuse a future reader, don't write it.
 
+**An external-clock comment belongs in an ADR, not inline.** If a note will rot on launch, a dependency bump, or a policy change (e.g. a migration plan), record the reasoning in an ADR and let the comment cite the *number*. A bare `// for now …` is either load-bearing (→ ADR) or disposable (→ delete). This applies to app UI files too, not just the engine.
+
 ## `CLAUDE.md` is the static minimum
 
 Constraints with no in-code home (e.g. "no backend ever") belong in `CLAUDE.md`. Anything that *does* have an in-code home belongs at that code site, not in `CLAUDE.md`. Keep `CLAUDE.md` under ~15 lines.
