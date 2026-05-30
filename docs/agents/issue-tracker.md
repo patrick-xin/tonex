@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and PRDs for this repo live as GitHub issues at **patrick-xin/tonex**. Use the `gh` CLI for all operations.
+GitHub Issues at `patrick-xin/tonex`. Skills like `to-issues`, `to-prd`, `triage` read from and write to it.
 
 ## Conventions
 
@@ -20,3 +20,5 @@ Create a GitHub issue.
 ## When a skill says "fetch the relevant ticket"
 
 Run `gh issue view <number> --comments`.
+
+_Avoid_: backlog manager. Use "ticket" only when quoting external systems that call them tickets.

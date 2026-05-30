@@ -1,8 +1,6 @@
-> **State:** Living. Edit when a working rule for `apps/www/` is added, refined, or retired.
-
 # `apps/www` — working rules
 
-Auto-loaded when you touch `apps/www/`. Engine-side rules (`deriveTheme`, schema, sinks, seed) live in `packages/core/CLAUDE.md`; the `@tonex/core` export index is `docs/agents/core-surface.md`. Authoritative decisions are in `docs/adr/` — follow a citation only when you need the trade.
+Engine-side rules live in `packages/core/CLAUDE.md`; the `@tonex/core` export index is `docs/agents/core-surface.md`. Authoritative decisions are in `docs/adr/` — follow a citation only when you need the trade.
 
 ## Where types live — the CLI test
 Domain types/constants live in `@tonex/core`; **never inline-define them in www.** Test: *would a CLI or future second app care about this?* yes → `@tonex/core` (import via a declared subpath — see `core-surface.md`); no → app-only is fine in www's `types.ts` / `constants.ts` / inline.
@@ -82,7 +80,7 @@ apps/www/src/
 ```
 Most slots are created on demand; the `theme/(md|shadcn)/layout.tsx` + `_nav-config.ts`, `_providers.tsx`, and the `features/`/`components/` core are not.
 
-**Locate-test (worked):**
+**Locate-test:**
 
 | Prompt | Folder(s) |
 |---|---|

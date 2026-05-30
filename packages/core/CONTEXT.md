@@ -1,17 +1,17 @@
-> **State:** Living. Edit when domain vocabulary changes in code. Vocabulary for unbuilt features does not belong here.
+# tonex
+
+A tool that turns seed hex color into a theme via Material Color Utilities.
 
 ## Project domain
 
-This is a tool that turns a logo or seed hex color into a copy-paste-ready theme via Material Color Utilities (MCU). See ADRs in `docs/adr/` for load-bearing decisions.
-
 **Engine**:
-The fixed color-generation library: Material Color Utilities (MCU). Produces palettes from a seed using HCT/CAM16. Not swappable — see ADR-0001.
+The fixed color-generation library: MCU. Produces palettes from a seed using HCT/CAM16.
 
 **ColorSystem**:
-A palette-library slot for third-party libraries (Tailwind, Radix). Not an engine — MCU is the engine. See ADR-0001.
+A palette-library slot for third-party libraries (Tailwind, Radix). Not an engine, but a source picker.
 
 **Source**:
-The persisted state — only what the user picked, never what was computed. `PortableTheme` in `packages/core/src/theme/schema.ts` is the wire shape; `SourceState` adds `_hydrated` and actions. HCT is the canonical seed representation, with the user's pasted hex preserved verbatim in `seed.exactHex` until they touch an HCT axis — see ADR-0028 (supersedes ADR-0003).
+The persisted state — only what the user picked, never what was computed. `PortableTheme` in `packages/core/src/theme/schema.ts` is the wire shape; `SourceState` adds `_hydrated` and actions. HCT is the canonical seed representation, with the user's pasted hex preserved verbatim in `seed.exactHex` until they touch an HCT axis — see ADR-0028.
 
 **Derived**:
 Pure function of Source. `deriveTheme(source) → { md, shadcn, warnings }` in `packages/core/src/theme/derive.ts`. Both modes co-derive in one call. Never persisted. See ADR-0017.
@@ -37,19 +37,9 @@ A recorded per-field boolean signal that the user chose a Source input — NOT a
 **Preset** (theme preset):
 An adoptable identity for a whole theme: a *recipe* (variant + surface treatment + the 26-role binding map for both modes) plus the *curated source inputs* it was tuned against (a curated `seed` and `contrastLevel`). `findActivePreset` decides identity from the recipe only — never the source inputs (ADR-0031 #5). On apply, `resolvePresetApply` overwrites every recipe field and supersedes only an untouched, unlocked source field with the curated value. Library lives in `packages/core/src/theme/shadcn-presets.ts`; the apply resolver in `preset-apply.ts`. A binding-only starting point is *not* a preset — it carries no identity (ADR-0031 #1). See ADR-0026, ADR-0031.
 
-## Agent skills
+**Binding / Override**:
+Two parallel shadcn-layer fields. A *binding* (`shadcnRoleBindings`) is symbolic and fully populated — role → MD token. An *override* (`shadcnRoleOverrides`) is a sparse, per-mode literal hex pin (presence = "pinned for this mode"). Resolution precedence is override > binding-resolved token. Bindings explore; overrides commit. See ADR-0026.
 
-**Issue tracker**:
-GitHub Issues at `patrick-xin/tonex`. Skills like `to-issues`, `to-prd`, `triage` read from and write to it.
-_Avoid_: backlog manager. Use "ticket" only when quoting external systems that call them tickets.
+**Chart palette**:
+`PortableTheme.chart` carries chart intent — `scheme: 'categorical' | 'sequential' | 'diverging'`, with future axes nested under `chart.*`. Derivation produces `--chart-1..N`; chart overrides pin on top, terminal and scheme-agnostic. See ADR-0027.
 
-**Issue**:
-A single tracked unit of work inside an Issue tracker — a bug, task, PRD, or slice produced by `to-issues`.
-
-**Triage role**:
-A canonical state-machine label applied to an Issue during triage (e.g. `needs-triage`, `ready-for-agent`). See `docs/agents/triage-labels.md`.
-
-## Relationships
-
-- An Issue tracker holds many Issues
-- An Issue carries one Triage role at a time
