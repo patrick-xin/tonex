@@ -12,7 +12,7 @@ Tonex serves two audiences (md3 users, shadcn users) from one engine. ADR-0017 p
 
 4. **Mode is owned by `next-themes` on `<html class="dark">`** — per ADR-0017 commitment 4. `applyDom` emits all four blocks regardless of mode; the `<html>` class flip selects which pair wins via cascade. No re-derivation on mode toggle.
 
-5. **Single `<style id="tonex-tokens">` in `<head>`.** Appended once after `globals.css` so the cascade wins. Updates replace `textContent`.
+5. **Single `<style id="tonex-tokens">` in `<head>`.** Appended once after `globals.css` so the cascade wins. (How it's updated — per-token, not re-serialized — is ADR-0017's perf concern.)
 
 **Why:** Symmetric scoping (both layers class-scoped, neither at `:root`) is future-proof. An md preview pane embedded in a shadcn page would work without rewiring `applyDom`. Token-name collisions between MD3 and shadcn (both have notions of background, primary, foreground) are prevented structurally by the scope class — neither layer leaks into the other's namespace.
 

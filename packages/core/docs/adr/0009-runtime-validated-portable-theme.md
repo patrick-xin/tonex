@@ -4,7 +4,7 @@
 
 **Decision:** Add a runtime schema for `PortableTheme` and validate the rehydrated state against it.
 
-1. **Library: valibot.** `@tonex/core` will publish to npm. Tree-shaken valibot's used surface (`object`, `record`, `picklist`, `pipe`, `check`, `safeParse`) is a fraction of zod's equivalent payload; lingua-franca familiarity isn't worth the bundle delta on a colour-engine library.
+1. **Library: valibot.** `@tonex/core` will publish to npm. Tree-shaken, valibot's used surface is a fraction of zod's equivalent payload; lingua-franca familiarity isn't worth the bundle delta on a colour-engine library.
 2. **Where it lives.** `PortableThemeSchema` and `parsePortableTheme()` are co-located with the `PortableTheme` interface and re-exported through the `/schema` subpath.
 3. **Wire-in point: post-rehydrate inside `onRehydrateStorage`.** The migration ladder runs first and lifts the persisted shape to the current version; the schema then validates the result. Schema describes the *current* shape only — it does not need to know about historical shapes, because migrate produces the current version by contract.
 4. **Recovery: all-or-nothing reset to `DEFAULT_INPUTS`.** On parse failure the rehydrate handler calls `state.actions.reset()` and then flips `_hydrated`. No per-field fallback. The failure path is rare (corruption, manual tampering); per-field fallback would add maintenance surface for vanishingly rare events while obscuring the diagnostic signal ("your localStorage was reset" beats "some of your edits silently disappeared").

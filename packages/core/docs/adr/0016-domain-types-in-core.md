@@ -8,11 +8,11 @@ The monorepo seam between `@tonex/core` (engine + schema + registries) and `apps
 - Yes → it's domain → must live in `@tonex/core`.
 - No → it's app-only → www is fine.
 
-**Domain (must be in core):** `Mode`, `MODES` runtime tuple, `Variant`, `VariantName`, `VariantGroup` and the canonical group ordering, `ColorSystem`, `ResolvedTheme`, MD3 token names (`MD_TOKEN_NAMES`), shadcn role names, scheme variant enums, default sources / `DEFAULT_INPUTS`, role binding maps, `SurfaceAlgo` and `SURFACE_ALGOS` runtime tuple. **Both type and runtime value** when both are needed (e.g. iterating modes in UI requires the tuple, not just the union).
+**Domain (must be in core):** the engine vocabulary — modes, variants and their group ordering, token and role names, default inputs, role-binding maps, surface algos. Each ships as **both type and runtime value** when both are needed (iterating modes in UI requires the `MODES` tuple, not just the `Mode` union). The exhaustive catalogue is the `@tonex/core` schema and registries, not this list.
 
 **App-only (may live in www):** UI panel state, routing strings, www-only UX strings, display labels (`VARIANT_LABELS`, `GROUP_LABELS`), layout-specific helpers, panel ordering driven by display layout.
 
-**Subpath exports from `@tonex/core`** organise domain content into named scopes — engine surface (derivation, sink functions, hooks), schema (`PortableTheme`, token + role names, defaults, validators), colour-space helpers, palette data, variants registry. The specific subpaths are defined in `@tonex/core/package.json#exports`; that is the truth-source.
+**Subpath exports from `@tonex/core`** organise domain content into named scopes; the specific subpaths are defined in `@tonex/core/package.json#exports` — that is the truth-source.
 
 Adding a schema field doesn't widen the engine surface; adding an engine API doesn't drag schema into every importer.
 

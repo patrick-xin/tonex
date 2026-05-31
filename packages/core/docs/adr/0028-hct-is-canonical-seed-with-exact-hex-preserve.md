@@ -32,11 +32,4 @@ seed: {
 5. **Reconciles with ADR-0006 (single flat source store).** `seed: {hue, chroma, tone, exactHex?}` is a nested record, but ADR-0006's prohibition is on nested struct slots used for *categorisation* ("which slice does this field go in?"). A canonical seed is a *value* — parallel to `{ light, dark }` mode-keyed records, which ADR-0006 explicitly classifies as values, not slices. The flat-store rule remains intact.
 6. **Reaffirms ADR-0017 (WYSIWYG no preview/export drift).** This change is upstream of `deriveTheme` — every Sink still consumes the same `deriveTheme(source) → {md, shadcn, warnings}` output. The drift this ADR closes is *between source-state and user-intent*, not between preview and export. The byte-equality contract (`applyDom` ≡ exporters) holds because both still derive from `seedHex` (now via the selector) the same way.
 
-**Acceptance criteria:**
-
-1. `PortableTheme.seed: {hue, chroma, tone, exactHex?}` is the persisted source of truth; `PortableTheme.seedHex` (the field) is removed.
-2. Wide sweep across the `chroma < 4` regime (the 75-seed probe surfaced in #57): after any chroma-only or tone-only setter call, `|Δhue|` is bounded by solver epsilon (effectively 0).
-3. Lock-release case: dragging chroma from 3.99 → 4.5 preserves the original hue. Today this drifts up to 3.3° on 8/15 probed seeds.
-4. Hex-paste preservation: `setSeedFromHex('#3B82F6')` followed by a `seedHex` selector read returns `'#3B82F6'` exactly — not `#3B82F4`. Any HCT-axis setter call after that clears `exactHex`; the next selector read returns `hexFromHct(seed)`.
-5. ADR-0009's schema-bump procedure followed: `SCHEMA_VERSION` bumped, `PortableThemeSchema` updated, `DEFAULT_INPUTS` and `NONDEFAULT_INPUTS` updated, round-trip test exercises the new shape.
-6. Drift-guard test (the #56 setter-tolerance suite) is extended with a low-chroma-no-hue-drift assertion that fails on master and passes after this change.
+**Verified by `source.test.ts`** — the setter-tolerance / `CHROMA_HUE_LOCK` suite is the truth-source for the contract this decision turns on: after any chroma- or tone-only setter the hue holds to solver epsilon across the low-chroma probe (#57), a lock-release touch (`chroma` 3.99 → 4.5) preserves hue, and `setSeedHex('#3B82F6')` reads back exactly until an HCT axis is touched (then `exactHex` clears). The `seedHex`-field removal and schema bump are structural, per ADR-0009 c.4.

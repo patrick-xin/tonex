@@ -19,7 +19,7 @@ When `true`, every seed-mutation pathway (`setSeedHex`, `setSeedHue`, `setSeedCh
 **Consequence:**
 
 - Lock and override are **orthogonal flat siblings** on `PortableTheme`. Override is per-token, mode-keyed, hex-valued. Lock is global, not-mode-keyed, boolean. Two parallel pinning concerns at materially different shapes — the difference is the proof that ADR-0006's single-flat-field rule handles both without nesting.
-- `setSeedHex` and every other seed-mutation pathway routes through the same gate. Adding a new seed pathway requires the same `if (s.seedHexLock) return {}` early return at the source seam. Centralisation is load-bearing — if a pathway forgets the gate, the lock leaks.
+- Centralisation is load-bearing: every seed-mutation pathway routes through the one source-seam gate, so a pathway that forgets it leaks the lock.
 - Reset (`reset()` action) is allowed to bypass the gate; reset restores `DEFAULT_INPUTS` whose `seedHexLock` is `false` again. Locking does not survive reset.
-- Earlier draft direction (`lockedSnapshot: LockedSnapshot | null`) is closed. Future "lock another input" needs are new boolean fields, not a struct. A `primaryHexLock` once existed alongside `seedHexLock` and was pruned — narrower lock surface, fewer surprises.
+- The rejected `lockedSnapshot` struct stays closed: future "lock another input" needs are new boolean fields, not a struct — a narrower lock surface, fewer surprises.
 - Disable invalid interaction states up-front (UI tooltip + greyed input) rather than allowing the action and emitting a runtime warning. The lock toggle and the lock-aware setters are both consumers of the same boolean source-of-truth.

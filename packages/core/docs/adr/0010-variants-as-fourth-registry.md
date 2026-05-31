@@ -1,6 +1,6 @@
 # Variants — one widened interface, special cases as data
 
-Variants are named MCU scheme strategies (cmf, tonalSpot, neutral, vibrant, expressive, fidelity, content, rainbow, fruitSalad, monochrome) registered as a named-slot map. Some variants take a single seed; cmf takes a seed plus an optional secondary source colour (the 2026 spec's two-source feature).
+Variants are named MCU scheme strategies registered as a named-slot map (the roster lives in the glossary and the `variants/` registry). Most take a single seed; `cmf` takes a seed plus an optional secondary source colour (the 2026 spec's two-source feature) — the one case that drives this decision.
 
 The shape question at slice 1 ship review was: should the `VariantStrategy` interface (a) widen with an optional second-source param, (b) split into a discriminated union of `SingleSourceVariant | TwoSourceVariant`?
 
@@ -14,8 +14,7 @@ The shape question at slice 1 ship review was: should the `VariantStrategy` inte
 
 **Consequence:**
 
-- New single-source variant → one file in `variants/`, model on `tonalSpot.ts`. Register in barrel.
-- New two-source variant → model on `cmf.ts`. Register in barrel. The interface already accommodates it.
+- A new variant is one file registered in the barrel; the widened interface already accommodates the two-source case (`cmf`) without a per-arity shape decision.
 - `cmfSecondSourceHex` lives on `PortableTheme` (per ADR-0006: flat with prefixed name). `derive.ts` threads it into `cmf.build` only — every other variant call passes through with `secondHct` unset.
 - Disable rule for invalid combos (e.g. tertiary palette override when `variant === 'cmf'`) is a UI concern. The engine accepts whatever the source says; UI prevents invalid source states up-front rather than emitting runtime warnings.
 - If a 3rd two-source variant ever lands, this ADR's option (a) becomes the candidate to amend. Until then, the optional param is the contract.

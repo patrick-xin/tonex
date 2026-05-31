@@ -61,7 +61,7 @@ Adding a pair is a one-row schema edit. Removing one breaks any test asserting c
 
 ## 7. Pair shape bakes `intent` and `threshold` from day one
 
-Slice 1 ships only `intent: 'text'` pairs at `threshold: 4.5`. Non-text pairs (`outline`, `border`, `input`, `ring`, `sidebar-border`, `sidebar-ring` against their backgrounds) at `threshold: 3` ship in slice contrast-3 with sectioned UI; the schema does not migrate.
+`ContrastPair` carries `intent` and `threshold` from the first slice, so text pairs (`threshold: 4.5`) and non-text pairs (`threshold: 3`) coexist in one closed list and the set grows without a schema migration. The live roster is `CONTRAST_PAIRS` (see the Consequences note).
 
 **Why:** ADR-0023 commitment 6's scope-creep guard is about prefs, not domain shape. Two fields on `ContrastPair` cost nothing pref-shaped while removing reshape work from the next slice. Pre-baking shape for known-shape extensions is the cheap form of forward compatibility.
 

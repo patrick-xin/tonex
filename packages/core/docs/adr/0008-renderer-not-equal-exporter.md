@@ -4,7 +4,7 @@
 
 **Decision:** Keep them separate by *role*.
 
-1. **Renderer.** `applyDom(theme)` writes a single `<style id="tonex-tokens">` element appended to `<head>` after `globals.css`. Emits four class-scoped blocks (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`) per ADR-0013. No-ops while `_hydrated === false` (per ADR-0015). One renderer, called once per source change, idempotent.
+1. **Renderer.** `applyDom(theme)` writes the live theme to the DOM via the single class-scoped `<style>` element ADR-0013 places in `<head>`. No-ops while `_hydrated === false` (per ADR-0015). One renderer, called once per source change, idempotent.
 
 2. **Exporters.** Pure functions in `packages/core/src/theme/exporters/` that take a theme and produce a string for human use (clipboard, file download). The `exporters/` barrel is the registry surface; per-format options thread through `ExportOptions`. No DOM access, no side effects.
 
