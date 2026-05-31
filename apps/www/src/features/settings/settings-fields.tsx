@@ -34,7 +34,7 @@ export function SettingsFields({
           <Field name="extended-colors" className="gap-1">
             <FieldLabel className="items-center justify-between w-full">
               Extended tokens
-              <Switch size="sm" checked={showExtended} onCheckedChange={setShowExtended} />
+              <Switch checked={showExtended} onCheckedChange={setShowExtended} />
             </FieldLabel>
             <FieldDescription className="max-w-5/6">
               Show additional color roles for tokens
@@ -48,7 +48,7 @@ export function SettingsFields({
           <Field name="brand-color" className="gap-1">
             <FieldLabel className="items-center justify-between w-full">
               Brand color
-              <Switch size="sm" checked={brandEnabled} onCheckedChange={setBrandEnabled} />
+              <Switch checked={brandEnabled} onCheckedChange={setBrandEnabled} />
             </FieldLabel>
             <FieldDescription className="max-w-5/6">
               Export brand color pair (current seed)

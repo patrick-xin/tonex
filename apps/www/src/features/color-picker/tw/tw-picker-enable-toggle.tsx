@@ -12,7 +12,7 @@ export function TwPickerEnableToggle() {
     <Field name="tailwind-picker-enable" className="gap-1">
       <FieldLabel className="items-center justify-between w-full">
         Tailwind color picker
-        <Switch size="sm" checked={enabled} onCheckedChange={setEnabled} />
+        <Switch checked={enabled} onCheckedChange={setEnabled} />
       </FieldLabel>
       <FieldDescription className="max-w-5/6">Enable tailwind color picker.</FieldDescription>
     </Field>
