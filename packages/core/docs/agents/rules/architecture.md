@@ -2,7 +2,7 @@
 
 # Architecture — core invariants
 
-Read before any core change. Terms → [../../../glossary.md](../../../glossary.md).
+Read before any core change. Terms → [../../glossary.md](../../glossary.md).
 
 ## Engine — MCU is the only generator
 - **No `ColorEngine` slot.** Don't introduce an abstraction or alternate generator (Radix-as-engine, custom palette algorithms). _(ADR-0001)_

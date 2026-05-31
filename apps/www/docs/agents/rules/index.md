@@ -13,6 +13,7 @@ Rules are split per surface so you load only what your task touches. **Read the 
 | input affordances — disable vs warn | [interactions.md](interactions.md) |
 | any component file — naming, why-lines, React conventions | [components.md](components.md) |
 | how a component looks/behaves — tokens, focus rings, motion, a11y | [interface-guidelines.md](interface-guidelines.md) |
+| tests (`*.test.ts`) | [testing.md](testing.md) |
 
 Engine rules: `packages/core/CLAUDE.md`. Public API by subpath: `packages/core/docs/agents/api/core-surface.md`. Rail UI conventions are feature-local in `src/features/md-rail/CLAUDE.md` (governs both rails).
 

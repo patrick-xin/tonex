@@ -16,7 +16,8 @@ Rules are split per surface so you load only what your task touches. **Read the 
 | role bindings & overrides (`theme/palette-override/`) | [overrides.md](overrides.md) |
 | chart palette (`chart/`) | [chart.md](chart.md) |
 | contrast · color-utils boundary (`theme/contrast/`) | [contrast.md](contrast.md) |
+| tests (`*.test.ts`) | [testing.md](testing.md) |
 
 Public API by subpath: [../api/core-surface.md](../api/core-surface.md).
 
-**Adding rules:** put the rule in the shard for its surface (new surface → new shard + a row above). One imperative sentence per bullet, ending `_(ADR-NNNN)_`. Definitions go in `../../../glossary.md`, the *why* in the ADR — don't restate either here.
+**Adding rules:** put the rule in the shard for its surface (new surface → new shard + a row above). One imperative sentence per bullet, ending `_(ADR-NNNN)_`. Definitions go in `../../glossary.md`, the *why* in the ADR — don't restate either here.
