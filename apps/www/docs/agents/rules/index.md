@@ -13,6 +13,6 @@ Rules are split per surface so you load only what your task touches. **Read the 
 | how a component looks/behaves — tokens, focus rings, motion, a11y | [interface-guidelines.md](interface-guidelines.md) |
 | tests (`*.test.ts`) | [testing.md](testing.md) |
 
-Engine rules: `packages/core/CLAUDE.md`. Public API by subpath: `packages/core/docs/agents/api/core-surface.md`. Rail UI conventions are feature-local in `src/features/md-rail/CLAUDE.md` (governs both rails).
+Engine rules: `packages/core/CLAUDE.md`. Public API by subpath: `packages/core/docs/agents/api/core-surface.md`.
 
 **Adding rules:** put the rule in the shard for its surface (new surface → new shard + a row above). One imperative per bullet, ending `_(ADR-NNNN)_`. Definitions go in `../../glossary.md`, the *why* in the ADR — don't restate either here.

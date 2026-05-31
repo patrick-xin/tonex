@@ -13,8 +13,8 @@ const popoverHandle = createPopoverHandle<ShadcnChartTokenName>()
 
 // why: ADR-0027 slice chart-3 — chart override editor surface. Parallel
 // component to ShadcnRoleOverrideList (chosen over inlining a Chart group
-// into ROLE_GROUPS because token types and theme.shadcn field reads diverge;
-// see ADR-0027 c.6 "revisit if grouping is awkward" clause). Reads
+// into ROLE_GROUPS because token types and theme.shadcn field reads diverge).
+// Reads
 // `theme.shadcn.lightChart`/`darkChart` (post-override) so swatches reflect
 // the literal pin instantly. SHADCN_CHART_TOKEN_NAMES is flat (no families),
 // so renders as a single section.
