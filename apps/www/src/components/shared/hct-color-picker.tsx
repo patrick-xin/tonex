@@ -16,18 +16,23 @@ import {
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
-interface PaletteColorPickerProps {
+interface HctColorPickerProps {
   value: string
   onChange: (hex: string) => void
 }
 
+// why: hex-canonical color editor — swatch + hex field + optional Tailwind
+// palette + HCT sliders against a single (value, onChange) pair. Shared by
+// every hex-owning surface (palette-override rows, cmf second source); the
+// parent owns the hex string and decides what a write means.
+//
 // why: drag commits per tick — same UX as seed sliders, surface-tint, and
 // every other streaming input in the rail. The prior commit-only-on-release
 // pattern existed because the per-tick cost was unaffordable; issue #9 fixed
 // that in core (shared derive cache, per-token applyDom, debounced persist),
 // so consistency wins. ADR-0017 amendment 2026-05-06 (issue #9 per-token
 // applyDom) is what made per-tick streaming affordable.
-export function PaletteColorPicker({ value, onChange }: PaletteColorPickerProps) {
+export function HctColorPicker({ value, onChange }: HctColorPickerProps) {
   const hexInputId = useId()
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
   const twPickerEnabled = useUiPrefs((s) => s.twPickerEnabled)

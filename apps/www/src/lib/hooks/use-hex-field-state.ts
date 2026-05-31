@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { type FocusEvent, useEffect, useRef, useState } from 'react'
 
 // why: every hex-typing site in the rail wants the same buffered shape: a
 // local string state so the user can type partial values ("#ff" → "#ff00")
@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 // into the buffer when the field is unfocused so seed updates don't blow
 // away mid-typing. One copy, one regex (`/^#[0-9a-fA-F]{6}$/`), one
 // focus-buffering policy — five sites used to spell this out themselves.
+// Focus also selects the whole value so the field is type-to-replace.
 // Spread the returned `inputProps` onto the <Input> to wire focus/blur.
 export function useHexFieldState(value: string, onChange: (hex: string) => void) {
   const [hexInput, setHexInput] = useState(value)
@@ -24,8 +25,16 @@ export function useHexFieldState(value: string, onChange: (hex: string) => void)
   }
 
   const inputProps = {
-    onFocus: () => {
+    onFocus: (e: FocusEvent<HTMLInputElement>) => {
       isFocused.current = true
+      // why: select-all so a focus lands type-to-replace (no manual clear).
+      // Deferred via rAF (as the HCT sliders do) because a mouse click positions
+      // the caret in mousedown's default action *after* focus fires — a sync
+      // select() would be collapsed; rAF runs after it, so the selection sticks
+      // for click and tab alike. Capture the element first: React nulls the
+      // event's currentTarget once the handler returns.
+      const el = e.currentTarget
+      requestAnimationFrame(() => el.select())
     },
     onBlur: () => {
       isFocused.current = false

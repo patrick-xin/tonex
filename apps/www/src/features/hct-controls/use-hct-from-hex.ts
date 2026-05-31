@@ -35,9 +35,7 @@ function useEventCallback<T>(handler: (value: T) => void): (value: T) => void {
 // Secondary win: this also preserves hue across low-chroma round trips. When
 // chroma drops below CHROMA_HUE_LOCK the hex projection drifts toward grey and
 // MCU's hue becomes meaningless, but our cached hue stays put — so dragging
-// chroma down and back up doesn't whip the hue thumb. The prior `lockedHue`
-// ref shimmy in palette-color-picker existed to paper over exactly this case
-// and becomes redundant once HCT is held locally.
+// chroma down and back up doesn't whip the hue thumb.
 //
 // Scope post-ADR-0028: the canonical seed sliders no longer use this hook —
 // HCT lives in the store directly, so the hex ↔ HCT cache that motivates
