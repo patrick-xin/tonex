@@ -78,7 +78,7 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
       ) : (
         trigger
       )}
-      <PopoverContent className="py-2 w-72" showArrow sideOffset={8}>
+      <PopoverContent className="w-72" showArrow sideOffset={8}>
         <div className="mb-2 flex items-start justify-between gap-2">
           <PopoverDescription className="text-xs">{description}</PopoverDescription>
           {isSet && (
