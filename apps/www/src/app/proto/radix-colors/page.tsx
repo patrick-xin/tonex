@@ -5,7 +5,8 @@
 // colors for both the swatches and the page chrome, one local light/dark toggle
 // (a Radix scale renders completely differently per mode, so the toggle is the
 // honest preview). Delete the whole `proto/radix-colors/` folder to remove.
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
+import { buildRadixScale, deltaE } from './radix-generator'
 import {
   BANDS,
   bandFor,
@@ -23,10 +24,15 @@ import {
   stepHex,
 } from './radix-sample-data'
 
-type PatternKey = 'combobox' | 'ramp-rows' | 'drill-down' | 'bands' | 'purpose'
+type PatternKey = 'generated' | 'combobox' | 'ramp-rows' | 'drill-down' | 'bands' | 'purpose'
 type Sel = { scale: string; step: number }
 
 const PATTERNS: { key: PatternKey; label: string; note: string }[] = [
+  {
+    key: 'generated',
+    label: 'Generated',
+    note: 'MCU generates a 12-step Radix-shaped scale from any seed — diffed vs real Radix',
+  },
   {
     key: 'combobox',
     label: 'Combobox',
@@ -964,11 +970,135 @@ function ComboboxLab(props: {
   )
 }
 
+// — pattern 6: generated (the engine spike) ——————————————————————
+
+// seeds to validate against — accent step-9s (incl. amber, a "bright" one),
+// a gray, and a non-Radix custom hex with no ground truth
+const GEN_SEEDS: { label: string; real: string | null }[] = [
+  { label: 'Tomato', real: 'tomato' },
+  { label: 'Blue', real: 'blue' },
+  { label: 'Grass', real: 'grass' },
+  { label: 'Amber (bright)', real: 'amber' },
+  { label: 'Iris', real: 'iris' },
+  { label: 'Slate (gray)', real: 'slate' },
+  { label: 'Custom violet (no ground truth)', real: null },
+]
+const CUSTOM_SEED = '#7c3aed'
+
+function GenRamp(props: {
+  steps: string[]
+  deltas: number[] | null
+  label: string
+  chrome: Chrome
+}) {
+  const { steps, deltas, label, chrome } = props
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className="w-16 shrink-0 text-[10px] uppercase tracking-wide"
+        style={{ color: chrome.muted }}
+      >
+        {label}
+      </span>
+      <div className="flex flex-1 overflow-hidden rounded-md">
+        {steps.map((hex, i) => {
+          const ink = inkOn(hex)
+          const off = deltas ? deltas[i] > 0.05 : false
+          const step = i + 1
+          return (
+            <div
+              key={step}
+              title={deltas ? `step ${step} · ΔE ${deltas[i].toFixed(3)}` : `step ${step}`}
+              className="relative flex h-7 flex-1 items-center justify-center text-[9px] font-semibold"
+              style={{ background: hex, color: ink }}
+            >
+              {step === IDENTITY_STEP ? IDENTITY_STEP : off ? '!' : ''}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function GeneratedLab(props: { mode: Mode; chrome: Chrome }) {
+  const { mode, chrome } = props
+  // why: buildRadixScale runs MCU's HCT solver, whose float output can differ
+  // between the SSR (Node) and client engines — gate to client-only render so
+  // the generated hexes don't trip a hydration text mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) {
+    return (
+      <div className="text-xs" style={{ color: chrome.muted }}>
+        Generating…
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="text-xs" style={{ color: chrome.muted }}>
+        One seed → a generated 12-step scale (top row) vs real Radix (bottom). Steps 11–12 are
+        contrast-walked (≥4.5:1 / ≥7:1); step {IDENTITY_STEP} is the seed, so it anchors exactly.{' '}
+        <span className="font-mono">!</span> marks a cell where ΔE &gt; 0.05 (clearly off).
+      </p>
+      {GEN_SEEDS.map(({ label, real }) => {
+        const seed = real ? stepHex(scaleByName(real), 'light', IDENTITY_STEP) : CUSTOM_SEED
+        const { steps, onColor } = buildRadixScale(seed, mode)
+        const realSteps = real ? scaleByName(real).ramp[mode] : null
+        const deltas = realSteps ? steps.map((s, i) => deltaE(s, realSteps[i])) : null
+        const mean = deltas ? deltas.reduce((a, b) => a + b, 0) / 12 : null
+        return (
+          <div key={label} className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-sm">
+              <span
+                className="size-4 shrink-0 rounded"
+                style={{ background: seed, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)' }}
+              />
+              <span className="font-medium" style={{ color: chrome.text }}>
+                {label}
+              </span>
+              <span className="font-mono text-xs" style={{ color: chrome.muted }}>
+                {seed}
+              </span>
+              {mean != null ? (
+                <span
+                  className="rounded px-1.5 py-0.5 font-mono text-[11px]"
+                  style={{
+                    background: chrome.sub,
+                    color: mean < 0.025 ? chrome.muted : chrome.text,
+                  }}
+                >
+                  mean ΔE {mean.toFixed(3)}
+                </span>
+              ) : null}
+              <span
+                className="ml-auto flex items-center gap-1 text-[10px]"
+                style={{ color: chrome.muted }}
+              >
+                step-9 fg
+                <span
+                  className="size-4 rounded"
+                  style={{ background: onColor, boxShadow: `inset 0 0 0 1px ${chrome.border}` }}
+                />
+              </span>
+            </div>
+            <GenRamp steps={steps} deltas={deltas} label="Generated" chrome={chrome} />
+            {realSteps ? (
+              <GenRamp steps={realSteps} deltas={null} label="Radix" chrome={chrome} />
+            ) : null}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // — page ——————————————————————————————————————————————————————
 
 export default function RadixColorsProtoPage() {
   const [mode, setMode] = useState<Mode>('light')
-  const [pattern, setPattern] = useState<PatternKey>('combobox')
+  const [pattern, setPattern] = useState<PatternKey>('generated')
   const [selected, setSelected] = useState<Sel | null>({ scale: 'tomato', step: IDENTITY_STEP })
   const [hovered, setHovered] = useState<Sel | null>(null)
   const chrome = chromeFor(mode)
@@ -1040,6 +1170,7 @@ export default function RadixColorsProtoPage() {
 
         {/* active pattern */}
         <div>
+          {pattern === 'generated' ? <GeneratedLab mode={mode} chrome={chrome} /> : null}
           {pattern === 'combobox' ? <ComboboxLab {...shared} /> : null}
           {pattern === 'ramp-rows' ? <RampRows {...shared} /> : null}
           {pattern === 'drill-down' ? <DrillDown {...shared} /> : null}
