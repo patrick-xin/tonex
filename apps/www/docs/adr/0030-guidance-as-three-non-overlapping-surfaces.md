@@ -25,16 +25,6 @@ The partition is a rule, not a tendency: persistent reference prose never lives 
 - Copy that two surfaces must show *verbatim* (a label the user reads in the UI and again in the reference) is the only case for a shared constant; copy that each surface phrases for its own job is deliberately not shared, because forcing it to match would defeat the per-surface tuning the three-surface split exists to enable.
 - The reference surface is the safe default when a viewport, layout, or future surface can't host the others: it is on-demand, anchorless, and layer-complete. Orientation and inline cues are enhancements layered on top of it, not prerequisites for the product being explainable.
 
-## Current structure (feature in progress)
+## Where it lives
 
-This section is the executable companion to the rationale above: it says *where each surface lives* so a session can go from "add a scheme-variant tour" to code without re-discovering the layout. It is the one part of this ADR that tracks implementation and is expected to drift — trust the code over it, and when this feature stops growing, move this table out and let the ADR keep only the rationale.
-
-| Surface | Lives in | You extend it by | Must obey |
-| --- | --- | --- | --- |
-| Orientation (tour) | `features/onboarding-guide/` — stops in `tour-steps.tsx`; the spotlight host + anchor registry are the rest of the folder | adding a `GuideStep` to `tour-steps.tsx` (one sentence, `layers`, `anchorKey`, `learnMore`) and wrapping the target control in a `<GuideAnchor anchorKey="…">` at its own feature's call site | one sentence per stop; `layers` matches the workspace it belongs to; `learnMore` points at a registered reference section; desktop-only |
-| Reference (help dialog) | `features/help-dialog/` — prose in `key-concepts.tsx` + `qa.tsx`; the id→type registry in `help-sections.ts` | adding a concept/Q&A block and registering its id in `help-sections.ts` | every id registered; canonical depth lives here and nowhere else; covers both layers |
-| Inline cue | a `hints.ts` beside the feature it reacts to (e.g. `features/scheme-variant/hints.ts`), rendered by that feature | adding a pure boolean predicate (state → show/hide) + a test, rendered as muted microcopy next to the control | conditioned on live state only; no persistent tooltip; no per-control "?" button |
-
-The one mechanically-guarded coupling is orientation→reference: `help-sections.test.ts` asserts every tour `learnMore` resolves to a registered section, so a dangling deep-link fails the suite rather than shipping.
-
-**Worked example — "add a scheme-variant tour step":** classify first (a tour step is orientation, so this is the tour surface). Add a `GuideStep` to `tour-steps.tsx` with `layers` set to the workspace(s) where the scheme-variant control is relevant, a one-sentence teaser, an `anchorKey`, and a `learnMore` pointing at the scheme-variant reference section (the `scheme-variants` concept already exists in `key-concepts.tsx` — reuse it; only author new reference prose if the depth isn't there yet). Wrap the scheme-variant control in `<GuideAnchor anchorKey="…">` at its own call site. Do **not** add a tooltip to the control, and do **not** restate the reference depth in the teaser. The drift-guard test will confirm the `learnMore` resolves; the tour-steps test covers the layer filter.
+The three surfaces' homes and the steps to extend each are imperative reference, not rationale — they live in [`rules/guidance.md`](../agents/rules/guidance.md). This ADR keeps only the *why*. The one coupling worth guarding mechanically — a tour `learnMore` must resolve to a real reference section — is asserted by `help-sections.test.ts`, so a dangling deep-link fails the suite rather than shipping.

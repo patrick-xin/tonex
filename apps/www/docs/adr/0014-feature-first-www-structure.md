@@ -14,22 +14,7 @@
 
 5. **Surface vs workflow — superseded by ADR-0022.** The original rule 5 made all features layer-agnostic (no `features/md/` or `features/shadcn/`). ADR-0022 supersedes it with a workflow/surface split: **workflow features** (verbs — "pick a seed") stay layer-agnostic, but **surface features** (nouns/places — `features/md-rail/`, `features/shadcn-rail/`) may be layer-keyed because they ARE the layer-specific composition site. The current statement of this rule, plus rule 6 (the locate-test design metric) and the route-provided `<LayerContext>` carve-out, all live in ADR-0022. This rule's number is retained as the anchor; its content moved.
 
-**Layout target:**
-
-```
-apps/www/src/
-  app/                # routes (per ADR-0019 chrome/canvas split)
-    _providers.tsx    # app-wide providers ONLY here
-  features/           # workflow (layer-agnostic) + surface (layer-keyed) features per ADR-0022
-  components/
-    ui/               # md-styled primitives
-    shadcn/           # shadcn-styled primitives
-    shared/           # layer-agnostic primitives
-  lib/                # www-only glue (clipboard, cn) — created on demand
-  styles/
-```
-
-Most slots are created on demand. The features/ + components/ + app/_providers.tsx core is not.
+**Layout target:** the concrete tree — the living version, including which slots are created on demand and which form the always-present core — is in `rules/structure.md`. This ADR pins the rules above, not the tree.
 
 **Why:** Pattern-gravity. The first feature folder becomes the template for the next ten. Each rule corresponds to a legacy failure mode; the structural prevention is cheaper than per-PR enforcement, and it survives subagent parallelism (which would otherwise amplify a bad pattern across many features before review catches it).
 

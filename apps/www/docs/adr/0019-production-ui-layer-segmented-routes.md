@@ -23,7 +23,7 @@ Foundation slices (1–8) shipped a layer-unified engine: `deriveTheme(source)` 
 **Consequence:**
 
 - Implementation slices (10+) lift testbed rail controls into `features/editor-rail/`. The rail is shared between routes; per-route differences are slot-level (a shadcn-only collapsible appears only on `/theme/shadcn`, by route-level composition, not runtime branching).
-- The cross-route layer switcher is a chrome control that fires `<Link href="/theme/{other}">`. State persists via the shared store; no extra plumbing.
+- The cross-route layer switcher is a chrome control that navigates between the two routes; state persists via the shared store, so no extra plumbing.
 - The "Customize Tokens" tab inside the rail (per legacy reference) is a content swap inside the rail body, not a route. Same store, same route — just a different rail mode.
 - **Route-provided `<LayerContext>` is allowed for behavior parameterization, not primitive selection.** A workflow feature (e.g. `features/token-override/`) consumed from both `(md)` and `(shadcn)` subtrees may read a route-provided context to know *which token list / scheme / scope* it operates on. Still banned: runtime primitive switching — a component must not pick `components/ui/` vs `components/shadcn/` from context; primitive selection stays route-level. Rule of thumb: if removing the context changes *which component renders*, that's the banned pattern; if it changes *what data the same component renders*, that's allowed.
 - `glossary.md` gains *Editor route*, *Chrome*, *Canvas* vocabulary when those terms become felt in code, per glossary.md's "vocabulary for unbuilt features doesn't belong here" rule.

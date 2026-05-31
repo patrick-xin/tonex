@@ -44,7 +44,7 @@ A pref may *also* surface inline next to its affected content for discoverabilit
 
 The store mirrors `useSource`'s actions-namespace shape: typed prefs object, typed actions namespace, `_hydrated` runtime flag. The persisted shape is the prefs object alone — `_hydrated` and `actions` are excluded via a two-key blacklist (same maintenance-free pattern as `selectPortable` in `useSource`). Adding new prefs auto-flows through `partialize`; adding new actions auto-stays out of persistence.
 
-Persistence: `localStorage` via `createJSONStorage`, name `'tonex-ui-prefs'`, version starts at 1. Migration ladder follows ADR-0009 discipline as fields land. **The persisted shape is a wire contract**, not implementation incidentalia — when auth ships, the same shape lifts to a server-backed storage adapter without migration. The sync mechanism itself (storage-adapter swap, conflict resolution, offline cache) is parked; the schema discipline is committed now.
+Persistence is versioned `localStorage` (the store name and JSON adapter are code); migration ladder follows ADR-0009 discipline as fields land. **The persisted shape is a wire contract**, not implementation incidentalia — when auth ships, the same shape lifts to a server-backed storage adapter without migration. The sync mechanism itself (storage-adapter swap, conflict resolution, offline cache) is parked; the schema discipline is committed now.
 
 **Why:** treating localStorage as a contract today is the cheapest way to make tomorrow's server-sync mechanical. The auth-tier feature *"your prefs roam across devices"* becomes a backend implementation detail, not a frontend rewrite.
 
@@ -60,7 +60,7 @@ A pref enters `useUiPrefs` only when a *second* consumer materially needs it. Th
 
 The store mirrors `useSource`'s shape but deliberately diverges on three details:
 
-- **No debounce.** `useSource` debounces 200ms because slider drag streams writes at ~60Hz (Issue #9). Display prefs flip one at a time on user click — debouncing is unnecessary complexity. Plain `localStorage` via `createJSONStorage`.
+- **No debounce.** `useSource` debounces 200ms because slider drag streams writes at ~60Hz (Issue #9). Display prefs flip one at a time on user click — debouncing is unnecessary complexity.
 - **No consumer null-gate on `_hydrated`.** Display prefs are visibility-only — the pre-hydrate state IS the lean default, which is the safe-to-display default. Worst case: one-frame flicker if the user had toggled a pref on. Acceptable for cosmetic prefs; *not* acceptable for portable-theme state, which is why `useResolvedTokens` rightly null-gates per ADR-0015. The `_hydrated` flag stays exposed: a future pref where pre-hydrate flicker would be unacceptable can null-gate locally without changing the store contract.
 - **No `flushPersist` seam.** `useSource` exports `flushPersist` for tests and lifecycle handlers because the debounced queue needs draining. With no debounce, no queue, no seam.
 
