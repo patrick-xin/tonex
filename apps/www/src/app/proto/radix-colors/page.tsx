@@ -6,7 +6,7 @@
 // (a Radix scale renders completely differently per mode, so the toggle is the
 // honest preview). Delete the whole `proto/radix-colors/` folder to remove.
 import { type ReactNode, useEffect, useState } from 'react'
-import { buildRadixScale, buildToneMapped, deltaE } from './radix-generator'
+import { buildHybrid, buildRadixScale, buildToneMapped, deltaE } from './radix-generator'
 import {
   BANDS,
   bandFor,
@@ -1038,21 +1038,25 @@ function GeneratedLab(props: { mode: Mode; chrome: Chrome }) {
   return (
     <div className="flex flex-col gap-5">
       <p className="text-xs" style={{ color: chrome.muted }}>
-        Three rows per seed: <span style={{ color: chrome.text }}>Tuned</span> (chroma envelope +
-        contrast walk), <span style={{ color: chrome.text }}>Tone-map</span> (MCU's 18 tones snapped
-        straight to 12 steps at constant chroma), and real{' '}
-        <span style={{ color: chrome.text }}>Radix</span>. Step {IDENTITY_STEP} is the seed in both.{' '}
-        <span className="font-mono">!</span> marks a cell where ΔE &gt; 0.05.
+        Four rows per seed: <span style={{ color: chrome.text }}>Tuned</span> (chroma envelope),{' '}
+        <span style={{ color: chrome.text }}>Tone-map</span> (18 tones snapped to 12),{' '}
+        <span style={{ color: chrome.text }}>Hybrid</span> (interpolated tones + mild trim +
+        contrast walk), and real <span style={{ color: chrome.text }}>Radix</span>. Step{' '}
+        {IDENTITY_STEP} is the seed. <span className="font-mono">!</span> marks a cell where ΔE &gt;
+        0.05.
       </p>
       {GEN_SEEDS.map(({ label, real }) => {
         const seed = real ? stepHex(scaleByName(real), 'light', IDENTITY_STEP) : CUSTOM_SEED
         const { steps, onColor } = buildRadixScale(seed, mode)
         const toneSteps = buildToneMapped(seed, mode)
+        const hybSteps = buildHybrid(seed, mode)
         const realSteps = real ? scaleByName(real).ramp[mode] : null
         const deltas = realSteps ? steps.map((s, i) => deltaE(s, realSteps[i])) : null
         const toneDeltas = realSteps ? toneSteps.map((s, i) => deltaE(s, realSteps[i])) : null
+        const hybDeltas = realSteps ? hybSteps.map((s, i) => deltaE(s, realSteps[i])) : null
         const mean = deltas ? deltas.reduce((a, b) => a + b, 0) / 12 : null
         const toneMean = toneDeltas ? toneDeltas.reduce((a, b) => a + b, 0) / 12 : null
+        const hybMean = hybDeltas ? hybDeltas.reduce((a, b) => a + b, 0) / 12 : null
         return (
           <div key={label} className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2 text-sm">
@@ -1082,6 +1086,14 @@ function GeneratedLab(props: { mode: Mode; chrome: Chrome }) {
                   tone-map {toneMean.toFixed(3)}
                 </span>
               ) : null}
+              {hybMean != null ? (
+                <span
+                  className="rounded px-1.5 py-0.5 font-mono text-[11px]"
+                  style={{ background: chrome.sub, color: chrome.text }}
+                >
+                  hybrid {hybMean.toFixed(3)}
+                </span>
+              ) : null}
               <span
                 className="ml-auto flex items-center gap-1 text-[10px]"
                 style={{ color: chrome.muted }}
@@ -1095,6 +1107,7 @@ function GeneratedLab(props: { mode: Mode; chrome: Chrome }) {
             </div>
             <GenRamp steps={steps} deltas={deltas} label="Tuned" chrome={chrome} />
             <GenRamp steps={toneSteps} deltas={toneDeltas} label="Tone-map" chrome={chrome} />
+            <GenRamp steps={hybSteps} deltas={hybDeltas} label="Hybrid" chrome={chrome} />
             {realSteps ? (
               <GenRamp steps={realSteps} deltas={null} label="Radix" chrome={chrome} />
             ) : null}

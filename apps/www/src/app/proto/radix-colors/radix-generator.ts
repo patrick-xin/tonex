@@ -102,6 +102,38 @@ export function buildToneMapped(seedHex: string, mode: Mode): string[] {
   return targets.map((t, i) => (i === 8 ? at(h, cs, seed.tone) : at(h, cs, nearestTone(t))))
 }
 
+// the hybrid: continuous (interpolated) tones so the dense L87–99 band keeps
+// distinct steps, near-constant chroma with a mild background trim to tame
+// wide-gamut hues (grass), contrast-walked text. Grays fall out of the same
+// path since a low-chroma seed produces a near-neutral ramp. The proposed
+// algorithm for a real `radix` Sink.
+const HYB_TONE: Record<Mode, number[]> = {
+  light: [99, 98, 96, 93.5, 91, 87.5, 82, 75],
+  dark: [8, 11, 15, 19, 24, 29, 36, 46],
+}
+const HYB_TRIM: Record<Mode, number[]> = {
+  light: [0.4, 0.55, 0.72, 0.85, 0.93, 1, 1, 1],
+  dark: [0.6, 0.7, 0.82, 0.9, 0.95, 1, 1, 1],
+}
+
+export function buildHybrid(seedHex: string, mode: Mode): string[] {
+  const seed = hctFromHex(seedHex)
+  const h = seed.hue
+  const cs = seed.chroma
+  const tone = HYB_TONE[mode]
+  const trim = HYB_TRIM[mode]
+  const dir: 1 | -1 = mode === 'light' ? -1 : 1
+  const steps = new Array<string>(12)
+  for (let i = 0; i < 8; i++) steps[i] = at(h, cs * trim[i], tone[i])
+  steps[8] = at(h, cs, seed.tone)
+  steps[9] = at(h, cs, seed.tone + 4 * dir)
+  const t11 = walkToContrast(h, cs * 0.95, seed.tone + 4 * dir, dir, steps[1], 4.5)
+  steps[10] = at(h, cs * 0.95, t11)
+  const t12 = walkToContrast(h, cs * 0.6, t11 + dir, dir, steps[0], 7)
+  steps[11] = at(h, cs * 0.6, t12)
+  return steps
+}
+
 // sRGB hex → OKLab ΔE (euclidean; OKLab ~perceptually uniform, ~0.02 = JND)
 function lin(c: number): number {
   return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
