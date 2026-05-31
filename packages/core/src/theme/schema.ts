@@ -32,10 +32,10 @@ export { type CustomColorEntry, slugifyCustomColorName, validateCustomColorEntry
 // to `seed: { hue, chroma, tone, exactHex? }`. v3 — issue #123 splits
 // `contrastLevel: number` to per-mode `{ light, dark }`, mirroring the
 // surface levels (contrast is a per-build() MCU arg, so the split is
-// structural). Pre-launch breaking change per
-// memory/feedback_prelaunch_breaking_changes.md: no forward migration,
-// persisted older records fail schema parse and reset to DEFAULT_INPUTS on
-// rehydrate (ADR-0009 c.4). Future bumps follow ADR-0009's procedure:
+// structural). Pre-launch breaking change: no forward migration while there
+// are no live users to preserve — persisted older records fail schema parse
+// and reset to DEFAULT_INPUTS on rehydrate (ADR-0009 c.4). Future bumps follow
+// ADR-0009's procedure:
 // increment SCHEMA_VERSION AND add a forward-migration branch in
 // source.ts:migrate when there are live users to preserve.
 export const SCHEMA_VERSION = 3 as const

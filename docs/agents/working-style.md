@@ -1,57 +1,31 @@
-> **State:** Living. Edit when working norms in this codebase change.
+> **State:** Living. Edit when working norms change. Why this doc is imperative-only (no rationale prose): ADR-0034.
 
 # Working style for tonex agents
 
-This codebase is built around an observation: AI agents are dominated by what they read at generation time, not by what they were told earlier. The conventions below are tuned for that constraint.
+- **Model new files on the most-read ones.** The store, the schema, the top utility are the de-facto templates — new files inherit by pattern continuation, so a wrong foundation propagates. Fix a bad pattern at its source, not at the leaf. Correct by pointing at the canonical file ("model this on X"), not by citing a rule.
 
-## Foundation files are templates
+- **`// why:` only at non-obvious choices.** Record the constraint or invariant that drove the choice, or the ADR number when an architectural rule applies here. Never restate what the code already says. An external-clock reason (launch, dependency bump, policy) goes in an ADR and the comment cites the number; a bare `// for now` is either load-bearing (→ ADR) or disposable (→ delete). Applies to app UI files, not just the engine.
 
-Whichever files agents read most often become the de-facto template for new files. The store, the schema, the most-imported utility — every new file pattern-matches against these. **Fix the foundations first; subsequent files inherit by pattern continuation.**
+- **`CLAUDE.md` is the static minimum.** Put a constraint there only if it has no in-code home (e.g. "no backend ever"); anything with a code site lives at that site. Keep each `CLAUDE.md` under ~15 lines.
 
-Pattern continuation isn't laziness; consistency is usually correct. The failure mode is when the pattern itself is wrong — then consistency *is* the bug. Invest in foundations before scaling work.
+- **Corrections commit to code.** A correction survives only as a refactor, `// why:`, fixture, ADR, or an entry in this doc — one left in conversation evaporates at the session boundary.
 
-## In-file `// why:` comments are load-bearing
+- **Name domain concepts with the glossary's term.** In any output that names a concept — issue title, refactor proposal, hypothesis, test name — use the per-layer glossary's term (`packages/core/docs/glossary.md`, `apps/www/docs/glossary.md`); don't drift to synonyms it avoids. A concept missing from the glossary is a signal: either you're inventing language the project doesn't use (reconsider), or it's a real gap (note it).
 
-A comment in the file an agent is editing is read at the moment of generation. A rule in `CLAUDE.md` was read 200 lines ago and competes with surrounding code for influence. **Comments at non-obvious choices win over abstract rules.**
+- **Capture a changed decision as an issue, not an in-place doc edit.** When a decision refines or contradicts a rule a *living* doc already states, file an issue via `/to-issues` first — it's the dated record of what changed and why; the doc edit follows. A net-new rule with no prior conflict is written straight to its home (a `rules/` shard, a feature `CLAUDE.md`, or here); a decision big enough for an ADR is written as an ADR directly (an append-amendment if it refines one) — ADRs have no in-place-overwrite failure mode. When unsure, file the issue.
 
-Use `// why:` to record:
-- the constraint that drove a non-obvious choice
-- the invariant a future edit must preserve
-- the relevant ADR number when an architectural rule applies here
+- **Surface skill moments; don't auto-run them.** `/to-prd`, `/to-issues`, `/triage`, and the `sweep` skill are user-invoked. When a moment calls for one, offer it ("this looks like a `/to-issues` moment — want me to draft the body?"). PRDs publish to the tracker as issues (problem / solution / user-stories / implementation-decisions), not as `docs/prd/` files — `docs/prd/0021` is the blueprint-era exception.
 
-Do not use `// why:` for what code already says. If removing the comment wouldn't confuse a future reader, don't write it.
+- **ADRs carry rationale, not implementation.** When writing or amending an ADR, strip file paths, signatures, schema versions, test references, and forward slice-plans — code is the truth-source and the ADR rots against it. Keep a code block only when it names the exact contract surface the decision changes (a relaxed tsconfig flag, an added union case). Folder and feature names are convention (→ `structure.md` / the glossary), not ADR content: keep the principle, drop the roster.
 
-**An external-clock comment belongs in an ADR, not inline.** If a note will rot on launch, a dependency bump, or a policy change (e.g. a migration plan), record the reasoning in an ADR and let the comment cite the *number*. A bare `// for now …` is either load-bearing (→ ADR) or disposable (→ delete). This applies to app UI files too, not just the engine.
+- **Worktrees: one per PR, sibling dir, launched from inside.**
+  - Cut fresh from `origin/master`: `git worktree add -b feat/<slug> ../tonex-<slug> origin/master`.
+  - Location is a *sibling* of the main repo (`/Users/patrickxin/dev/tonex-<slug>`), never nested inside it — a worktree under the main-repo path is a descendant of a `master` checkout, so any launcher or relative path that resolves to the repo root silently lands on `master`. Siblings share no ancestor. (`.claude/worktrees/` is gitignored and was a false start — don't nest there.)
+  - Launch the agent from inside the worktree (`cd ../tonex-<slug> && claude`) so its cwd *is* the worktree; otherwise Bash defaults to the launch dir and edits/tests split-brain onto `master`. If cwd is ever the main repo mid-session, target the worktree with absolute paths until you relaunch.
+  - `git worktree remove` after the PR merges.
 
-## `CLAUDE.md` is the static minimum
+- **Subagents start cold.** They can't see machine-local memory or session history — anything load-bearing must live in repo files. Point them at specific paths (code with `// why:`, ADRs, `glossary.md`, this doc), don't restate rules in the prompt; repo paths are durable, prompt content evaporates with the subagent.
 
-Constraints with no in-code home (e.g. "no backend ever") belong in `CLAUDE.md`. Anything that *does* have an in-code home belongs at that code site, not in `CLAUDE.md`. Keep `CLAUDE.md` under ~15 lines.
+- **Planner writes the contract; implementer makes it pass.** The planner produces only durable artifacts — ADR (the why), PRD (the what), sliced issues, and the failing test that pins each slice's contract; the implementer takes those plus the code and makes the test green. See `slice-strategy.md`, `tdd.md`.
 
-## Corrections must commit to the code
-
-Within a session, explicit corrections work — "restructure that, don't add another mode parameter" is followed. The problem: corrections evaporate at session boundary. **The durable form of a correction is a code change** (refactor, `// why:`, fixture, ADR, working-style entry). A rule that lives only in conversation will not survive.
-
-## Curator, not enforcer
-
-The most effective correction is "model your code on file X," not "you violated rule 3." Concrete examples beat abstract rules every time, because the example is read at generation time and the rule is not.
-
-## Worktrees: one per PR, sibling dirs, launched from inside
-
-One branch per PR, one worktree per branch. Never reuse a worktree across PRs.
-
-- **Cut fresh from `origin/master`:** `git worktree add -b feat/<slug> ../tonex-<slug> origin/master`.
-- **Location is a sibling of the main repo** (`/Users/patrickxin/dev/tonex-<slug>`), *not* nested inside it. A worktree that lives under the main-repo path is a descendant of a tree checked out on `master`; any launcher or relative path that resolves to the repo root then silently lands on `master`. Siblings share no ancestor, so no path can cross over. (`.claude/worktrees/` is gitignored and was a false start — don't nest there.)
-- **Launch the agent from inside the worktree** (`cd ../tonex-<slug> && claude`) so the agent's cwd *is* the worktree. Otherwise Bash defaults to the launch dir — if that's the main repo, edits/tests split-brain onto `master` while you think you're on the branch. If you ever find cwd is the main repo mid-session, target the worktree with absolute paths until you can relaunch.
-- **`git worktree remove` after the PR merges.**
-
-## Subagents start cold
-
-Subagents spawned by a main agent cannot see machine-local memory or session history. Anything load-bearing for a subagent must live in repo files: code with `// why:` comments, ADRs, `CONTEXT.md`, this doc, or be embedded in the subagent's prompt.
-
-When orchestrating, prefer pointing subagents at specific repo paths over restating rules in their prompt. Repo paths are durable; prompt content evaporates with the subagent.
-
-## The planner writes the contract; the implementer makes it pass
-
-Work splits into two roles. A **planner** produces only durable artifacts — ADRs (the why), a PRD on the tracker (the what), sliced issues, and **the failing test that fixes each slice's contract**. An **implementer** takes those plus the codebase, makes the test green, and refactors. The artifacts are the entire interface; the implementer needs nothing from the planner's session.
-
-The Red test is load-bearing for the same reason `// why:` comments are — it's read at generation time and can't be misread. Prose specs get reconstructed and drift in the gaps; a failing test states exactly what passing means. `slice-strategy.md` already names the Red test the contract; this names its author — the planner, because pinning the contract is where planning pays off, and a contract the implementer writes is one no one checked against intent. So a planner producing "docs only" is not a degraded handoff: the contract travels as a test, the why as an ADR, the what as the PRD. Residual friction lives in the gap between those and the implementer's micro-decisions — keep slices small so a bad gap-fill dies in one Red-Green cycle.
+- **Enforcement & before-done.** husky/lint-staged runs Biome + `check-conventions.mjs` on staged `.ts/.tsx` — the culori firewall (ADR-0025), the `next-themes` allowlist (ADR-0015), inline Mode-union literals (ADR-0016); a Stop drift sentinel flags ADR-decision rewrites, sink-side color logic, and narrative comments. Touched files must pass — run `pnpm biome check <files>` and `pnpm check:conventions` before reporting done.

@@ -21,7 +21,7 @@ A consumer of Derived output. Today: `applyDom` (runtime renderer). Future: expo
 The single pure orchestrator: `deriveTheme(source) → { md, shadcn, warnings }`. See ADR-0005 (no facade) and ADR-0017 (lean spine).
 
 **Variant**:
-A named MCU scheme strategy (cmf, tonalSpot, etc.) registered in `packages/core/src/variants/`. Each entry implements `VariantStrategy` and feeds `deriveTheme` via a registry lookup.
+A named MCU scheme strategy (cmf, tonalSpot, etc.) registered in `packages/core/src/variants/`. Each entry implements `VariantStrategy` and feeds `deriveTheme` via a registry lookup. Not a chart axis — chart shape lives under `chart.scheme` (ADR-0027).
 
 **Surface treatment**:
 A post-MCU transform on the neutral ramp. `surfaceAlgo: 'tint' | 'desaturate'` selects at most one transform. Runs inside `deriveTheme` between md emit and shadcn bind so all consumers see the treated values.
@@ -39,5 +39,5 @@ An adoptable identity for a whole theme: a *recipe* (variant + surface treatment
 Two parallel shadcn-layer fields. A *binding* (`shadcnRoleBindings`) is symbolic and fully populated — role → MD token. An *override* (`shadcnRoleOverrides`) is a sparse, per-mode literal hex pin (presence = "pinned for this mode"). Resolution precedence is override > binding-resolved token. Bindings explore; overrides commit. See ADR-0026.
 
 **Chart palette**:
-`PortableTheme.chart` carries chart intent — `scheme: 'categorical' | 'sequential' | 'diverging'`, with future axes nested under `chart.*`. Derivation produces `--chart-1..N`; chart overrides pin on top, terminal and scheme-agnostic. See ADR-0027.
+`PortableTheme.chart` carries chart intent — `scheme: 'categorical' | 'sequential' | 'diverging'`, with future axes nested under `chart.*`. Derivation produces `--chart-1..5` (N = 5 today; `chart.count` reserved); chart overrides pin on top, terminal and scheme-agnostic. See ADR-0027.
 

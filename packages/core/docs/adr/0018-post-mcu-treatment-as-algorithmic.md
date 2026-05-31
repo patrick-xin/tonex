@@ -6,7 +6,7 @@ ADR-0002 framed surface treatment as **palette-sourced**: the user picks a palet
 
 **Decision:** Surface treatment is a **post-derive algorithmic transform** applied inside `deriveTheme`. It has no palette dependency. Shape:
 
-- `surfaceAlgo: 'none' | 'tint' | 'desaturate'` selects a single algorithm. Mutually exclusive — composing tint and desaturate is not a product feature.
+- `surfaceAlgo: 'none' | 'tint' | 'desaturate'` selects a single algorithm. Mutually exclusive — composing tint and desaturate is not a product feature. _(superseded — see Amendment 2026-05-30: no `'none'` member ships; level-0 desaturate is the identity.)_
 - `surfaceTintLevel`, `surfaceDesaturateLevel` — per-mode scalars in `0..1`. Strength for the corresponding algorithm. Zero is the no-op endpoint; one is the full-treatment endpoint.
 - Treatment touches the **md surface family only**. The primary family stays MCU. The surface/component asymmetry from ADR-0002 is preserved — only the *mechanism* changed.
 - Treatment runs after MCU emit and before shadcn binds, so any shadcn role bound to a treated surface token automatically reflects the treated value.
@@ -18,7 +18,7 @@ Algorithms live as pure free functions that transform per-token hex inputs to ou
 1. **WYSIWYG (ADR-0017) is trivially preserved.** A post-derive transform inside `deriveTheme` is consumed identically by `applyDom` and `exporters/*`. Palette-sourced surfaces would have required either feeding palette data into derive (cross-cutting concern) or a separate compose step (second derive path = drift surface).
 2. **No palette adapter needed to ship.** ADR-0002 coupled the feature to ColorSystem (ADR-0004). The rewrite has no `color-systems/` directory yet — feature would have been blocked on an abstraction with one (TW) speculative consumer. Algorithmic mechanism ships standalone.
 3. **One scalar per algorithm beats two asymmetric tint controls.** ADR-0002's `tintLevel` (chrome) and `componentTintLevel` (component) created a four-way UI state space. The shipped one-scalar-per-algo collapses to a slider per algorithm — simpler editing UX, less product surface to explain.
-4. **Default `'none'` is zero-cost.** The drift-guard baseline (`globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))`) stays trivially green because the treatment branch is a no-op when `surfaceAlgo === 'none'`.
+4. **Default `'none'` is zero-cost.** The drift-guard baseline (`globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))`) stays trivially green because the treatment branch is a no-op when `surfaceAlgo === 'none'`. _(superseded — see Amendment 2026-05-30: the no-op is the level-0 desaturate short-circuit, not a `'none'` branch.)_
 
 **Consequence:**
 

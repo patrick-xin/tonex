@@ -27,7 +27,7 @@ Foundation slices (1–8) shipped a layer-unified engine: `deriveTheme(source)` 
 - Implementation slices (10+) lift testbed rail controls into `features/editor-rail/`. The rail is shared between routes; per-route differences are slot-level (a shadcn-only collapsible appears only on `/theme/shadcn`, by route-level composition, not runtime branching).
 - The cross-route layer switcher is a chrome control that fires `<Link href="/theme/{other}">`. State persists via the shared store; no extra plumbing.
 - The "Customize Tokens" tab inside the rail (per legacy reference) is a content swap inside the rail body, not a route. Same store, same route — just a different rail mode.
-- `CONTEXT.md` gains *Editor route*, *Chrome*, *Canvas* vocabulary when those terms become felt in code, per CONTEXT.md's "vocabulary for unbuilt features doesn't belong here" rule.
+- `glossary.md` gains *Editor route*, *Chrome*, *Canvas* vocabulary when those terms become felt in code, per glossary.md's "vocabulary for unbuilt features doesn't belong here" rule.
 - `docs/agents/slice-strategy.md` acknowledges blueprint slices (this one) as legitimate precedent for doc-only slices.
 
 This ADR does not amend ADR-0017. ADR-0017's five commitments hold unchanged: both modes co-derived in one call, all four blocks always emitted, mode owned by next-themes, derive is the single source of truth, `globals.css` baked from defaults. Layer *presentation* is downstream of all of them.

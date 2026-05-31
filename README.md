@@ -22,7 +22,7 @@ pnpm typecheck                    # workspace typecheck
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Agent collaborators should start at [`docs/agents/session-flow.md`](./docs/agents/session-flow.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Agent collaborators should start at [`docs/agents/working-style.md`](./docs/agents/working-style.md).
 
 ## License
 

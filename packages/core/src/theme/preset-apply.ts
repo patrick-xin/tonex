@@ -41,7 +41,7 @@ export function resolvePresetApply(
     },
   }
 
-  // why: a locked seed means "do not move this" (CONTEXT: Lock), so lock keeps
+  // why: a locked seed means "do not move this" (GLOSSARY: Lock), so lock keeps
   // the user's seed regardless of the touched signal or any dialog choice.
   // Otherwise the curated seed supersedes an untouched seed automatically, or a
   // touched one when the dialog's "Use {preset}'s" switch opted in — in which

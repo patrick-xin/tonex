@@ -14,6 +14,8 @@ Tonex is a pnpm workspace. The conventional split "uses core / is core" is one o
 
 4. **Turborepo orchestrates tasks.** Root scripts (`build`, `dev`, `test`, `typecheck`, `lint`) all delegate to `turbo run`. Per-package scripts are the canonical commands; `turbo.json` wires the dependency graph.
 
+5. **ADRs are cited by number — the cross-layer join key.** A multi-context tree scatters ADRs across layers (`docs/adr/`, `packages/core/docs/adr/`, `apps/www/docs/adr/`), so code and docs reference a decision by number (`ADR-0018`, `ADR-0009 c.4`), never by path or title — path, title, and directory are mutable metadata. **Never renumber an ADR**: moving the file is free, but renumbering (even `0014`→`0015`) silently severs every reference. A new decision takes the next free number; a superseded one keeps its number, marked superseded.
+
 **Why:** Splitting by publishability gives a cleaner conceptual line than "uses core / is core." A CLI is a publishable binary regardless of whether it imports core; the www site is a deployed target regardless of which packages it consumes. Source-mode workspace mapping keeps the dev loop fast (no dist build between core edits and www reload) and keeps debugging legible.
 
 **Consequence:**
@@ -23,3 +25,4 @@ Tonex is a pnpm workspace. The conventional split "uses core / is core" is one o
 - One `core` package today. Splitting (e.g. `@tonex/spine` + `@tonex/registries`) only when a second consumer arrives. **Two adapters = real seam; one consumer = manufactured seam.**
 - Per-package tsconfig may relax strict bits locally (per ADR-0012 for mcu) without bleeding into the shared base.
 - Subpath exports from `@tonex/core` are the public surface (per ADR-0016); `package.json#exports` is the truth-source. Reaching into `@tonex/core/src/...` bypasses the surface — refuse.
+- The number is the join ADR-0034 relies on: rationale relocated out of an imperative doc stays reachable because the ADR it lands in never renumbers (Decision 5).

@@ -13,3 +13,4 @@ Governs `theme/palette-override/`.
 - **Override picker is UI-side; storage is always hex.** May source from any combobox but persists one hex string. _(ADR-0026 c.6)_
 - **Reset is two independent operations** — "reset override" clears the override; "reset binding" re-applies `DEFAULT_SHADCN_ROLE_BINDINGS`. Don't collapse. _(ADR-0026 c.7)_
 - **Two scopes co-exist.** `md3TokenOverrides` pins an md token (propagates to every bound shadcn role); `shadcnRoleOverrides` pins one shadcn role. _(ADR-0026)_
+- **md3 token pins land before `applyTreatment`.** A pin on a treated surface/outline token is then subject to the active treatment — the surgical-pin guarantee is "beats MCU + palette regen", never "beats the surface treatment". Escape hatch: a shadcn-layer override (runs after treatment) or lower the level. _(ADR-0018 Amendment 2026-05-21)_

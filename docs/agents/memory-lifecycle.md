@@ -29,16 +29,9 @@ The `lifecycle:` field is mandatory. Valid values:
 - **`snapshot-YYYY-MM-DD`** — frozen point-in-time observation; verify against current state before acting on it. Sweep deletes if older than 30 days.
 - **`permanent`** — durable personal data (working preferences, identity-shaped facts). Justify in the description.
 
-## Sweep protocol
+## Running the sweep
 
-Run on a recurring cadence (every ~2 weeks or every N slices, whichever lands first). Walk `MEMORY.md` top-to-bottom:
-
-1. **Forcing condition met?** Graduate the content (write into ADR / `docs/agents/` / GH issue) or delete the memo.
-2. **Snapshot >30 days?** Re-read against current code. Refresh the snapshot date or delete.
-3. **Project ledger?** Check whether shipped history belongs in `CHANGELOG.md` or open items belong in GH issues.
-4. **No forcing condition?** That memo is the wrong shape. Add one or convert to a `permanent` with justification.
-
-The sweep itself doesn't need a tool — a 10-minute pass through the index, gated on the cadence trigger.
+The sweep procedure — walk the index, check each memo's forcing condition, graduate or delete — runs on a recurring cadence (every ~2 weeks or every N slices, whichever lands first) and lives as the `sweep` skill. This doc is the policy that sweep enforces: the forcing conditions above and the graduation table below.
 
 ## What graduates where
 
@@ -46,7 +39,7 @@ The sweep itself doesn't need a tool — a 10-minute pass through the index, gat
 |---|---|
 | Decision rationale | `docs/adr/NNNN-...md` |
 | Working norm / convention | `docs/agents/<topic>.md` |
-| Glossary / vocabulary | `CONTEXT.md` |
+| Glossary / vocabulary | the layer `glossary.md` |
 | Slice / shipped history | `CHANGELOG.md` |
 | Open work item | GH issue with appropriate label |
 | Strategic / competitor / sibling-product positioning | `docs/private/<topic>.md` (gitignored) |

@@ -18,5 +18,5 @@ Issues live in GitHub Issues at `patrick-xin/tonex`. See `docs/agents/issue-trac
 Default canonical labels. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
-Multi-context layout: ADRs live per layer — system-wide in `docs/adr/`, engine in `packages/core/docs/adr/`, web app in `apps/www/docs/adr/`. See `docs/agents/domain.md`.
+Multi-context layout: ADRs live per layer — system-wide in `docs/adr/`, engine in `packages/core/docs/adr/`, web app in `apps/www/docs/adr/`; cited by number, never renumbered (ADR-0011 §5).
 
