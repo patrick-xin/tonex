@@ -5,6 +5,7 @@
 // HCT primitives — no @tonex/mcu reach-through (ADR-0025).
 import { hctFromHex, hexFromHct, type Mode, maxChroma } from '@tonex/core'
 import { argbFromHex, relativeLuminance } from '@tonex/core/oklch'
+import { MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
 
 // tone (≈L*) targets for the structural steps 1–8; 9–12 are seed-anchored or
 // contrast-walked below. Light = light tinted-gray ramp; dark = its inverse.
@@ -80,6 +81,25 @@ export function buildRadixScale(seedHex: string, mode: Mode): RadixScaleResult {
   const onColor = contrast(steps[8], '#ffffff') >= contrast(steps[8], fgDark) ? '#ffffff' : fgDark
 
   return { steps, onColor }
+}
+
+// the "map MCU's 18 tones straight to 12 steps" hypothesis — snap each step's
+// target tone to the nearest of MD_PALETTE_TONE_NAMES and sample at constant
+// seed chroma (no envelope, no contrast walk). Step 9 stays the exact seed.
+// Isolates what the tuned generator's chroma-envelope + contrast-walk buy.
+function nearestTone(t: number): number {
+  return MD_PALETTE_TONE_NAMES.reduce((a, b) => (Math.abs(b - t) < Math.abs(a - t) ? b : a))
+}
+
+export function buildToneMapped(seedHex: string, mode: Mode): string[] {
+  const seed = hctFromHex(seedHex)
+  const h = seed.hue
+  const cs = seed.chroma
+  const targets =
+    mode === 'light'
+      ? [99, 98, 96, 93.5, 91, 87.5, 82, 75, seed.tone, seed.tone - 4, 40, 25]
+      : [8, 11, 15, 19, 23, 28, 35, 45, seed.tone, seed.tone + 4, 70, 90]
+  return targets.map((t, i) => (i === 8 ? at(h, cs, seed.tone) : at(h, cs, nearestTone(t))))
 }
 
 // sRGB hex → OKLab ΔE (euclidean; OKLab ~perceptually uniform, ~0.02 = JND)
