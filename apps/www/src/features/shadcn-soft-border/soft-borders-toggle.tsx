@@ -10,7 +10,7 @@ export function SoftBordersToggle() {
   const { enabled, setEnabled } = useSoftBorder()
 
   return (
-    <Field name="soft-borders" className="gap-1 p-2">
+    <Field name="soft-borders" className="gap-1">
       <FieldLabel className="items-center justify-between w-full">
         <div className="flex items-center gap-2">
           Soft borders

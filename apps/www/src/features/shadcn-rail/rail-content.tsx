@@ -7,12 +7,8 @@ import { cn } from 'tailwind-variants'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { ChartPaletteToggle } from '@/features/chart-palette'
-import { ContrastLevelSlider } from '@/features/contrast-level'
 import { CustomColorList } from '@/features/custom-colors'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
-import { SoftBordersToggle } from '@/features/shadcn-soft-border'
 import { ShadcnSourceColor } from '@/features/source-color'
 import { SurfaceAdjustment } from '@/features/surface-adjustment'
 import { ShadcnBindingsContent } from './bindings-content'
@@ -44,21 +40,6 @@ export function ShadcnRailContent() {
             <SchemeVariantsToggle />
           </AnimatedCollapsible>
           <SurfaceAdjustment />
-          <AnimatedCollapsible
-            variant="ghost"
-            title="Refinements"
-            contentClassName="px-0 space-y-1"
-          >
-            <SoftBordersToggle />
-            <Separator className="opacity-20 mx-2" />
-            <div className="p-2">
-              <ContrastLevelSlider />
-            </div>
-            <Separator className="opacity-20 mx-2" />
-            <div className="p-2">
-              <ChartPaletteToggle />
-            </div>
-          </AnimatedCollapsible>
           <CustomColorList />
           <Button
             className="w-full justify-between px-2! group leading-snug"

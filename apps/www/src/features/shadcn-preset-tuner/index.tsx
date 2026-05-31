@@ -73,7 +73,9 @@ export function ShadcnPresetTunerRail() {
                 <SchemeVariantsToggle />
               </AnimatedCollapsible>
               <SurfaceAdjustment />
-              <SoftBordersToggle />
+              <div className="p-2">
+                <SoftBordersToggle />
+              </div>
               <ShadcnBindingsContent />
             </ScrollArea>
           </TabsPanel>

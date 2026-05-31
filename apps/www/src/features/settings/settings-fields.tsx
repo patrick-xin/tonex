@@ -4,8 +4,11 @@ import { TrashIcon } from '@phosphor-icons/react'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { ChartPaletteToggle } from '@/features/chart-palette'
 import { TwPickerEnableToggle } from '@/features/color-picker'
+import { ContrastLevelSlider } from '@/features/contrast-level'
 import { ResetButton } from '@/features/reset-button'
+import { SoftBordersToggle } from '@/features/shadcn-soft-border'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 
@@ -52,8 +55,14 @@ export function SettingsFields({
             </FieldDescription>
           </Field>
           <Separator className="opacity-50" />
+          <SoftBordersToggle />
+          <Separator className="opacity-50" />
         </>
       )}
+      <ContrastLevelSlider />
+      <Separator className="opacity-50" />
+      <ChartPaletteToggle />
+      <Separator className="opacity-50" />
       <TwPickerEnableToggle />
       <Separator className="opacity-50" />
       <div className="flex items-center justify-between gap-2">
