@@ -15,6 +15,12 @@ const rulerSliderStyles = tv({
   slots: {
     root: [
       'relative w-full touch-none select-none rounded-md border border-outline-variant/60 bg-surface-container-high px-3',
+      // why: cursor lives on the root (it's an inherited property) so the track,
+      // ticks, and thumb resolve to one value. The thumb (w-5) lags the pointer
+      // while dragging tick-to-tick, so a thumb-only cursor flickers to the
+      // track's default between snaps — driving it from base-ui's data-dragging
+      // holds a stable grabbing cursor across the whole drag.
+      'cursor-grab data-dragging:cursor-grabbing',
       'data-disabled:pointer-events-none data-disabled:opacity-50',
     ],
     control: 'relative flex h-full w-full',
@@ -25,8 +31,8 @@ const rulerSliderStyles = tv({
     // the container so the panel nests into its corners at max.
     fill: 'absolute inset-y-0 -left-3 rounded-xs',
     thumb: [
+      // cursor is inherited from the root so it can't lag behind the thumb mid-drag
       'group absolute top-1/2 flex h-full w-5 -translate-y-1/2 items-center justify-center outline-none',
-      'cursor-grab active:cursor-grabbing data-disabled:cursor-default',
     ],
     bar: [
       'w-0.5 rounded-full shadow-sm transition-[width,background-color] duration-150',

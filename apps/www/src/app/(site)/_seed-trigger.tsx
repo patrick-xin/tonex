@@ -21,10 +21,6 @@ export function SeedTrigger() {
         value={hexInput}
         onChange={(e) => handleChange(e.target.value)}
         {...inputProps}
-        onFocus={(e) => {
-          inputProps.onFocus()
-          e.currentTarget.select()
-        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === 'Escape') e.currentTarget.blur()
         }}

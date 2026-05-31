@@ -5,6 +5,7 @@ import { type Mode, useResolvedTokens, useSource } from '@tonex/core'
 import { hexString, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName, PaletteName } from '@tonex/core/schema'
 import { cx } from 'tailwind-variants'
+import { HctColorPicker } from '@/components/shared/hct-color-picker'
 import { Button } from '@/components/ui/button'
 import {
   createPopoverHandle,
@@ -18,7 +19,6 @@ import {
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useActiveMode } from '@/features/theme-mode'
-import { PaletteColorPicker } from './palette-color-picker'
 
 interface AnimatedButtonColorPickerProps {
   palette: PaletteName
@@ -190,7 +190,7 @@ function Payload({ palette, mode }: { palette: PaletteName; mode: Mode }) {
         {isOverridden && <ResetOverrideButton onReset={() => setOverride(palette, null)} />}
       </div>
 
-      <PaletteColorPicker value={value} onChange={handleChange} />
+      <HctColorPicker value={value} onChange={handleChange} />
     </div>
   )
 }
