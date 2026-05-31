@@ -5,8 +5,8 @@ import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
 import { cmfSecondSourceDisabledReason, findActivePreset } from '@tonex/core/schema'
 import { cn } from 'tailwind-variants'
 import { useShallow } from 'zustand/react/shallow'
+import { HctColorPicker } from '@/components/shared/hct-color-picker'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
@@ -14,8 +14,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ColorPicker } from '@/features/color-picker'
-import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 import { useLayer } from '@/lib/layer-context'
 import { presetUsesTertiary } from './hints'
 
@@ -36,8 +34,6 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
   // with an unrelated default. ADR-0028: seedHex is derived from the canonical
   // HCT via selectSeedHex (preserves user's pasted bytes when present).
   const formHex = cmfSecondSourceHex ?? seedHex
-
-  const { hexInput, handleChange, inputProps } = useHexFieldState(formHex, setCmfSecondSourceHex)
 
   // why: the second source drives the tertiary palette. On md that's always a
   // visible role; on shadcn it only reaches the export if the active preset
@@ -82,21 +78,9 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
       ) : (
         trigger
       )}
-      <PopoverContent className="py-2 w-56" showArrow sideOffset={8}>
-        <PopoverDescription className="text-xs mb-2">{description}</PopoverDescription>
-        <div className="flex items-center gap-2">
-          <ColorPicker value={formHex} onChange={handleChange} align="start" />
-          <Input
-            className="font-mono w-full"
-            inputSize="sm"
-            type="text"
-            value={hexInput}
-            onChange={(e) => handleChange(e.target.value)}
-            {...inputProps}
-            maxLength={7}
-            spellCheck={false}
-            placeholder="#rrggbb"
-          />
+      <PopoverContent className="py-2 w-72" showArrow sideOffset={8}>
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <PopoverDescription className="text-xs">{description}</PopoverDescription>
           {isSet && (
             <Tooltip>
               <TooltipTrigger
@@ -105,6 +89,7 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
                   <Button
                     variant="ghost"
                     size="icon-xs"
+                    className="-mt-1 shrink-0"
                     onClick={() => setCmfSecondSourceHex(null)}
                   >
                     <ArrowCounterClockwiseIcon />
@@ -115,6 +100,7 @@ export function CmfSecondSourcePicker({ className }: { className?: string }) {
             </Tooltip>
           )}
         </div>
+        <HctColorPicker value={formHex} onChange={setCmfSecondSourceHex} />
       </PopoverContent>
     </Popover>
   )
