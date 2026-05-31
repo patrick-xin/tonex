@@ -5,7 +5,7 @@
 // colors for both the swatches and the page chrome, one local light/dark toggle
 // (a Radix scale renders completely differently per mode, so the toggle is the
 // honest preview). Delete the whole `proto/radix-colors/` folder to remove.
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import {
   BANDS,
   bandFor,
@@ -575,7 +575,6 @@ function PurposeFirst(props: {
 // — pattern 5: combobox (the real surface) ————————————————————
 
 type Grouping = 'hue' | 'function' | 'flat'
-type RowStyle = 'ramp' | 'identity'
 
 const GROUPINGS: { key: Grouping; label: string }[] = [
   { key: 'hue', label: 'Hue families' },
@@ -606,46 +605,122 @@ function buildGroups(grouping: Grouping, query: string): ComboGroup[] {
   })).filter((g) => g.scales.length)
 }
 
-// compact 12-cell ramp for a combobox row — identity marked, no numbers
-function MiniRamp(props: {
+// the framed popover shell shared by both row designs (search + scroll)
+function PopoverFrame(props: {
+  title: string
+  width: number
+  query: string
+  onQuery: (q: string) => void
+  chrome: Chrome
+  children: ReactNode
+}) {
+  const { title, width, query, onQuery, chrome, children } = props
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="text-xs" style={{ color: chrome.muted }}>
+        {title} · <span className="font-mono">{width}px</span>
+      </div>
+      <div
+        className="flex flex-col overflow-hidden rounded-xl"
+        style={{
+          width,
+          background: chrome.panel,
+          boxShadow: `0 0 0 1px ${chrome.border}, 0 12px 32px rgba(0,0,0,.16)`,
+        }}
+      >
+        <div className="p-1.5" style={{ borderBottom: `1px solid ${chrome.border}` }}>
+          <input
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+            placeholder="Search colors…"
+            className="w-full rounded-md px-2 py-1.5 text-sm outline-none"
+            style={{ background: chrome.sub, color: chrome.text }}
+          />
+        </div>
+        <div className="flex max-h-80 flex-col overflow-auto p-1">{children}</div>
+      </div>
+    </div>
+  )
+}
+
+function GroupHeader({ label, chrome }: { label: string; chrome: Chrome }) {
+  return (
+    <div
+      className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide"
+      style={{ color: chrome.muted }}
+    >
+      {label}
+    </div>
+  )
+}
+
+function NoResults({ chrome }: { chrome: Chrome }) {
+  return (
+    <div className="px-2 py-6 text-center text-sm" style={{ color: chrome.muted }}>
+      No color found.
+    </div>
+  )
+}
+
+const BAND_SHORT: Record<string, string> = {
+  background: 'Bg',
+  component: 'Comp',
+  border: 'Border',
+  solid: 'Solid',
+  text: 'Text',
+}
+
+// the unfolded 12-step strip (B, on active) — numbers on identity + selected,
+// band labels beneath so the step's job is legible inline
+function StepStrip(props: {
   scale: RadixScale
   mode: Mode
   selected: Sel | null
   onSelect: (s: Sel) => void
   onHover: (s: Sel | null) => void
+  chrome: Chrome
 }) {
-  const { scale, mode, selected, onSelect, onHover } = props
+  const { scale, mode, selected, onSelect, onHover, chrome } = props
   return (
-    <div className="flex flex-1 overflow-hidden rounded">
-      {STEP_ROLES.map((role) => {
-        const hex = stepHex(scale, mode, role.step)
-        const ink = inkOn(hex)
-        const isSel = selected?.scale === scale.name && selected?.step === role.step
-        const isId = role.step === IDENTITY_STEP
-        return (
-          <button
-            key={role.step}
-            type="button"
-            title={`${scale.name} ${role.step} · ${role.label}`}
-            onMouseEnter={() => onHover({ scale: scale.name, step: role.step })}
-            onMouseLeave={() => onHover(null)}
-            onClick={() => onSelect({ scale: scale.name, step: role.step })}
-            className="relative h-5 flex-1"
-            style={{
-              background: hex,
-              boxShadow: isSel ? `inset 0 0 0 2px ${ink}` : 'none',
-              zIndex: isSel ? 1 : 0,
-            }}
+    <div className="flex flex-col gap-1 px-2 pb-2">
+      <div className="flex overflow-hidden rounded">
+        {STEP_ROLES.map((role) => {
+          const hex = stepHex(scale, mode, role.step)
+          const ink = inkOn(hex)
+          const isSel = selected?.scale === scale.name && selected?.step === role.step
+          const isId = role.step === IDENTITY_STEP
+          return (
+            <button
+              key={role.step}
+              type="button"
+              title={`${scale.name} ${role.step} · ${role.label}`}
+              onMouseEnter={() => onHover({ scale: scale.name, step: role.step })}
+              onMouseLeave={() => onHover(null)}
+              onClick={() => onSelect({ scale: scale.name, step: role.step })}
+              className="relative flex h-6 flex-1 items-center justify-center text-[9px] font-medium"
+              style={{
+                background: hex,
+                color: ink,
+                boxShadow: isSel ? `inset 0 0 0 2px ${ink}` : 'none',
+                zIndex: isSel ? 1 : 0,
+              }}
+            >
+              {isId || isSel ? role.step : null}
+            </button>
+          )
+        })}
+      </div>
+      <div className="flex">
+        {BANDS.map((b) => (
+          <div
+            key={b.key}
+            className="text-center text-[9px]"
+            style={{ flexGrow: b.steps.length, flexBasis: 0, color: chrome.muted }}
           >
-            {isId ? (
-              <span
-                className="absolute right-0 bottom-0 left-0 h-0.5"
-                style={{ background: ink, opacity: 0.9 }}
-              />
-            ) : null}
-          </button>
-        )
-      })}
+            {BAND_SHORT[b.key]}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -662,11 +737,64 @@ function BrightBadge({ chrome }: { chrome: Chrome }) {
   )
 }
 
-// one combobox popover mock at a real width
-function ComboPopover(props: {
+// (B) one collapsed identity row that unfolds into the step strip on open
+function ExpandRow(props: {
+  scale: RadixScale
+  mode: Mode
+  expanded: boolean
+  onToggle: () => void
+  selected: Sel | null
+  onSelect: (s: Sel) => void
+  onHover: (s: Sel | null) => void
+  chrome: Chrome
+}) {
+  const { scale, mode, expanded, onToggle, selected, onSelect, onHover, chrome } = props
+  const idHex = stepHex(scale, mode, IDENTITY_STEP)
+  const rowSelected = selected?.scale === scale.name
+  return (
+    <div
+      className="flex flex-col rounded-md"
+      style={{ background: expanded ? chrome.sub : 'transparent' }}
+    >
+      <button
+        type="button"
+        onMouseEnter={() => onHover({ scale: scale.name, step: IDENTITY_STEP })}
+        onMouseLeave={() => onHover(null)}
+        onClick={() => {
+          onToggle()
+          if (!rowSelected) onSelect({ scale: scale.name, step: IDENTITY_STEP })
+        }}
+        className="flex items-center gap-2 px-2 py-1.5 text-left"
+      >
+        <span
+          className="size-4 shrink-0 rounded"
+          style={{ background: idHex, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)' }}
+        />
+        <span className="text-sm capitalize" style={{ color: chrome.text }}>
+          {scale.name}
+        </span>
+        {isBright(scale) ? <BrightBadge chrome={chrome} /> : null}
+        <span className="ml-auto text-xs" style={{ color: chrome.muted }}>
+          {expanded ? '▾' : '▸'}
+        </span>
+      </button>
+      {expanded ? (
+        <StepStrip
+          scale={scale}
+          mode={mode}
+          selected={selected}
+          onSelect={onSelect}
+          onHover={onHover}
+          chrome={chrome}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function ExpandPopover(props: {
   title: string
   width: number
-  rowStyle: RowStyle
   grouping: Grouping
   query: string
   onQuery: (q: string) => void
@@ -676,116 +804,109 @@ function ComboPopover(props: {
   onHover: (s: Sel | null) => void
   chrome: Chrome
 }) {
-  const {
-    title,
-    width,
-    rowStyle,
-    grouping,
-    query,
-    onQuery,
-    mode,
-    selected,
-    onSelect,
-    onHover,
-    chrome,
-  } = props
+  const { title, width, grouping, query, onQuery, mode, selected, onSelect, onHover, chrome } =
+    props
+  const [expanded, setExpanded] = useState<string | null>(selected?.scale ?? null)
   const groups = buildGroups(grouping, query)
-
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="text-xs" style={{ color: chrome.muted }}>
-        {title} · <span className="font-mono">{width}px</span>
-      </div>
-      <div
-        className="flex flex-col overflow-hidden rounded-xl"
-        style={{
-          width,
-          background: chrome.panel,
-          boxShadow: `0 0 0 1px ${chrome.border}, 0 12px 32px rgba(0,0,0,.16)`,
-        }}
-      >
-        {/* search box (visual + functional) */}
-        <div className="p-1.5" style={{ borderBottom: `1px solid ${chrome.border}` }}>
-          <input
-            value={query}
-            onChange={(e) => onQuery(e.target.value)}
-            placeholder="Search colors…"
-            className="w-full rounded-md px-2 py-1.5 text-sm outline-none"
-            style={{ background: chrome.sub, color: chrome.text }}
-          />
-        </div>
-        <div className="flex max-h-80 flex-col overflow-auto p-1">
-          {groups.length === 0 ? (
-            <div className="px-2 py-6 text-center text-sm" style={{ color: chrome.muted }}>
-              No color found.
-            </div>
-          ) : (
-            groups.map((group) => (
-              <div key={group.label ?? 'flat'} className="flex flex-col">
-                {group.label ? (
-                  <div
-                    className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide"
-                    style={{ color: chrome.muted }}
-                  >
-                    {group.label}
-                  </div>
-                ) : null}
-                {group.scales.map((scale) => {
-                  const idHex = stepHex(scale, mode, IDENTITY_STEP)
-                  const rowSelected = selected?.scale === scale.name
-                  if (rowStyle === 'identity') {
-                    return (
-                      <button
-                        key={scale.name}
-                        type="button"
-                        onMouseEnter={() => onHover({ scale: scale.name, step: IDENTITY_STEP })}
-                        onMouseLeave={() => onHover(null)}
-                        onClick={() => onSelect({ scale: scale.name, step: IDENTITY_STEP })}
-                        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left"
-                        style={{ background: rowSelected ? chrome.sub : 'transparent' }}
-                      >
-                        <span
-                          className="size-4 shrink-0 rounded"
-                          style={{
-                            background: idHex,
-                            boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)',
-                          }}
-                        />
-                        <span className="text-sm capitalize" style={{ color: chrome.text }}>
-                          {scale.name}
-                        </span>
-                        {isBright(scale) ? <BrightBadge chrome={chrome} /> : null}
-                      </button>
-                    )
-                  }
+    <PopoverFrame title={title} width={width} query={query} onQuery={onQuery} chrome={chrome}>
+      {groups.length === 0 ? (
+        <NoResults chrome={chrome} />
+      ) : (
+        groups.map((group) => (
+          <div key={group.label ?? 'flat'} className="flex flex-col">
+            {group.label ? <GroupHeader label={group.label} chrome={chrome} /> : null}
+            {group.scales.map((scale) => (
+              <ExpandRow
+                key={scale.name}
+                scale={scale}
+                mode={mode}
+                expanded={expanded === scale.name}
+                onToggle={() => setExpanded((cur) => (cur === scale.name ? null : scale.name))}
+                selected={selected}
+                onSelect={onSelect}
+                onHover={onHover}
+                chrome={chrome}
+              />
+            ))}
+          </div>
+        ))
+      )}
+    </PopoverFrame>
+  )
+}
+
+// (A) literal TW parity — scale sub-header, then one labeled row per step
+function FlatPopover(props: {
+  title: string
+  width: number
+  grouping: Grouping
+  query: string
+  onQuery: (q: string) => void
+  mode: Mode
+  selected: Sel | null
+  onSelect: (s: Sel) => void
+  onHover: (s: Sel | null) => void
+  chrome: Chrome
+}) {
+  const { title, width, grouping, query, onQuery, mode, selected, onSelect, onHover, chrome } =
+    props
+  const groups = buildGroups(grouping, query)
+  return (
+    <PopoverFrame title={title} width={width} query={query} onQuery={onQuery} chrome={chrome}>
+      {groups.length === 0 ? (
+        <NoResults chrome={chrome} />
+      ) : (
+        groups.map((group) => (
+          <div key={group.label ?? 'flat'} className="flex flex-col">
+            {group.label ? <GroupHeader label={group.label} chrome={chrome} /> : null}
+            {group.scales.map((scale) => (
+              <div key={scale.name} className="flex flex-col">
+                <div
+                  className="px-2 pt-1.5 pb-0.5 text-xs font-medium capitalize"
+                  style={{ color: chrome.text }}
+                >
+                  {scale.name}
+                </div>
+                {STEP_ROLES.map((role) => {
+                  const hex = stepHex(scale, mode, role.step)
+                  const isSel = selected?.scale === scale.name && selected?.step === role.step
+                  const isId = role.step === IDENTITY_STEP
                   return (
-                    <div
-                      key={scale.name}
-                      className="flex items-center gap-2 rounded-md px-2 py-1"
-                      style={{ background: rowSelected ? chrome.sub : 'transparent' }}
+                    <button
+                      key={role.step}
+                      type="button"
+                      onMouseEnter={() => onHover({ scale: scale.name, step: role.step })}
+                      onMouseLeave={() => onHover(null)}
+                      onClick={() => onSelect({ scale: scale.name, step: role.step })}
+                      className="flex items-center gap-2 rounded-md py-1 pr-2 pl-3 text-left"
+                      style={{ background: isSel ? chrome.sub : 'transparent' }}
                     >
                       <span
-                        className="w-12 shrink-0 truncate text-xs capitalize"
-                        style={{ color: chrome.text }}
-                      >
-                        {scale.name}
-                      </span>
-                      <MiniRamp
-                        scale={scale}
-                        mode={mode}
-                        selected={selected}
-                        onSelect={onSelect}
-                        onHover={onHover}
+                        className="size-4 shrink-0 rounded"
+                        style={{ background: hex, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)' }}
                       />
-                    </div>
+                      <span
+                        className="w-4 shrink-0 font-mono text-[11px]"
+                        style={{ color: chrome.muted }}
+                      >
+                        {role.step}
+                      </span>
+                      <span
+                        className="truncate text-xs"
+                        style={{ color: chrome.text, fontWeight: isId ? 600 : 400 }}
+                      >
+                        {role.label}
+                      </span>
+                    </button>
                   )
                 })}
               </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
+            ))}
+          </div>
+        ))
+      )}
+    </PopoverFrame>
   )
 }
 
@@ -809,15 +930,14 @@ function ComboboxLab(props: {
         <SegTabs value={grouping} options={GROUPINGS} onChange={setGrouping} chrome={chrome} />
       </div>
       <p className="text-xs" style={{ color: chrome.muted }}>
-        Same data + grouping, two row treatments. Left keeps the whole ramp legible (needs more
-        width); right matches today's TW picker 1:1 but a row only yields step {IDENTITY_STEP} — the
-        step choice has to move to a second surface.
+        Both expose every step — no blocked options, full TW parity. (B) starts compact (identity +
+        name) and unfolds the band-labeled strip on click; default lands on step {IDENTITY_STEP}.
+        (A) lists one labeled row per step under each scale — zero new interaction, but taller.
       </p>
       <div className="flex flex-wrap items-start gap-6">
-        <ComboPopover
-          title="Row = ramp"
-          width={300}
-          rowStyle="ramp"
+        <ExpandPopover
+          title="(B) Expand-on-active"
+          width={236}
           grouping={grouping}
           query={query}
           onQuery={setQuery}
@@ -827,10 +947,9 @@ function ComboboxLab(props: {
           onHover={onHover}
           chrome={chrome}
         />
-        <ComboPopover
-          title="Row = identity swatch (today's TW picker)"
-          width={208}
-          rowStyle="identity"
+        <FlatPopover
+          title="(A) Flat step rows — TW parity"
+          width={252}
           grouping={grouping}
           query={query}
           onQuery={setQuery}
