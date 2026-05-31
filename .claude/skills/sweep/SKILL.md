@@ -24,12 +24,16 @@ A drained `MEMORY.md` is the success state, not a failure — load-bearing memos
 
 ## 2. ADR audit
 
-Walk the live ADR set across all layers (`docs/adr/`, `packages/core/docs/adr/`, `apps/www/docs/adr/`), skipping `_archive/`. For each ADR:
+Walk the live ADR set across all layers (`docs/adr/`, `packages/core/docs/adr/`, `apps/www/docs/adr/`), skipping `_archive/`.
+
+**Run `pnpm check:adr` first — it is the deterministic half of this audit; don't hand-write one-off scripts for it.** The guard enforces ADR-0034's two invariants in both directions: c.8, every `ADR-N c.M` / amendment citation resolves *forward* to a live anchor; c.11, every active ADR resolves *back* to the code surface it governs via a `**Code anchors:**` footer whose paths each carry an `ADR-N` breadcrumb. Clear everything it flags before the judgment pass — a new ADR with no footer, a citation a fold orphaned, a breadcrumb deleted from a code anchor. The folds below are hand edits; re-run the guard after each.
+
+Then, for each ADR by hand:
 
 1. **Still load-bearing?** — it constrains runtime behavior, code structure, or a contract surface → keep.
 2. **Constrains nothing** — a glossary entry or meta-rule that doesn't bind behavior, structure, or a contract → **archive, don't delete.** Move it to `docs/adr/_archive/`; that we once thought it earned an ADR slot is itself a lesson. Relocate live vocabulary to the layer's `glossary.md` and meta-rules to the agent docs before archiving. **Never renumber on the way** (ADR-0011 §5) — the number is the cross-layer join key.
-3. **Rotted against code?** — body now carries implementation that drifted from the source (paths, signatures, schema versions, slice-plans). Strip it back to rationale; don't leave stale implementation prose competing with the truth-source.
+3. **Holds a command-falsifiable result?** — the litmus: *could a command prove a sentence false, with no re-decision?* If yes it is a **result**, and it belongs to the code or test the ADR cites, not the prose (ADR-0034 c.9). Strip embedded results — config/type mirrors, constant values, "passes/fails strict", build-graph or error-count claims — back to the decision and its *why*; cite the test or name the symbol that carries the live truth. A decision's **shape** (a chosen type, a field name, the structure being decided) stays; its **measured behavior** leaves. Re-run `pnpm check:adr` after — the `Code anchors:` footer must survive the trim.
 
 ## Reporting
 
-Summarize what moved: memos graduated/deleted, ADRs archived/trimmed, and anything that needs a human decision (a memo with no clear home, an ADR whose load-bearingness is ambiguous). Never delete or archive anything ambiguous without surfacing it first.
+Summarize what moved: memos graduated/deleted, ADRs archived/trimmed, the `pnpm check:adr` end-state (green, or what was fixed to get there), and anything that needs a human decision (a memo with no clear home, an ADR whose load-bearingness is ambiguous). Never delete or archive anything ambiguous without surfacing it first.
