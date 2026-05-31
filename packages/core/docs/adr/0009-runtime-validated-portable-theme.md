@@ -26,3 +26,5 @@
 - Migration ladder bumps still need their own forward-migration logic — the schema does not bridge versions, it validates a single version. Field additions extend the schema, defaults, and test fixture; the schema is the truth-source for the current-version shape.
 - A future "import a theme from a file" path will reuse `parsePortableTheme` directly — same recovery semantics (reject the file outright on parse failure, surface a UI message). The contract is the same regardless of source.
 - `validateCustomColorEntry` exposes both binary-return and message-return shapes for the same predicate — UI form-level surfacing uses the message form; the schema uses the binary form. Both call shapes coexist because the schema's per-entry refinement uses an empty existing-set, leaving cross-entry slug uniqueness to the array-level check.
+
+**Code anchors:** `packages/core/src/theme/schema.ts` — the valibot portable-theme schema.

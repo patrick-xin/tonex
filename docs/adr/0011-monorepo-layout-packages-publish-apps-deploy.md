@@ -24,3 +24,5 @@ Tonex is a pnpm workspace. The conventional split "uses core / is core" is one o
 - Per-package tsconfig may relax strict bits locally (per ADR-0012 for mcu) without bleeding into the shared base.
 - Subpath exports from `@tonex/core` are the public surface (per ADR-0016); `package.json#exports` is the truth-source. Reaching into `@tonex/core/src/...` bypasses the surface — refuse.
 - The number is the join ADR-0034 relies on: rationale relocated out of an imperative doc stays reachable because the ADR it lands in never renumbers (Decision 5).
+
+**Code anchors:** `pnpm-workspace.yaml`, `apps/www/tsconfig.json` — packages publish / apps deploy; source-mode mapping.

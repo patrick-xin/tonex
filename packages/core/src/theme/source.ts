@@ -1,3 +1,7 @@
+// Single flat source store — one zustand store, flat top-level shape, no slices or
+// sub-stores; field-name prefixes (md3*, shadcn*, surface*, cmf*) are the taxonomy
+// (ADR-0006). Lock is a boolean input-gate: seed-mutation setters early-return when
+// seedHexLock is set — never a derived snapshot (ADR-0007).
 import { isValidHex } from '@tonex/color-utils'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'

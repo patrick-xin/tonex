@@ -39,3 +39,5 @@ The rejection is conditional on the format's current state, not permanent. Reope
 - an AI-prose-authoring feature gives the prose a job that justifies a second authoring surface.
 
 Until then, the design *prose* tonex wants to keep can live as ordinary `docs/` — it does not need the format to exist.
+
+**Code anchors:** `packages/core/src/theme/exporters/design-md.ts` — DESIGN.md is an outbound color-only export target.

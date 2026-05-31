@@ -15,7 +15,8 @@ export type { VariantGroup, VariantStrategy } from './types'
 // why: registry shape mirrors color-systems / exporters / importers — a record
 // indexed by stable lowercase name. derive.ts looks up `variants[source.variant]`.
 // `as const satisfies` keeps keys typed literally so VariantName narrows to
-// the actual present keys.
+// the actual present keys. One widened VariantStrategy interface carries the
+// optional second-source param (cmf) as data — not a per-arity union (ADR-0010).
 export const variants = {
   cmf,
   tonalSpot,

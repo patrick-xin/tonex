@@ -15,3 +15,5 @@
 - New output formats (json, dart, ts, …) earn their own files in `exporters/` and export from the barrel. Per-format options thread through `ExportOptions`; the barrel + options pattern is the registry — no separate typed registry needed.
 - `applyDom` is never called from a tool/CLI build step. Bake-time CSS comes from `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` is a renderer-adjacent helper that produces the same text `applyDom` would emit, exposed as a string for build tooling. The drift-guard test asserts equality between baked output and live `formatCss` output for arbitrary source state.
 - Tempted to add an `exportClipboard(theme)` that reads the DOM → refuse. Clipboard is a side-effect *consumer* of an exporter's string, not a separate exporter. The www app handles the clipboard call; core stays pure.
+
+**Code anchors:** `packages/core/src/theme/exporters/json.ts` — exporter barrel; renderer writes DOM, exporters format strings.

@@ -78,3 +78,5 @@ A "reset everything for this role" affordance, if surfaced, composes the two —
 - ADR-0017's "preview === export" contract holds: overrides resolve inside `deriveTheme`, the same single source the export pipeline consumes. The export's `:root + .dark` blocks reflect post-override values byte-for-byte.
 - ADR-0023's UI-prefs scope is unaffected — the override layer is portable theme state (round-trips with the seed, persists to localStorage under STORAGE_KEY), not a display preference.
 - A "snapshot from binding to override" affordance — pick the role, capture its currently-bound resolved hex, write it to overrides — falls out of the picker design naturally (it's just "MD-token combobox" applied to the role's current binding). Whether to expose this as a one-click button or require the user to walk the combobox is a UX call deferred to slice override-2.
+
+**Code anchors:** `packages/core/src/theme/shadcn-presets.ts` — shadcn role-override layer.

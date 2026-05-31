@@ -31,3 +31,5 @@
 
 - **2026-05-08** — rule 5 superseded and rule 6 added by ADR-0022 (the `ADR-0014 → ADR-0022` chain). Folded into rule 5.
 - **2026-05-19** — rule 4 relaxed: `components/shared/` allowed as the third primitive folder. Folded into rule 4.
+
+**Code anchors:** `apps/www/docs/agents/rules/structure.md` — feature-first www structure, rules 1-4.

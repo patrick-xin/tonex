@@ -26,3 +26,5 @@ The route-segmentation play (ADR-0019) sits on top of this: the route picks whic
 - **Reject** a runtime `<Layer>` context that swaps primitives at runtime — route-level segmentation (ADR-0019) is the layer mechanism.
 - Slice 1 (the day-one tracer) verifies BOTH layers — one md element + one shadcn element, both updating from one source change. The "and" is load-bearing.
 - The Tailwind v4 bridge between md `--color-*` tokens and shadcn classic names (`--primary` etc.) lives in `globals.css`, not in engine code. `derive.ts` stays a pure value function.
+
+**Code anchors:** `packages/core/src/theme/mode.ts` — md-default / shadcn-subscope class layering.

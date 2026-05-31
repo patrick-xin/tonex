@@ -5,6 +5,10 @@
 // under a wrapper folder, until 4-5 files justify grouping. Per-mode shape
 // `{ light, dark }` for overrides + bindings is in schema.ts; this file is
 // just the union itself.
+//
+// Canonical domain definition — domain types live in @tonex/core, never inline-defined
+// in www; the drift sentinel greps for inline light/dark unions outside this file
+// (ADR-0016).
 export type Mode = 'light' | 'dark'
 
 // why: runtime tuple for iteration sites that need to enumerate both modes

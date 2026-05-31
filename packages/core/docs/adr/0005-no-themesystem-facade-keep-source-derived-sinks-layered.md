@@ -15,3 +15,5 @@ A reasonable-sounding suggestion is to collapse the theme code behind a single `
 4. The "many imports" complaint that motivates the facade is a strawman: callers import the public surface (a hook + a sink), not the file tree.
 
 **Consequence:** The public surface for callers is small but **not** funneled through one class — a hook (`useResolvedTokens`) for components, a pure derive function (`deriveTheme`) for tests and fixtures, and sink functions (`applyDom`, exporters) for DOM and export. The file count is higher than a facade design would have, but that's the **shape** of slot-fill, not a smell. Resist future suggestions to consolidate into a class.
+
+**Code anchors:** `packages/core/src/theme/derive/derive.ts` — pure deriveTheme; no ThemeSystem facade.

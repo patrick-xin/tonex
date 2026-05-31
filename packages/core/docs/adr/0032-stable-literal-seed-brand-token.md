@@ -37,3 +37,5 @@ The token values are still always derivable and always written to the live DOM a
 This token is additive. It does not touch the existing primary / primary-container bindings, and it does not resolve the `text-primary`-on-pale-container contrast problem that motivated the investigation.
 
 **Why:** that problem is the MCU mode×variant flip from the opening — a genuinely harder question about how roles should be routed, with its own trade-offs across every variant. Bundling a routing change into this token would couple a safe, isolated addition to a contested redesign. Brand stands alone and ships independently; normalizing the primary binding remains open and is decided on its own terms when taken up.
+
+**Code anchors:** `packages/core/src/theme/contrast/pairs.ts`, `packages/core/src/theme/contrast/contrast.ts` — stable literal seed brand token.

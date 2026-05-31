@@ -33,3 +33,5 @@ seed: {
 6. **Reaffirms ADR-0017 (WYSIWYG no preview/export drift).** This change is upstream of `deriveTheme` — every Sink still consumes the same `deriveTheme(source) → {md, shadcn, warnings}` output. The drift this ADR closes is *between source-state and user-intent*, not between preview and export. The byte-equality contract (`applyDom` ≡ exporters) holds because both still derive from `seedHex` (now via the selector) the same way.
 
 **Verified by `source.test.ts`** — the setter-tolerance / `CHROMA_HUE_LOCK` suite is the truth-source for the contract this decision turns on: after any chroma- or tone-only setter the hue holds to solver epsilon across the low-chroma probe (#57), a lock-release touch (`chroma` 3.99 → 4.5) preserves hue, and `setSeedHex('#3B82F6')` reads back exactly until an HCT axis is touched (then `exactHex` clears). The `seedHex`-field removal and schema bump are structural, per ADR-0009 c.4.
+
+**Code anchors:** `packages/core/src/theme/source.test.ts`, `packages/core/src/theme/source.ts` — HCT canonical seed with exact-hex preserve.

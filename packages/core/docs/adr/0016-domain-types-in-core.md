@@ -24,3 +24,5 @@ Adding a schema field doesn't widen the engine surface; adding an engine API doe
 - Reaching into `@tonex/core/src/...` (a subpath into source files) bypasses the public exports — refuse. Use the declared subpaths.
 - When a needed runtime tuple is missing from core (e.g. `MODES`), **add it to core first, then import** — don't inline-define and intend to lift later. The "I'll lift it later" intention is exactly what the rule blocks.
 - **Drift sentinel (cheap, mechanical):** grep for `'light' | 'dark'` literal unions outside `packages/core/src/theme/mode.ts`. Each hit is either an `import type { Mode }` (fine) or an inline definition (violation).
+
+**Code anchors:** `packages/core/src/theme/mode.ts` — domain types live in core; canonical Mode + drift sentinel.

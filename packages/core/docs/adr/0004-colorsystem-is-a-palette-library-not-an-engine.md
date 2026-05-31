@@ -10,3 +10,5 @@ The type `ColorSystemDef` is named ambiguously — "system" reads like an engine
 - Two expected adapters (TW + Radix) clear the two-adapters = real seam bar; one speculative adapter would not.
 
 **Consequence:** "Color system" in this codebase always means "palette library" — never engine, generator, or output format. An adapter without a surface-role map is picker-only; one with it is also offerable as a surface. That asymmetry is intentional.
+
+**Code anchors:** none — forward-looking palette-library slot; no color-systems/ directory exists until the second (Radix) adapter clears the two-adapters bar.

@@ -43,3 +43,5 @@ Algorithms live as pure free functions transforming per-token hex in to hex out.
 - **2026-05-20** — tint mechanism is resample-onto-MCU-tone, not `SHADE_MAP` snapping; coverage scaled 3→8 backgrounds and the `mode` param dropped. Folded into Mechanism + Coverage.
 - **2026-05-21** — text accent (`surfaceTintTextLevel`, GH #92) and outline coverage (coherence-coupled, treatment-over-pin order, GH #93) shipped. Folded into the Decision shape + the Coverage forks.
 - **2026-05-30** — confirms no `'none'` member ships; identity is level-0 desaturate. Folded into the Decision's first bullet.
+
+**Code anchors:** `packages/core/src/theme/surface/tint.ts` — post-MCU algorithmic surface treatment.

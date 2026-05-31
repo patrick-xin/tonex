@@ -11,3 +11,5 @@ MCU produces tinted neutrals (chromatic by design). Some users want clean, achro
 - The neutral ramp can visibly disagree with itself (e.g. a clean background next to an MCU-neutral muted). This is accepted.
 - The surface-only contract admits 1..N treatment knobs; the asymmetry is what's load-bearing, not the count.
 - Mechanism is downstream and lives in its own ADR (ADR-0018). This ADR pins the asymmetry; ADR-0018 pins how it ships. Issue #5 holds the original decision trail.
+
+**Code anchors:** `packages/core/src/theme/surface/index.ts` — surface-token-only escape valve; components keep MCU values.

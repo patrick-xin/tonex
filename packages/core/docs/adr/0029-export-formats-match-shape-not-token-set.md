@@ -24,3 +24,5 @@ ADR-0021 c.9 committed to non-CSS formatters (JSON, TS, Dart) without stating th
 **Amendment anchors** — folded into the body above; no external date-citation:
 
 - **2026-05-29** — DESIGN.md (ADR-0033) confirmed the shape-match contract binds to a non-CSS / non-Material target and added the two refinements above.
+
+**Code anchors:** `packages/core/src/theme/exporters/json.ts` — export formats match shape, not token set.

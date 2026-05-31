@@ -13,3 +13,5 @@ The source-of-truth zustand store holds every persisted user choice (seed hex, v
 - The exception bar is high: a separate store is only justified when there is a real lifecycle boundary (e.g. ephemeral session state that must NOT be persisted, or third-party integration state owned by a library). "It feels cleaner" is not a reason.
 - The persisted shape (`PortableTheme`) is the flat fields minus runtime-only fields (`_hydrated`, `actions`); flat layout makes the strip mechanical — no traversal, no slot-map.
 - The lock-vs-override pair (per ADR-0007) demonstrates the rule's range: two parallel pinning concerns at materially different shapes (boolean vs per-token mode-keyed hex) live as flat siblings, not nested under a "pinning manifest."
+
+**Code anchors:** `packages/core/src/theme/source.ts` — single flat zustand source store, no slices.

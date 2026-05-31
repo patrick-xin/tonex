@@ -2,6 +2,8 @@
   "extends": "@tonex/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
+      // Internal packages resolve to SOURCE, never built dist — the source-mode
+      // workspace mapping keeps grep / go-to-def / stack traces on src (ADR-0011).
       "@/*": ["./src/*"],
       "@tonex/core": ["../../packages/core/src/index.ts"],
       "@tonex/mcu": ["../../packages/mcu/index.ts"]

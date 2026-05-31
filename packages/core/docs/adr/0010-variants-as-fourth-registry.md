@@ -18,3 +18,5 @@ The shape question at slice 1 ship review was: should the `VariantStrategy` inte
 - `cmfSecondSourceHex` lives on `PortableTheme` (per ADR-0006: flat with prefixed name). `derive.ts` threads it into `cmf.build` only — every other variant call passes through with `secondHct` unset.
 - Disable rule for invalid combos (e.g. tertiary palette override when `variant === 'cmf'`) is a UI concern. The engine accepts whatever the source says; UI prevents invalid source states up-front rather than emitting runtime warnings.
 - If a 3rd two-source variant ever lands, this ADR's option (a) becomes the candidate to amend. Until then, the optional param is the contract.
+
+**Code anchors:** `packages/core/src/variants/index.ts` — variants registry; one widened VariantStrategy interface.

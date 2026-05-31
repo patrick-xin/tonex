@@ -23,3 +23,5 @@ When `true`, every seed-mutation pathway (`setSeedHex`, `setSeedHue`, `setSeedCh
 - Reset (`reset()` action) is allowed to bypass the gate; reset restores `DEFAULT_INPUTS` whose `seedHexLock` is `false` again. Locking does not survive reset.
 - The rejected `lockedSnapshot` struct stays closed: future "lock another input" needs are new boolean fields, not a struct — a narrower lock surface, fewer surprises.
 - Disable invalid interaction states up-front (UI tooltip + greyed input) rather than allowing the action and emitting a runtime warning. The lock toggle and the lock-aware setters are both consumers of the same boolean source-of-truth.
+
+**Code anchors:** `packages/core/src/theme/source.ts` — lock is a boolean source-input gate, not a snapshot.

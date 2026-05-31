@@ -28,3 +28,5 @@ The partition is a rule, not a tendency: persistent reference prose never lives 
 ## Where it lives
 
 The three surfaces' homes and the steps to extend each are imperative reference, not rationale — they live in [`rules/guidance.md`](../agents/rules/guidance.md). This ADR keeps only the *why*. The one coupling worth guarding mechanically — a tour `learnMore` must resolve to a real reference section — is asserted by `help-sections.test.ts`, so a dangling deep-link fails the suite rather than shipping.
+
+**Code anchors:** `apps/www/src/features/help-dialog/help-sections.test.ts` — three guidance surfaces; learnMore coupling guarded.

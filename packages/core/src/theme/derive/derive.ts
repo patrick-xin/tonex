@@ -1,3 +1,6 @@
+// MCU is the only color engine — no engine slot, no alternate generators (ADR-0001).
+// deriveTheme stays pure (source → { md, shadcn, warnings }): zero React, zero side
+// effects, no ThemeSystem facade — DOM and clipboard live in sinks (ADR-0005).
 import { contrastRatio } from '@tonex/color-utils'
 import {
   argbFromHex,

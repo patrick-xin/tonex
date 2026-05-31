@@ -1,3 +1,6 @@
+# packages/ = publishable npm artifacts; apps/ = deployed targets. Internal packages
+# never publish dist between themselves — consumers resolve to src, not built output
+# (ADR-0011). The ADR number is an API: never renumber (ADR-0011 §5).
 packages:
   - 'packages/*'
   - 'apps/*'

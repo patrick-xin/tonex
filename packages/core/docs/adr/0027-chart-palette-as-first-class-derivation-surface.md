@@ -64,3 +64,5 @@ The trajectory under this namespace is justified by properties the foundation gi
 ---
 
 ADR-0024's `chartMode` axis is superseded by this ADR's `chart.scheme` axis. The two-mode split established by 0024 (intent: coherent vs distinct series) is preserved verbatim; what changes is the namespace shape, the names (`mono`→`sequential`, `multi`→`categorical`), the reserved third value (`diverging`), and the perceptual-uniformity trajectory for `sequential`.
+
+**Code anchors:** `packages/core/src/chart/build.ts`, `packages/core/src/theme/derive/derive.test.ts` — chart palette as first-class derivation.

@@ -29,3 +29,5 @@ ADR-0014 set five rules for `apps/www/src/` based on legacy-prototype failure mo
 - `apps/www/CLAUDE.md` (living) updates to match; it holds the worked examples that resolve the locate-test for current surfaces.
 
 **Doc lifecycle — superseded by ADR-0034 Part B (Decisions 6–7).** A new decision still gets a new ADR with a supersession redirect; the `ADR-0014 → ADR-0022` chain stands. What changed is the rest of the original shape: a rule's *current statement* now lives as current truth in the owning ADR's body (rules 5–6 here), not reconstructed from a frozen original plus an amendment chain. ADR-0014's pre-feature reasoning is preserved as the rejected alternative beside the current rule, not as an audit trail the reader replays.
+
+**Code anchors:** `apps/www/src/lib/layer-context.tsx` — workflow/surface split + route-provided LayerContext.

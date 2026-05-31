@@ -95,3 +95,5 @@ Material's official theme builder ships 6 separate files (light/light-mc/light-h
 - **2026-05-13** — shadcn export emits `:root` + `.dark` (paste-replace, not class scopes) with an opt-in `includeHeader`; shadcn ignores `includeContrastVariants`. Folded into commitment 5–6.
 - **2026-05-29** — `applyDom` emits the md extended tier (reverses commitment 4's original *extended* exclusion; palette stays data-only). The showcase mood-shift demo is the second consumer that broke the "zero render benefit" premise. Folded into commitment 4.
 - *Folded without a date anchor (not cited externally):* the chartMode axis refinement to commitment 2 (chart derivation now lives in ADR-0027), and the shared-control-surface reframing of commitment 6 (options are one surface across all formats, not per-tab — the JSON formatter retired the per-tab framing).
+
+**Code anchors:** `packages/core/src/theme/exporters/css.ts`, `packages/core/src/theme/derive/derive.ts` — layered export boundaries.

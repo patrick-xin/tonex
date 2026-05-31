@@ -36,3 +36,5 @@ This ADR does not amend ADR-0017. ADR-0017's five commitments hold unchanged: bo
 - **2026-05-06** — md route shortened from `/theme/md3` to `/theme` (shadcn keeps its named segment). Folded into commitment 1.
 - **2026-05-07** — outer route group encapsulates the editor; non-editor surfaces grow under their own outer sibling group. Commitment 1's "two editor routes" was the layer split, not a route cap. Folded into commitment 1.
 - **2026-05-08** — route-provided `<LayerContext>` allowed for behavior parameterization (ADR-0022), distinct from the runtime primitive switching commitments 4–5 still ban. Folded into the Consequence.
+
+**Code anchors:** `apps/www/src/lib/layer-context.tsx` — segmented md/shadcn route layer.

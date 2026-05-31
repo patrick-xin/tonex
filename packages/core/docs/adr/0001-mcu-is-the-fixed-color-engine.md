@@ -7,3 +7,5 @@ This tool's wedge is Material Color Utilities (MCU): one seed → multiple well-
 **Why:** Swapping the engine dilutes the differentiator. Adding an engine slot makes "MCU vs other" a user-facing choice, which would force the UI to abstract over engine differences and lose the live mood-shift demo that's the actual pitch.
 
 **Consequence:** "Add Radix" can only mean "add Radix as a palette library" (see ADR-0004), never "add Radix as an engine."
+
+**Code anchors:** `packages/core/src/theme/derive/derive.ts` — MCU is the only color engine; no engine slot.

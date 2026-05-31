@@ -27,3 +27,5 @@ The shared `packages/typescript-config/base.json` keeps full strict. Core, www, 
 - New code in `@tonex/core` cannot rely on the strict-mode relax — that's mcu's local concession, not a workspace policy.
 - Don't fork upstream MCU. The package is a local *copy*, not a fork — when npm ships, we leave. If 2026-spec divergences from upstream are ever introduced, they must be removed before the migration window opens.
 - Type-import discipline holds: when `@tonex/core` consumes mcu types, it imports them as types and treats them as upstream contract; it does not silently widen mcu's surface.
+
+**Code anchors:** `packages/mcu/tsconfig.json`, `packages/core/src/theme/derive/derive.ts` — vendored MCU; strict relax scoped to mcu.

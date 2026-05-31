@@ -8,7 +8,8 @@ import type { ContrastBundle, ExportOptions } from './bundle'
 // why: emits one mode's color surface as a DESIGN.md (@google/design.md)
 // `colors:` YAML block — the fragment a user pastes into their own DESIGN.md
 // (commonly Stitch-authored), replacing its colors block with tonex's derived
-// palette. Sibling to json.ts / css.ts and bound by the same rules: ADR-0017 —
+// palette. DESIGN.md enters tonex outbound, color-only — never an inbound source or
+// CSS-generation input (ADR-0033). Sibling to json.ts / css.ts, same rules: ADR-0017 —
 // pure sink, reshapes what deriveTheme returned, never recomputes a color or a
 // role mapping; ADR-0021 c.1 — argb is canonical inside DerivedTheme, projection
 // to hex happens here at the seam. Four differences from the JSON / CSS sinks,

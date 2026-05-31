@@ -74,3 +74,5 @@ The store mirrors `useSource`'s shape but deliberately diverges on three details
 - ADR-0021 line 128 is **superseded** by this ADR's commitments 1, 2, 5, and 6. The "lift to a small UI store when a second consumer appears" rule is preserved (commitment 6); the surrounding context (categorization, layer boundary, persistence contract) is added.
 - `apps/www/CLAUDE.md` gains a one-paragraph reference pointing to this ADR's taxonomy and boundary rules so the convention layer stays in sync without restating the contract.
 - Future occupants of the Display popover enter only via commitment 6 (second-consumer guard); the popover is not a junk drawer for "things we might want a switch for someday."
+
+**Code anchors:** `apps/www/src/lib/stores/ui-prefs.ts` — display-prefs store + persistence contract.
