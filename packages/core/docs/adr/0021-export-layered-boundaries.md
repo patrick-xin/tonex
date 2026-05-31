@@ -12,14 +12,9 @@ Export is the product's deliverable. ADR-0017 established WYSIWYG between previe
 
 ## 2. Three-class md partition + chart
 
-The schema exports four constant token-name arrays:
+The schema partitions md token names into four constant arrays by export tier — `MD_CORE_TOKEN_NAMES`, `MD_EXTENDED_TOKEN_NAMES`, `MD_PALETTE_TOKEN_NAMES`, `MD_CHART_TOKEN_NAMES` (each array's membership is the schema's, not restated here). For chart this commitment fixes only the names and their export tier; the *derivation* — how chart tokens are computed from the source — is ADR-0027's concern.
 
-- `MD_CORE_TOKEN_NAMES` — primary/secondary/tertiary/error families, surface ladder, outline.
-- `MD_EXTENDED_TOKEN_NAMES` — fixed/fixed-dim families, per-family dim, inverse trio, surface-tint, shadow, scrim.
-- `MD_PALETTE_TOKEN_NAMES` — palette tones, mode/contrast invariant.
-- `MD_CHART_TOKEN_NAMES` — chart slots (chart-related arrays live in `chart/schema.ts`). The *derivation* behind these names — how chart tokens are computed from the source — is ADR-0027's concern, not this partition's; this commitment fixes only the names and their export tier.
-
-`MD_TOKEN_NAMES` keeps its current family-grouped order; partitions are name-match Sets, not contiguous slices. Order in baked CSS is unchanged.
+`MD_TOKEN_NAMES` keeps its family-grouped order; partitions are name-match Sets, not contiguous slices, so baked CSS order is unchanged.
 
 **Why:** future formatters (TS / JSON / Dart) inherit the partitions for free. Type unions (`MdCoreTokenName`, etc.) make role-bindings statically check against the right tier.
 
@@ -92,9 +87,8 @@ Material's official theme builder ships 6 separate files (light/light-mc/light-h
 ## Consequences
 
 - Drift-guard test (ADR-0017's amendment) reads tokens back from each `CSSStyleRule.style`; its `projectTheme` helper covers the DOM-emitted fields — core + extended + chart for md — so the data-level contract is "applyDom's md tokens = core + extended + chart". Format-side has its own pure-function snapshot tests over `exportCss(bundle, layer, options)` covering each filter combination.
-- `pnpm bake` calls `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` is a thin convenience wrapper that constructs `{ default: theme }` and calls `exportCss`. globals.css regenerates with identical text (oklch output preserved).
+- `pnpm bake` regenerates `globals.css` from `DEFAULT_INPUTS` through the same export pipeline, byte-identical (oklch output preserved) — so baked and live output cannot diverge.
 - Toggle state for the dialog: the JSON formatter (ADR-0029) is the second non-CSS consumer that made every tab read options, so whether toggle state lifts to a small UI store or stays React-local is an implementation call for the wiring slice, not a commitment here.
-- The cmf-vs-2025 spec memo's `lifecycle` field bumps from `until-adr-0021` to whatever number the future shadcn-binding-expansion ADR ends up taking. Trivial bookkeeping.
 
 **Amendment anchors** — dates cited from code/docs; each decision is folded into the commitment bodies above and kept here only so the citation resolves in one hop:
 
