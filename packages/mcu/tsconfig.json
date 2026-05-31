@@ -1,6 +1,8 @@
 {
   "extends": "@tonex/typescript-config/base.json",
   "compilerOptions": {
+    // Strict relaxed HERE ONLY — vendored third-party MCU source doesn't pass full
+    // strict; never relax the shared base. Removed when MCU ships on npm (ADR-0012).
     "noUncheckedIndexedAccess": false,
     "exactOptionalPropertyTypes": false
   },

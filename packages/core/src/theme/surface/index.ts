@@ -1,6 +1,8 @@
 // why: surface/ groups the post-MCU treatment algorithms (ADR-0018). Each
 // algorithm exports a free function `(layer, [mode,] level, ...) → TokenMap`
-// and touches only md surface tokens. derive.ts dispatches via source.surfaceAlgo.
+// and touches only md surface tokens — a surface-token-only escape valve; component
+// tokens keep MCU values unconditionally (ADR-0002). derive.ts dispatches via
+// source.surfaceAlgo.
 // Adding a third algorithm: new file here, register the branch in
 // derive.applyTreatment, extend SURFACE_ALGOS in schema.
 export { applySurfaceDesaturate } from './desaturate'

@@ -1,5 +1,3 @@
-> **State:** Living. Edit when public-facing positioning shifts.
-
 # Tonex — vision
 
 Tonex turns a seed colour into copy-paste-ready themes for both **Material 3** and **shadcn**, generated from one source in one call. Light and dark are co-derived; preview and export never drift (see ADR-0017).

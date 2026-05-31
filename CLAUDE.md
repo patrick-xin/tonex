@@ -1,10 +1,13 @@
-> **State:** Living. Edit when adding a constraint with no in-code home.
+# tonex
+
+This is a tool that turns a seed hex color into a theme via Material Color Utilities.
 
 ## Agent context
 
-Agent context (working style, conventions, durable rules) lives in `docs/agents/`. Subtree code rules auto-load from nested `CLAUDE.md` — `packages/core/CLAUDE.md` (engine) and `apps/www/CLAUDE.md` (app) — when you touch those trees. Promote stable rules to repo; keep memory for transient observations only.
-
-Starting work? Read `docs/agents/session-flow.md` for the reading order.
+Multi-context repo:
+- Core Engine → `packages/core/CLAUDE.md`
+- Web app → `apps/www/CLAUDE.md`
+- System-wide `decision → docs/adr/`
 
 ## Agent skills
 
@@ -12,7 +15,8 @@ Starting work? Read `docs/agents/session-flow.md` for the reading order.
 Issues live in GitHub Issues at `patrick-xin/tonex`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
-Default canonical label strings (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+Default canonical labels. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
-Single-context repo — one `CONTEXT.md` (vocabulary) and `docs/adr/` (decisions) at the root. Use `CONTEXT.md` terms; skim ADR filenames and read those touching your area.
+Multi-context layout: ADRs live per layer — system-wide in `docs/adr/`, engine in `packages/core/docs/adr/`, web app in `apps/www/docs/adr/`; cited by number, never renumbered (ADR-0011 §5).
+

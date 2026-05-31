@@ -30,8 +30,8 @@ interface HctColorPickerProps {
 // every other streaming input in the rail. The prior commit-only-on-release
 // pattern existed because the per-tick cost was unaffordable; issue #9 fixed
 // that in core (shared derive cache, per-token applyDom, debounced persist),
-// so consistency wins. ADR-0003 amendment 2026-05-06 codifies this for HCT
-// sliders specifically.
+// so consistency wins. ADR-0017 amendment 2026-05-06 (issue #9 per-token
+// applyDom) is what made per-tick streaming affordable.
 export function HctColorPicker({ value, onChange }: HctColorPickerProps) {
   const hexInputId = useId()
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)

@@ -66,7 +66,7 @@ describe('resolvePresetApply — seed source field', () => {
 })
 
 describe('resolvePresetApply — contrast source field', () => {
-  // why: contrast has no lock (only the seed does — CONTEXT: Lock), so its
+  // why: contrast has no lock (only the seed does — GLOSSARY: Lock), so its
   // matrix is just touched vs untouched. 'enterprise' carries a non-zero curated
   // contrast, so supersession is observable against the boot default of 0.
   it('supersedes an untouched contrast with the preset curated contrast', () => {
@@ -142,7 +142,7 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   })
 
   // why: lock outranks the dialog — a locked seed means "do not move this" by
-  // any path (CONTEXT: Lock), so an adopt choice can't override it. The dialog
+  // any path (GLOSSARY: Lock), so an adopt choice can't override it. The dialog
   // never offers the switch for a locked seed, but the resolver stays the
   // authority regardless of what the UI passes.
   it('keeps a locked seed even when the seed choice is set', () => {

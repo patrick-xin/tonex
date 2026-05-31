@@ -1,15 +1,15 @@
-# Triage Labels
+# Triage labels
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+The triage skills (`/triage`, `/to-issues`, `/to-prd`) speak in five canonical roles. In this repo the GitHub label strings **are** those role names verbatim — the mapping is identity, so there is nothing to translate.
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
-| -------------------------- | -------------------- | ---------------------------------------- |
-| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
-| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
-| `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
-| `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
-| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+| Label             | When to apply                                          |
+| ----------------- | ------------------------------------------------------ |
+| `needs-triage`    | Maintainer still needs to evaluate the issue           |
+| `needs-info`      | Blocked on the reporter for more information           |
+| `ready-for-agent` | Fully specified — an AFK agent can take it unattended  |
+| `ready-for-human` | Needs human implementation judgment                    |
+| `wontfix`         | Will not be actioned                                   |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+`gh label list` is the source of truth for what exists; this table only carries the *when-to-apply* a command can't tell you. Area labels (`core`, `www`) and status labels (`deferred`) are orthogonal to triage and may co-apply.
 
-Edit the right-hand column to match whatever vocabulary you actually use.
+When a skill names a role ("apply the AFK-ready label"), use the matching string above.

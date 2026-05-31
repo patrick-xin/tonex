@@ -24,6 +24,9 @@ describe('openItemsFor', () => {
   })
 })
 
+// ADR-0030's one mechanically-guarded coupling: guidance is three non-overlapping
+// surfaces with depth living only in reference, so a tour learnMore must resolve to a
+// real help section — a dangling deep-link fails here rather than shipping.
 describe('tour learnMore drift guard', () => {
   it('every tour step learnMore resolves to a real help section', () => {
     for (const step of TOUR_STEPS) {

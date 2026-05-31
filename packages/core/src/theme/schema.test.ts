@@ -173,7 +173,7 @@ describe('parsePortableTheme', () => {
     expect(parsePortableTheme(bad).ok).toBe(false)
   })
 
-  // why: ADR-0027 c.6 slice chart-2 — chart override layer mirrors role
+  // why: ADR-0027 c.4 slice chart-2 — chart override layer mirrors role
   // override schema modulo the key domain (SHADCN_CHART_TOKEN_NAMES vs
   // SHADCN_ROLE_NAMES). Same validation surface, same sparse-default
   // shape, same rejection modes.

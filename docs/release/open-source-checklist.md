@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the OSS-readiness bar changes.
-
 # Open-source release checklist
 
 Run before flipping the repo public OR before publishing any package to npm. The cost of an extra audit pass is small; the cost of leaking a personal identifier or a strategic positioning note is high.
@@ -23,7 +21,7 @@ Run before flipping the repo public OR before publishing any package to npm. The
 
 ### Voice
 
-- [ ] `CONTEXT.md` and `docs/agents/*` reviewed — second-person ("you", "the user") replaced with third-person ("contributors", "agents") where the doc will be read by external readers.
+- [ ] `glossary.md` and `docs/agents/*` reviewed — second-person ("you", "the user") replaced with third-person ("contributors", "agents") where the doc will be read by external readers.
 - [ ] No "user told me…" style notes in tracked files.
 
 ### Repo hygiene
@@ -37,7 +35,7 @@ Run before flipping the repo public OR before publishing any package to npm. The
 
 ### Memory and machine-local state
 
-- [ ] Sweep run per `docs/agents/memory-lifecycle.md` — strategically sensitive content moved to `docs/private/`, graduated content absorbed into ADRs / `docs/agents/` / CHANGELOG.
+- [ ] Sweep run (the `sweep` skill; policy in `docs/agents/memory-lifecycle.md`) — strategically sensitive content moved to `docs/private/`, graduated content absorbed into ADRs / `docs/agents/` / CHANGELOG.
 - [ ] `~/.claude/projects/<repo>/memory/` reviewed for accidental commits (memory should never have been tracked, but verify).
 
 ### Open issues / labels

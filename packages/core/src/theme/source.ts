@@ -1,3 +1,7 @@
+// Single flat source store — one zustand store, flat top-level shape, no slices or
+// sub-stores; field-name prefixes (md3*, shadcn*, surface*, cmf*) are the taxonomy
+// (ADR-0006). Lock is a boolean input-gate: seed-mutation setters early-return when
+// seedHexLock is set — never a derived snapshot (ADR-0007).
 import { isValidHex } from '@tonex/color-utils'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -403,10 +407,9 @@ export const useSource = create<SourceState>()(
       // why: passthrough — no forward-migration logic for v1 → v2.
       // ADR-0028 flipped the seed shape (`seedHex: string` → `seed: {...}`)
       // pre-launch; persisted v1 records fail the v2 schema and reset to
-      // DEFAULT_INPUTS via onRehydrateStorage below (ADR-0009 c.4,
-      // memory/feedback_prelaunch_breaking_changes.md). Future bumps with
-      // live users to preserve add real forward-migration branches per
-      // ADR-0009.
+      // DEFAULT_INPUTS via onRehydrateStorage below (ADR-0009 c.4). Future
+      // bumps with live users to preserve add real forward-migration branches
+      // per ADR-0009.
       migrate: (persistedState, _version) => persistedState as PortableTheme,
       // why: flip the _hydrated guard once persist completes. useResolvedTokens
       // returns null until this fires; applyDom only subscribes after this is

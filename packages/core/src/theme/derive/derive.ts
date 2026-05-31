@@ -1,3 +1,6 @@
+// MCU is the only color engine — no engine slot, no alternate generators (ADR-0001).
+// deriveTheme stays pure (source → { md, shadcn, warnings }): zero React, zero side
+// effects, no ThemeSystem facade — DOM and clipboard live in sinks (ADR-0005).
 import { contrastRatio } from '@tonex/color-utils'
 import {
   argbFromHex,
@@ -295,8 +298,10 @@ export function deriveTheme(source: PortableTheme): DerivedTheme {
   applyPaletteOverrides(lightScheme, darkScheme, source)
 
   // why: MCU build → palette override → md emit → generic token override.
-  // Token override is the surgical pin and runs LAST so user pins always
-  // win over both MCU and the palette regen.
+  // Token override is the surgical pin and runs last in the md pipeline,
+  // before applyTreatment — so user pins win over MCU and the palette regen,
+  // but a pin on a surface/outline token is still subject to the active
+  // treatment (ADR-0018 Amendment 2026-05-21, outline coverage).
   const mdLightBase = applyMd3TokenOverrides(
     buildMdLayer(lightScheme, mdc),
     source.md3TokenOverrides.light,
