@@ -64,7 +64,7 @@ const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeKey[]>> = {
   JSON: ['includeExtended', 'includeChart', 'includePalette', 'includeContrastVariants'],
   Dart: ['includeChart', 'includePalette', 'includeContrastVariants'],
   // why: DESIGN.md is a flat hex color block — extended roles is its only
-  // meaningful include (mode is picked separately in the rail, below).
+  // meaningful include (mode is picked separately, in the dialog header).
   'Design.md': ['includeExtended'],
 }
 
@@ -102,10 +102,9 @@ export function tabUsesMode(tab: ExportTab): boolean {
   return MODE_TABS.has(tab)
 }
 
-// why: single-mode picker for the Design.md tab. Lives in the export rail (not
-// the header) so the tab's controls — mode + extended roles — sit together;
-// Design.md is not a FORMAT_TAB, so the header's oklch/hex chooser never
-// applies to it. Mirrors that chooser's shape.
+// why: single-mode picker for the Design.md tab. Sits in the dialog header at
+// the oklch/hex chooser's slot — Design.md is not a FORMAT_TAB, so that chooser
+// never renders there and the two are mutually exclusive. Mirrors its shape.
 export function ExportModeChooser({
   mode,
   onChange,
@@ -155,8 +154,6 @@ interface ExportFiltersProps {
   tab: ExportTab
   options: ExportOptions
   onChange: (next: ExportOptions) => void
-  mode: Mode
-  onModeChange: (mode: Mode) => void
 }
 
 // why: the rail reflows at lg (the grid's `lg:grid-cols-[…]` breakpoint, the
@@ -181,7 +178,7 @@ function useIsDesktop(): boolean {
   return isDesktop
 }
 
-export function ExportFilters({ tab, options, onChange, mode, onModeChange }: ExportFiltersProps) {
+export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
   const isDesktop = useIsDesktop()
   const [userOpen, setUserOpen] = useState(false)
   const keys = INCLUDES_BY_TAB[tab] ?? []
@@ -195,12 +192,6 @@ export function ExportFilters({ tab, options, onChange, mode, onModeChange }: Ex
 
   return (
     <aside className="flex min-h-0 flex-col overflow-y-auto border-b border-outline-variant/40 p-4 lg:border-r lg:border-b-0">
-      {tabUsesMode(tab) && (
-        <div className="mb-4 flex flex-col gap-1.5">
-          <span className="text-sm font-medium uppercase tracking-wide">Mode</span>
-          <ExportModeChooser mode={mode} onChange={onModeChange} />
-        </div>
-      )}
       <Collapsible open={open} onOpenChange={setUserOpen} className="flex min-h-0 flex-col">
         {/* Mobile-only disclosure; force-open at lg+ via useIsDesktop. */}
         <CollapsibleTrigger className="flex w-full items-center justify-between text-sm text-on-surface lg:hidden">

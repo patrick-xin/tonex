@@ -25,8 +25,10 @@ import { ExportControls } from './export-controls'
 import {
   ExportFilters,
   ExportFormatChooser,
+  ExportModeChooser,
   tabHasOptions,
   tabSupportsFormat,
+  tabUsesMode,
 } from './export-filters'
 import { type ExportTab, useExportContent } from './use-export-content'
 
@@ -112,7 +114,10 @@ export const ExportButton = ({
           </div>
         </TooltipContent>
       </Tooltip>
-      <DialogContent className="flex flex-col gap-0 p-0! w-full max-w-3xl max-h-[calc(100dvh-10rem)] sm:max-h-[calc(100dvh-6rem)] overflow-hidden">
+      {/* why: fixed height (not max-h) so switching tabs never resizes the
+          dialog — the long CSS tabs overflow to the cap while Design.md's short
+          color block would otherwise shrink it. */}
+      <DialogContent className="flex flex-col gap-0 p-0! w-full max-w-3xl h-[calc(100dvh-10rem)] sm:h-[calc(100dvh-6rem)] overflow-hidden">
         <DialogHeader className="flex flex-row justify-between p-4 border-b border-outline-variant/40 text-left">
           <div className="flex flex-col gap-1">
             <DialogTitle>Export theme</DialogTitle>
@@ -121,6 +126,7 @@ export const ExportButton = ({
           {tabSupportsFormat(exportTab) && (
             <ExportFormatChooser options={options} onChange={setOptions} />
           )}
+          {tabUsesMode(exportTab) && <ExportModeChooser mode={mode} onChange={setPickedMode} />}
         </DialogHeader>
         <div
           className={cn(
@@ -128,15 +134,7 @@ export const ExportButton = ({
             hasOptions && 'lg:grid-cols-[13rem_minmax(0,1fr)]',
           )}
         >
-          {hasOptions && (
-            <ExportFilters
-              tab={exportTab}
-              options={options}
-              onChange={setOptions}
-              mode={mode}
-              onModeChange={setPickedMode}
-            />
-          )}
+          {hasOptions && <ExportFilters tab={exportTab} options={options} onChange={setOptions} />}
           {showTabs ? (
             <Tabs
               value={exportTab}
