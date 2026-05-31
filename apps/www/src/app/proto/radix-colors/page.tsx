@@ -9,20 +9,29 @@ import { useState } from 'react'
 import {
   BANDS,
   bandFor,
+  GROUPS,
+  type GroupKey,
   IDENTITY_STEP,
   inkOn,
+  isBright,
   type Mode,
   type RadixScale,
   roleFor,
   SCALES,
   STEP_ROLES,
+  scalesIn,
   stepHex,
 } from './radix-sample-data'
 
-type PatternKey = 'ramp-rows' | 'drill-down' | 'bands' | 'purpose'
+type PatternKey = 'combobox' | 'ramp-rows' | 'drill-down' | 'bands' | 'purpose'
 type Sel = { scale: string; step: number }
 
 const PATTERNS: { key: PatternKey; label: string; note: string }[] = [
+  {
+    key: 'combobox',
+    label: 'Combobox',
+    note: 'The real surface — ~30 scales at TW-picker width. How do we group + show steps?',
+  },
   {
     key: 'ramp-rows',
     label: 'Ramp rows',
@@ -563,11 +572,284 @@ function PurposeFirst(props: {
   )
 }
 
+// — pattern 5: combobox (the real surface) ————————————————————
+
+type Grouping = 'hue' | 'function' | 'flat'
+type RowStyle = 'ramp' | 'identity'
+
+const GROUPINGS: { key: Grouping; label: string }[] = [
+  { key: 'hue', label: 'Hue families' },
+  { key: 'function', label: 'Grays vs accents' },
+  { key: 'flat', label: 'Flat A–Z' },
+]
+
+type ComboGroup = { label: string | null; scales: RadixScale[] }
+
+function buildGroups(grouping: Grouping, query: string): ComboGroup[] {
+  const q = query.trim().toLowerCase()
+  const match = (s: RadixScale) => !q || s.name.includes(q)
+  if (grouping === 'flat') {
+    const scales = [...SCALES].filter(match).sort((a, b) => a.name.localeCompare(b.name))
+    return scales.length ? [{ label: null, scales }] : []
+  }
+  if (grouping === 'function') {
+    return (
+      [
+        { label: 'Accents', scales: SCALES.filter((s) => s.kind === 'accent' && match(s)) },
+        { label: 'Grays', scales: SCALES.filter((s) => s.kind === 'gray' && match(s)) },
+      ] satisfies ComboGroup[]
+    ).filter((g) => g.scales.length)
+  }
+  return GROUPS.map((g) => ({
+    label: g.label,
+    scales: scalesIn(g.key as GroupKey).filter(match),
+  })).filter((g) => g.scales.length)
+}
+
+// compact 12-cell ramp for a combobox row — identity marked, no numbers
+function MiniRamp(props: {
+  scale: RadixScale
+  mode: Mode
+  selected: Sel | null
+  onSelect: (s: Sel) => void
+  onHover: (s: Sel | null) => void
+}) {
+  const { scale, mode, selected, onSelect, onHover } = props
+  return (
+    <div className="flex flex-1 overflow-hidden rounded">
+      {STEP_ROLES.map((role) => {
+        const hex = stepHex(scale, mode, role.step)
+        const ink = inkOn(hex)
+        const isSel = selected?.scale === scale.name && selected?.step === role.step
+        const isId = role.step === IDENTITY_STEP
+        return (
+          <button
+            key={role.step}
+            type="button"
+            title={`${scale.name} ${role.step} · ${role.label}`}
+            onMouseEnter={() => onHover({ scale: scale.name, step: role.step })}
+            onMouseLeave={() => onHover(null)}
+            onClick={() => onSelect({ scale: scale.name, step: role.step })}
+            className="relative h-5 flex-1"
+            style={{
+              background: hex,
+              boxShadow: isSel ? `inset 0 0 0 2px ${ink}` : 'none',
+              zIndex: isSel ? 1 : 0,
+            }}
+          >
+            {isId ? (
+              <span
+                className="absolute right-0 bottom-0 left-0 h-0.5"
+                style={{ background: ink, opacity: 0.9 }}
+              />
+            ) : null}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function BrightBadge({ chrome }: { chrome: Chrome }) {
+  return (
+    <span
+      className="rounded px-1 text-[9px] font-medium uppercase"
+      style={{ background: chrome.sub, color: chrome.muted }}
+      title="Step 9 is light — needs dark foreground"
+    >
+      bright
+    </span>
+  )
+}
+
+// one combobox popover mock at a real width
+function ComboPopover(props: {
+  title: string
+  width: number
+  rowStyle: RowStyle
+  grouping: Grouping
+  query: string
+  onQuery: (q: string) => void
+  mode: Mode
+  selected: Sel | null
+  onSelect: (s: Sel) => void
+  onHover: (s: Sel | null) => void
+  chrome: Chrome
+}) {
+  const {
+    title,
+    width,
+    rowStyle,
+    grouping,
+    query,
+    onQuery,
+    mode,
+    selected,
+    onSelect,
+    onHover,
+    chrome,
+  } = props
+  const groups = buildGroups(grouping, query)
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="text-xs" style={{ color: chrome.muted }}>
+        {title} · <span className="font-mono">{width}px</span>
+      </div>
+      <div
+        className="flex flex-col overflow-hidden rounded-xl"
+        style={{
+          width,
+          background: chrome.panel,
+          boxShadow: `0 0 0 1px ${chrome.border}, 0 12px 32px rgba(0,0,0,.16)`,
+        }}
+      >
+        {/* search box (visual + functional) */}
+        <div className="p-1.5" style={{ borderBottom: `1px solid ${chrome.border}` }}>
+          <input
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+            placeholder="Search colors…"
+            className="w-full rounded-md px-2 py-1.5 text-sm outline-none"
+            style={{ background: chrome.sub, color: chrome.text }}
+          />
+        </div>
+        <div className="flex max-h-80 flex-col overflow-auto p-1">
+          {groups.length === 0 ? (
+            <div className="px-2 py-6 text-center text-sm" style={{ color: chrome.muted }}>
+              No color found.
+            </div>
+          ) : (
+            groups.map((group) => (
+              <div key={group.label ?? 'flat'} className="flex flex-col">
+                {group.label ? (
+                  <div
+                    className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wide"
+                    style={{ color: chrome.muted }}
+                  >
+                    {group.label}
+                  </div>
+                ) : null}
+                {group.scales.map((scale) => {
+                  const idHex = stepHex(scale, mode, IDENTITY_STEP)
+                  const rowSelected = selected?.scale === scale.name
+                  if (rowStyle === 'identity') {
+                    return (
+                      <button
+                        key={scale.name}
+                        type="button"
+                        onMouseEnter={() => onHover({ scale: scale.name, step: IDENTITY_STEP })}
+                        onMouseLeave={() => onHover(null)}
+                        onClick={() => onSelect({ scale: scale.name, step: IDENTITY_STEP })}
+                        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left"
+                        style={{ background: rowSelected ? chrome.sub : 'transparent' }}
+                      >
+                        <span
+                          className="size-4 shrink-0 rounded"
+                          style={{
+                            background: idHex,
+                            boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.15)',
+                          }}
+                        />
+                        <span className="text-sm capitalize" style={{ color: chrome.text }}>
+                          {scale.name}
+                        </span>
+                        {isBright(scale) ? <BrightBadge chrome={chrome} /> : null}
+                      </button>
+                    )
+                  }
+                  return (
+                    <div
+                      key={scale.name}
+                      className="flex items-center gap-2 rounded-md px-2 py-1"
+                      style={{ background: rowSelected ? chrome.sub : 'transparent' }}
+                    >
+                      <span
+                        className="w-12 shrink-0 truncate text-xs capitalize"
+                        style={{ color: chrome.text }}
+                      >
+                        {scale.name}
+                      </span>
+                      <MiniRamp
+                        scale={scale}
+                        mode={mode}
+                        selected={selected}
+                        onSelect={onSelect}
+                        onHover={onHover}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ComboboxLab(props: {
+  mode: Mode
+  selected: Sel | null
+  onSelect: (s: Sel) => void
+  onHover: (s: Sel | null) => void
+  chrome: Chrome
+}) {
+  const { mode, selected, onSelect, onHover, chrome } = props
+  const [grouping, setGrouping] = useState<Grouping>('hue')
+  const [query, setQuery] = useState('')
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-medium" style={{ color: chrome.text }}>
+          Grouping
+        </span>
+        <SegTabs value={grouping} options={GROUPINGS} onChange={setGrouping} chrome={chrome} />
+      </div>
+      <p className="text-xs" style={{ color: chrome.muted }}>
+        Same data + grouping, two row treatments. Left keeps the whole ramp legible (needs more
+        width); right matches today's TW picker 1:1 but a row only yields step {IDENTITY_STEP} — the
+        step choice has to move to a second surface.
+      </p>
+      <div className="flex flex-wrap items-start gap-6">
+        <ComboPopover
+          title="Row = ramp"
+          width={300}
+          rowStyle="ramp"
+          grouping={grouping}
+          query={query}
+          onQuery={setQuery}
+          mode={mode}
+          selected={selected}
+          onSelect={onSelect}
+          onHover={onHover}
+          chrome={chrome}
+        />
+        <ComboPopover
+          title="Row = identity swatch (today's TW picker)"
+          width={208}
+          rowStyle="identity"
+          grouping={grouping}
+          query={query}
+          onQuery={setQuery}
+          mode={mode}
+          selected={selected}
+          onSelect={onSelect}
+          onHover={onHover}
+          chrome={chrome}
+        />
+      </div>
+    </div>
+  )
+}
+
 // — page ——————————————————————————————————————————————————————
 
 export default function RadixColorsProtoPage() {
   const [mode, setMode] = useState<Mode>('light')
-  const [pattern, setPattern] = useState<PatternKey>('ramp-rows')
+  const [pattern, setPattern] = useState<PatternKey>('combobox')
   const [selected, setSelected] = useState<Sel | null>({ scale: 'tomato', step: IDENTITY_STEP })
   const [hovered, setHovered] = useState<Sel | null>(null)
   const chrome = chromeFor(mode)
@@ -587,9 +869,10 @@ export default function RadixColorsProtoPage() {
         <header className="flex flex-col gap-1">
           <h1 className="text-xl font-semibold">Radix color picker — pattern lab</h1>
           <p className="text-sm" style={{ color: chrome.muted }}>
-            Throwaway prototype. Sample data — only <span className="font-mono">tomato</span> is
-            canonical; other scales are approximate Radix values for layout, swap for{' '}
-            <span className="font-mono">@radix-ui/colors</span> before real use.
+            Throwaway prototype. All 31 scales vendored accurately from{' '}
+            <span className="font-mono">@radix-ui/colors@3.0.0</span> (solid, light + dark). The{' '}
+            <span style={{ color: chrome.text }}>Combobox</span> tab is the real surface —
+            everything else is full-page exploration.
           </p>
         </header>
 
@@ -638,6 +921,7 @@ export default function RadixColorsProtoPage() {
 
         {/* active pattern */}
         <div>
+          {pattern === 'combobox' ? <ComboboxLab {...shared} /> : null}
           {pattern === 'ramp-rows' ? <RampRows {...shared} /> : null}
           {pattern === 'drill-down' ? <DrillDown {...shared} /> : null}
           {pattern === 'bands' ? <SemanticBands {...shared} /> : null}
