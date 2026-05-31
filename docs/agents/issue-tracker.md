@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-GitHub Issues at `patrick-xin/tonex`. Skills like `to-issues`, `to-prd`, `triage` read from and write to it.
+Issues and PRDs live as GitHub Issues at [`patrick-xin/tonex`](https://github.com/patrick-xin/tonex/issues). The `/to-issues`, `/to-prd`, and `/triage` skills read from and write to it.
 
 ## Conventions
 
@@ -8,7 +8,7 @@ GitHub Issues at `patrick-xin/tonex`. Skills like `to-issues`, `to-prd`, `triage
 - **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
-- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."` — valid strings live in [`triage-labels.md`](./triage-labels.md).
 - **Close**: `gh issue close <number> --comment "..."`
 
 `gh` infers the repo from `git remote -v` automatically when run inside this clone.
