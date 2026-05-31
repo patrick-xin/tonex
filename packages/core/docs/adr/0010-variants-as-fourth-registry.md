@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Variants — one widened interface, special cases as data
 
 Variants are named MCU scheme strategies (cmf, tonalSpot, neutral, vibrant, expressive, fidelity, content, rainbow, fruitSalad, monochrome) registered as a named-slot map. Some variants take a single seed; cmf takes a seed plus an optional secondary source colour (the 2026 spec's two-source feature).

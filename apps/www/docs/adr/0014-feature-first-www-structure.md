@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Feature-first www structure with five hard rules
 
 `apps/www/src/` is feature-first. The legacy prototype showed four failure modes that destroyed pattern-gravity: nested sub-features, multiple `shared/` rot folders, features without public surfaces, and layer mixed with workflow at the wrong abstraction level. The rules below block each one structurally.
@@ -12,9 +10,9 @@
 
 3. **Providers by scope.** App-wide → `app/_providers.tsx`. Feature-scoped → inside the feature folder (e.g. `features/<name>/providers.tsx`). **No top-level `providers/` folder ever.** The location of a provider tells you its scope.
 
-4. **`components/` has a strict promotion rule.** A component (or component group) lives in `components/` ONLY when 2+ features import it. Single-feature components stay private to their feature. There are exactly two layer-keyed primitive folders — `components/ui/` (md) and `components/shadcn/`. **No `components/shared/`.**
+4. **`components/` has a strict promotion rule, three layer-keyed folders.** A component (or component group) lives in `components/` ONLY when 2+ features import it; single-feature components stay private to their feature. There are exactly three primitive folders, distinguished by layer semantics — `components/ui/` (md-styled), `components/shadcn/` (shadcn-styled), and `components/shared/` (layer-agnostic). `components/shared/` is a legitimate home for cross-layer primitives that are neither md- nor shadcn-styled; the promotion gate (2+ features) bounds the rot failure mode the original prototype's `shared/` folders showed, so the ban that once applied to it was an over-correction.
 
-5. **Features are layer-agnostic.** A feature's job is the workflow ("pick a seed"). Primitives come from `components/ui/` or `components/shadcn/` based on the consumption site, not from feature-level forks. There is no `features/md/` or `features/shadcn/` — wrong abstraction level.
+5. **Surface vs workflow — superseded by ADR-0022.** The original rule 5 made all features layer-agnostic (no `features/md/` or `features/shadcn/`). ADR-0022 supersedes it with a workflow/surface split: **workflow features** (verbs — "pick a seed") stay layer-agnostic, but **surface features** (nouns/places — `features/md-rail/`, `features/shadcn-rail/`) may be layer-keyed because they ARE the layer-specific composition site. The current statement of this rule, plus rule 6 (the locate-test design metric) and the route-provided `<LayerContext>` carve-out, all live in ADR-0022. This rule's number is retained as the anchor; its content moved.
 
 **Layout target:**
 
@@ -22,10 +20,11 @@
 apps/www/src/
   app/                # routes (per ADR-0019 chrome/canvas split)
     _providers.tsx    # app-wide providers ONLY here
-  features/           # workflow features, layer-agnostic
+  features/           # workflow (layer-agnostic) + surface (layer-keyed) features per ADR-0022
   components/
     ui/               # md-styled primitives
     shadcn/           # shadcn-styled primitives
+    shared/           # layer-agnostic primitives
   lib/                # www-only glue (clipboard, cn) — created on demand
   styles/
 ```
@@ -39,27 +38,11 @@ Most slots are created on demand. The features/ + components/ + app/_providers.t
 - New feature → model on a representative existing feature folder. That folder is the de-facto template.
 - Tempted to nest sub-features → refuse; split into a sibling.
 - Tempted to leave a hook bare at `features/` root → refuse; place under a `features/<name>/` folder (promote to `lib/` only when 2+ features consume it).
-- Tempted to create `features/shared/` → refuse; promote to `components/` if 2+ features need it, otherwise keep private.
-- Tempted to add a `<Layer>` context → refuse; route-level segmentation is the layer mechanism (ADR-0019).
-- Doc surface for these rules: `apps/www/CLAUDE.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins the rules; the doc carries the working examples.
+- Tempted to create `features/shared/` → refuse; that rot-folder name stays banned. A cross-layer *primitive* belongs in `components/shared/` once 2+ features need it; otherwise keep it private to its feature.
+- Tempted to add a `<Layer>` context for *primitive selection* → refuse; route-level segmentation is the layer mechanism (ADR-0019). A route-provided `<LayerContext>` for *behavior parameterization* (which token list / scheme a workflow operates on) is allowed per ADR-0022 — the distinction is whether removing the context changes *which component renders* (banned) or *what data the same component renders* (allowed).
+- Doc surface for these rules: `apps/www/CLAUDE.md` keeps the living version with locate-test examples and any subsequent route-plan adjustments. This ADR pins rules 1–4; ADR-0022 carries rules 5–6 and the worked examples.
 
-## Amendment 2026-05-08 — rule 5 superseded; rule 6 added (see ADR-0022)
+**Amendment anchors** — folded into the rule bodies above; no external date-citations, kept for the supersession chain:
 
-Three slices of real features (editor-rail, export, testbed in active use; md/shadcn rail split + shadcn token-override route on the near horizon) revealed two failure modes in the original rules:
-
-1. **Rule 5 was over-broad.** It correctly bans layer-keyed *workflow* features (don't fork "pick a seed" per layer) but also blocked layer-keyed *surface* features like `features/md-rail/` and `features/shadcn-rail/`, which are legitimate layer-specific composition sites and are needed to keep cross-layer workflows like `token-override` from becoming homeless.
-2. **The locate-test was implicit.** Pattern-gravity is really an agent-locality property, but the rules never made it the falsifiable design metric.
-
-**ADR-0022 supersedes rule 5** by introducing a workflow/surface split — workflow features stay layer-agnostic; surface features may be layer-keyed because they ARE the composition site. **ADR-0022 adds rule 6** — locate-test as the design metric: a prompt that names X must resolve to `features/<X>/` or one primitive in `components/`, otherwise the structure has missed a name.
-
-ADR-0022 also clarifies that route-provided `<LayerContext>` for behavior parameterization is allowed and distinct from the runtime primitive switching banned by ADR-0019.
-
-Rules 1–4 of this ADR stand unchanged. See ADR-0022 for the current rule set and the locate-test worked examples.
-
-## Amendment 2026-05-19 — rule 4 relaxed; `components/shared/` allowed
-
-Rule 4 banned `components/shared/` outright, treating "shared" as the rot-folder name from the legacy prototype. In practice, layer-agnostic primitives (cross-layer pieces that are neither md-styled nor shadcn-styled) need a home, and routing them into `components/ui/` or `components/shadcn/` mis-categorizes them by layer.
-
-**Decision:** `components/shared/` is allowed as a third primitive folder alongside `components/ui/` (md) and `components/shadcn/`. The 2+ feature promotion rule (rule 4) still applies — single-feature components stay private to their feature.
-
-**Why:** the three primitive folders now carry distinct semantics — `ui/` is md-styled, `shadcn/` is shadcn-styled, `shared/` is layer-agnostic. The rot failure mode is bounded by the promotion gate; anything that lands in `shared/` is already consumed by 2+ features. The original ban over-corrected, blocking a legitimate composition slot to prevent a failure mode the promotion rule already prevents.
+- **2026-05-08** — rule 5 superseded and rule 6 added by ADR-0022 (the `ADR-0014 → ADR-0022` chain). Folded into rule 5.
+- **2026-05-19** — rule 4 relaxed: `components/shared/` allowed as the third primitive folder. Folded into rule 4.

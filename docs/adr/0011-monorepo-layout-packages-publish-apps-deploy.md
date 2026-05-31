@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Monorepo layout — packages publish, apps deploy
 
 Tonex is a pnpm workspace. The conventional split "uses core / is core" is one option; the chosen split is by *publishability*.

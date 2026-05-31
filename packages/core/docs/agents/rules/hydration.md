@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a hydration-guard rule changes; the why lives in the cited ADR.
-
 # Hydration — two AND-ed guards
 
 Governs `theme/useResolvedTokens.ts`, `react.ts`, and `applyDom`'s pre-hydrate gate.

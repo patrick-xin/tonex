@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Chart palette as a first-class derivation surface
 
 ADR-0024 introduced `chartMode: 'mono' | 'multi'` to split chart derivation along intent (coherent vs distinct series). That decision was right for the immediate question — one algorithm could not serve both intents — but the schema shape it landed under is too narrow for the design surface we now want to invest in. Two pressures push us to restructure:

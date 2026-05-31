@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the core test pattern changes; shared principles → the root testing doc.
-
 # Core testing — the deriveTheme canonical pattern
 
 Governs `packages/core` (and `packages/color-utils`, which mirrors it) unit tests. Shared principles (runner, location, what-to-test, scripts) → [../../../../../docs/agents/tdd.md](../../../../../docs/agents/tdd.md). Terms → [../../glossary.md](../../glossary.md).

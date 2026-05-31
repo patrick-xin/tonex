@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Display preferences — taxonomy, store boundary, persistence contract
 
 ADR-0021 line 128 pre-authorized "lift to a small UI store when a second consumer appears." `color-roles-list` (the role inspector at `/theme/color-roles`) is that consumer: it wants the same extended-token visibility filter that the export dialog has surfaced as a local toggle. The lift is small in code; the principles it forces are not. UI prefs are state that *isn't* portable theme (ADR-0017), and the auth/server-sync roadmap means today's localStorage shape is tomorrow's wire contract — committing the boundaries now is cheaper than re-litigating per pref.

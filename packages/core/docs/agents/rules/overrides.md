@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a binding/override rule changes; the why lives in the cited ADR.
-
 # Override layer — bindings vs overrides
 
 Governs `theme/palette-override/`.

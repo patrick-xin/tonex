@@ -1,5 +1,3 @@
-> **State:** Living. Edit when rail UI conventions change.
-
 # Rail UI standard
 
 Auto-loaded when you touch `md-rail/`. **These conventions govern both rails** — `md-rail/` and `shadcn-rail/` (both ship). The rail is the editor's primary chrome and the template the next feature reads first, so foundations matter here. _(ADR-0019 c.4)_

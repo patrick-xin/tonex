@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Domain types and constants live in @tonex/core
 
 The monorepo seam between `@tonex/core` (engine + schema + registries) and `apps/www` (UI) tempts inline type definitions whenever a www file is "in www, far from core." A type or constant defined inline in www today becomes the precedent the next type follows.

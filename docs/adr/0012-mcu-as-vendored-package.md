@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # @tonex/mcu — vendored, migrate to npm on official release
 
 The MCU 2026 spec (cmf variant, two-source palettes) is unreleased on npm. The engine fix (per ADR-0001) is hard-tied to that spec. Two options were on the table: pin npm's older release and lose 2026-only features, or vendor the upcoming source until release.

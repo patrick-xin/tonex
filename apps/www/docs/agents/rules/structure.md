@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a structure rule changes; the why lives in the cited ADR.
-
 # Structure — feature-first under anti-rot rules
 
 Read before any www change. `apps/www/src/` is feature-first. Terms → [../../glossary.md](../../glossary.md). _(ADR-0014 rules 1–4; ADR-0022 rules 5–6)_

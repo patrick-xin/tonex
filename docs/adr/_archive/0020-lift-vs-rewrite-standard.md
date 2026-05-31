@@ -1,5 +1,3 @@
-> **State:** Frozen. Append amendment blocks only — never rewrite the body. New decisions get new ADRs.
-
 # Lift-vs-rewrite standard for legacy code
 
 Tonex retains a substantial legacy prototype as a UI/layout reference. The foundation slices (1–8) deliberately rebuilt the engine from scratch — not lifted — because the engine had load-bearing failure modes the rebuild explicitly resolved (drift, four parallel derive paths, `ThemeSystem` facade, sinks folder). Implementation slices (10+) consume the legacy as source material for the production UI. Without an explicit rule, lifting drifts back into the failure modes the rebuild eliminated: lifted code drags in stale schema field names, references abstractions resolved by ADR, or re-introduces logic the new engine already owns.

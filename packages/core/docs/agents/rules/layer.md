@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a layer-emission rule changes; the why lives in the cited ADR.
-
 # Layer architecture — four class-scoped blocks
 
 Governs `theme/applyDom.ts`.

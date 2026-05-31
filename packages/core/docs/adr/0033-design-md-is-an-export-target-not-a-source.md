@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # DESIGN.md is an export target, not a source of truth
 
 `@google/design.md` (DESIGN.md) is a YAML-frontmatter-plus-prose format for describing a design system to coding agents — colors, typography, radius, spacing, components, with rationale prose around each. It is tempting to adopt because the pipeline tonex sits in already produces it: Stitch hands users a DESIGN.md, agents read it, and tonex is positioned as the refinement layer between them. Two integrations were on the table:

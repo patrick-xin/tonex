@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a variant rule changes; the why lives in the cited ADR.
-
 # Variants — one widened interface
 
 Governs `variants/`.

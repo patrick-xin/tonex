@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # User guidance is three non-overlapping surfaces, classified by the nature of the help — not the control it explains
 
 The clarity findings that prompted this work all share a shape: a control does something non-obvious (the chroma ceiling moves, a CMF second source has no visible effect under some presets, a custom color expands to a different token set per layer), and the editor said nothing about it. The reflexive fix is per-control help — a "?" button or persistent tooltip next to each axis. Taken to its conclusion that buries the rail under question marks, scatters the same explanation across every place a concept appears, and still leaves a first-time user with no sense of the whole. The editor is a dense rail of interacting controls; "explain everything in place" and "keep the rail legible" are in direct tension, and per-control help resolves it the wrong way.

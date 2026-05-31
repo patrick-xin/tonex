@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # the brand token — the literal seed, pinned past MCU's mode and variant flips
 
 shadcn users have no stable, vivid, AA-safe token for their own brand color. The default preset binds the filled `--primary` role to the soft `--color-primary-container` in light mode, so a filled `bg-primary` button reads as the pale container rather than the color the user actually chose; `text-primary` usages fail contrast on light surfaces for the same reason. The one color the user unambiguously picked and unambiguously means as "their brand" — the seed — surfaces nowhere as a directly usable, contrast-safe filled token.

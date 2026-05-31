@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a renderer or exporter rule changes; the why lives in the cited ADR.
-
 # Sinks — renderer + exporters
 
 Governs `theme/exporters/`, `bundle.ts`, `format.ts`, `applyDom`.

@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Single flat source store — no slices, no sub-stores
 
 The source-of-truth zustand store holds every persisted user choice (seed hex, variant, contrast level, surface treatment, lock state, overrides, role bindings). A reasonable-sounding suggestion is to split it into slices (`createLockSlice`, `createOverrideSlice`, etc.) or feature-scoped sub-stores once the field count grows.

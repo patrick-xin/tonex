@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Workflow vs surface features, and locate-test as the design metric
 
 ADR-0014 set five rules for `apps/www/src/` based on legacy-prototype failure modes. Those rules were directional commitments made before real features existed. Three slices later (editor-rail, export, testbed in active use; md/shadcn rail split and shadcn token-override route on the near horizon), the rules have hit two failure modes of their own.
@@ -30,4 +28,4 @@ ADR-0014 set five rules for `apps/www/src/` based on legacy-prototype failure mo
 - ADR-0019's "no in-app layer toggle" stands. The route is still the layer label. `<LayerContext>` (commitment 3) provides layer info to features for behavior, not for primitive selection — primitive selection remains route-level per ADR-0019 commitments 4–5. See ADR-0019 amendment of this date for the matching note.
 - `apps/www/CLAUDE.md` (living) updates to match; it holds the worked examples that resolve the locate-test for current surfaces.
 
-**Doc lifecycle note:** This ADR exists because the original (ADR-0014) was a *pre-feature* directional commitment. Rewriting its decision and rationale would erase the pre-feature reasoning that's still useful as audit trail. Future evolutions of these rules should follow the same shape: new ADR, amendment back-pointer, living doc updated, code follows.
+**Doc lifecycle — superseded by ADR-0034 Part B (Decisions 6–7).** A new decision still gets a new ADR with a supersession redirect; the `ADR-0014 → ADR-0022` chain stands. What changed is the rest of the original shape: a rule's *current statement* now lives as current truth in the owning ADR's body (rules 5–6 here), not reconstructed from a frozen original plus an amendment chain. ADR-0014's pre-feature reasoning is preserved as the rejected alternative beside the current rule, not as an audit trail the reader replays.

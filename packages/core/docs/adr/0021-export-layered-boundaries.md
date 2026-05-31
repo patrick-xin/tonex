@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Export pipeline — every layer at its own boundary
 
 Export is the product's deliverable. ADR-0017 established WYSIWYG between preview and export by *value*; this ADR commits to layered boundaries across the export pipeline so each concern lives at its own seam, and extends the WYSIWYG promise to *visibility*: what the user sees in the dialog's export-string pane is exactly what they paste. The previous prototype's failure mode was values diverging across paths (0017 closed it). The next failure mode would be visibility diverging — a token in the live preview that's silently absent from the export — and this ADR closes it before it surfaces.
@@ -19,7 +17,7 @@ The schema exports four constant token-name arrays:
 - `MD_CORE_TOKEN_NAMES` — primary/secondary/tertiary/error families, surface ladder, outline.
 - `MD_EXTENDED_TOKEN_NAMES` — fixed/fixed-dim families, per-family dim, inverse trio, surface-tint, shadow, scrim.
 - `MD_PALETTE_TOKEN_NAMES` — palette tones, mode/contrast invariant.
-- `MD_CHART_TOKEN_NAMES` — chart slots, derived from the primary palette via a fixed tone mapping (chart-related arrays live in `chart/schema.ts`).
+- `MD_CHART_TOKEN_NAMES` — chart slots (chart-related arrays live in `chart/schema.ts`). The *derivation* behind these names — how chart tokens are computed from the source — is ADR-0027's concern, not this partition's; this commitment fixes only the names and their export tier.
 
 `MD_TOKEN_NAMES` keeps its current family-grouped order; partitions are name-match Sets, not contiguous slices. Order in baked CSS is unchanged.
 
@@ -27,19 +25,19 @@ The schema exports four constant token-name arrays:
 
 ## 3. Dedicated fields per semantics class
 
-`MdLayer` carries fields keyed by *what each class is for*, not flattened with sidecar Sets. The md layer separates core role tokens (mode-aware, DOM-emitted), chart tokens (mode-aware, DOM-emitted, filter-gated for export), extended role tokens (mode-aware, data-only), and palette tones (mode/contrast-invariant, data-only). The shadcn layer carries core role tokens and chart tokens (with shadcn naming). `DerivedTheme` composes both layers plus warnings.
+`MdLayer` carries fields keyed by *what each class is for*, not flattened with sidecar Sets. The md layer separates core role tokens (mode-aware, DOM-emitted), chart tokens (mode-aware, DOM-emitted, filter-gated for export), extended role tokens (mode-aware, DOM-emitted), and palette tones (mode/contrast-invariant, data-only). The shadcn layer carries core role tokens and chart tokens (with shadcn naming). `DerivedTheme` composes both layers plus warnings.
 
-**Why:** each field's update frequency, DOM relevance, and consumer set is sharp. `applyDom` iterates only DOM-emitted fields with no partition import. Format-time filters merge fields based on toggles. Shape encodes intent — every consumer reads what it needs without a filter step at the seam.
+**Why:** each field's update frequency, DOM relevance, and consumer set is sharp. Format-time filters merge fields based on toggles. Shape encodes intent — every consumer reads what it needs without a filter step at the seam.
 
-## 4. applyDom emits only DOM-relevant groups
+## 4. applyDom emits the live functional theme; palette stays data-only
 
-`applyDom` writes `md.{light, dark, lightChart, darkChart}` + `shadcn.{light, dark, lightChart, darkChart}` to four scope rules per layer (per ADR-0013, ADR-0017's amendment for issue #9). It does **not** write `*Extended` or `palette` — those are data, consumed by inspect UIs (landing showcase, tone-palette swatches, per-token override editor) directly via `useResolvedTokens()`.
+`applyDom` writes `md.{light, dark, lightExtended, darkExtended, lightChart, darkChart}` + `shadcn.{light, dark, lightChart, darkChart}` to the scope rules per layer (per ADR-0013, ADR-0017's amendment for issue #9), merged into each mode block (`{ ...light, ...lightExtended, ...lightChart }`). Extended role tokens are live, seed-reactive CSS variables wherever a `.md` scope applies. `applyDom` does **not** write `palette` — palette tones have no `@theme` bridge and no CSS utility consumes them; they are inspect-data, read via `useResolvedTokens()`.
 
-**Why:** app components (and the editor itself) only consume core role tokens + chart. Extended and palette have no runtime renderer; emitting them to DOM costs ~200 setProperty calls per source change for zero render benefit. Per-tick setProperty count drops to ~57 per mode block — direct issue #9 win.
+**Why:** the marketing/showcase pages drive the live mood-shift demo (the product wedge) off extended tokens as live CSS variables — `bg-inverse-surface`, `var(--color-primary-fixed)`, the fixed/dim/inverse families — so a data-only extended tier would silently freeze them at the baked `globals.css` default. This aligns with commitment 7: `applyDom` emits the full functional theme, and the extended tier is part of it. The cost (the 22-token extended tier × two md mode blocks of `setProperty`) is accepted knowingly; slider-drag stays bounded by `applyDiff` (unchanged values skip projection) and the extended roster is fixed, so it never churns the diff's key set. Palette is excluded because it has a different access pattern (inspect-data, read off the derived object directly) and no renderer.
 
-## 5. Contrast variants as class-scoped single file
+## 5. Contrast variants as class-scoped single file (md); shadcn exports paste-replace `:root`
 
-When `includeContrastVariants: true`, the export emits one CSS file with three contrast tiers scoped through `<html>` classes — same axis as ADR-0013's `dark` class:
+When `includeContrastVariants: true`, the **md** export emits one CSS file with three contrast tiers scoped through `<html>` classes — same axis as ADR-0013's `dark` class:
 
 ```
 .md                            { /* default contrast, light role + palette */ }
@@ -52,13 +50,15 @@ html.contrast-high.dark .md    { /* hc, dark role */ }
 
 Palette declares once in `.md`'s rule (mode/contrast-invariant); role overrides cascade per tier. A new helper `buildContrastBundle(source, { includeContrastVariants })` in core orchestrates the 3× derive when needed (canonical levels 0 / 0.5 / 1.0). `exportCss(bundle: ContrastBundle, layer, options)` always takes a bundle; single-contrast wraps as `{ default: theme }`. www's hook calls `buildContrastBundle` lazily — on export click, not on every render.
 
-**Why:** matches our existing class-axis pattern. One file, one paste, no zip dependency. Edge case (user's preview contrast ≠ 0 + variants on): default block reflects user's preview contrast; medium/high blocks emit at canonical 0.5 / 1.0 as accessibility additions.
+The **shadcn** export instead emits root selectors `:root` (light) and `.dark` (dark) — a drop-in replacement for the blocks shadcn-cli scaffolds, because users paste our output to *replace* those blocks, not extend them. An opt-in `includeHeader: boolean` (default `false`) prepends the Tailwind v4 incantation (`@import "tailwindcss"` + `@custom-variant dark`) for green-field projects. The shadcn export ignores `includeContrastVariants` — contrast tiers are an md-side accessibility feature; if a bundle still carries medium/high tiers, the shadcn branch emits only the default tier. Internal scoping (`applyDom`, `format.ts`, the editor's own `globals.css`) keeps class-scoped `.md` / `.shadcn` because both layers coexist in the editor DOM (ADR-0013 symmetry); only the *user-facing export* seam differs by layer.
 
-## 6. Format options at the seam, defaults off
+**Why:** the md class-axis matches our existing mode pattern — one file, one paste, no zip. The shadcn root-selector shape is byte-equivalent to what shadcn-cli writes, so the paste target is unambiguous; the original "extend an existing scoped block" framing optimized for a use case shadcn users don't actually hit.
 
-`format.ts` accepts an `ExportOptions` object whose defaults match the current single-contrast oklch behavior — `colorFormat: 'oklch'`, every `include*` filter off. md exports surface 4 filters + colorFormat; shadcn exports surface 1 filter (`includeChart`) + colorFormat — sidebar is already covered by shadcn role bindings, custom colors emit by presence.
+## 6. Format options are one shared control surface, defaults lean
 
-**Why:** every default reflects what most users actually paste. Extended, palette, chart, and contrast variants are opt-in surfaces — users who don't need them get a clean, lean export. Defaults match the current single-contrast oklch behavior.
+`format.ts` accepts an `ExportOptions` object whose defaults match the current single-contrast oklch behavior — `colorFormat: 'oklch'`, every `include*` filter off. Options are **one control surface shared across all formats**, not a per-tab filter set: a single option change re-renders every format at once, and each format applies the options meaningful to it and ignores the rest. A target schema that lacks a concept (e.g. a chart slot, or the Tailwind-only `includeHeader`) drops it, never invents it; `includeHeader` is read by shadcn only.
+
+**Why:** options describe *the theme the user is handing off*, not the tab they happen to be on, so they sit above the format choice with one action propagating everywhere. Every default reflects what most users actually paste — extended, palette, chart, and contrast variants are opt-in surfaces; users who don't need them get a clean, lean export.
 
 ## 7. WYSIWYG-visibility scoped to the inspect surface
 
@@ -91,68 +91,13 @@ Material's official theme builder ships 6 separate files (light/light-mc/light-h
 
 ## Consequences
 
-- Drift-guard test (ADR-0017's amendment) reads tokens back from each `CSSStyleRule.style` for the four DOM-emitted fields × four scope rules; format-side has its own pure-function snapshot tests over `exportCss(bundle, layer, options)` covering each filter combination.
-- `pnpm bake` calls `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` becomes a thin convenience wrapper that constructs `{ default: theme }` and calls `exportCss`. globals.css regenerates with identical text post-refactor (oklch output preserved).
-- Toggle state for the dialog lives as React-local state, not in `useSource` (UI prefs aren't portable theme). Lift to a small UI store only when a second consumer (a production inspect UI) appears.
+- Drift-guard test (ADR-0017's amendment) reads tokens back from each `CSSStyleRule.style`; its `projectTheme` helper covers the DOM-emitted fields — core + extended + chart for md — so the data-level contract is "applyDom's md tokens = core + extended + chart". Format-side has its own pure-function snapshot tests over `exportCss(bundle, layer, options)` covering each filter combination.
+- `pnpm bake` calls `formatCss(deriveTheme(DEFAULT_INPUTS))` — `formatCss` is a thin convenience wrapper that constructs `{ default: theme }` and calls `exportCss`. globals.css regenerates with identical text (oklch output preserved).
+- Toggle state for the dialog: the JSON formatter (ADR-0029) is the second non-CSS consumer that made every tab read options, so whether toggle state lifts to a small UI store or stays React-local is an implementation call for the wiring slice, not a commitment here.
 - The cmf-vs-2025 spec memo's `lifecycle` field bumps from `until-adr-0021` to whatever number the future shadcn-binding-expansion ADR ends up taking. Trivial bookkeeping.
 
----
+**Amendment anchors** — dates cited from code/docs; each decision is folded into the commitment bodies above and kept here only so the citation resolves in one hop:
 
-## Amendment 2026-05-08 — chartMode axis (ADR-0024)
-
-Commitment 2 of this ADR described `MD_CHART_TOKEN_NAMES` as "derived from the primary palette via a fixed 5-tone mapping." That description is the **mono** branch under ADR-0024's chartMode axis; it is no longer the only path.
-
-ADR-0024 introduces `chartMode: 'mono' | 'multi'` on `PortableTheme`:
-- **mono** (default) — preserves the primary-palette-derived behavior named here. Variant-aware. Drift-guard baseline holds (default `chartMode: 'mono'` produces byte-identical chart values to pre-axis output).
-- **multi** — synthesizes via `Hct.from()` with hue rotation; bypasses the primary palette by design. See ADR-0024 commitment 2 for why the divergence is permanent.
-
-Token shape (5 tokens, names per `MD_CHART_TOKEN_NAMES` / `SHADCN_CHART_TOKEN_NAMES`) and emission paths (formatCss, exportCss, applyDom) are **unchanged**. The axis acts upstream of stringification — exporters and applyDom consume the same `lightChart` / `darkChart` TokenMap shape regardless of mode.
-
----
-
-## Amendment 2026-05-13 — shadcn export shape (paste-replace + bootstrap)
-
-Commitment 5 of this ADR specified class-scoped selectors for the shadcn export (`.shadcn` / `html.dark .shadcn`) on the rationale that "the shadcn audience already owns root `:root` / `.dark` blocks from shadcn-cli." Field feedback flipped that: users paste our output to **replace** shadcn-cli's blocks, not extend them. Class-scoped output forced manual rewriting to merge with the existing globals.css.
-
-**Decision:** shadcn export switches to root selectors `:root` (light) and `.dark` (dark) — drop-in replacement for the blocks shadcn-cli scaffolds. A new opt-in `includeHeader: boolean` (default `false`) prepends the Tailwind v4 incantation (`@import "tailwindcss"` + `@custom-variant dark (&:is(.dark *))`) for green-field projects starting without an existing globals.css.
-
-**Decision:** shadcn export ignores `includeContrastVariants`. The contrast axis is not part of the shadcn audience's surface — contrast tiers are an md-side accessibility feature. The shadcn filter row does not expose the toggle; if a bundle still carries medium/high tiers, the shadcn branch in `exportCss` emits only the default tier (no contrast prefixes). md export shape (commitment 5) is unchanged.
-
-**Decision:** the `ExportOptions` interface gains `includeHeader?: boolean`. md ignores the flag (md always emits the full header). shadcn reads it.
-
-**Why:** matches the failure mode users actually hit. The original commitment 5 framing optimized for a use case (extending an existing scoped block) that isn't how shadcn users actually adopt new themes — they wholesale-replace globals.css role blocks. The new shape is byte-equivalent to what shadcn-cli writes, so the paste target is unambiguous.
-
-**Internal scoping unchanged.** `applyDom`, `format.ts`, and the editor's `apps/www/src/styles/globals.css` still use class-scoped `.md` / `.shadcn` because md and shadcn coexist in the editor's DOM (ADR-0013 symmetry rule). This amendment is scoped to the **user-facing export** seam only.
-
-**Consequence:** the export dialog hides the tab strip when only one tab is configured (shadcn route — we ship only the Tailwind v4 shape). The Tailwind tab on md routes keeps its full filter row.
-
----
-
-## Amendment 2026-05-20 — options are a shared surface across every format
-
-Commitment 6 framed `ExportOptions` as per-tab filter rows (md surfaces four filters, shadcn one), and the consequences kept toggle state React-local "until a second consumer appears." Real non-CSS formatters (JSON, per ADR-0029) make every tab a consumer, retiring the per-tab framing.
-
-**Decision:** `ExportOptions` is one control surface shared across all formats, not a per-tab filter set. A single option change re-renders every format at once; each format applies the options meaningful to it and ignores the rest — JSON honors `colorFormat`, contrast, palette, and the role-tier toggle; it has no use for the Tailwind-only header flag, and a chart concept a target schema lacks is dropped, never invented. Defaults stay lean per commitment 6: a fresh dialog is the minimal export, toggles expand it.
-
-**Why:** the per-tab framing was an artifact of only one real formatter existing when commitment 6 was written. Options describe *the theme the user is handing off*, not the tab they happen to be on — so they sit above the format choice, with one action propagating everywhere. A format ignoring an option it can't use is strictly simpler than maintaining disjoint per-tab option sets.
-
-**Convention, not decision:** where the shared control row physically renders (e.g. above the tab strip) is an `apps/www` structure concern, recorded in `apps/www/CLAUDE.md` — not in this ADR.
-
-**Consequence:** the original "lift toggle state to a UI store when a second consumer appears" line is now live — the JSON formatter is that second consumer. Whether the lift happens or React-local state still suffices is an implementation call for the wiring slice, not a commitment here.
-
----
-
-## Amendment 2026-05-29 — extended role tokens are DOM-emitted
-
-Commitment 4 excluded `*Extended` (and `palette`) from `applyDom` on the rationale that "app components and the editor only consume core role tokens + chart," so emitting the extended tier cost ~200 setProperty calls per source change "for zero render benefit." A second consumer breaks that premise: the marketing/showcase pages drive the live mood-shift demo (the product wedge) off extended tokens — `bg-inverse-surface`, `var(--color-primary-fixed)`, the fixed/dim/inverse families — as live CSS variables. Under commitment 4 those resolve only to the frozen `globals.css` default (baked from `DEFAULT_INPUTS`) and silently fail to track the seed, because `applyDom` never rewrites them. The `@theme inline` bridge for all 22 extended tokens already exists in `globals.css`; the only missing piece was live emission.
-
-**Decision:** `applyDom` emits the md extended tier into the `.md` / `html.dark .md` scope rules, merged alongside core + chart (`{ ...light, ...lightExtended, ...lightChart }`). Extended role tokens become live, seed-reactive CSS variables wherever a `.md` scope applies. This reverses commitment 4's *extended* exclusion only; commitments 1–3 and 5–10 stand.
-
-**Palette stays data-only.** The palette tones remain excluded from `applyDom` — they have no `@theme` bridge and no CSS utility consumes them; they are inspect-data, read via `useResolvedTokens()`. The reversal is scoped to extended.
-
-**Cost is accepted.** Per-tick `setProperty` count rises by the 22-token extended tier × the two md mode blocks. Commitment 4's issue-#9 optimization traded this away; we trade it back knowingly because live showcase tokens are now a real requirement. Slider-drag cost stays bounded by `applyDiff` (unchanged values skip projection), and the extended roster is fixed so it never churns the diff's key set.
-
-**Why:** commitment 4's "zero render benefit" premise held when the only extended consumer was the inspect surface, which reads the derived object directly. The showcase demo is a second consumer with a different access pattern — live CSS variables — that the data-only path cannot serve. This aligns with commitment 7 ("`applyDom` always emits the full functional theme"): the extended tier is part of that functional theme, and carving it out was a performance lean, not a semantic one. The lean no longer pays.
-
-**Consequence:** the `applyDom` drift-guard test widens its `projectTheme` helper to include `lightExtended` / `darkExtended` in the md projection — the data-level contract is now "applyDom's md tokens = core + extended + chart." Inspect UIs reading extended via `useResolvedTokens()` are unaffected (the data path is unchanged). The latent staleness in `apps/www`'s `Button` `inverse` variant — which referenced `var(--color-inverse-*)` against the frozen default — is resolved as a side effect.
-
+- **2026-05-13** — shadcn export emits `:root` + `.dark` (paste-replace, not class scopes) with an opt-in `includeHeader`; shadcn ignores `includeContrastVariants`. Folded into commitment 5–6.
+- **2026-05-29** — `applyDom` emits the md extended tier (reverses commitment 4's original *extended* exclusion; palette stays data-only). The showcase mood-shift demo is the second consumer that broke the "zero render benefit" premise. Folded into commitment 4.
+- *Folded without a date anchor (not cited externally):* the chartMode axis refinement to commitment 2 (chart derivation now lives in ADR-0027), and the shared-control-surface reframing of commitment 6 (options are one surface across all formats, not per-tab — the JSON formatter retired the per-tab framing).

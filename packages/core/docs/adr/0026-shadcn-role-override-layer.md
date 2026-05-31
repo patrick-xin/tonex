@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # shadcn role override layer — literal pins above symbolic bindings
 
 The shadcn layer today supports one user knob: `shadcnRoleBindings`, a per-mode map from each shadcn role to an MD token name. Editing a binding is symbolic — the role's value still flows through MCU; the binding just changes which md token it follows. Power users hit a wall when they want a literal commitment: "I picked `--ring` to be exactly this color, don't move it when I nudge the seed." The MD layer already has `md3TokenOverrides` for this exact pattern; the shadcn layer is missing the symmetric mechanism.

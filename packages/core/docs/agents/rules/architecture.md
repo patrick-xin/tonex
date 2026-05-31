@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a cross-cutting core invariant changes; the why lives in the cited ADR.
-
 # Architecture — core invariants
 
 Read before any core change. Terms → [../../glossary.md](../../glossary.md).

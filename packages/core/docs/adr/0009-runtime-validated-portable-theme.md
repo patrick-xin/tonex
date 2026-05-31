@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Runtime-validated PortableTheme contract
 
 `PortableTheme` is the wire shape — what gets serialised to localStorage, files, or the network — and the input surface for `deriveTheme`. Until now it lived as a TypeScript interface plus a migration ladder plus field-level setter validators (`isValidHex`, `validateCustomColorEntry`). All three guard *write* time. Nothing guarded *read* time: a corrupted localStorage record (manual tampering, schema bug, partial write, browser-storage quota mid-write) flowed straight into `deriveTheme`, where MCU would throw on the first malformed input.

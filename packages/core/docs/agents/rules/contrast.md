@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a contrast or color-utils-boundary rule changes; the why lives in the cited ADR.
-
 # Contrast · color-utils boundary — the culori firewall
 
 Governs `theme/contrast/` and every color-lib import in core.

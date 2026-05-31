@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a source-store, lock, seed, or schema rule changes; the why lives in the cited ADR.
-
 # Source store · lock · seed · schema
 
 Governs `theme/source.ts` and `theme/schema.ts`.

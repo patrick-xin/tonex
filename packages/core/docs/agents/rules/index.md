@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the surface→shard routing changes.
-
 # Core rules — dispatch
 
 Rules are split per surface so you load only what your task touches. **Read the shard(s) for the surface you're editing — nothing more.** Each rule cites its ADR by number; open it in `../../adr/` only when you need the *why* (cite ADRs by number — the number is the stable join key).

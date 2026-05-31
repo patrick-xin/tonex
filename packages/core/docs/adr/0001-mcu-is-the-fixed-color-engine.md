@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # MCU is the fixed color engine
 
 This tool's wedge is Material Color Utilities (MCU): one seed → multiple well-conditioned palettes (HCT/CAM16, accessibility-aware) across distinct moods.

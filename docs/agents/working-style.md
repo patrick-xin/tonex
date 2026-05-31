@@ -1,5 +1,3 @@
-> **State:** Living. Edit when working norms change. Why this doc is imperative-only (no rationale prose): ADR-0034.
-
 # Working style for tonex agents
 
 - **Model new files on the most-read ones.** The store, the schema, the top utility are the de-facto templates — new files inherit by pattern continuation, so a wrong foundation propagates. Fix a bad pattern at its source, not at the leaf. Correct by pointing at the canonical file ("model this on X"), not by citing a rule.

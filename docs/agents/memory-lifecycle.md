@@ -1,5 +1,3 @@
-> **State:** Living. Edit when memo lifecycle norms change.
-
 # Memory lifecycle
 
 Machine-local agent memory (`~/.claude/projects/<repo>/memory/`) is a personal scratchpad, not durable project knowledge. A memo is read at generation time and acted on as if current, so every memo must declare what kills it; without a forcing condition, stale snapshots accumulate and future agents act on them. Load-bearing knowledge graduates to the repo.

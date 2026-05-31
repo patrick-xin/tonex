@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a chart-palette rule changes; the why lives in the cited ADR.
-
 # Chart palette derivation
 
 Governs `chart/`.

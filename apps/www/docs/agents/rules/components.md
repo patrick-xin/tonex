@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a component-file convention changes; the why lives in the cited ADR.
-
 # Component file conventions
 
 The component file is the smallest unit of agent locality — the locate-test (see [structure.md](structure.md)) resolves *which file*; these resolve *what's inside it*. _(ADR-0022)_

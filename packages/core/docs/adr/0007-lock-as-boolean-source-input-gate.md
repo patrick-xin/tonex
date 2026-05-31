@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Lock is a boolean source-input gate, not a derived-side snapshot
 
 A reasonable-sounding suggestion for "pin a color" is a per-token derived snapshot — a struct that captures rendered values and replays them on every derive. We considered it (`lockedSnapshot: LockedSnapshot | null`) and rejected it after threat-modeling the user's actual behavior.

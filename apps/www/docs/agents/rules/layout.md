@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a layout/layer rule changes; the why lives in the cited ADR.
-
 # Layout — chrome vs canvas, layer awareness
 
 Governs `app/(app)/theme/…` layouts and how features read layer. Terms → [../../glossary.md](../../glossary.md). _(ADR-0019; 2026-05-08 amendment)_

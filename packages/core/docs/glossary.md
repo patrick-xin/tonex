@@ -1,5 +1,3 @@
-> **State:** Living. Edit when domain vocabulary changes; definitions only — rules go in `docs/agents/rules/`, the why in the ADR.
-
 ## Project domain
 
 **Engine**:

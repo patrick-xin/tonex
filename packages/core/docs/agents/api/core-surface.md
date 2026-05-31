@@ -1,5 +1,3 @@
-> **State:** Living. Edit when core's public exports or subpath structure change. The trigger to update is editing `packages/core/src/{index,schema,oklch,data,variants/index}.ts`.
-
 # Core surface
 
 What `@tonex/core` exposes, by subpath. Read this before importing in `apps/www/` so you don't have to walk core's source to find what's already there. If your need isn't listed, the answer is usually compose in a www feature folder (ADR-0022 rule 5), not extend core.

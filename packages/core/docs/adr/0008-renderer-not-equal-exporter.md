@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Renderer ≠ exporter — distinct consumers, distinct shapes
 
 `deriveTheme(source)` produces `{ md, shadcn, warnings }` (per ADR-0017). Two kinds of consumer eat that output: a runtime renderer that writes CSS variables onto the DOM for live preview, and exporter functions that serialise tokens into copy-paste output for human consumption. A reasonable-sounding suggestion is to fold both behind a single "sink" abstraction.

@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the www test pattern or config changes; shared principles → the root testing doc.
-
 # www testing — the useEventCallback canonical hook pattern
 
 Governs `apps/www` unit tests. Shared principles (runner, location, what-to-test, scripts) → [../../../../../docs/agents/tdd.md](../../../../../docs/agents/tdd.md). Terms → [../../glossary.md](../../glossary.md).

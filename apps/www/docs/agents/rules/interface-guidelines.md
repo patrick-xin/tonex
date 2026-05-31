@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a token, focus, motion, or a11y convention changes.
-
 # Interface guidelines — tokens, focus, motion, a11y
 
 Governs the *rendered surface* of every www component: which token, which focus ring, which motion utility, which a11y idiom. The *form* of the file (naming, React mechanics) is [components.md](components.md); this is its *output*.

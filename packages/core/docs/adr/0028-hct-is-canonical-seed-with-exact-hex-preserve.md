@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # HCT is the canonical seed, with exactHex preserved across hex-input paths
 
 Supersedes ADR-0003 ("Hex is the canonical seed representation"). The hex-as-canonical model held while the only slider drift surface was per-axis round-tripping — fixable by per-tick precision (issue #56, fixed in PR #58). Issue #57 exposed a second, structural drift that cannot be patched at the slider layer: in the `CHROMA_HUE_LOCK` regime (`chroma < 4`), a chroma-only touch silently rotates the underlying hue by up to **12.888°**, because `hexFromHct → hctFromHex` is not an identity at low chroma — MCU's solver picks a different in-gamut hue when chroma changes. The slider's hue is disabled at that point on the principle "hue has no perceptual signal here," but the persisted seed encodes a hue regardless; downstream consumers (chart palette via `MULTI_HUE_OFFSETS`, custom-color blending, any subsequent chroma rise) see the rotated value, not the user's pick. The "lock" is cosmetic; the state moves underneath.

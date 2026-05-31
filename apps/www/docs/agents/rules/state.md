@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a state-home rule changes; the why lives in the cited ADR.
-
 # State boundaries — four classes, four homes
 
 The judgment line in each bullet decides the home. Terms → [../../glossary.md](../../glossary.md). _(ADR-0023, on ADR-0017 + ADR-0021)_

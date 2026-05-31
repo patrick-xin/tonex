@@ -1,5 +1,3 @@
-> **State:** Living. Edit when a surface-treatment rule changes; the why lives in the cited ADR.
-
 # Surface treatment — chrome only
 
 Governs `theme/surface/`.

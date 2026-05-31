@@ -1,5 +1,3 @@
-> **State:** Living. Edit when slice-shaping rules change.
-
 # Slice strategy
 
 Implementation proceeds as **vertical slices** (tracer bullets), not layer-by-layer. Each slice is one Red-Green-Refactor cycle with a one-sentence promise, cutting through every layer (source → derive → DOM → export → UI) so the core↔www seam — the highest-risk join — is exercised on day one, not after ten layers sit on top of it. Shipped slice history lives in `CHANGELOG.md`.

@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the core/www type boundary changes; the why lives in the cited ADR.
-
 # Where types live — the CLI test
 
 Governs every type/constant placement in `apps/www/src/`. Terms → [../../glossary.md](../../glossary.md).

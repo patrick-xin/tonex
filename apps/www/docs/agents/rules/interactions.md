@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the invalid-interaction pattern changes.
-
 # Invalid interactions — disable, don't warn after the fact
 
 Governs input affordances across www features.

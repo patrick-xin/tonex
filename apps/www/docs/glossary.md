@@ -1,5 +1,3 @@
-> **State:** Living. Edit when www vocabulary changes; definitions only — rules go in `agents/rules/`, the why in the ADR.
-
 ## App domain
 
 **Workflow feature**:

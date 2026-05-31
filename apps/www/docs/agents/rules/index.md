@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the surface→shard routing changes.
-
 # www rules — dispatch
 
 Rules are split per surface so you load only what your task touches. **Read the shard(s) for the surface you're editing — nothing more.** Each rule cites its ADR by number — the stable join key; ADRs live per layer (this app's in `../../adr/`, engine + system-wide in their layers' `adr/`), opened only when you need the *why*. Terms → [../../glossary.md](../../glossary.md).

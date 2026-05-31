@@ -1,5 +1,3 @@
-> **State:** Living. Edit when the OSS-readiness bar changes.
-
 # Open-source release checklist
 
 Run before flipping the repo public OR before publishing any package to npm. The cost of an extra audit pass is small; the cost of leaking a personal identifier or a strategic positioning note is high.

@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # what a preset is — a seedful theme bundle, gated by touched-state
 
 No ADR has governed presets; the model was set implicitly during curation, and it conflates two orthogonal things under one identity. A preset today bundles routing (the role→token bindings) with aesthetic treatment (variant + surface) and detects "active" by structural equality across the whole bundle — so a single binding edit and a variant swap each collapse the same identity. Worse for the original intent: the bundle deliberately excludes the seed, so the "editor's choice — give me something usable" promise can never actually reach the user, because the curated colors never travel with the preset.

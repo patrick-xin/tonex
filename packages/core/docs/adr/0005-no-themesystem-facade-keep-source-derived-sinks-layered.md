@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # No ThemeSystem facade — keep Source / Derived / Sinks layered
 
 A reasonable-sounding suggestion is to collapse the theme code behind a single `ThemeSystem` facade with `.apply()`, `.toCSS()`, `.copyToClipboard()` methods. We considered it and rejected it.

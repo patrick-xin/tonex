@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Layer architecture — md default, shadcn sub-scope, both class-scoped
 
 Tonex serves two audiences (md3 users, shadcn users) from one engine. ADR-0017 pins both layers always co-derived in one call. This ADR pins how those layers reach the DOM.

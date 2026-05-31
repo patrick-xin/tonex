@@ -1,5 +1,3 @@
-> **State:** Living rationale. Edit body when reality overtakes prose; the decision and rationale don't change without a new ADR.
-
 # Hydration guard — two flags, both required
 
 SSR/SSG renders before zustand-persist has loaded persisted state and before next-themes has resolved the active mode. Rendering theme-aware UI in that window produces hydration mismatches: server-rendered HTML disagrees with first client paint, and any colour-bound component flickers or shows the wrong values. The fix is two independent guards, both required.
@@ -23,33 +21,14 @@ The flip-via-action rule (point 2) is load-bearing for a different reason: `_hyd
 **Consequence:**
 
 - Every consumer of derived theme state (rendered tokens) goes through `useResolvedTokens`. Direct `useSource(s => s.someSourceField)` reads of *source* state are fine; what cannot bypass the guard is the *derived* output.
-- Every consumer of `resolvedTheme` goes through `useActiveMode`. `useTheme()` is reserved for `_providers.tsx` (one site, set up the provider) and event handlers where SSR mismatch is structurally impossible (e.g. keypress).
+- Every consumer of `resolvedTheme` goes through `useActiveMode`. `next-themes` is imported by exactly one folder — `apps/www/src/features/theme-mode/` — which owns three named exports: `useActiveMode` (the canonical `useTheme().resolvedTheme` reader), `useSetMode` (the event-handler setter, the SSR-safe carve-out), and `useThemePreference` (the unresolved `theme` string, for cosmetic consumers that mirror the *setting* rather than the resolved appearance — e.g. the `sonner` Toaster). The two files are `use-active-mode.ts` and `theme-mode-provider.tsx`; nothing else imports `next-themes`.
+- Raw `_hydrated` is read through `selectHydrated(state)` (sibling to `selectSeedHex` / `selectPortable`), the named home for gating that needs source hydration before any token derives (export availability, picker inputs). Reaching into the private `_hydrated` field directly is the bypass. (The separate `lib/stores/ui-prefs` store owns its own `_hydrated` + `selectUiPrefs`.)
 - **Drift sentinels (cheap, mechanical)** catch the bypass class:
-  - `useTheme()` outside its allowlist — bypass candidate. The current allowlist is enforced by the drift sentinel in `.claude/settings.json` rule #5.
-  - Raw `_hydrated` reads outside the source store and `useResolvedTokens` — bypass candidate.
+  - `useTheme()` (or any `next-themes` import) outside `features/theme-mode/` — bypass candidate, enforced by the drift sentinel in `.claude/settings.json` rule #5 (a two-file allowlist).
+  - Raw `_hydrated` reads outside the source store, `useResolvedTokens`, and `selectHydrated` — bypass candidate.
 - "Remove the null check, it's annoying" — refuse. The annoyance is the guard working. Render proper placeholders instead.
 
-## Amendment 2026-05-09
+**Amendment anchors** — dates cited from code/docs; each decision is folded into the Consequence above and kept here only so the citation resolves in one hop. The five numbered Decision points and commitment 4 continue to bind verbatim through both.
 
-The allowlist moved with the workflow-feature consolidation (ADR-0022 rule 5). `next-themes` is now imported by exactly one folder, `features/theme-mode/`, and the canonical resolved-theme hook moved there from `lib/hooks/use-active-mode.ts`.
-
-Updated allowlist (the only files allowed to import from `next-themes`):
-
-- `apps/www/src/features/theme-mode/use-active-mode.ts` — the canonical `useTheme().resolvedTheme` reader. Now also exports `useSetMode`, a thin wrapper around `setTheme` for event-handler callers (the carve-out the original Consequence section already permitted; this just gives it a named home so callers don't import `useTheme()` directly).
-- `apps/www/src/features/theme-mode/theme-mode-provider.tsx` — mounts `<NextThemesProvider>` and the `D`-key hotkey. Imports `ThemeProvider` only; does not call `useTheme()`.
-
-Removed from the allowlist:
-
-- `apps/www/src/app/_providers.tsx` — no longer imports `next-themes`. It mounts `ThemeModeProvider` from `features/theme-mode/` instead.
-- `apps/www/src/lib/hooks/use-active-mode.ts` — file deleted; moved to the theme-mode feature folder.
-
-The five numbered Decision points stand verbatim. Commitment 4 still binds: any component reading `'light' | 'dark'` MUST go through `useActiveMode`. Components that need to set the mode in event handlers go through the new `useSetMode`. The drift-sentinel hook in `.claude/settings.json` updates to match.
-
-## Amendment 2026-05-25 (issue #128 P3)
-
-Two bypass-candidate classes the original Consequence named had legitimate-but-unhomed instances. This amendment gives each a named home rather than carving file-level exceptions — the allowlist stays two files, and the bypass greps stay zero in product code.
-
-- **Raw theme *preference* (incl `'system'`)** — `use-active-mode.ts` gains a third export, `useThemePreference()`, returning the unresolved `theme` string. It is the home for cosmetic consumers that mirror the user's *setting* rather than the resolved appearance — the only current caller is the shadcn `sonner` Toaster's `theme` prop, which previously imported `useTheme()` directly (the one real out-of-allowlist call). `next-themes` remains imported by exactly one folder. No mounted-guard: the value is presentational, not SSR-critical token output.
-- **Raw `_hydrated` reads** — the source store now exports `selectHydrated(state)` (sibling to `selectSeedHex` / `selectPortable`). Gating sites that need source hydration before any token is derived — export availability (`features/export/use-export-content.ts`), picker input (`features/testbed/seed-input.tsx`) — read `useSource(selectHydrated)` instead of reaching into the private `_hydrated` field. These were always legitimate (source-state gates, not derived-output bypasses); the selector removes the ambiguity so the "bypass candidate" grep returns zero in `apps/www/src`. (The separate `lib/stores/ui-prefs` store owns its own `_hydrated` + `selectUiPrefs` and is unaffected.)
-
-The five numbered Decision points and Commitment 4 continue to bind verbatim. No `.claude/settings.json` sentinel change: rule #5's two-file allowlist is unchanged (the new export lives inside `use-active-mode.ts`), and `_hydrated` has no mechanical sentinel rule.
+- **2026-05-09** — the `next-themes` allowlist moved into `features/theme-mode/` (canonical hook relocated from `lib/hooks/use-active-mode.ts`; `_providers.tsx` no longer imports `next-themes`); `useSetMode` got a named home.
+- **2026-05-25** (issue #128 P3) — two bypass-candidate classes got named homes instead of file-level exceptions: `useThemePreference()` for raw preference (incl. `'system'`) and `selectHydrated(state)` for raw `_hydrated` gates, so the bypass greps return zero in product code. Allowlist stays two files; no sentinel change.

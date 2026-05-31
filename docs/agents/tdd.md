@@ -1,5 +1,3 @@
-> **State:** Living. Edit when testing patterns change.
-
 # Testing in tonex
 
 Shared principles below. The per-layer canonical pattern + config delta live in each layer's testing shard:
