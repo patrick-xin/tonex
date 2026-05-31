@@ -11,8 +11,9 @@
 // It is the deterministic harness that makes current-truth-first folds safe to
 // repeat: rewrite prose, then run this to prove no cited anchor was dropped.
 //
-// Run: node scripts/check-adr-citations.mjs            # audit the whole tree
-//      node scripts/check-adr-citations.mjs <file...>  # only these (lint-staged)
+// Bundled with the `adr` skill (.claude/skills/adr/); invoked via package.json.
+// Run: pnpm check:adr                       # audit the whole tree
+//      pnpm check:adr <file...>             # only these (lint-staged passes staged paths)
 //
 // With file args (lint-staged passes staged paths) the ADR index is still built
 // from the whole tree — resolution needs every ADR — but only the named files

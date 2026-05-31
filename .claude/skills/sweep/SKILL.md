@@ -9,7 +9,7 @@ Two stores rot silently between sessions: machine-local agent memory (stale snap
 
 This skill owns the *procedure*; the *policy* it enforces lives in docs. Don't restate the rules here — read them:
 - Memory policy (forcing-condition frontmatter, the graduation table, what never goes in) → `docs/agents/memory-lifecycle.md`.
-- ADR authoring discipline (rationale, not implementation) → the "ADRs carry rationale" bullet in `docs/agents/working-style.md`.
+- ADR authoring + audit procedure → the **`adr` skill** (it owns the convention and the fold procedure; this skill just runs it on the cadence).
 
 ## 1. Memory sweep
 
@@ -24,15 +24,7 @@ A drained `MEMORY.md` is the success state, not a failure — load-bearing memos
 
 ## 2. ADR audit
 
-Walk the live ADR set across all layers (`docs/adr/`, `packages/core/docs/adr/`, `apps/www/docs/adr/`), skipping `_archive/`.
-
-**Run `pnpm check:adr` first — it is the deterministic half of this audit; don't hand-write one-off scripts for it.** The guard enforces ADR-0034's two invariants in both directions: c.8, every `ADR-N c.M` / amendment citation resolves *forward* to a live anchor; c.11, every active ADR resolves *back* to the code surface it governs via a `**Code anchors:**` footer whose paths each carry an `ADR-N` breadcrumb. Clear everything it flags before the judgment pass — a new ADR with no footer, a citation a fold orphaned, a breadcrumb deleted from a code anchor. The folds below are hand edits; re-run the guard after each.
-
-Then, for each ADR by hand:
-
-1. **Still load-bearing?** — it constrains runtime behavior, code structure, or a contract surface → keep.
-2. **Constrains nothing** — a glossary entry or meta-rule that doesn't bind behavior, structure, or a contract → **archive, don't delete.** Move it to `docs/adr/_archive/`; that we once thought it earned an ADR slot is itself a lesson. Relocate live vocabulary to the layer's `glossary.md` and meta-rules to the agent docs before archiving. **Never renumber on the way** (ADR-0011 §5) — the number is the cross-layer join key.
-3. **Holds a command-falsifiable result?** — the litmus: *could a command prove a sentence false, with no re-decision?* If yes it is a **result**, and it belongs to the code or test the ADR cites, not the prose (ADR-0034 c.9). Strip embedded results — config/type mirrors, constant values, "passes/fails strict", build-graph or error-count claims — back to the decision and its *why*; cite the test or name the symbol that carries the live truth. A decision's **shape** (a chosen type, a field name, the structure being decided) stays; its **measured behavior** leaves. Re-run `pnpm check:adr` after — the `Code anchors:` footer must survive the trim.
+The ADR audit lives in the dedicated **`adr` skill** — it owns the authoring convention and the audit/fold procedure. Run it as the ADR half of the sweep: `pnpm check:adr` to clear the deterministic flags, then its by-hand pass (still load-bearing? constrains nothing? holds a command-falsifiable result?). Surface anything ambiguous rather than archiving it.
 
 ## Reporting
 
