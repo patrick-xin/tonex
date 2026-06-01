@@ -174,6 +174,64 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   })
 })
 
+describe('resolvePresetApply — ambient soft-border (sticky-soft)', () => {
+  // why: a soft edge weight is a global stylistic setting that survives a preset
+  // switch (like dark mode). If the user currently has soft edges, the resolver
+  // re-asserts the soft token onto the freshly-stamped preset bindings so the
+  // switch doesn't snap edges back to the preset's (often hard) bake. Hard and
+  // custom edge states are NOT carried — the preset's curated edges stand — so
+  // "editor's choice" presets keep their intended edge look unless the user
+  // opted into soft. See the shadcn-binding-expansion design.
+  const EDGE_ROLES = ['--border', '--input', '--sidebar-border'] as const
+
+  function withEdges(theme: PortableTheme, light: string, dark: string): PortableTheme {
+    const next: PortableTheme = {
+      ...theme,
+      shadcnRoleBindings: {
+        light: { ...theme.shadcnRoleBindings.light },
+        dark: { ...theme.shadcnRoleBindings.dark },
+      },
+    }
+    for (const role of EDGE_ROLES) {
+      next.shadcnRoleBindings.light[role] = light as never
+      next.shadcnRoleBindings.dark[role] = dark as never
+    }
+    return next
+  }
+
+  it('carries soft edges onto a hard-baking preset when the current weight is soft', () => {
+    // breeze bakes hard edges (--color-outline); a soft current weight re-asserts.
+    const soft = withEdges(themeWith({}), '--color-outline-variant', '--color-outline-variant')
+    const patch = resolvePresetApply(soft, SHADCN_PRESETS.breeze)
+    for (const role of EDGE_ROLES) {
+      expect(patch.shadcnRoleBindings?.light[role]).toBe('--color-outline-variant')
+      expect(patch.shadcnRoleBindings?.dark[role]).toBe('--color-outline-variant')
+    }
+    // non-edge roles still come straight from breeze
+    expect(patch.shadcnRoleBindings?.light['--card']).toBe(
+      SHADCN_PRESETS.breeze.shadcnRoleBindings.light['--card'],
+    )
+  })
+
+  it('does NOT carry a hard weight — a soft-baking preset keeps its curated soft edges', () => {
+    // themeWith({}) is the boot default (hard edges); noir bakes soft. Hard is not
+    // carried, so noir's curated bindings pass through verbatim.
+    const patch = resolvePresetApply(themeWith({}), SHADCN_PRESETS.noir)
+    expect(patch.shadcnRoleBindings).toEqual(SHADCN_PRESETS.noir.shadcnRoleBindings)
+  })
+
+  it('does NOT carry a custom edge — the preset bake stands', () => {
+    const custom = themeWith({
+      shadcnRoleBindings: {
+        light: { ...DEFAULT_INPUTS.shadcnRoleBindings.light, '--border': '--color-primary' },
+        dark: { ...DEFAULT_INPUTS.shadcnRoleBindings.dark },
+      },
+    })
+    const patch = resolvePresetApply(custom, SHADCN_PRESETS.breeze)
+    expect(patch.shadcnRoleBindings).toEqual(SHADCN_PRESETS.breeze.shadcnRoleBindings)
+  })
+})
+
 describe('resolvePresetApply — recipe fields always overwrite', () => {
   // why: regardless of source-field resolution, every recipe field detection
   // compares (issue #108) is written unconditionally, so the just-applied

@@ -978,11 +978,14 @@ describe('setShadcnBindingPreset', () => {
 
   it('composes on a theme preset: keeps its recipe + seed, re-routes bindings, theme tier → custom', () => {
     const { actions } = useSource.getState()
-    actions.setShadcnPreset('grove')
+    // why: breeze bakes HARD edges, so sticky-soft is a no-op here and the
+    // re-routed bindings equal clean's map exactly — this test pins tier
+    // independence, not the ambient soft-border rule (covered separately).
+    actions.setShadcnPreset('breeze')
     const afterTheme = useSource.getState()
     actions.setShadcnBindingPreset('clean')
     const afterBinding = useSource.getState()
-    // recipe + seed preserved from grove
+    // recipe + seed preserved from breeze
     expect(afterBinding.variant).toBe(afterTheme.variant)
     expect(afterBinding.surfaceAlgo).toBe(afterTheme.surfaceAlgo)
     expect(afterBinding.seed).toEqual(afterTheme.seed)
@@ -991,6 +994,53 @@ describe('setShadcnBindingPreset', () => {
     // the two tiers carry independent identity
     expect(findActivePreset(selectPortable(afterBinding))).toBeNull()
     expect(findActiveBindingPreset(selectPortable(afterBinding))).toBe('clean')
+  })
+})
+
+// why: ambient soft-border (sticky-soft) — a soft edge weight is a global
+// stylistic setting that survives a preset / binding-preset switch, like dark
+// mode. The apply path re-asserts soft edges so the switch never snaps them back
+// to the target's (often hard) bake. Hard/custom weights are NOT carried.
+describe('ambient soft-border survives a switch (sticky-soft)', () => {
+  const EDGE_ROLES = ['--border', '--input', '--sidebar-border'] as const
+
+  beforeEach(() => {
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  function turnSoftOn() {
+    const { setShadcnRoleBinding } = useSource.getState().actions
+    for (const mode of MODES) {
+      for (const role of EDGE_ROLES) {
+        setShadcnRoleBinding(mode, role, '--color-outline-variant')
+      }
+    }
+  }
+
+  function edgesAreSoft(): boolean {
+    const b = useSource.getState().shadcnRoleBindings
+    return MODES.every((m) => EDGE_ROLES.every((r) => b[m][r] === '--color-outline-variant'))
+  }
+
+  it('setShadcnPreset keeps soft edges when soft-border is on (breeze bakes hard)', () => {
+    turnSoftOn()
+    useSource.getState().actions.setShadcnPreset('breeze')
+    expect(edgesAreSoft()).toBe(true)
+    // non-edge roles still come from breeze
+    expect(useSource.getState().shadcnRoleBindings.light['--card']).toBe(
+      SHADCN_PRESETS.breeze.shadcnRoleBindings.light['--card'],
+    )
+  })
+
+  it('setShadcnBindingPreset keeps soft edges when soft-border is on (clean bakes hard)', () => {
+    turnSoftOn()
+    useSource.getState().actions.setShadcnBindingPreset('clean')
+    expect(edgesAreSoft()).toBe(true)
+  })
+
+  it('does not force hard — a soft-baking preset stays soft from a hard start', () => {
+    useSource.getState().actions.setShadcnPreset('noir')
+    expect(edgesAreSoft()).toBe(true)
   })
 })
 
