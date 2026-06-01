@@ -1,1 +1,1 @@
-export { BindingPresetPicker } from './binding-preset-picker'
+export { BindingPresetToggle } from './binding-preset-toggle'

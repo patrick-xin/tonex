@@ -13,7 +13,6 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { ExportButton } from '@/features/export'
 import { GuideAnchor } from '@/features/onboarding-guide'
 import { Settings } from '@/features/settings'
-import { BindingPresetPicker } from '@/features/shadcn-binding-presets'
 import { PresetPicker } from '@/features/shadcn-presets'
 import { SiteCommandMenu } from '@/features/site-command-menu'
 import type { NavConfig } from '@/lib/nav-config'
@@ -121,7 +120,6 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
             <ExportButton tabs={exportTabs} icon />
           </GuideAnchor>
           {config.layer !== 'md' && <PresetPicker />}
-          {config.layer !== 'md' && <BindingPresetPicker />}
           <Settings layer={config.layer} />
           <ContrastChecker layer={config.layer} />
           <HelpDialog />

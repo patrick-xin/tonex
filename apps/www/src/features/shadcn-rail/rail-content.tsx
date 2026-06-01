@@ -12,6 +12,7 @@ import { ChartPaletteToggle } from '@/features/chart-palette'
 import { ContrastLevelSlider } from '@/features/contrast-level'
 import { CustomColorList } from '@/features/custom-colors'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
+import { BindingPresetToggle } from '@/features/shadcn-binding-presets'
 import { SoftBordersToggle } from '@/features/shadcn-soft-border'
 import { ShadcnSourceColor } from '@/features/source-color'
 import { SurfaceAdjustment } from '@/features/surface-adjustment'
@@ -42,6 +43,9 @@ export function ShadcnRailContent() {
           <ShadcnSourceColor />
           <AnimatedCollapsible variant="ghost" title="Scheme Variant">
             <SchemeVariantsToggle />
+          </AnimatedCollapsible>
+          <AnimatedCollapsible variant="ghost" title="Binding Preset">
+            <BindingPresetToggle />
           </AnimatedCollapsible>
           <SurfaceAdjustment />
           <AnimatedCollapsible
