@@ -2,12 +2,7 @@
 
 This is a tool that turns a seed hex color into a theme via Material Color Utilities.
 
-## Agent context
-
-Multi-context repo:
-- Core Engine → `packages/core/CLAUDE.md`
-- Web app → `apps/www/CLAUDE.md`
-- System-wide `decision → docs/adr/`
+Starting work->Read `docs/agents/session-flow.md` for the reading order.
 
 ## Agent skills
 
@@ -16,7 +11,4 @@ Issues live in GitHub Issues at `patrick-xin/tonex`. See `docs/agents/issue-trac
 
 ### Triage labels
 Default canonical labels. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-Multi-context layout: ADRs live per layer — system-wide in `docs/adr/`, engine in `packages/core/docs/adr/`, web app in `apps/www/docs/adr/`; cited by number, never renumbered (ADR-0011 §5).
 
