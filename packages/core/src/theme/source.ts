@@ -8,6 +8,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/schema'
 import type { VariantName } from '../variants'
 import { cmfSecondSourceDisabledReason } from '../variants/cmf-second-source'
+import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from './binding-presets'
 import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
@@ -70,6 +71,14 @@ export interface SourceActions {
   // — those are orthogonal user-owned axes (ADR-0026: overrides sit on top of
   // bindings, not inside the preset).
   setShadcnPreset(name: ShadcnPresetName, choices?: PresetAdoptChoices): void
+  // why: applies a binding preset — pure routing (ADR-0031 #1). Stamps BOTH
+  // modes' shadcnRoleBindings from the catalog and touches nothing else: no
+  // recipe field, no seed/contrast, no touched signal, no confirm gate. It
+  // composes on top of whatever theme/seed the user already has, so the theme
+  // tier (findActivePreset) may drop to "custom" while findActiveBindingPreset
+  // highlights this name — the two tiers carry independent identity. Sibling to
+  // setShadcnRoleBinding (the single-role editor); this is the whole-map set.
+  setShadcnBindingPreset(name: ShadcnBindingPresetName): void
   // why: ADR-0026 — literal pin on a shadcn role. hex sets the entry; null
   // deletes so the role falls back to its binding-resolved value. Mirrors
   // setMd3TokenOverride's per-mode shape so override editors share one
@@ -296,6 +305,16 @@ export const useSource = create<SourceState>()(
         // preset can still supersede (story 12).
         setShadcnPreset: (name, choices) =>
           set((s) => resolvePresetApply(s, SHADCN_PRESETS[name], choices)),
+        // why: whole-map binding write — clones both modes from the catalog so
+        // the store never aliases the shared preset object. Spreads nothing else
+        // into the patch (no recipe, no seed/contrast, no touched signal): a
+        // binding preset is pure routing that composes on top of the current
+        // theme (ADR-0031 #1), unlike setShadcnPreset which overwrites the recipe.
+        setShadcnBindingPreset: (name) =>
+          set(() => {
+            const { light, dark } = SHADCN_BINDING_PRESETS[name].shadcnRoleBindings
+            return { shadcnRoleBindings: { light: { ...light }, dark: { ...dark } } }
+          }),
         setShadcnRoleOverride: (mode, role, hex) =>
           set((s) => {
             const next = { ...s.shadcnRoleOverrides[mode] }

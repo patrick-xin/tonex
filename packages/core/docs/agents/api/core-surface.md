@@ -92,6 +92,10 @@ Pure types, frozen tuples, validators. Free to import widely; cheap.
 - `findActivePreset(...)` — match current source against a preset by *recipe* fields only (never source inputs).
 - `resolvePresetApply(...)` with `PresetAdoptChoices` (`{ seed?, contrast? }`) — pure resolver for what an apply adopts.
 
+**Shadcn binding presets** (`theme/binding-presets`; ADR-0031 #1) — the routing tier: named role→md-token maps with no color/recipe, applied via `setShadcnBindingPreset` (composes on top of any theme).
+- `SHADCN_BINDING_PRESETS` / `ShadcnBindingPresetName`, type `ShadcnBindingPreset` — curated binding-only presets (description + light/dark role maps).
+- `findActiveBindingPreset(...)` — match current bindings against the catalog by `shadcnRoleBindings` only (both modes). Tier-independent from `findActivePreset`: the binding picker highlights its own selection while the theme tier may read "custom".
+
 **Contrast (schema-level)**: `CONTRAST_PAIRS` / type `ContrastPair` — the static fg/bg pair definitions `evaluateThemeContrast` walks.
 
 **Chart schema fragments**: `CHART_SCHEMES` / `ChartScheme`, `HUE_ANCHORS` / `HueAnchor`, `HUE_ANCHOR_DEFAULT`, `HUE_SPREAD_DEFAULT` (the chart token tuples above live here too). `HUE_*` are re-exported through the engine barrel as well — see Chart sequential above.

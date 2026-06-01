@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CustomColorList } from '@/features/custom-colors'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
+import { BindingPresetToggle } from '@/features/shadcn-binding-presets'
 import { ShadcnSourceColor } from '@/features/source-color'
 import { SurfaceAdjustment } from '@/features/surface-adjustment'
 import { ShadcnBindingsContent } from './bindings-content'
@@ -38,6 +39,9 @@ export function ShadcnRailContent() {
           <ShadcnSourceColor />
           <AnimatedCollapsible variant="ghost" title="Scheme Variant">
             <SchemeVariantsToggle />
+          </AnimatedCollapsible>
+          <AnimatedCollapsible variant="ghost" title="Binding Preset">
+            <BindingPresetToggle />
           </AnimatedCollapsible>
           <SurfaceAdjustment />
           <CustomColorList />

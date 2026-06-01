@@ -17,6 +17,7 @@ export {
   type ShadcnChartTokenName,
 } from './chart'
 export {
+  findActiveBindingPreset,
   SHADCN_BINDING_PRESETS,
   type ShadcnBindingPreset,
   type ShadcnBindingPresetName,
