@@ -1125,4 +1125,23 @@ describe('deriveTheme', () => {
       }
     })
   })
+
+  describe('input-only fields never reach derive', () => {
+    // why: seedHexLock / seedTouched / contrastTouched are editor-state gates —
+    // they govern future mutations and preset-apply (ADR-0031), never token
+    // VALUES. The applyDom round-trip can't catch one leaking into derive
+    // (applyDom AND deriveTheme both read the source, so they'd shift together
+    // and still match); only comparing deriveTheme WITH the flag flipped against
+    // WITHOUT it pins byte-identity. Threading any of these into derive — or a
+    // future input-only field that does — turns this red. Generalises the lone
+    // seedHexLock pin in applyDom.test.ts. ADR-0017 (single source of token
+    // values) + ADR-0031 (touched gates).
+    const base = { ...DEFAULT_INPUTS, seed: { ...hctFromHex('#ff5500'), exactHex: '#ff5500' } }
+    const baseline = deriveTheme(base)
+    for (const field of ['seedHexLock', 'seedTouched', 'contrastTouched'] as const) {
+      it(`${field} flipped leaves deriveTheme output byte-identical`, () => {
+        expect(deriveTheme({ ...base, [field]: true })).toEqual(baseline)
+      })
+    }
+  })
 })
