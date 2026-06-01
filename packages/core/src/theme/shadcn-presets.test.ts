@@ -224,3 +224,57 @@ describe('R6: findActivePreset ignores source inputs (seed, contrast)', () => {
     expect(findActivePreset(withForeignSource)).toBe(name)
   })
 })
+
+// why: --border / --input / --sidebar-border form an "edge weight" sub-axis that
+// the soft-border toggle flips between --color-outline (hard) and
+// --color-outline-variant (soft). Per the shadcn-binding-expansion design these
+// three roles are a RECOGNIZED MODIFIER, not part of a preset's identity:
+// changing edge weight — or even routing an edge to an off-outline token — must
+// leave the active preset detected, so toggling soft-border keeps the picker lit
+// and never reads as "drifted off the preset" (which would also wrongly trip the
+// switch-confirmation dialog). Non-edge roles (incl. --ring, which soft-border
+// never touches) stay fully identity-defining.
+describe('R10: edge roles are a recognized modifier, factored out of identity', () => {
+  const EDGE_ROLES = ['--border', '--input', '--sidebar-border'] as const
+
+  it('stays on the preset when edge weight flips hard → soft', () => {
+    // breeze ships hard edges (--color-outline); soften all three in both modes.
+    const theme = themeWithPreset('breeze')
+    const soft: PortableTheme = {
+      ...theme,
+      shadcnRoleBindings: {
+        light: { ...theme.shadcnRoleBindings.light },
+        dark: { ...theme.shadcnRoleBindings.dark },
+      },
+    }
+    for (const role of EDGE_ROLES) {
+      soft.shadcnRoleBindings.light[role] = '--color-outline-variant'
+      soft.shadcnRoleBindings.dark[role] = '--color-outline-variant'
+    }
+    expect(findActivePreset(soft)).toBe('breeze')
+  })
+
+  it('stays on the preset when an edge routes to an off-outline token (custom edge)', () => {
+    const theme = themeWithPreset('breeze')
+    const custom: PortableTheme = {
+      ...theme,
+      shadcnRoleBindings: {
+        light: { ...theme.shadcnRoleBindings.light, '--border': '--color-primary' },
+        dark: { ...theme.shadcnRoleBindings.dark },
+      },
+    }
+    expect(findActivePreset(custom)).toBe('breeze')
+  })
+
+  it('still returns null when a NON-edge binding drifts (--ring)', () => {
+    const theme = themeWithPreset('breeze')
+    const drifted: PortableTheme = {
+      ...theme,
+      shadcnRoleBindings: {
+        light: { ...theme.shadcnRoleBindings.light, '--ring': '--color-outline-variant' },
+        dark: { ...theme.shadcnRoleBindings.dark },
+      },
+    }
+    expect(findActivePreset(drifted)).toBeNull()
+  })
+})

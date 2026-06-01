@@ -273,6 +273,23 @@ export type ShadcnRoleName = (typeof SHADCN_ROLE_NAMES)[number]
 
 export type ShadcnRoleBindings = Record<ShadcnRoleName, MdTokenName>
 
+// why: the "edge weight" sub-axis — the three hairline-border roles the
+// soft-border toggle flips together between --color-outline (hard) and
+// --color-outline-variant (soft). These are a RECOGNIZED MODIFIER on the
+// binding layer, not part of preset identity: findActivePreset and
+// findActiveBindingPreset compare every role EXCEPT these, so changing edge
+// weight (or routing an edge off-outline) keeps the active preset detected and
+// a soft-border toggle never reads as "drifted". --ring / --sidebar-ring are
+// deliberately NOT here — soft-border never touches the focus ring and ring
+// routing varies per preset, so the ring stays identity-defining. The single
+// source of truth shared by the detectors and the soft-border predicate. See
+// the shadcn-binding-expansion design.
+export const SHADCN_EDGE_ROLES = [
+  '--border',
+  '--input',
+  '--sidebar-border',
+] as const satisfies readonly ShadcnRoleName[]
+
 // why: re-exported from SHADCN_PRESETS.default.shadcnRoleBindings so the
 // default binding map has a single source of truth — the `default` preset.
 // Pre-launch this thin re-export keeps callers (drift-guard tests, UI reset

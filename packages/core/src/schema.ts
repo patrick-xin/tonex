@@ -50,6 +50,7 @@ export {
   SCHEMA_VERSION,
   type SchemaVersion,
   type Seed,
+  SHADCN_EDGE_ROLES,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type ShadcnRoleName,

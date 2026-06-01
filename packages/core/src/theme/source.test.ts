@@ -980,17 +980,17 @@ describe('setShadcnBindingPreset', () => {
     const { actions } = useSource.getState()
     actions.setShadcnPreset('grove')
     const afterTheme = useSource.getState()
-    actions.setShadcnBindingPreset('crisp')
+    actions.setShadcnBindingPreset('clean')
     const afterBinding = useSource.getState()
     // recipe + seed preserved from grove
     expect(afterBinding.variant).toBe(afterTheme.variant)
     expect(afterBinding.surfaceAlgo).toBe(afterTheme.surfaceAlgo)
     expect(afterBinding.seed).toEqual(afterTheme.seed)
-    // bindings re-routed to crisp
-    expect(afterBinding.shadcnRoleBindings).toEqual(SHADCN_BINDING_PRESETS.crisp.shadcnRoleBindings)
+    // bindings re-routed to clean
+    expect(afterBinding.shadcnRoleBindings).toEqual(SHADCN_BINDING_PRESETS.clean.shadcnRoleBindings)
     // the two tiers carry independent identity
     expect(findActivePreset(selectPortable(afterBinding))).toBeNull()
-    expect(findActiveBindingPreset(selectPortable(afterBinding))).toBe('crisp')
+    expect(findActiveBindingPreset(selectPortable(afterBinding))).toBe('clean')
   })
 })
 

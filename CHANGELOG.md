@@ -4,6 +4,11 @@ Slice-organized history. Each entry corresponds to a vertical-tracer increment p
 
 ## [Unreleased]
 
+### Slice binding-edge-modifier — Edges are a recognized modifier, not preset identity
+
+- `feat(core)`: new `SHADCN_EDGE_ROLES` SSOT (`--border` / `--input` / `--sidebar-border`) — the "edge weight" sub-axis the soft-border toggle flips between `--color-outline` (hard) and `--color-outline-variant` (soft). `findActivePreset` and `findActiveBindingPreset` now compare every role *except* these three, so toggling soft-border (or any edge rebind) keeps the active preset / binding-preset detected instead of dropping the picker to "Custom" — and a pure soft-border change no longer trips the preset-switch confirmation dialog, because it reads as a recognized modifier rather than drift. `--ring` / `--sidebar-ring` stay identity-defining (soft-border never touches the focus ring; ring routing varies per preset). The edge-role set resolves lazily inside the matcher to sidestep the `schema ↔ shadcn-presets` import cycle.
+- `feat(core)`: binding-preset catalog rename — `crisp` → `default` / `clean` / `mixed` (alongside `layered` / `seamless`), with `default` keyed off `SHADCN_PRESETS.default`'s routing. A fresh boot now lights up "Default" on the binding tier instead of the empty "Custom" sentinel.
+
 ### Slice brand-token — Stable literal-seed brand pair (ADR-0032)
 
 - `feat(core)`: `deriveTheme` emits a `shadcn.brand` token map — `--brand` (the literal seed, mode-invariant) and `--brand-foreground` (an MD3-style tinted on-color computed to clear AA against it). Brand is the seed pinned past MCU's variant×mode tone flip: filled `bg-primary` reads as the soft `--color-primary-container` under the default preset, so the color the user actually chose had no vivid, contrast-safe filled token. Kept out of `shadcn.light`/`dark` so the `:root === shadcn.light` export contract and the byte-identical drift baseline are untouched. Philosophically an ADR-0026 override (literal pin, not a symbolic binding); aligned with ADR-0031's "brand is the seed".

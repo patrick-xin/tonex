@@ -12,9 +12,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 // exhaustive Record means a binding preset added in core surfaces here as a
 // compile error, mirroring scheme-variant's VARIANT_LABELS.
 const BINDING_PRESET_LABELS: Record<ShadcnBindingPresetName, string> = {
-  crisp: 'Crisp',
+  default: 'Default',
+  mixed: 'Mixed',
   layered: 'Layered',
   seamless: 'Seamless',
+  clean: 'Clean',
 }
 
 const BINDING_PRESET_NAMES = Object.keys(SHADCN_BINDING_PRESETS) as ShadcnBindingPresetName[]

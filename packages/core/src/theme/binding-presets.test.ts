@@ -81,11 +81,12 @@ describe('findActiveBindingPreset', () => {
     expect(findActiveBindingPreset(theme)).toBe(name)
   })
 
-  it('returns null for the default routing — no binding preset is the default', () => {
-    // why: DEFAULT_INPUTS routing is the commented-out `clean` placeholder, and a
-    // theme-vs-binding scan confirmed no map coincides, so the default sits off
-    // every binding preset — the same "custom" sentinel findActivePreset uses.
-    expect(findActiveBindingPreset(DEFAULT_INPUTS)).toBeNull()
+  it('detects the default routing as the "default" binding preset', () => {
+    // why: the `default` binding preset is keyed off SHADCN_PRESETS.default's
+    // routing, which IS the DEFAULT_INPUTS routing (DEFAULT_SHADCN_ROLE_BINDINGS).
+    // So a fresh boot lights up "Default" on the binding tier instead of the
+    // "Custom" sentinel — the false-custom-on-boot the rename was meant to remove.
+    expect(findActiveBindingPreset(DEFAULT_INPUTS)).toBe('default')
   })
 
   it('returns null when a single role drifts off a preset', () => {
@@ -99,6 +100,29 @@ describe('findActiveBindingPreset', () => {
         },
       }),
     ).toBeNull()
+  })
+
+  it('stays on the binding preset when edge weight flips hard → soft', () => {
+    // why: the edge roles (--border/--input/--sidebar-border) are a recognized
+    // modifier, not identity — softening them must keep the picker lit on its
+    // preset, mirroring findActivePreset. `clean` ships hard edges; soften all
+    // three in both modes and it must still resolve to "clean".
+    const base = SHADCN_BINDING_PRESETS.clean.shadcnRoleBindings
+    const soft = {
+      light: {
+        ...base.light,
+        '--border': '--color-outline-variant' as MdTokenName,
+        '--input': '--color-outline-variant' as MdTokenName,
+        '--sidebar-border': '--color-outline-variant' as MdTokenName,
+      },
+      dark: {
+        ...base.dark,
+        '--border': '--color-outline-variant' as MdTokenName,
+        '--input': '--color-outline-variant' as MdTokenName,
+        '--sidebar-border': '--color-outline-variant' as MdTokenName,
+      },
+    }
+    expect(findActiveBindingPreset({ shadcnRoleBindings: soft })).toBe('clean')
   })
 
   it('requires BOTH modes to match — one preset light + another preset dark → null', () => {
