@@ -3,6 +3,7 @@ import { hctFromHex } from './hct'
 import {
   type PortableTheme,
   type Seed,
+  SHADCN_EDGE_ROLES,
   SHADCN_ROLE_NAMES,
   type ShadcnRoleBindings,
   type SurfaceAlgo,
@@ -607,9 +608,9 @@ export const SHADCN_PRESETS = {
     variant: 'cmf',
     surfaceAlgo: 'tint',
     surfacePaletteName: 'mist',
-    surfaceTintLevel: { light: 0, dark: 0 },
+    surfaceTintLevel: { light: 0.5, dark: 0.3 },
     surfaceTintTextLevel: { light: 0.8, dark: 0.9 },
-    surfaceDesaturateLevel: { light: 0.3, dark: 0 },
+    surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
         '--background': '--color-surface',
@@ -629,7 +630,7 @@ export const SHADCN_PRESETS = {
         '--destructive': '--color-error',
         '--border': '--color-outline-variant',
         '--input': '--color-outline-variant',
-        '--ring': '--color-primary',
+        '--ring': '--color-outline-variant',
         '--sidebar': '--color-surface-container-low',
         '--sidebar-foreground': '--color-on-surface-variant',
         '--sidebar-primary': '--color-primary',
@@ -657,7 +658,7 @@ export const SHADCN_PRESETS = {
         '--destructive': '--color-error',
         '--border': '--color-outline-variant',
         '--input': '--color-outline-variant',
-        '--ring': '--color-primary',
+        '--ring': '--color-outline-variant',
         '--sidebar': '--color-surface-container-low',
         '--sidebar-foreground': '--color-on-surface-variant',
         '--sidebar-primary': '--color-primary-container',
@@ -1211,19 +1212,37 @@ export const SHADCN_PRESETS = {
 // than a silent runtime miss.
 export type ShadcnPresetName = keyof typeof SHADCN_PRESETS
 
-function bindingsEqual(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
+// why: structural equality across every role EXCEPT the edge-weight sub-axis
+// (SHADCN_EDGE_ROLES). Edges are a recognized modifier, not identity, so two
+// binding maps that differ only on --border/--input/--sidebar-border are the
+// same preset — a soft-border toggle keeps the picker lit rather than dropping
+// it to "custom". --ring stays compared (soft-border never touches it).
+//
+// The edge-role set is memoized lazily (not a module-level const): schema.ts and
+// shadcn-presets.ts form an import cycle (schema reads SHADCN_PRESETS.default for
+// DEFAULT_SHADCN_ROLE_BINDINGS), so SHADCN_EDGE_ROLES is still uninitialized when
+// this module's body runs. Resolving it on first call — like SHADCN_ROLE_NAMES
+// is read inside the loop — sidesteps the cycle entirely.
+let edgeRoleSet: Set<string> | undefined
+function bindingsEqualIgnoringEdges(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
+  edgeRoleSet ??= new Set<string>(SHADCN_EDGE_ROLES)
   for (const role of SHADCN_ROLE_NAMES) {
+    if (edgeRoleSet.has(role)) continue
     if (a[role] !== b[role]) return false
   }
   return true
 }
 
 // why: matches a full PortableTheme against the preset library by structural
-// equality on the 6 preset-defining fields. Returns the first preset whose
-// recipe equals the theme's projection, or null if the user has drifted off
-// any preset (mutated a binding, changed a surface dial, swapped variant).
-// Used by the picker UI to highlight the active preset; consumers downstream
-// must treat null as "custom" rather than "default" — see ADR-0026.
+// equality on the 6 preset-defining fields, comparing the binding map on every
+// role EXCEPT the edge-weight sub-axis (SHADCN_EDGE_ROLES). Returns the first
+// preset whose recipe equals the theme's projection, or null if the user has
+// drifted off any preset (mutated a NON-edge binding, changed a surface dial,
+// swapped variant). Edge weight is a recognized modifier, not identity: a
+// soft-border toggle (or any edge rebind) keeps the preset detected so the
+// picker stays lit and the switch-confirmation dialog never trips on it. Used
+// by the picker UI to highlight the active preset; consumers downstream must
+// treat null as "custom" rather than "default" — see ADR-0026.
 //
 // Iteration order is `Object.entries(SHADCN_PRESETS)` which follows literal
 // declaration order — `default` ships first, so a state matching multiple
@@ -1242,8 +1261,12 @@ export function findActivePreset(theme: PortableTheme): ShadcnPresetName | null 
     if (theme.surfaceTintTextLevel.dark !== preset.surfaceTintTextLevel.dark) continue
     if (theme.surfaceDesaturateLevel.light !== preset.surfaceDesaturateLevel.light) continue
     if (theme.surfaceDesaturateLevel.dark !== preset.surfaceDesaturateLevel.dark) continue
-    if (!bindingsEqual(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)) continue
-    if (!bindingsEqual(theme.shadcnRoleBindings.dark, preset.shadcnRoleBindings.dark)) continue
+    if (
+      !bindingsEqualIgnoringEdges(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)
+    )
+      continue
+    if (!bindingsEqualIgnoringEdges(theme.shadcnRoleBindings.dark, preset.shadcnRoleBindings.dark))
+      continue
     return name
   }
   return null

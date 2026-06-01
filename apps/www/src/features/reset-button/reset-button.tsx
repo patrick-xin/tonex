@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { useBindingBaseline } from '@/lib/stores/binding-baseline'
 
 type ButtonProps = ComponentProps<typeof Button>
 
@@ -30,6 +31,12 @@ export function ResetButton({
   onConfirm,
 }: ResetButtonProps) {
   const reset = useSource((s) => s.actions.reset)
+  // why: "Reset to defaults" clears every customization, so the binding rail's
+  // tracked baseline (option 1.5) resets to the default routing too — otherwise a
+  // post-reset hand-edit would measure "custom" against the stale last-applied
+  // preset. Detection stays primary, so the immediate post-reset state is correct
+  // regardless; this keeps the subsequent drift correct as well.
+  const resetBaseline = useBindingBaseline((s) => s.actions.reset)
   return (
     <AlertDialog>
       <AlertDialogTrigger render={<Button variant={variant} size={size} />}>
@@ -48,6 +55,7 @@ export function ResetButton({
           <AlertDialogClose
             onClick={() => {
               reset()
+              resetBaseline()
               onConfirm?.()
             }}
             render={<Button variant="primary" />}

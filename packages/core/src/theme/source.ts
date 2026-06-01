@@ -9,6 +9,7 @@ import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/sche
 import type { VariantName } from '../variants'
 import { cmfSecondSourceDisabledReason } from '../variants/cmf-second-source'
 import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from './binding-presets'
+import { isSoftEdgeWeight, withSoftEdges } from './edge-weight'
 import { hctFromHex, hexFromHct } from './hct'
 import type { Mode } from './mode'
 import { paletteOverrideDisabledReason } from './palette-override'
@@ -310,10 +311,18 @@ export const useSource = create<SourceState>()(
         // into the patch (no recipe, no seed/contrast, no touched signal): a
         // binding preset is pure routing that composes on top of the current
         // theme (ADR-0031 #1), unlike setShadcnPreset which overwrites the recipe.
+        // Sticky-soft: a soft edge weight survives the switch (mirrors
+        // resolvePresetApply's ambient rule), so soft-border governs across both
+        // tiers — hard/custom weights are not carried.
         setShadcnBindingPreset: (name) =>
-          set(() => {
+          set((s) => {
             const { light, dark } = SHADCN_BINDING_PRESETS[name].shadcnRoleBindings
-            return { shadcnRoleBindings: { light: { ...light }, dark: { ...dark } } }
+            const next = { light: { ...light }, dark: { ...dark } }
+            return {
+              shadcnRoleBindings: isSoftEdgeWeight(s.shadcnRoleBindings)
+                ? withSoftEdges(next)
+                : next,
+            }
           }),
         setShadcnRoleOverride: (mode, role, hex) =>
           set((s) => {

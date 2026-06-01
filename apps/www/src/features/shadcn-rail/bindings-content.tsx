@@ -42,7 +42,7 @@ export function ShadcnBindingsContent() {
   if (data === null) return null
   const {
     bindings,
-    defaults,
+    expected,
     setBinding,
     roleLayer,
     roleContrastByRole,
@@ -59,7 +59,7 @@ export function ShadcnBindingsContent() {
           variant="ghost"
           defaultOpen={index === 0}
           className="text-sm font-semibold capitalize tracking-wider"
-          overridden={group.roles.some((role) => bindings[role] !== defaults[role])}
+          overridden={group.roles.some((role) => bindings[role] !== expected[role])}
         >
           <div className="flex flex-col gap-4 pb-2">
             {group.roles.map((role) => {
@@ -72,11 +72,11 @@ export function ShadcnBindingsContent() {
                   roleHex={roleHex}
                   contrast={roleContrastByRole.get(role) ?? null}
                   currentToken={bindings[role]}
-                  defaultToken={defaults[role]}
+                  expectedToken={expected[role]}
                   tokenItems={tokenItems}
                   tokenItemGroups={tokenItemGroups}
                   onChange={(token) => setBinding(role, token)}
-                  onReset={() => setBinding(role, defaults[role])}
+                  onReset={() => setBinding(role, expected[role])}
                 />
               )
             })}
@@ -92,7 +92,7 @@ interface BindingRowProps {
   roleHex: string
   contrast: ContrastWarning | null
   currentToken: MdTokenName
-  defaultToken: MdTokenName
+  expectedToken: MdTokenName
   tokenItems: ReadonlyArray<TokenItem>
   tokenItemGroups: ReadonlyArray<TokenItemGroup>
   onChange: (token: MdTokenName) => void
@@ -104,13 +104,13 @@ function BindingRow({
   roleHex,
   contrast,
   currentToken,
-  defaultToken,
+  expectedToken,
   tokenItems,
   tokenItemGroups,
   onChange,
   onReset,
 }: BindingRowProps) {
-  const isCustom = currentToken !== defaultToken
+  const isCustom = currentToken !== expectedToken
 
   return (
     <div className="flex flex-col gap-2">
@@ -125,7 +125,7 @@ function BindingRow({
         </div>
         <ContrastBadge warning={contrast} />
         {isCustom && (
-          <Button variant="ghost" size="icon-xs" onClick={onReset} title="Reset to default">
+          <Button variant="ghost" size="icon-xs" onClick={onReset} title="Reset to preset">
             <ArrowCounterClockwiseIcon />
           </Button>
         )}

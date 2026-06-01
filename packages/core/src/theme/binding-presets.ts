@@ -1,4 +1,10 @@
-import { type PortableTheme, SHADCN_ROLE_NAMES, type ShadcnRoleBindings } from './schema'
+import {
+  type PortableTheme,
+  SHADCN_EDGE_ROLES,
+  SHADCN_ROLE_NAMES,
+  type ShadcnRoleBindings,
+} from './schema'
+import { SHADCN_PRESETS } from './shadcn-presets'
 
 // why: a role binding preset is a *named, described starting point* for the
 // shadcn role→md-token map — ADR-0031 #1's "convenience input to the binding
@@ -27,23 +33,73 @@ export interface ShadcnBindingPreset {
 // Add: a new key with a description + full light/dark binding maps.
 // Remove: delete the key.
 export const SHADCN_BINDING_PRESETS = {
-  // why: provisional placeholder (= default routing) commented out during the
-  // exploration pass — replaced by the three curated maps below, each authored
-  // in the preset tuner and named for the *elevation behaviour* it produces
-  // (not a hue, since a binding preset carries no color).
-  // clean: {
-  //   description: 'Popover & card share one background',
-  //   shadcnRoleBindings: {
-  //     light: { ...DEFAULT_SHADCN_ROLE_BINDINGS.light },
-  //     dark: { ...DEFAULT_SHADCN_ROLE_BINDINGS.dark },
-  //   },
-  // },
-
-  // why: bright cards lift off the page, controls get crisp full-strength
-  // outlines (--border/--input → --color-outline). The high-energy routing —
-  // edges are stated, not whispered. (imported from tuner: "Lime")
-  crisp: {
-    description: 'Bright cards lift off the page with crisp, outlined controls',
+  default: {
+    description: 'Balanced defaults — a neutral surface mapping to start from',
+    shadcnRoleBindings: SHADCN_PRESETS.default.shadcnRoleBindings,
+  },
+  clean: {
+    description: 'Flat surfaces — card, popover, and background share one layer',
+    shadcnRoleBindings: {
+      light: {
+        '--background': '--color-surface',
+        '--foreground': '--color-on-surface',
+        '--card': '--color-surface',
+        '--card-foreground': '--color-on-surface',
+        '--popover': '--color-surface',
+        '--popover-foreground': '--color-on-surface',
+        '--primary': '--color-primary',
+        '--primary-foreground': '--color-on-primary',
+        '--secondary': '--color-secondary-container',
+        '--secondary-foreground': '--color-on-secondary-container',
+        '--muted': '--color-surface-container',
+        '--muted-foreground': '--color-on-surface-variant',
+        '--accent': '--color-surface-container',
+        '--accent-foreground': '--color-on-surface',
+        '--destructive': '--color-error',
+        '--border': '--color-outline',
+        '--input': '--color-outline',
+        '--ring': '--color-outline',
+        '--sidebar': '--color-surface-container-low',
+        '--sidebar-foreground': '--color-on-surface-variant',
+        '--sidebar-primary': '--color-primary',
+        '--sidebar-primary-foreground': '--color-on-primary',
+        '--sidebar-accent': '--color-surface-container-high',
+        '--sidebar-accent-foreground': '--color-on-surface',
+        '--sidebar-border': '--color-outline',
+        '--sidebar-ring': '--color-outline',
+      },
+      dark: {
+        '--background': '--color-surface',
+        '--foreground': '--color-on-surface',
+        '--card': '--color-surface',
+        '--card-foreground': '--color-on-surface',
+        '--popover': '--color-surface',
+        '--popover-foreground': '--color-on-surface',
+        '--primary': '--color-primary',
+        '--primary-foreground': '--color-on-primary',
+        '--secondary': '--color-secondary-container',
+        '--secondary-foreground': '--color-on-secondary-container',
+        '--muted': '--color-surface-container',
+        '--muted-foreground': '--color-on-surface-variant',
+        '--accent': '--color-surface-container',
+        '--accent-foreground': '--color-on-surface',
+        '--destructive': '--color-error',
+        '--border': '--color-outline',
+        '--input': '--color-outline',
+        '--ring': '--color-outline',
+        '--sidebar': '--color-surface-container-low',
+        '--sidebar-foreground': '--color-on-surface-variant',
+        '--sidebar-primary': '--color-primary',
+        '--sidebar-primary-foreground': '--color-on-primary',
+        '--sidebar-accent': '--color-surface-container-highest',
+        '--sidebar-accent-foreground': '--color-on-surface',
+        '--sidebar-border': '--color-outline',
+        '--sidebar-ring': '--color-outline',
+      },
+    },
+  },
+  mixed: {
+    description: 'Mode-aware — light and dark route to different layers',
     shadcnRoleBindings: {
       light: {
         '--background': '--color-surface',
@@ -56,7 +112,7 @@ export const SHADCN_BINDING_PRESETS = {
         '--primary-foreground': '--color-on-primary-container',
         '--secondary': '--color-secondary-container',
         '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container',
+        '--muted': '--color-surface-container-high',
         '--muted-foreground': '--color-on-surface-variant',
         '--accent': '--color-surface-container-high',
         '--accent-foreground': '--color-on-surface',
@@ -103,13 +159,8 @@ export const SHADCN_BINDING_PRESETS = {
       },
     },
   },
-
-  // why: popovers sit *below* cards (--popover → surface-container-low while
-  // --card → surface-container) and muted reads dim (--color-surface-dim), so
-  // the UI feels recessed and stacked. Soft outline-variant edges. (imported
-  // from tuner: "Crimson 9")
   layered: {
-    description: 'Popovers recede beneath cards; dim, layered surfaces',
+    description: 'Stacked depth — each surface sits on its own elevation tier',
     shadcnRoleBindings: {
       light: {
         '--background': '--color-surface',
@@ -127,7 +178,7 @@ export const SHADCN_BINDING_PRESETS = {
         '--accent': '--color-surface-container-highest',
         '--accent-foreground': '--color-on-surface',
         '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
+        '--border': '--color-outline',
         '--input': '--color-outline',
         '--ring': '--color-primary',
         '--sidebar': '--color-surface-container-low',
@@ -136,7 +187,7 @@ export const SHADCN_BINDING_PRESETS = {
         '--sidebar-primary-foreground': '--color-on-primary',
         '--sidebar-accent': '--color-surface-container-high',
         '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
+        '--sidebar-border': '--color-outline',
         '--sidebar-ring': '--color-outline',
       },
       dark: {
@@ -164,18 +215,13 @@ export const SHADCN_BINDING_PRESETS = {
         '--sidebar-primary-foreground': '--color-on-primary',
         '--sidebar-accent': '--color-surface-container-highest',
         '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
+        '--sidebar-border': '--color-outline',
         '--sidebar-ring': '--color-outline',
       },
     },
   },
-
-  // why: popovers blend flat into the page (light --popover → --color-surface,
-  // i.e. the background itself) while cards still lift to surface-container —
-  // only cards read as raised. Calm, minimal-chrome routing. (imported from
-  // tuner: "Grass 9")
   seamless: {
-    description: 'Popovers blend flat into the page; only cards lift',
+    description: 'Subtle depth — cards lift gently while popovers blend into the page',
     shadcnRoleBindings: {
       light: {
         '--background': '--color-surface',
@@ -242,12 +288,21 @@ export const SHADCN_BINDING_PRESETS = {
 // TS error, mirroring ShadcnPresetName.
 export type ShadcnBindingPresetName = keyof typeof SHADCN_BINDING_PRESETS
 
-// why: mode-keyed equality across the full role set. A deliberate mirror of the
-// private bindingsEqual in shadcn-presets.ts, kept local so this module stays
-// decoupled from the theme-preset module — the loop is trivial and the sibling
-// file establishes the exact pattern.
-function bindingsEqual(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
+// why: mode-keyed equality across every role EXCEPT the edge-weight sub-axis
+// (SHADCN_EDGE_ROLES). A deliberate mirror of the private
+// bindingsEqualIgnoringEdges in shadcn-presets.ts, kept local so this module
+// stays decoupled — the loop is trivial and the sibling file establishes the
+// exact pattern. Edges are a recognized modifier, not identity: softening
+// --border/--input/--sidebar-border keeps the binding picker lit on its preset,
+// mirroring findActivePreset. --ring stays compared.
+// Edge-role set is memoized lazily (matching shadcn-presets.ts) so it never
+// reads SHADCN_EDGE_ROLES at module-init time — defensive against import-cycle
+// ordering, even though this leaf module currently loads after schema settles.
+let edgeRoleSet: Set<string> | undefined
+function bindingsEqualIgnoringEdges(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
+  edgeRoleSet ??= new Set<string>(SHADCN_EDGE_ROLES)
   for (const role of SHADCN_ROLE_NAMES) {
+    if (edgeRoleSet.has(role)) continue
     if (a[role] !== b[role]) return false
   }
   return true
@@ -255,15 +310,17 @@ function bindingsEqual(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
 
 // why: the binding-tier mirror of findActivePreset (shadcn-presets.ts). Matches a
 // theme's role→token routing against the catalog by structural equality on BOTH
-// modes, returning the first matching name or null ("custom routing"). Reads ONLY
-// shadcnRoleBindings (hence the `Pick`, also lets a SourceState pass directly,
-// like selectSeedHex) — never the recipe or source inputs: a binding preset is
-// pure routing (ADR-0031 #1), so its identity is the map alone and survives any
-// seed/variant/surface change. This is the tier-independent identity that lets a
-// binding picker highlight its own selection while findActivePreset reports the
-// theme tier separately — the two pickers never share an identity, by design.
-// Iteration is declaration order, so a state matching multiple presets resolves
-// to the earliest (none overlap today).
+// modes — across every role EXCEPT the edge-weight sub-axis (SHADCN_EDGE_ROLES),
+// so a soft-border toggle keeps the picker lit on its preset — returning the
+// first matching name or null ("custom routing"). Reads ONLY shadcnRoleBindings
+// (hence the `Pick`, also lets a SourceState pass directly, like selectSeedHex) —
+// never the recipe or source inputs: a binding preset is pure routing (ADR-0031
+// #1), so its identity is the map alone and survives any seed/variant/surface
+// change. This is the tier-independent identity that lets a binding picker
+// highlight its own selection while findActivePreset reports the theme tier
+// separately — the two pickers never share an identity, by design. Iteration is
+// declaration order, so a state matching multiple presets resolves to the
+// earliest (none overlap today).
 export function findActiveBindingPreset(
   theme: Pick<PortableTheme, 'shadcnRoleBindings'>,
 ): ShadcnBindingPresetName | null {
@@ -271,8 +328,12 @@ export function findActiveBindingPreset(
     ShadcnBindingPresetName,
     ShadcnBindingPreset,
   ][]) {
-    if (!bindingsEqual(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)) continue
-    if (!bindingsEqual(theme.shadcnRoleBindings.dark, preset.shadcnRoleBindings.dark)) continue
+    if (
+      !bindingsEqualIgnoringEdges(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)
+    )
+      continue
+    if (!bindingsEqualIgnoringEdges(theme.shadcnRoleBindings.dark, preset.shadcnRoleBindings.dark))
+      continue
     return name
   }
   return null

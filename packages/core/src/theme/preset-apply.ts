@@ -1,3 +1,4 @@
+import { isSoftEdgeWeight, withSoftEdges } from './edge-weight'
 import type { PortableTheme } from './schema'
 import type { ShadcnPreset } from './shadcn-presets'
 
@@ -28,6 +29,19 @@ export function resolvePresetApply(
   preset: ShadcnPreset,
   choices: PresetAdoptChoices = {},
 ): Partial<PortableTheme> {
+  // why: ambient soft-border (sticky-soft, ADR-0035 #3) — a soft edge weight is
+  // a global stylistic setting that survives a preset switch, like dark mode. If the user
+  // currently has soft edges, re-assert them onto the freshly-stamped preset
+  // bindings so the switch doesn't snap edges back to the preset's (often hard)
+  // bake. Hard and custom edge states are NOT carried: the preset's curated
+  // edges stand, so "editor's choice" presets keep their intended edge look
+  // unless the user opted into soft. Edges are a recognized modifier factored
+  // out of preset identity (SHADCN_EDGE_ROLES), so this never affects which
+  // preset findActivePreset reports — it only chooses the edge token.
+  const presetBindings = {
+    light: { ...preset.shadcnRoleBindings.light },
+    dark: { ...preset.shadcnRoleBindings.dark },
+  }
   const patch: Partial<PortableTheme> = {
     variant: preset.variant,
     surfaceAlgo: preset.surfaceAlgo,
@@ -35,10 +49,9 @@ export function resolvePresetApply(
     surfaceTintLevel: { ...preset.surfaceTintLevel },
     surfaceTintTextLevel: { ...preset.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...preset.surfaceDesaturateLevel },
-    shadcnRoleBindings: {
-      light: { ...preset.shadcnRoleBindings.light },
-      dark: { ...preset.shadcnRoleBindings.dark },
-    },
+    shadcnRoleBindings: isSoftEdgeWeight(theme.shadcnRoleBindings)
+      ? withSoftEdges(presetBindings)
+      : presetBindings,
   }
 
   // why: a locked seed means "do not move this" (GLOSSARY: Lock), so lock keeps
