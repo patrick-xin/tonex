@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { MD_TOKEN_ITEM_GROUPS } from '@/features/color-picker'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
+import { useBindingBaseline } from '@/lib/stores/binding-baseline'
 import { collapseFixedGroups, type TokenItem, type TokenItemGroup } from './collapse-fixed-groups'
 import { resolveExpectedBindings } from './expected-bindings'
 
@@ -20,15 +21,18 @@ export function useBindingData() {
   const mode = useActiveMode()
   const allBindings = useSource((s) => s.shadcnRoleBindings)
   const portable = useSource(useShallow(selectPortable))
+  const baseline = useBindingBaseline((s) => s.baseline)
   const setShadcnRoleBinding = useSource((s) => s.actions.setShadcnRoleBinding)
 
   if (theme === null || mode === null) return null
 
   // why: the per-row "custom" dot, reset target, and group highlight measure
-  // divergence from the ACTIVE preset's routing (theme tier, then binding tier,
-  // then the fixed default) plus the soft-border edge modifier — not the fixed
-  // default. See expected-bindings.ts for the layered baseline rationale.
-  const expected = resolveExpectedBindings(portable)[mode]
+  // divergence from the ACTIVE preset's routing (theme tier, then binding tier)
+  // plus the soft-border edge modifier — not the fixed default. When the bindings
+  // have drifted off every preset, `baseline` (the last preset the user applied,
+  // tracked in useBindingBaseline) is the fallback, so editing one role doesn't
+  // make every sibling row read default-relative. See expected-bindings.ts.
+  const expected = resolveExpectedBindings(portable, baseline)[mode]
 
   // why: merge core md tokens with extended so the picker covers the full
   // 49-name domain. Same trick as MdSnapshotPicker.

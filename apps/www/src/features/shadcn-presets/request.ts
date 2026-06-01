@@ -1,5 +1,6 @@
 import { useSource } from '@tonex/core'
 import type { ShadcnPresetName } from '@tonex/core/schema'
+import { applyShadcnPreset } from './apply'
 import { presetSwitchNeedsDialog } from './predicate'
 import { presetSwitchDialogHandle } from './preset-dialog'
 
@@ -14,6 +15,6 @@ export function requestPresetSwitch(name: ShadcnPresetName): void {
   if (presetSwitchNeedsDialog(state)) {
     presetSwitchDialogHandle.openWithPayload(name)
   } else {
-    state.actions.setShadcnPreset(name)
+    applyShadcnPreset(name)
   }
 }

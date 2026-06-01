@@ -7,6 +7,7 @@ import {
   type ShadcnBindingPresetName,
 } from '@tonex/core/schema'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { applyShadcnBindingPreset } from './apply'
 
 // why: app-only display labels (ADR-0016 — www owns presentation strings). The
 // exhaustive Record means a binding preset added in core surfaces here as a
@@ -31,7 +32,6 @@ const BINDING_PRESET_NAMES = Object.keys(SHADCN_BINDING_PRESETS) as ShadcnBindin
 // never chosen here.
 export function BindingPresetToggle() {
   const bindings = useSource((s) => s.shadcnRoleBindings)
-  const setBindingPreset = useSource((s) => s.actions.setShadcnBindingPreset)
   const active = findActiveBindingPreset({ shadcnRoleBindings: bindings })
 
   return (
@@ -41,7 +41,7 @@ export function BindingPresetToggle() {
       className="justify-start"
       value={active ? [active] : []}
       onValueChange={(value) => {
-        if (value.length > 0) setBindingPreset(value[0] as ShadcnBindingPresetName)
+        if (value.length > 0) applyShadcnBindingPreset(value[0] as ShadcnBindingPresetName)
       }}
     >
       {BINDING_PRESET_NAMES.map((name) => (

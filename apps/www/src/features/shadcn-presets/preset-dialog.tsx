@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { RadioCard, RadioGroup } from '@/components/ui/radio'
+import { applyShadcnPreset } from './apply'
 import { isPresetSwitchDirty } from './predicate'
 
 // why: imperative handle threads the pending preset name (the payload) from
@@ -111,7 +112,6 @@ function ContrastValue({ c }: { c: { light: number; dark: number } }) {
 // only a touched-and-unlocked seed / touched contrast raises a choice, matching
 // presetSwitchNeedsDialog's gate at the call site.
 function PresetSwitchBody({ name }: { name: ShadcnPresetName }) {
-  const setShadcnPreset = useSource((s) => s.actions.setShadcnPreset)
   const portable = useSource(useShallow(selectPortable))
   const seedTouched = useSource((s) => s.seedTouched)
   const seedHexLock = useSource((s) => s.seedHexLock)
@@ -165,7 +165,7 @@ function PresetSwitchBody({ name }: { name: ShadcnPresetName }) {
       <DialogFooter>
         <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
         <DialogClose
-          onClick={() => setShadcnPreset(name, { seed: !keepSeed, contrast: !keepContrast })}
+          onClick={() => applyShadcnPreset(name, { seed: !keepSeed, contrast: !keepContrast })}
           render={<Button variant="primary" />}
         >
           Apply
