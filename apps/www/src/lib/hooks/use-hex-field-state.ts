@@ -1,5 +1,6 @@
 'use client'
 
+import { isValidHex } from '@tonex/color-utils'
 import { type FocusEvent, useEffect, useRef, useState } from 'react'
 
 // why: every hex-typing site in the rail wants the same buffered shape: a
@@ -7,10 +8,13 @@ import { type FocusEvent, useEffect, useRef, useState } from 'react'
 // without each invalid intermediate firing onChange, and external writes
 // (variant change, palette swap, native picker drag from elsewhere) sync
 // into the buffer when the field is unfocused so seed updates don't blow
-// away mid-typing. One copy, one regex (`/^#[0-9a-fA-F]{6}$/`), one
-// focus-buffering policy — five sites used to spell this out themselves.
-// Focus also selects the whole value so the field is type-to-replace.
-// Spread the returned `inputProps` onto the <Input> to wire focus/blur.
+// away mid-typing. One copy, one focus-buffering policy — five sites used to
+// spell this out themselves. Validity is core's `isValidHex` — the same
+// trust-boundary check the source store uses before MCU's argbFromHex — not a
+// private regex, so what this field accepts can never drift from what the
+// engine accepts. Focus also selects the whole value so the field is
+// type-to-replace. Spread the returned `inputProps` onto the <Input> to wire
+// focus/blur.
 export function useHexFieldState(value: string, onChange: (hex: string) => void) {
   const [hexInput, setHexInput] = useState(value)
   const isFocused = useRef(false)
@@ -21,7 +25,7 @@ export function useHexFieldState(value: string, onChange: (hex: string) => void)
 
   const handleChange = (next: string) => {
     setHexInput(next)
-    if (/^#[0-9a-fA-F]{6}$/.test(next)) onChange(next)
+    if (isValidHex(next)) onChange(next)
   }
 
   const inputProps = {
