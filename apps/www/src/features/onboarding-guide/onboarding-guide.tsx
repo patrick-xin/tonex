@@ -242,7 +242,7 @@ export function OnboardingGuide({
                   ) : (
                     <span />
                   )}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 ml-auto">
                     <Button variant="outline" onClick={dismiss}>
                       Skip
                     </Button>

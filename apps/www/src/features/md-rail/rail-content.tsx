@@ -1,8 +1,5 @@
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { ChartPaletteToggle } from '@/features/chart-palette'
-import { ContrastLevelSlider } from '@/features/contrast-level'
 import { CustomColorList } from '@/features/custom-colors'
 import { FineTuneColors } from '@/features/palette-override'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
@@ -21,15 +18,6 @@ export function MdRailContent() {
           <FineTuneColors />
         </AnimatedCollapsible>
         <SurfaceAdjustment />
-        <AnimatedCollapsible variant="ghost" title="Refinements" contentClassName="px-0 space-y-1">
-          <div className="p-2">
-            <ContrastLevelSlider />
-          </div>
-          <Separator className="opacity-20 mx-2" />
-          <div className="p-2">
-            <ChartPaletteToggle />
-          </div>
-        </AnimatedCollapsible>
         <CustomColorList />
       </div>
     </ScrollArea>
