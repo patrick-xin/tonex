@@ -1,4 +1,4 @@
-import type { ShadcnRoleBindings } from './schema'
+import { type PortableTheme, SHADCN_ROLE_NAMES, type ShadcnRoleBindings } from './schema'
 
 // why: a role binding preset is a *named, described starting point* for the
 // shadcn role→md-token map — ADR-0031 #1's "convenience input to the binding
@@ -241,3 +241,39 @@ export const SHADCN_BINDING_PRESETS = {
 // the exact set of declared keys — renaming/removing flows to call sites as a
 // TS error, mirroring ShadcnPresetName.
 export type ShadcnBindingPresetName = keyof typeof SHADCN_BINDING_PRESETS
+
+// why: mode-keyed equality across the full role set. A deliberate mirror of the
+// private bindingsEqual in shadcn-presets.ts, kept local so this module stays
+// decoupled from the theme-preset module — the loop is trivial and the sibling
+// file establishes the exact pattern.
+function bindingsEqual(a: ShadcnRoleBindings, b: ShadcnRoleBindings): boolean {
+  for (const role of SHADCN_ROLE_NAMES) {
+    if (a[role] !== b[role]) return false
+  }
+  return true
+}
+
+// why: the binding-tier mirror of findActivePreset (shadcn-presets.ts). Matches a
+// theme's role→token routing against the catalog by structural equality on BOTH
+// modes, returning the first matching name or null ("custom routing"). Reads ONLY
+// shadcnRoleBindings (hence the `Pick`, also lets a SourceState pass directly,
+// like selectSeedHex) — never the recipe or source inputs: a binding preset is
+// pure routing (ADR-0031 #1), so its identity is the map alone and survives any
+// seed/variant/surface change. This is the tier-independent identity that lets a
+// binding picker highlight its own selection while findActivePreset reports the
+// theme tier separately — the two pickers never share an identity, by design.
+// Iteration is declaration order, so a state matching multiple presets resolves
+// to the earliest (none overlap today).
+export function findActiveBindingPreset(
+  theme: Pick<PortableTheme, 'shadcnRoleBindings'>,
+): ShadcnBindingPresetName | null {
+  for (const [name, preset] of Object.entries(SHADCN_BINDING_PRESETS) as [
+    ShadcnBindingPresetName,
+    ShadcnBindingPreset,
+  ][]) {
+    if (!bindingsEqual(theme.shadcnRoleBindings.light, preset.shadcnRoleBindings.light)) continue
+    if (!bindingsEqual(theme.shadcnRoleBindings.dark, preset.shadcnRoleBindings.dark)) continue
+    return name
+  }
+  return null
+}

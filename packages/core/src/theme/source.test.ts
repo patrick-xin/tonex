@@ -2,6 +2,11 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ShadcnChartTokenName } from '../chart/schema'
+import {
+  findActiveBindingPreset,
+  SHADCN_BINDING_PRESETS,
+  type ShadcnBindingPresetName,
+} from './binding-presets'
 import { hctFromHex } from './hct'
 import { MODES } from './mode'
 import {
@@ -906,6 +911,86 @@ describe('setShadcnPreset recipe symmetry', () => {
     expect(useSource.getState().surfaceTintTextLevel).toEqual(
       SHADCN_PRESETS.default.surfaceTintTextLevel,
     )
+  })
+})
+
+// why: ADR-0031 #1 — a binding preset is pure routing. setShadcnBindingPreset
+// stamps both modes' shadcnRoleBindings and must touch nothing else: no recipe,
+// no source inputs, no touched signal, no confirm. These pin that isolation and
+// the two-tier composition — the theme tier (findActivePreset) may go "custom"
+// while the binding tier (findActiveBindingPreset) highlights the applied name.
+describe('setShadcnBindingPreset', () => {
+  const BINDING_PRESET_NAMES = Object.keys(SHADCN_BINDING_PRESETS) as ShadcnBindingPresetName[]
+
+  beforeEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: true })
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    useSource.setState({ ...DEFAULT_INPUTS, _hydrated: false })
+  })
+
+  it.each(
+    BINDING_PRESET_NAMES,
+  )('"%s" writes both modes and detects as the active binding preset', (name) => {
+    useSource.getState().actions.setShadcnBindingPreset(name)
+    const state = useSource.getState()
+    expect(state.shadcnRoleBindings).toEqual(SHADCN_BINDING_PRESETS[name].shadcnRoleBindings)
+    expect(findActiveBindingPreset(selectPortable(state))).toBe(name)
+  })
+
+  it('clones the catalog map — the store never aliases the shared preset object', () => {
+    const name = BINDING_PRESET_NAMES[0]!
+    useSource.getState().actions.setShadcnBindingPreset(name)
+    expect(useSource.getState().shadcnRoleBindings.light).not.toBe(
+      SHADCN_BINDING_PRESETS[name].shadcnRoleBindings.light,
+    )
+  })
+
+  it('touches no recipe field, source input, or touched signal', () => {
+    useSource.setState({
+      variant: 'monochrome',
+      surfaceAlgo: 'tint',
+      surfacePaletteName: 'slate',
+      surfaceTintLevel: { light: 0.42, dark: 0.18 },
+      surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
+      seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },
+      seedTouched: true,
+      contrastLevel: { light: 0.5, dark: 0.8 },
+      contrastTouched: true,
+      _hydrated: true,
+    })
+    const before = useSource.getState()
+    useSource.getState().actions.setShadcnBindingPreset(BINDING_PRESET_NAMES[0]!)
+    const after = useSource.getState()
+    expect(after.variant).toBe(before.variant)
+    expect(after.surfaceAlgo).toBe(before.surfaceAlgo)
+    expect(after.surfacePaletteName).toBe(before.surfacePaletteName)
+    expect(after.surfaceTintLevel).toEqual(before.surfaceTintLevel)
+    expect(after.surfaceDesaturateLevel).toEqual(before.surfaceDesaturateLevel)
+    expect(after.seed).toEqual(before.seed)
+    expect(after.seedTouched).toBe(true)
+    expect(after.contrastLevel).toEqual(before.contrastLevel)
+    expect(after.contrastTouched).toBe(true)
+  })
+
+  it('composes on a theme preset: keeps its recipe + seed, re-routes bindings, theme tier → custom', () => {
+    const { actions } = useSource.getState()
+    actions.setShadcnPreset('grove')
+    const afterTheme = useSource.getState()
+    actions.setShadcnBindingPreset('crisp')
+    const afterBinding = useSource.getState()
+    // recipe + seed preserved from grove
+    expect(afterBinding.variant).toBe(afterTheme.variant)
+    expect(afterBinding.surfaceAlgo).toBe(afterTheme.surfaceAlgo)
+    expect(afterBinding.seed).toEqual(afterTheme.seed)
+    // bindings re-routed to crisp
+    expect(afterBinding.shadcnRoleBindings).toEqual(SHADCN_BINDING_PRESETS.crisp.shadcnRoleBindings)
+    // the two tiers carry independent identity
+    expect(findActivePreset(selectPortable(afterBinding))).toBeNull()
+    expect(findActiveBindingPreset(selectPortable(afterBinding))).toBe('crisp')
   })
 })
 
