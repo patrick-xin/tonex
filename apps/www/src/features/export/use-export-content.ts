@@ -16,17 +16,13 @@ import {
 } from '@tonex/core'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { type ExportTab, resolveExportRoute } from './resolve-export-route'
 
-export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart' | 'Design.md'
-
-// why: Tailwind tab emits the md layer (full globals.css with @theme inline);
-// shadcn tab emits :root + .dark only since the user already owns the @import
-// and @theme inline in their shadcn project. CSS tab emits framework-agnostic
-// Material Design custom properties (`--md-sys-color-*`, one light-dark() pair
-// per token) for non-Tailwind / Material Web consumers. All three go through
-// core's exporters so the drift-guard (ADR-0017) covers what users actually
-// paste. JSON and Dart have real formatters in
-// `@tonex/core/exporters/{json,dart}.ts`.
+// why: the per-tab routing decision (which exporter, extension, header policy)
+// lives in resolveExportRoute — one exhaustively-typed table instead of six
+// scattered return sites. ExportTab is owned there and re-exported here so the
+// existing import sites keep resolving.
+export type { ExportTab } from './resolve-export-route'
 
 // why: header is the export's provenance trail. seed + variant always carry
 // signal; date is what users actually find useful when comparing two pasted
@@ -91,43 +87,41 @@ export function useExportContent({
     // commitment 7 — the string we hand to the dialog pane equals what the user
     // pastes byte-for-byte.
     const bundle = buildContrastBundle(portable, options)
+    const route = resolveExportRoute(exportTab)
 
-    // why: DESIGN.md (@google/design.md) interop — a bare `colors:` YAML block
-    // for one mode, no provenance header (the user pastes it over the colors
-    // block of their own DESIGN.md, commonly Stitch-authored). Mode comes from
-    // the header chooser, the extended-roles include from the export rail; the
-    // format's Color type is sRGB hex, so the exporter ignores colorFormat.
-    if (exportTab === 'Design.md') {
-      return { exportContent: exportDesignMd(bundle, mode, options), ext: 'md' }
-    }
+    // why: each exporter takes a different shape (Design.md needs the chosen
+    // mode; JSON also needs the portable source; the css tabs need a layer), so
+    // the route's discriminant picks the call — but the routing *decision*
+    // (which exporter, ext, header) is the single table above, not this switch.
+    // Design.md is @google/design.md interop (bare `colors:` YAML, sRGB hex so
+    // colorFormat is ignored); JSON reshapes the same DerivedTheme into MTB JSON
+    // (ADR-0029); Dart into a Flutter MaterialTheme (ADR-0021 c.9); CSS is
+    // framework-agnostic light-dark() pairs; Tailwind/shadcn are the md/shadcn
+    // layers (shadcn omits @import/@theme since the user already owns them).
+    const body = (() => {
+      switch (route.exporter) {
+        case 'designMd':
+          return exportDesignMd(bundle, mode, options)
+        case 'json':
+          return exportJson(portable, bundle, options)
+        case 'dart':
+          return exportDart(bundle, options)
+        case 'nativeCss':
+          return exportNativeCss(bundle, options)
+        case 'css':
+          return exportCss(bundle, route.layer, options)
+      }
+    })()
 
-    // why: the JSON branch lives below the hydration guard (#84) — it needs the
-    // derived bundle + source. exportJson reshapes the same DerivedTheme the CSS
-    // path uses into MTB-shaped JSON (ADR-0029).
-    if (exportTab === 'JSON') {
-      return { exportContent: exportJson(portable, bundle, options), ext: 'json' }
-    }
-
-    // why: Dart joined the bundle-consuming branches in slice dart-1 — it
-    // reshapes the same DerivedTheme into a Flutter MaterialTheme (ADR-0021
-    // c.9). options gate the tiers (dart-2 contrast) and the standalone
-    // ChartColors class (dart-3 includeChart).
-    if (exportTab === 'Dart') return { exportContent: exportDart(bundle, options), ext: 'dart' }
-
-    // why: ISO yyyy-mm-dd — sortable, locale-free, and the form users expect
-    // to see in a generated-file banner. Captured at memo recompute time so
-    // the header reflects when the user actually generated this export.
+    // why: data formats (JSON/Dart/Design.md) stay header-free — a /* */ banner
+    // breaks a JSON parse or a `colors:` paste. Only the css family gets the
+    // provenance header. Date is ISO yyyy-mm-dd (sortable, locale-free) captured
+    // at recompute so the banner reflects when this export was generated.
+    if (!route.header) return { exportContent: body, ext: route.ext }
     const date = new Date().toISOString().slice(0, 10)
-    const header = formatHeader(seedHex, variant, contrastLevel, date)
-
-    // why: the CSS tab is framework-agnostic native CSS (light-dark() pairs,
-    // optional --md-sys-color-* namespace), a separate exporter from the
-    // Tailwind/shadcn `md`/`shadcn` layers. Same provenance header.
-    if (exportTab === 'CSS') {
-      return { exportContent: header + exportNativeCss(bundle, options), ext: 'css' }
+    return {
+      exportContent: formatHeader(seedHex, variant, contrastLevel, date) + body,
+      ext: route.ext,
     }
-
-    const layer = exportTab === 'Tailwind' ? 'md' : 'shadcn'
-    return { exportContent: header + exportCss(bundle, layer, options), ext: 'css' }
   }, [exportTab, mode, hydrated, portable, options, seedHex, variant, contrastLevel])
 }
