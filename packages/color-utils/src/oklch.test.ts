@@ -1,6 +1,6 @@
 import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { hexFromOklch, oklchString } from './oklch'
+import { argbFromOklch, hexFromOklch, hexString, oklchString } from './oklch'
 
 const OKLCH = /^oklch\((-?[\d.]+) (-?[\d.]+) (-?[\d.]+)\)$/
 
@@ -83,5 +83,61 @@ describe('canonical-form firewall (ADR-0025 commitment 3)', () => {
     expect(oklchString(argbFromHex('#ffffff'))).toMatch(/^oklch\([\d.]+ 0 0\)$/)
     expect(oklchString(argbFromHex('#000000'))).toMatch(/^oklch\([\d.]+ 0 0\)$/)
     expect(oklchString(argbFromHex('#404040'))).toMatch(/^oklch\([\d.]+ 0 0\)$/)
+  })
+})
+
+// why: the firewall tests above pin oklchString's OUTPUT (shape, precision,
+// gamut, neutral snap) but never that the string round-trips back to its source
+// color. Every drift-guard in core compares two values BOTH produced through
+// oklchString, so a precision/rounding regression that shifts emission moves
+// both sides together and ships green — the shared-core blind spot, where only
+// the single-seed baked globals.css stands apart. This sweep is the INDEPENDENT
+// oracle: argbFromOklch / argbFromHex are the inverse direction, so
+// argb -> string -> argb must return the source for EVERY color in the sRGB
+// cube, including the saturated boundary colors the default theme never
+// exercises. Asymmetric by design — only the forward path rounds — so a
+// precision downgrade (e.g. L to 2 decimals) blows the tolerance. A culori math
+// shift that moves forward AND inverse together is caught instead by the
+// external-truth gamut assertions above. ADR-0017 / ADR-0025.
+describe('round-trip invariant — independent inverse oracle', () => {
+  const STEPS = [0, 32, 64, 96, 128, 159, 191, 223, 255] as const
+  const argbOf = (r: number, g: number, b: number) =>
+    ((0xff << 24) | (r << 16) | (g << 8) | b) >>> 0
+  const rgb = (argb: number) => [(argb >> 16) & 0xff, (argb >> 8) & 0xff, argb & 0xff] as const
+
+  // why: 2 is the MEASURED ceiling across all 729 cube colors — a single
+  // saturated-cyan boundary point (rgb(0,255,223)) reaches 2 from CSS Color 4
+  // gamut-mapping + rounding; every other color round-trips within 1. The
+  // drifters array enumerates any color that exceeds it, so a regression names
+  // its own offenders. Tighten to 1 if that boundary point is ever excluded.
+  const OKLCH_TOLERANCE = 2
+
+  it(`oklch: argb -> string -> argb within ${OKLCH_TOLERANCE}/channel across the sRGB cube`, () => {
+    const drifters: string[] = []
+    for (const r of STEPS)
+      for (const g of STEPS)
+        for (const b of STEPS) {
+          const argb = argbOf(r, g, b)
+          const [r1, g1, b1] = rgb(argbFromOklch(oklchString(argb)))
+          const d = Math.max(Math.abs(r1 - r), Math.abs(g1 - g), Math.abs(b1 - b))
+          if (d > OKLCH_TOLERANCE)
+            drifters.push(
+              `rgb(${r},${g},${b}) -> ${oklchString(argb)} -> rgb(${r1},${g1},${b1}) Δ=${d}`,
+            )
+        }
+    expect(drifters).toEqual([])
+  })
+
+  it('hex: argb -> string -> argb is exact across the sRGB cube', () => {
+    const drifters: string[] = []
+    for (const r of STEPS)
+      for (const g of STEPS)
+        for (const b of STEPS) {
+          const argb = argbOf(r, g, b)
+          const [r1, g1, b1] = rgb(argbFromHex(hexString(argb)))
+          if (r1 !== r || g1 !== g || b1 !== b)
+            drifters.push(`rgb(${r},${g},${b}) -> ${hexString(argb)} -> rgb(${r1},${g1},${b1})`)
+        }
+    expect(drifters).toEqual([])
   })
 })
