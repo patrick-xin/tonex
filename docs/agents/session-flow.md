@@ -31,7 +31,7 @@ Recent commits are already in the `SessionStart` output above — glance there f
 ## Read when relevant
 
 - `docs/agents/issue-tracker.md` / `triage-labels.md` — how issues are organized; triage label vocabulary.
-- `docs/agents/{slice-strategy,tdd,memory-lifecycle}.md` — slice discipline, the test-first contract, memory lifecycle.
+- `docs/agents/memory-lifecycle.md` — memory lifecycle.
 
 ## For subagents
 
