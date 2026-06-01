@@ -25,7 +25,7 @@ export function NeutralPaletteChips() {
 
   return (
     <div className="space-y-2">
-      <div className="text-sm font-medium">Tailwind neutral color</div>
+      <div className="text-sm font-medium text-on-surface-variant">Tailwind neutral color</div>
       <TooltipProvider>
         <div className="flex flex-wrap justify-around gap-3">
           {NEUTRAL_PALETTE_NAMES.map((n) => (

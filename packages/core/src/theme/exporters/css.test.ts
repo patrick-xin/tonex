@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme, type TokenMap } from '../derive'
 import type { Mode } from '../mode'
-import { oklchString } from '../oklch'
+import { hexString, oklchString } from '../oklch'
 import { DEFAULT_INPUTS, type PortableTheme } from '../schema'
 import { exportCss } from './css'
 
@@ -23,10 +23,14 @@ function parseBlock(css: string, selector: string): Record<string, string> {
   return out
 }
 
-function projectLayer(layer: TokenMap): Record<string, string> {
+// why: mirrors the exporter's projectArgb seam (css.ts) so the contract test
+// compares against the SAME projection the emitter uses. fmt defaults to oklch
+// — the second concrete adapter (hex) earns the parameter (ADR-0021 colorFormat
+// seam; slice-strategy "two adapters = real seam").
+function projectLayer(layer: TokenMap, fmt: 'oklch' | 'hex' = 'oklch'): Record<string, string> {
   const out: Record<string, string> = {}
   for (const [name, argb] of Object.entries(layer)) {
-    out[name] = oklchString(argb)
+    out[name] = fmt === 'hex' ? hexString(argb) : oklchString(argb)
   }
   return out
 }
@@ -325,6 +329,19 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       const out = exportCss(bundle, 'md', { colorFormat: 'hex' })
       const md = parseBlock(out, ':root')
       for (const v of Object.values(md)) expect(v).toMatch(/^#[0-9a-f]{6}$/i)
+    })
+
+    it('hex: :root and .dark values equal deriveTheme projected to hex (not just hex-shaped)', () => {
+      // why: the shape check above only proves "looks like hex"; the oklch path
+      // gets a VALUE pin (':root block values match theme.md.light …') but the
+      // hex path did not — a wrong-but-well-formed hex value shipped green
+      // (drift-guard Case 1, hex). This pins value equality against deriveTheme.
+      // It shares hexString with the exporter, so it catches an exporter-side
+      // transform/round on the hex branch, NOT a bug inside hexString itself —
+      // that round-trips in color-utils oklch.test.ts. ADR-0017 / ADR-0021.
+      const out = exportCss(bundle, 'md', { colorFormat: 'hex' })
+      expect(parseBlock(out, ':root')).toEqual(projectLayer(theme.md.light, 'hex'))
+      expect(parseBlock(out, '.dark')).toEqual(projectLayer(theme.md.dark, 'hex'))
     })
   })
 
