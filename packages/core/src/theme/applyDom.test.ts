@@ -469,11 +469,14 @@ describe('applyDom (jsdom integration)', () => {
         source: { ...DEFAULT_INPUTS, contrastLevel: { light: 0.5, dark: 0.5 } },
       },
       {
-        // why: seedHexLock is a source-input gate, not a derived-side flag —
-        // it must NOT change the rendered output. Pairing it with a non-default
-        // seed confirms the seed is what drives derive while the lock just
-        // governs future writes. Pinning this round-trip prevents anyone from
-        // accidentally threading seedHexLock into derive in the future.
+        // why: seedHexLock is a source-input gate, not a derived-side flag — it
+        // must NOT change the rendered output. This case pins applyDom↔derive
+        // consistency for a locked, non-default source (the seed drives derive;
+        // the lock only governs future writes). It does NOT by itself catch the
+        // lock leaking into derive — applyDom and deriveTheme both read the
+        // source, so a leak would shift both sides together and still match.
+        // That invariant lives in derive.test.ts ('input-only fields never reach
+        // derive'); this case complements it on the DOM seam.
         name: 'seedHexLock with non-default seed',
         source: { ...withSeed('#ff5500'), seedHexLock: true },
       },
