@@ -4,7 +4,9 @@ import { type MdTokenName, SHADCN_EDGE_ROLES, type ShadcnRoleBindings } from './
 // hairline edge (--color-outline-variant, "soft") vs M3's primary edge
 // (--color-outline, "hard", the project default). Core owns these so the
 // ambient preset-apply rule and the www soft-border toggle share one definition
-// instead of each hard-coding the token strings.
+// instead of each hard-coding the token strings. ADR-0035 — edge weight is a
+// sub-axis factored out of preset identity (#1), read from the bindings rather
+// than stored as provenance (#2).
 export const SOFT_EDGE_TOKEN: MdTokenName = '--color-outline-variant'
 export const HARD_EDGE_TOKEN: MdTokenName = '--color-outline'
 

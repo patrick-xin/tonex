@@ -18,6 +18,8 @@ interface BindingBaseline {
   // the drifted state. Lives in www, NOT core's PortableTheme, so it never
   // pollutes the portable wire shape — a future www/core split stays clean
   // (option 1.5, chosen over option 2's tracked core field for exactly this).
+  // ADR-0036 — www-local baseline (#2), detection-primary so a stale stamp fails
+  // safe (#3), keyed by bindings not by preset name (#4).
   baseline: BindingPair
 }
 

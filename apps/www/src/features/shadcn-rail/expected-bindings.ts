@@ -35,7 +35,8 @@ type BindingPair = { light: ShadcnRoleBindings; dark: ShadcnRoleBindings }
 // PRIMARY: when the bindings exactly match a preset the fallback is never read, so
 // a missed/stale stamp degrades to default-relative (option 1), never to a WRONG
 // preset. The baseline concept lives entirely in www — core's wire shape is
-// untouched, keeping a future www/core split clean.
+// untouched, keeping a future www/core split clean. ADR-0036 — the one expected
+// map all three faces share (#1) with detection-primary resolution (#3).
 //
 // The soft-border modifier is layered on top: when the current edge weight is soft
 // (isSoftEdgeWeight), the three edge roles in the expected map are forced soft so

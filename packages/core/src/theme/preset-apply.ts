@@ -29,8 +29,8 @@ export function resolvePresetApply(
   preset: ShadcnPreset,
   choices: PresetAdoptChoices = {},
 ): Partial<PortableTheme> {
-  // why: ambient soft-border (sticky-soft) — a soft edge weight is a global
-  // stylistic setting that survives a preset switch, like dark mode. If the user
+  // why: ambient soft-border (sticky-soft, ADR-0035 #3) — a soft edge weight is
+  // a global stylistic setting that survives a preset switch, like dark mode. If the user
   // currently has soft edges, re-assert them onto the freshly-stamped preset
   // bindings so the switch doesn't snap edges back to the preset's (often hard)
   // bake. Hard and custom edge states are NOT carried: the preset's curated
