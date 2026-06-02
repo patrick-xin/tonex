@@ -44,6 +44,15 @@ export default defineConfig({
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
+    // why: the landing hero plays a motion entrance (staggered translateY); while
+    // it runs, the animating container intercepts pointer events over the preset
+    // row + CTAs, so Playwright retries the click for 6–9s until the transform
+    // settles — enough to blow the 60s budget on a 2-vCPU CI runner. Emulating
+    // prefers-reduced-motion makes the app skip those transforms (the `m`
+    // components honor it via MotionConfig reducedMotion="user"), so clicks land
+    // immediately. No spec asserts on animation, so nothing is lost.
+    // (reducedMotion lives under contextOptions in @playwright/test 1.60.)
+    contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
