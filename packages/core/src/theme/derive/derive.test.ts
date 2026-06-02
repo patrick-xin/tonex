@@ -447,12 +447,12 @@ describe('deriveTheme', () => {
     it('default bindings preserve slice-1 mapping rule', () => {
       // why: locks the default behavior so changing the data shape can't
       // silently drift the visible mapping — DEFAULT_SHADCN_ROLE_BINDINGS
-      // is the migration contract for any consumer who upgrades schema.
-      // Asymmetric primary (light→container, dark→primary) is intentional and
-      // ships as the `default` preset under ADR-0026; this guard catches
-      // unintended movement of either side of the asymmetry.
+      // re-exports SHADCN_PRESETS.default.shadcnRoleBindings, the migration
+      // contract for any consumer who upgrades schema. The `default` preset
+      // binds --primary symmetrically to --color-primary in both modes
+      // (ADR-0026); this guard catches unintended movement of either side.
       const { md, shadcn } = deriveTheme(DEFAULT_INPUTS)
-      expect(shadcn.light['--primary']).toBe(md.light['--color-primary-container'])
+      expect(shadcn.light['--primary']).toBe(md.light['--color-primary'])
       expect(shadcn.dark['--primary']).toBe(md.dark['--color-primary'])
     })
 
@@ -481,15 +481,19 @@ describe('deriveTheme', () => {
       // why: the load-bearing reason bindings are mode-keyed — slice 7 will
       // admit cross-mode mapping divergence (e.g. for contrast). Verify the
       // mechanism here so the data shape carries weight before we use it.
+      // why: the default preset binds --primary symmetrically, so to exercise
+      // divergence we pin light to --color-primary-container while dark keeps
+      // the default --color-primary — proving the data shape carries per-mode
+      // weight before slice 7 uses it.
       const { md, shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
         shadcnRoleBindings: {
-          light: DEFAULT_SHADCN_ROLE_BINDINGS.light,
-          dark: {
-            ...DEFAULT_SHADCN_ROLE_BINDINGS.dark,
-            '--primary': '--color-primary',
-            '--primary-foreground': '--color-on-primary',
+          light: {
+            ...DEFAULT_SHADCN_ROLE_BINDINGS.light,
+            '--primary': '--color-primary-container',
+            '--primary-foreground': '--color-on-primary-container',
           },
+          dark: DEFAULT_SHADCN_ROLE_BINDINGS.dark,
         },
       })
       expect(shadcn.light['--primary']).toBe(md.light['--color-primary-container'])
@@ -502,7 +506,7 @@ describe('deriveTheme', () => {
       // drift. This is the slice-2 small-loop contract end-to-end.
       const { shadcn } = deriveTheme({
         ...DEFAULT_INPUTS,
-        md3TokenOverrides: { light: { '--color-primary-container': '#ff0000' }, dark: {} },
+        md3TokenOverrides: { light: { '--color-primary': '#ff0000' }, dark: {} },
         shadcnRoleBindings: DEFAULT_SHADCN_ROLE_BINDINGS,
       })
       expect(shadcn.light['--primary']).toBe(RED)
@@ -727,9 +731,9 @@ describe('deriveTheme', () => {
 
   describe('surfaceAlgo', () => {
     it("'desaturate' at level 0 leaves md surface family untouched (identity)", () => {
-      // why: baseline pins level=0 explicitly — DEFAULT_INPUTS now ships with
-      // light=0.3 desaturate as part of the `default` preset, so it's not a
-      // true neutral reference anymore.
+      // why: baseline pins level=0 explicitly so the identity claim doesn't
+      // ride on the `default` preset's surfaceDesaturateLevel staying at 0 —
+      // pinning keeps this a true neutral reference if the preset ever changes.
       const baseline = deriveTheme({
         ...DEFAULT_INPUTS,
         surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -749,8 +753,13 @@ describe('deriveTheme', () => {
         surfaceAlgo: 'tint',
         surfaceTintLevel: { light: 1, dark: 1 },
       })
-      expect(tinted.md.light['--color-surface']).not.toBe(baseline.md.light['--color-surface'])
-      // why: shadcn primary by default binds to primary-container (not surface),
+      // why: --color-surface (the lightest token, tone ~99) snaps to the same
+      // byte under the zinc tint, so assert on --color-surface-container, which
+      // the treatment genuinely moves.
+      expect(tinted.md.light['--color-surface-container']).not.toBe(
+        baseline.md.light['--color-surface-container'],
+      )
+      // why: shadcn primary by default binds to --color-primary (not surface),
       // so the treatment should NOT change shadcn primary at default bindings.
       expect(tinted.shadcn.light['--primary']).toBe(baseline.shadcn.light['--primary'])
     })

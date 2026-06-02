@@ -191,9 +191,15 @@ describe('applySurfaceTint', () => {
       }
     }
     // primary-independent at level 0: the border is the palette, not the seed.
+    // B2 pins tone from MCU (seed varies it by a fraction), so compare in HCT
+    // with a sub-unit tolerance rather than toBe — same semantics as the
+    // SURFACE_BG primary-independence guard above.
     const red = applySurfaceTint(deriveTheme(withSeed('#ff0000')).md.light, 0, 'zinc')
     const green = applySurfaceTint(deriveTheme(withSeed('#00ff00')).md.light, 0, 'zinc')
-    for (const tok of OUTLINE) expect(red[tok]).toBe(green[tok])
+    for (const tok of OUTLINE) {
+      expect(Math.abs(toneOf(red[tok]) - toneOf(green[tok]))).toBeLessThan(1)
+      expect(Math.abs(chromaOf(red[tok]) - chromaOf(green[tok]))).toBeLessThan(1)
+    }
     // decoupled from textLevel: pushing the text accent never touches the borders.
     const layer = deriveTheme(withSeed('#ff0000')).md.light
     const noText = applySurfaceTint(layer, 0, 'zinc', 0)

@@ -4,8 +4,8 @@ import { ArrowUpRight, Asterisk, Droplet, FlaskConical, Sparkles } from 'lucide-
 import { motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
 import { cx } from 'tailwind-variants'
+import { SectionHeader } from '../section-header'
 
-// THE LAYOUT KNOB (now wired) —
 // `BellaSection` owns a 3-way knob; the chosen `BellaLayout` flows down to
 // `BellaPosterSection`. The SAME eight content cards are rendered in every
 // layout — only each card's grid placement changes per layout. Because the
@@ -321,12 +321,11 @@ export function BellaSection() {
   const [layout, setLayout] = useState<BellaLayout>('poster')
   return (
     <section className="flex min-h-dvh w-full flex-col items-center bg-surface px-6 py-12">
-      <div className="flex shrink-0 flex-col items-center gap-3">
-        <p className="text-xs uppercase tracking-widest text-on-surface-variant">
-          one palette · three layouts
-        </p>
-        <BellaKnob value={layout} onChange={setLayout} />
-      </div>
+      <SectionHeader
+        heading="Keep your brand color consistent on every surface."
+        description="Send the same theme to your marketing site, dashboard, mobile app, and docs. It all derives from one seed, so the identity stays consistent everywhere."
+      />
+      <BellaKnob value={layout} onChange={setLayout} />
       <div className="flex w-full flex-1 items-center justify-center">
         <BellaPosterSection layout={layout} />
       </div>

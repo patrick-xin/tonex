@@ -48,7 +48,7 @@ export function SubscribeForm() {
           setSubmitting(false)
         }
       }}
-      className="gap-3 text-left"
+      className="gap-4 text-left"
     >
       <Field name="email">
         <FieldLabel>Email</FieldLabel>
@@ -67,7 +67,7 @@ export function SubscribeForm() {
         type="text"
       />
       <Button disabled={submitting} isLoading={submitting} type="submit">
-        {submitting && <Loader2 className="size-4 animate-spin" />} Notify me
+        {submitting && <Loader2 className="size-4 animate-spin" />} Keep me posted
       </Button>
     </Form>
   )

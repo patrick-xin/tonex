@@ -1,10 +1,7 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
 import { m as motion, type Variants } from 'motion/react'
-import Link from 'next/link'
-import { ShadcnIcon } from '@/components/icons/shadcn'
-import { Button } from '@/components/ui/button'
+import { CtaButtons } from './cta-buttons'
 import { PresetsRow } from './presets-row'
 import { SeedTrigger } from './seed-trigger'
 
@@ -57,27 +54,7 @@ export function HeroContent() {
         Built on perceptual color science.
         <br /> One seed, one coherent palette, one identity across every product.
       </motion.p>
-      <motion.div variants={item} className="flex flex-wrap items-center gap-4">
-        <Button
-          nativeButton={false}
-          render={<Link href="/theme" />}
-          size="lg"
-          className="px-8 h-12 text-base font-semibold shadow-2xl"
-        >
-          Try tonex
-          <ArrowRight className="ml-2 size-5" />
-        </Button>
-        <Button
-          nativeButton={false}
-          variant="outline"
-          size="lg"
-          className="px-8 h-12 text-base font-medium"
-          render={<Link href="/theme/shadcn" />}
-        >
-          shadcn mode
-          <ShadcnIcon className="ml-2 size-5" />
-        </Button>
-      </motion.div>
+      <CtaButtons />
     </motion.div>
   )
 }

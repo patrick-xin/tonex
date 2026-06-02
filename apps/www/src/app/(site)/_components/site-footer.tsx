@@ -128,7 +128,7 @@ export function SiteFooter() {
         <div className="aspect-3/1 w-full">
           <TextHoverEffect text="TONEX" />
         </div>
-        <div className="relative z-20 mt-[-14%] bg-surface-container">
+        <div className="relative z-20 mt-[-14%] bg-surface-container/90 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 py-4 text-sm text-on-surface-variant sm:flex-row sm:py-10">
             <ul className="flex items-center gap-4">
               <li>
