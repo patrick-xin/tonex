@@ -7,7 +7,12 @@ import { defineConfig, devices } from '@playwright/test'
 // a real browser across a real navigation can observe the stale frame. This file
 // is the FOUNDATION: webServer + one smoke. The Tier-1/2 suites land on top.
 
-const PORT = 3000
+// why: PORT is env-overridable (default 3000) so the suite can dodge a port
+// already held by a *sibling git worktree's* dev server — `reuseExistingServer`
+// would otherwise silently reuse it and test the wrong checkout. `PORT=3100 pnpm
+// e2e` runs against this worktree on its own port. The spawned webServer inherits
+// PORT below so dev/start bind to the same one baseURL points at.
+const PORT = Number(process.env.PORT ?? 3000)
 const BASE_URL = `http://localhost:${PORT}`
 
 // why: the app reads these at module load (subscribe route, app URL). Mirror the
@@ -50,6 +55,8 @@ export default defineConfig({
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
-    env: APP_ENV,
+    // why: PORT so next dev/start binds to the same port baseURL points at when
+    // it's overridden (sibling-worktree collision avoidance — see PORT above).
+    env: { ...APP_ENV, PORT: String(PORT) },
   },
 })

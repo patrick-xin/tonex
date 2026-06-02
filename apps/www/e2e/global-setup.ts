@@ -6,7 +6,9 @@
 // the response blocks on its compilation, so by the time tests start the dev
 // server serves them instantly. In CI the build is already done, so this is a
 // cheap no-op. A warm failure is non-fatal — the test itself surfaces real breakage.
-const BASE_URL = 'http://localhost:3000'
+// why: track PORT like playwright.config.ts so warm-up hits the server the tests
+// actually run against, not a sibling worktree's dev server squatting on :3000.
+const BASE_URL = `http://localhost:${process.env.PORT ?? 3000}`
 const ROUTES = ['/', '/theme', '/theme/shadcn']
 
 async function globalSetup() {

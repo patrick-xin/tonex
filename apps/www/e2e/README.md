@@ -73,11 +73,13 @@ way it does, not so it has to re-solve them:
   a cold compile outruns a test timeout. `global-setup.ts` requests `/`, `/theme`,
   `/theme/shadcn` before any test so the first spec doesn't pay (and flake on) the
   compile. No-op under CI's prod build.
-- **`seedField` targets the *visible* `#hex-input`.** The editor mounts the rail
-  twice (desktop aside + `sm:hidden` mobile drawer), so two elements share
-  `id="hex-input"` — a real uniqueness bug logged under #180. Filtering to the
-  visible match keeps helpers pointed at the field the user sees; don't re-handle
-  the duplicate per spec.
+- **`seedField` targets the field by its accessible name, and visible-filters.**
+  The editor mounts the rail twice (desktop aside + `sm:hidden` mobile drawer), so
+  the seed input renders twice. It's addressed by its accessible name ("Seed color
+  hex") rather than by id — the id is now per-mount unique (`useId`, after the
+  duplicate-`id="hex-input"` bug this suite surfaced was fixed under #180).
+  Filtering to the visible match keeps helpers pointed at the field the user sees;
+  don't re-handle the twin per spec.
 - **HCT sliders are anchored on `[data-slot="slider"]` + label text, not role.**
   Base UI's slider thumb exposes no nameable `role=slider` until late client
   mount, and each slider also carries a hidden `<input type="range">`. So

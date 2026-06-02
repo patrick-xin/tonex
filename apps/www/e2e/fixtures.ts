@@ -1,7 +1,11 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test'
 import type { Mode } from '@tonex/core'
 
-const BASE_URL = 'http://localhost:3000'
+// why: track PORT like playwright.config.ts so the guide_seen cookie is scoped to
+// the same origin the tests run against — a PORT override (sibling-worktree
+// collision avoidance) would otherwise set the cookie for :3000 while tests hit
+// :3100, re-arming the focus-trapping onboarding tour.
+const BASE_URL = `http://localhost:${process.env.PORT ?? 3000}`
 
 // why: single import surface for every e2e spec — `import { test, expect, ... }
 // from './fixtures'`. Keeps Playwright's globals and the repo's reusable helpers
@@ -34,16 +38,16 @@ export const THEME_PATHS = {
 } as const
 export type ThemeLayer = keyof typeof THEME_PATHS
 
-// why: the canonical seed hex field (source-color/hex-input.tsx, id="hex-input").
-// Scoped to the *visible* match on purpose: the editor mounts the rail twice — the
-// desktop aside (hidden sm:flex) and the sm:hidden mobile rail drawer — so two
-// elements carry id="hex-input" at once (a real uniqueness bug worth tracking
-// under #180). At the desktop viewport these specs run on, exactly one is visible;
-// filtering keeps every helper pointed at the field the user actually sees without
-// each spec re-handling the duplicate. One accessor, one place to fix on a markup
-// change.
+// why: the canonical seed hex field (source-color/hex-input.tsx). Targeted by its
+// accessible name ("Seed color hex", set via aria-label when the visible "Hex"
+// label is hidden in the rail) — NOT by id: the editor mounts the rail twice (the
+// desktop aside `hidden sm:flex` + the `sm:hidden` mobile drawer) and the id is
+// now per-mount unique (useId), so an id selector no longer addresses it. Two
+// mounts still exist, so visible-filter keeps every helper pointed at the field
+// the user sees. exact:true so it can't bleed into the landing field, whose name
+// is the superset "Seed color hex value".
 export function seedField(page: Page) {
-  return page.locator('#hex-input').filter({ visible: true })
+  return page.getByLabel('Seed color hex', { exact: true }).filter({ visible: true })
 }
 
 // why: the store rehydrates from localStorage *after* first paint (the ADR-0015
