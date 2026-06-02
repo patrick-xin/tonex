@@ -1,4 +1,5 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test'
+import type { Mode } from '@tonex/core'
 
 const BASE_URL = 'http://localhost:3000'
 
@@ -228,4 +229,84 @@ export function pickerHexField(page: Page) {
 // flaky pointer drag.
 export function saturationArea(page: Page) {
   return page.getByRole('slider', { name: /saturation/i })
+}
+
+// ── seed lock (source-color/color-lock.tsx) ────────────────────────────────
+// why: the lock toggle's accessible name IS its state — "Lock seed" while
+// unlocked (click to lock), "Unlock seed" while locked. Match either so a spec
+// can find the control regardless of state; the spec reads/clicks the specific
+// label it expects. Visible-filtered for the same desktop/mobile dual-mount
+// reason as seedField. When locked, every seed setter no-ops at the store seam
+// AND these controls go DOM-disabled: the hex field and picker trigger get a
+// real `disabled` attribute, and each HCT slider disables its underlying Base UI
+// `input[type=range]` (verified live — the value buttons also become
+// unactionable, so a spec must assert disabled, never try to click them).
+export function seedLockButton(page: Page) {
+  return page.getByRole('button', { name: /^(Lock|Unlock) seed$/ }).filter({ visible: true })
+}
+
+// why: the hidden range input Base UI mounts inside each slider is the one
+// element that carries a real `disabled` attribute consistently across all three
+// axes (the Hue/Tone value buttons dim via opacity + an onClick guard, not a
+// `disabled` prop). Asserting toBeDisabled() on it reads the slider's locked
+// state semantically rather than via a brittle opacity class.
+export function hctSliderRangeInput(page: Page, axis: HctAxis) {
+  return hctSlider(page, axis).locator('input[type="range"]')
+}
+
+// ── shadcn preset picker (shadcn-presets/) ─────────────────────────────────
+// why: the editor's preset entry point — a secondary icon button labelled
+// "Preset" (shadcn layer only; md has no preset concept per ADR-0026). Distinct
+// from the landing presets-row Tier-1 covers. Opens a popover of preset chips.
+export function presetButton(page: Page) {
+  return page.getByRole('button', { name: 'Preset', exact: true }).filter({ visible: true })
+}
+
+// why: each chip is a button whose accessible name starts with the preset name
+// (the swatch strip is decorative, so the name leads). Anchor on `^{name}` —
+// NOT `{name}#`: the accname algorithm joins child elements with a space
+// ("grove #27B08B"), so a `#`-adjacent match never fires. `^` keeps it a button
+// (excludes the non-button hover preview card) and unique per preset. Open the
+// picker first (presetButton click) — chips only render then.
+export function presetChip(page: Page, name: string) {
+  return page.getByRole('button', { name: new RegExp(`^${name}`, 'i') }).filter({ visible: true })
+}
+
+// why: the keep-vs-adopt confirmation. requestPresetSwitch only opens it when a
+// pick raises a decision — a drifted recipe, or a touched-and-unlocked seed /
+// touched contrast (predicate.ts). Title is "Switch to {name}?", so match on it;
+// a clean pick applies straight through and this never mounts (assert count 0).
+export function presetDialog(page: Page) {
+  return page.getByRole('dialog', { name: /switch to/i })
+}
+
+// why: the seed/contrast choice cards are <label>s wrapping a Base UI radio whose
+// own accessible name is empty — so target the card by its visible label text
+// ("Current" keeps the user's value, "Preset" adopts the preset's). Clicking the
+// label selects the nested radio. Scoped to the dialog so the words can't match
+// elsewhere. The real assertion is always the resulting seed value, not the
+// radio's checked state.
+export function presetChoiceCard(page: Page, choice: 'Current' | 'Preset') {
+  return presetDialog(page).locator('label').filter({ hasText: choice })
+}
+
+// ── light/dark mode (components/shared/theme-mode-toggle.tsx) ───────────────
+// why: the Base UI Toggle renders a <button> whose action-phrased aria-label is
+// the truth ("Switch to dark mode" while light, "Switch to light mode" while
+// dark) — the icon swap is visual-only. Two mount sites (rail-footer desktop +
+// mobile-nav-drawer); the drawer one stays hidden at desktop width, so
+// visible-filter to the one the user sees. The control is disabled until
+// next-themes resolves on the client, so prefer auto-waiting assertions.
+export function modeToggle(page: Page) {
+  return page
+    .getByRole('button', { name: /switch to (light|dark) mode/i })
+    .filter({ visible: true })
+}
+
+// why: mode is ambient via next-themes `attribute="class"` — it writes "light" or
+// "dark" onto <html>. Reading that class is how a spec observes the active mode
+// the user sees, without coupling to next-themes' storage. Returns the live mode.
+export async function getMode(page: Page): Promise<Mode> {
+  const cls = (await page.locator('html').getAttribute('class')) ?? ''
+  return cls.split(/\s+/).includes('dark') ? 'dark' : 'light'
 }

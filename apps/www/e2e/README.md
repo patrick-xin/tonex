@@ -85,6 +85,28 @@ way it does, not so it has to re-solve them:
   the inline `input[inputmode="decimal"]` editor (deterministic where a thumb drag
   is flaky). The custom *picker* popover's saturation area, by contrast, *is* a
   nameable `role=slider` — use `saturationArea(page)` and arrow keys.
+- **The seed lock disables controls unevenly — assert on the range input.** When
+  `seedHexLock` is set, the hex field and picker trigger get a real `disabled`
+  attribute, but the Hue/Tone value buttons only *dim* (opacity + an onClick
+  guard, no `disabled` prop) — so clicking one hangs on Playwright's actionability
+  wait. The one signal consistent across all three axes is each slider's hidden
+  `input[type="range"]`, which Base UI disables; use
+  `hctSliderRangeInput(page, axis)` + `toBeDisabled()`, never a value-button click.
+- **Preset chips match on `^name`, not `name#`.** A button's accessible name
+  joins its child elements with a space (`"grove #27B08B"`), so a `#`-adjacent
+  regex never fires even though `textContent` has no space (`"grove#27B08B"`).
+  `presetChip` anchors on the leading name; this is a recurring accname-vs-text
+  trap when a label and a value sit in sibling elements.
+- **Preset dialog choice cards have no nameable radio.** The Current/Preset cards
+  are `<label>`s wrapping a Base UI radio whose own accessible name is empty.
+  Select by the visible label text (`presetChoiceCard(page, 'Current'|'Preset')`)
+  and assert on the resulting *seed value* — the user-visible outcome — not the
+  radio's checked state.
+- **Mode is read off the `<html>` class.** next-themes runs `attribute="class"`,
+  so the live mode is the `light`/`dark` class on `<html>` (`getMode(page)`); the
+  toggle's truth is its action-phrased `aria-label`, not the icon. The starting
+  mode follows the OS color-scheme default, so specs capture it and assert the
+  *flip*, never hard-code light or dark.
 
 ## Layout
 
@@ -97,6 +119,13 @@ way it does, not so it has to re-solve them:
 | `seed-sync.spec.ts` | **Tier-1** — seed stays in sync across navigation + seed-entry surfaces |
 | `hex-field.spec.ts` | **Tier-2** — seed hex field input contract (select-all, invalid-revert, no silent normalization) |
 | `hct-controls.spec.ts` | **Tier-2** — HCT axes ↔ hex reconcile, 0/360 verbatim, gamut clamp, picker round-trip |
+| `seed-lock.spec.ts` | **Tier-3** — `seedHexLock` disables every seed input + freezes the seed; unlock restores |
+| `preset-apply.spec.ts` | **Tier-3** — shadcn preset dirty-gate: clean pick applies, touched seed opens the keep-vs-adopt dialog |
+| `theme-mode.spec.ts` | **Tier-3** — light/dark toggle flips the `<html>` mode + a token color, leaves the seed untouched |
 
-Tier-3 (preset-vs-custom, `seedHexLock` disabling the rail, light/dark toggle)
-from issue #180 builds on these primitives — see the issue for the prioritized list.
+Tiers 1–3 of issue #180 are implemented. One Tier-3 slice is **deliberately
+deferred**: preset-apply preserving *existing custom colors* (ADR-0026 — a preset
+overwrites the recipe but never `customColors`). The touched-seed keep-vs-adopt
+branch is covered; asserting custom-color preservation needs the add-custom-color
+UI flow, which isn't yet mapped here. Pick it up by seeding a custom color, then
+applying a preset and asserting it survives.
