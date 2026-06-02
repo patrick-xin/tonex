@@ -25,7 +25,7 @@ export interface ShadcnPreset {
   // reads it). The preset name is a pure mnemonic; the "who it's for / how it
   // feels" line lives here so the picker's preview popover can show a caption
   // and we never smuggle audience words into the key. Mirrors
-  // ShadcnBindingPreset.description. Final wording is the #112 curation pass.
+  // ShadcnBindingPreset.description. Wording curated in #112 (shipped).
   description: string
   variant: VariantName
   surfaceAlgo: SurfaceAlgo
@@ -37,8 +37,8 @@ export interface ShadcnPreset {
   // why: curated seed the preset was tuned against (ADR-0031 #2). Stored as the
   // canonical HCT decomposition with exactHex preserved so the hex display
   // reads back the curated bytes verbatim, exactly like a user paste (ADR-0028)
-  // — built via `seedOf(hex)` below. Provisional per-preset values land with
-  // the machinery (issue #109); final curation is the promotion slice.
+  // — built via `seedOf(hex)` below. Per-preset seeds were curated in #112
+  // (adopt machinery: #109).
   seed: Seed
   // why: curated per-mode contrast the preset was tuned against (ADR-0031 #2),
   // sibling to seed. Mirrors PortableTheme.contrastLevel ({ light, dark }, each
@@ -47,7 +47,7 @@ export interface ShadcnPreset {
   // (both modes land together — #123 Decision B's touched granularity stands);
   // per-mode is only the curated value's shape, not the touched granularity.
   // Supersedes an untouched contrast at apply, resolved independently of the
-  // seed. Final curation is the promotion slice.
+  // seed. Per-preset values curated in #112.
   contrastLevel: { light: number; dark: number }
 }
 

@@ -41,11 +41,13 @@ Active-preset detection compares the recipe only — variant, surface treatment,
 
 **Why:** a user who adopted a preset's recipe and kept their own color is still meaningfully "on" that preset; the look is the preset's. Folding source inputs into identity would de-highlight every user who applied a preset against their own color — the intended, common case.
 
-## 6. No confirmation gate on the source-input branch
+## 6. The source-input branch surfaces a per-field keep-vs-adopt choice
 
-A user who has chosen a color wants that color; keeping it is the right silent default, not a question. The rare user who wants to abandon their color for a preset's curated one resets their own input first — served by a reset affordance, not by the preset action.
+On applying a theme preset, each touched source input the resolver would otherwise decide silently — a touched seed (when unlocked) or touched contrast — is surfaced as an explicit per-field choice: a pair of cards showing the user's current value beside the preset's curated value, defaulting to _keep mine_. A locked seed raises no choice (the lock keeps it unconditionally, commitment 3). The apply dialog opens for this reason alone — even when the recipe is undrifted and would otherwise need no confirmation.
 
-**Why:** this is distinct from the existing recipe-switch confirmation, which still applies for its own reason — switching a preset overwrites binding, surface, and variant edits, and that destructive overwrite continues to warrant a confirm. The two "dirty" notions are orthogonal and must not be conflated: _recipe drift_ gates a confirmation; _source-input touched-state_ gates which value wins.
+**Why:** keeping the user's chosen value stays the right _default_ — the cards default to "Current", so a careless Apply never loses tuning. But surfacing both values side by side and letting the user opt in per field beats silently keeping and making the rare adopt-the-preset's-color user hunt for a separate reset: the choice is explicit, both values are visible at the decision point, and seed and contrast resolve independently (commitment 3). This stays distinct from the recipe-switch confirmation, which gates the destructive overwrite of binding/surface/variant edits; the two can share one dialog but answer different questions — _recipe drift_ asks "replace my customizations?", _source-input touched-state_ asks "whose seed/contrast wins?".
+
+_amendment 2026-06-02 — supersedes the original decision ("no confirmation gate on the source-input branch"; abandoning a chosen value served by a reset affordance, not the preset action). The shipped apply path surfaces a per-field keep-vs-adopt choice instead: `apps/www/src/features/shadcn-presets/predicate.ts` (`presetSwitchNeedsDialog` opens on a touched, unlocked seed or touched contrast) and `preset-dialog.tsx` (the choice cards), fed to `resolvePresetApply`'s `PresetAdoptChoices`. No `untouch`/reset affordance was built. Code is the standard; this folds the decision to match it._
 
 ---
 
