@@ -25,7 +25,6 @@ export function ThemeModeToggle({ className }: { className?: string }) {
     <Toggle
       aria-hidden={ready ? undefined : true}
       aria-label={ready ? label : undefined}
-      disabled={!ready}
       tabIndex={ready ? undefined : -1}
       pressed={isDark}
       onPressedChange={toggle}
@@ -36,7 +35,7 @@ export function ThemeModeToggle({ className }: { className?: string }) {
         className,
       )}
       render={(props, state) => (
-        <button type="button" {...props}>
+        <button disabled={!ready} type="button" {...props}>
           {!ready ? (
             <MoonIcon weight="fill" className="size-5 opacity-0" />
           ) : state.pressed ? (

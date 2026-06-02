@@ -13,7 +13,7 @@ export default function MdThemeLayout({ children }: { children: React.ReactNode 
       <GuideProvider>
         <AppShell
           rail={<MdRail />}
-          topNav={<TopNav layer="md" />}
+          topNav={<TopNav />}
           navTabs={<MdNavTabs />}
           mobileActionBar={
             <MobileActionBar

@@ -5,11 +5,12 @@ import type { CSSProperties } from 'react'
 import { cn } from 'tailwind-variants'
 
 const PRESETS = [
-  { name: 'Cobalt', hex: '#2D5BFF' },
-  { name: 'Tangerine', hex: '#FF6A1A' },
+  { name: 'Cobalt', hex: '#2e5bff' },
+  { name: 'Tangerine', hex: '#ff6a1a' },
   { name: 'Sage', hex: '#478f5c' },
-  { name: 'Iris', hex: '#7A2FFF' },
-  { name: 'Lagoon', hex: '#00C4C9' },
+  { name: 'Iris', hex: '#7a2fff' },
+  { name: 'Lagoon', hex: '#00c4c9' },
+  { name: 'Ruby', hex: '#e54666' },
 ] as const
 
 export function PresetsRow() {
@@ -19,7 +20,7 @@ export function PresetsRow() {
   return (
     <div className="inline-flex flex-wrap items-center gap-4 text-xs font-mono uppercase tracking-widest">
       {PRESETS.map((p) => {
-        const active = seedHex.toLowerCase() === p.hex.toLowerCase()
+        const active = seedHex === p.hex
         return (
           <button
             key={p.name}

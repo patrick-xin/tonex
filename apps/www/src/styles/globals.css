@@ -114,16 +114,6 @@
   --color-sidebar-ring: var(--color-sidebar-ring);
 }
 
-/* why: Voice (Vidaloka serif) is the landing display face. Scoped to the
-   (site) marketing tree (class on its layout wrapper) so the (app)/theme tool
-   keeps Chrome for its headings. Only family is set — weight/tracking stay with
-   each component; Vidaloka ships weight 400 and body sets
-   font-synthesis-weight:none, so existing font-semibold/bold render at 400
-   without faux-bold synthesis. */
-.voice-headlines :is(h1, h2) {
-  font-family: var(--font-voice);
-}
-
 /* why: Recharts ChartConfig idiom uses `color: 'var(--chart-N)'` (shadcn
    convention). md owns --color-chart-N as canonical; alias the shadcn name
    inside .md so demos following the shadcn idiom resolve in md scope without

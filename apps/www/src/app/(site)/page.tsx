@@ -1,15 +1,19 @@
-import { FeaturesSection } from './_features-section'
-import { ShaderHero } from './_shader-hero'
-// note: _hero.tsx (CSS-radial hero) + _hero-visual.tsx are kept on disk but no
-// longer rendered — the hero is now the live GodRays shader (_shader-hero).
-import { SubscribeSection } from './_subscribe-section'
+import { SiteFooter } from './_components/site-footer'
+import { SiteHeader } from './_components/site-header'
+import { BellaSection } from './_landing/bella-poster'
+import { ShadcnShowcaseSection } from './_landing/shadcn-showcase'
+import { ShaderHero } from './_landing/shader-hero'
+import { SubscribeSection } from './_landing/subscribe-section'
 
 export default function LandingPage() {
   return (
     <>
+      <SiteHeader />
       <ShaderHero />
-      <FeaturesSection />
+      <ShadcnShowcaseSection />
+      <BellaSection />
       <SubscribeSection />
+      <SiteFooter />
     </>
   )
 }

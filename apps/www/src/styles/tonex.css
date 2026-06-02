@@ -4,6 +4,7 @@
      re-points --font-chrome at Geist (globals.css) for the preview. */
   --font-sans: var(--font-chrome);
   --font-mono: var(--font-mono-plex);
+  --font-display: var(--font-display);
   /* Spacing around window */
   --toast-viewport-padding: 2rem;
   /* Toast width */

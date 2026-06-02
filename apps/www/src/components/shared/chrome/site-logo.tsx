@@ -2,15 +2,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from 'tailwind-variants'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
-import type { Layer } from '@/lib/layer-context'
 
-export function SiteLogo({ className, layer }: { className?: string; layer?: Layer }) {
+export function SiteLogo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center justify-center size-8', className)}>
-      <Link
-        className={cn('outline-transparent', focusVisiblePrimaryRing)}
-        href={layer === 'md' ? '/' : '/shadcn'}
-      >
+      <Link className={cn('outline-transparent', focusVisiblePrimaryRing)} href="/">
         <Image
           loading="eager"
           src="/logo.png"

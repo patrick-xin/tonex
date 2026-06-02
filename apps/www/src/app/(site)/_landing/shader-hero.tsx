@@ -7,7 +7,7 @@ import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
-import { HeroContent } from './_hero-content'
+import { HeroContent } from './hero-content'
 
 type Stop = readonly [family: string, tone: number]
 
@@ -116,7 +116,7 @@ export function ShaderHero() {
           and slides GodRays' resolution-dependent ray origin. Pinning to a
           fixed lvh keeps the convergence point put; the bar just clips the
           bottom of an ambient background. */}
-      <div ref={shaderRef} className="absolute inset-x-0 top-0 z-0 h-[100lvh]">
+      <div ref={shaderRef} className="absolute inset-x-0 top-0 z-0 h-lvh">
         {colors && noiseReady && (
           <GodRays
             colorBack={colors.back}

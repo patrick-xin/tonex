@@ -24,8 +24,8 @@ const mono = IBM_Plex_Mono({
   weight: ['400', '500'],
 })
 
-const voice = Vidaloka({
-  variable: '--font-voice',
+const display = Vidaloka({
+  variable: '--font-display',
   subsets: ['latin'],
   weight: '400',
 })
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       data-scroll-behavior="smooth"
       lang="en"
-      className={`${chrome.variable} ${mono.variable} ${voice.variable} ${geist.variable} h-full antialiased`}
+      className={`${chrome.variable} ${mono.variable} ${display.variable} ${geist.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="md size-full relative">

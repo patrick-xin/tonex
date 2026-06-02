@@ -59,30 +59,10 @@ function seedOf(hex: string): Seed {
   return { ...hctFromHex(hex), exactHex: hex }
 }
 
-// why: the shipping preset library. Currently an *exploration set* — the six
-// original issue-#36 presets are commented out below in favour of three tuner
-// imports (grove/lagoon/breeze) and five freshly-designed presets
-// (noir/paper/enterprise/sunset/sage); the set will re-settle in the #112
-// curation pass. Curator surface at apps/www/src/features/shadcn-preset-tuner/
-// remains live as the editing path; this is the in-core mirror. Each entry
-// carries its curated source inputs (seed + contrastLevel) plus the recipe
-// (ADR-0031 #2). Asymmetric primary bindings (light=container, dark=primary)
-// are intentional and identity-defining; see ADR-0027 for the contrast tradeoff
-// that motivated them.
-//
-// Key order matters: `default` ships first because (a) it is the
-// DEFAULT_INPUTS projection and the test pin guards that relationship, and
-// (b) Object.entries iteration order determines findActivePreset's match
-// precedence when two presets happen to share structure.
 export const SHADCN_PRESETS = {
   default: {
     description: 'Balanced, neutral starting point — calm chrome with no strong opinion',
-    // why: must equal DEFAULT_INPUTS.seed (#6750a4) — the `default` preset is
-    // the boot-default projection (R5 pins this), so its curated seed is the
-    // app default itself.
     seed: seedOf('#6750a4'),
-    // why: must equal DEFAULT_INPUTS.contrastLevel ({ light: 0, dark: 0 }) —
-    // `default` is the boot projection (R5).
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
@@ -149,457 +129,6 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-  /* why: the six provisional issue-#36 presets, commented out for the
-     exploration pass — `default` stays (R5 pins it to DEFAULT_INPUTS). The live
-     set below is the three tuner imports (grove/lagoon/breeze) plus five
-     freshly-designed presets (noir/paper/enterprise/sunset/sage). Uncomment any
-     block to bring it back; add its key to PRESET_NAMES in the test if so.
-
-  stark: {
-    // why: provisional curated seed — near-neutral cool (zinc) for the stark,
-    // minimal look. Final curation is the promotion slice.
-    seed: seedOf('#3f3f46'),
-    // why: provisional — stark leans into legibility, so a lifted contrast.
-    // Final curation is the promotion slice.
-    contrastLevel: { light: 0.3, dark: 0.3 },
-    variant: 'cmf',
-    surfaceAlgo: 'tint',
-    surfacePaletteName: 'zinc',
-    surfaceTintLevel: { light: 0, dark: 0 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0, dark: 0 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-high',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-high',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-high',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-high',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-    },
-  },
-  soft: {
-    // why: provisional curated seed — muted soft blue. Final curation is the
-    // promotion slice.
-    seed: seedOf('#8fa8c8'),
-    // why: provisional — soft keeps the baseline contrast. Final curation is
-    // the promotion slice.
-    contrastLevel: { light: 0, dark: 0 },
-    variant: 'tonalSpot',
-    surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'stone',
-    surfaceTintLevel: { light: 0.1, dark: 0.3 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0.2, dark: 1 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface-container',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface-container',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary',
-        '--primary-foreground': '--color-on-primary',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-highest',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-high',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface-container',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface-container',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary',
-        '--primary-foreground': '--color-on-primary',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-highest',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface-variant',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-highest',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-    },
-  },
-  warm: {
-    // why: provisional curated seed — warm terracotta so "warm" reads warm even
-    // on the faithful cmf family (the seed is the chroma/temperature ceiling,
-    // ADR-0031). Final curation is the promotion slice.
-    seed: seedOf('#c2683a'),
-    // why: provisional — warm keeps the baseline contrast. Final curation is
-    // the promotion slice.
-    contrastLevel: { light: 0, dark: 0 },
-    variant: 'cmf',
-    surfaceAlgo: 'tint',
-    surfacePaletteName: 'taupe',
-    surfaceTintLevel: { light: 0.1, dark: 0.1 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0, dark: 1 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface-container',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface-container',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-secondary-container',
-        '--primary-foreground': '--color-on-secondary-container',
-        '--secondary': '--color-secondary',
-        '--secondary-foreground': '--color-on-secondary',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-high',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline-variant',
-        '--sidebar': '--color-surface-container',
-        '--sidebar-foreground': '--color-on-surface-variant',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-high',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline-variant',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface-container',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface-container',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-secondary',
-        '--primary-foreground': '--color-on-secondary',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-outline-variant',
-        '--muted-foreground': '--color-on-surface',
-        '--accent': '--color-surface-container-high',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container',
-        '--sidebar-foreground': '--color-on-surface-variant',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-high',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline-variant',
-      },
-    },
-  },
-  playful: {
-    // why: provisional curated seed — vivid magenta-pink for the playful look.
-    // Final curation is the promotion slice.
-    seed: seedOf('#d6409f'),
-    // why: provisional — playful keeps the baseline contrast. Final curation is
-    // the promotion slice.
-    contrastLevel: { light: 0, dark: 0 },
-    variant: 'expressive',
-    surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'mauve',
-    surfaceTintLevel: { light: 1, dark: 0 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0, dark: 0 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary',
-        '--primary-foreground': '--color-on-primary',
-        '--secondary': '--color-tertiary-container',
-        '--secondary-foreground': '--color-on-tertiary-container',
-        '--muted': '--color-surface-container',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-tertiary-container',
-        '--accent-foreground': '--color-on-tertiary-container',
-        '--destructive': '--color-error',
-        '--border': '--color-tertiary-fixed-dim',
-        '--input': '--color-tertiary-fixed-dim',
-        '--ring': '--color-tertiary-fixed-dim',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-tertiary-container',
-        '--sidebar-accent-foreground': '--color-on-tertiary-container',
-        '--sidebar-border': '--color-outline',
-        '--sidebar-ring': '--color-outline',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary',
-        '--primary-foreground': '--color-on-primary',
-        '--secondary': '--color-tertiary-container',
-        '--secondary-foreground': '--color-on-tertiary-container',
-        '--muted': '--color-surface-container',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-tertiary-container',
-        '--accent-foreground': '--color-on-tertiary-container',
-        '--destructive': '--color-error',
-        '--border': '--color-tertiary-container',
-        '--input': '--color-tertiary-container',
-        '--ring': '--color-tertiary',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-tertiary-container',
-        '--sidebar-accent-foreground': '--color-on-tertiary-container',
-        '--sidebar-border': '--color-tertiary-container',
-        '--sidebar-ring': '--color-tertiary',
-      },
-    },
-  },
-  monotone: {
-    // why: provisional curated seed — low-chroma grey. monotone runs the
-    // monochrome variant which manufactures its own neutral ramp, so the seed
-    // mainly anchors hue; kept near-neutral. Final curation is the promotion
-    // slice.
-    seed: seedOf('#52525b'),
-    // why: provisional — a slight contrast lift suits the monochrome ramp.
-    // Final curation is the promotion slice.
-    contrastLevel: { light: 0.15, dark: 0.15 },
-    variant: 'monochrome',
-    surfaceAlgo: 'tint',
-    surfacePaletteName: 'zinc',
-    surfaceTintLevel: { light: 0, dark: 0 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0, dark: 0 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-high',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-highest',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface-container',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary',
-        '--primary-foreground': '--color-on-primary',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-highest',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-highest',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-outline',
-        '--sidebar': '--color-surface-container',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-highest',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-outline-variant',
-        '--sidebar-ring': '--color-outline',
-      },
-    },
-  },
-  tech: {
-    // why: provisional curated seed — cool tech blue. Final curation is the
-    // promotion slice.
-    seed: seedOf('#2563eb'),
-    // why: provisional — tech keeps the baseline contrast. Final curation is
-    // the promotion slice.
-    contrastLevel: { light: 0, dark: 0 },
-    variant: 'cmf',
-    surfaceAlgo: 'tint',
-    surfacePaletteName: 'mist',
-    surfaceTintLevel: { light: 1, dark: 1 },
-    surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0, dark: 0 },
-    shadcnRoleBindings: {
-      light: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
-        '--secondary': '--color-secondary-container',
-        '--secondary-foreground': '--color-on-secondary-container',
-        '--muted': '--color-surface-container-high',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-surface-container-highest',
-        '--accent-foreground': '--color-on-surface',
-        '--destructive': '--color-error',
-        '--border': '--color-outline-variant',
-        '--input': '--color-outline-variant',
-        '--ring': '--color-primary-container',
-        '--sidebar': '--color-surface-container-low',
-        '--sidebar-foreground': '--color-on-surface',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-surface-container-highest',
-        '--sidebar-accent-foreground': '--color-on-surface',
-        '--sidebar-border': '--color-inverse-primary',
-        '--sidebar-ring': '--color-outline',
-      },
-      dark: {
-        '--background': '--color-surface',
-        '--foreground': '--color-on-surface',
-        '--card': '--color-surface',
-        '--card-foreground': '--color-on-surface',
-        '--popover': '--color-surface',
-        '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
-        '--secondary': '--color-secondary',
-        '--secondary-foreground': '--color-on-secondary',
-        '--muted': '--color-surface-bright',
-        '--muted-foreground': '--color-on-surface-variant',
-        '--accent': '--color-tertiary-container',
-        '--accent-foreground': '--color-on-tertiary-container',
-        '--destructive': '--color-error',
-        '--border': '--color-inverse-primary',
-        '--input': '--color-inverse-primary',
-        '--ring': '--color-primary-container',
-        '--sidebar': '--color-surface-dim',
-        '--sidebar-foreground': '--color-on-surface-variant',
-        '--sidebar-primary': '--color-primary',
-        '--sidebar-primary-foreground': '--color-on-primary',
-        '--sidebar-accent': '--color-tertiary-fixed-dim',
-        '--sidebar-accent-foreground': '--color-on-tertiary-container',
-        '--sidebar-border': '--color-inverse-primary',
-        '--sidebar-ring': '--color-surface-tint',
-      },
-    },
-  },
-  */
-
-  // ── Tuner imports ────────────────────────────────────────────────────────
-  // Captured live in the preset tuner, renamed from their source-color labels
-  // to vibe concepts (Jade→grove, Teal→lagoon, Blue 10→breeze).
-
-  // why: calm jewel-green (cmf keeps the seed's emerald temperature). Audience —
-  // health, finance-calm, eco/nature products. Hierarchy: tinted mist surfaces
-  // with desaturated light text recede so the green primary carries the eye;
-  // primary-fg drops to surface-container-lowest in light for a crisp button.
   grove: {
     description:
       'Grounded jewel-green — trustworthy and organic, for natural or wellness-leaning products',
@@ -670,15 +199,10 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: deeper blue-green than grove. Audience — fintech, analytics,
-  // travel/booking. Hierarchy: asymmetric primary (light=primary,
-  // dark=primary-container per ADR-0027) plus a dark-mode tint lift so cards
-  // read against a slightly warmed teal ground.
   lagoon: {
     description:
       'Deep blue-green, cool and composed — steady-reading dashboards, fintech, and data tools',
-    seed: seedOf('#12A594'),
+    seed: seedOf('#009195'),
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
@@ -745,14 +269,9 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: bright, friendly azure on a desaturated zinc neutral. Audience —
-  // mainstream SaaS, onboarding, productivity. Hierarchy: surfaces stay neutral
-  // (desaturate) so the saturated blue primary and ring read as the only color;
-  // popover drops to surface-container-low in light for a subtle menu lift.
   breeze: {
     description: 'Bright airy azure on clean neutral — fresh and modern, for SaaS and dev tools',
-    seed: seedOf('#3B9EFF'),
+    seed: seedOf('#2e5bff'),
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
@@ -819,16 +338,6 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // ── Designed for the exploration pass ────────────────────────────────────
-
-  // why: dark-first drama. Audience — developer tools, media/music players,
-  // crypto dashboards (products that live in dark mode). Hierarchy: vibrant
-  // manufactures one electric accent; desaturate flattens surfaces to near-
-  // neutral so that accent is the *only* color on screen. In dark, card sits
-  // flush with the background (no elevation) and borders nearly vanish
-  // (outline-variant) — separation comes from the accent and type, not boxes.
-  // The lifted contrast (0.2) keeps text legible on the deep ground.
   noir: {
     description:
       'Dark-first drama — one electric accent on near-black surfaces, for dev tools, crypto, and media',
@@ -899,13 +408,6 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: warm editorial reading surface. Audience — blogs, docs, longform,
-  // publishing. Hierarchy: an amber seed tinted into stone gives a cream
-  // "paper" ground; cards and popovers stay flat to the page (both → surface)
-  // so nothing competes with the text, which carries full on-surface contrast.
-  // Chrome is whisper-quiet: soft outline-variant edges, focus ring on outline
-  // rather than the brand color. The slight contrast lift (0.1) aids long reads.
   paper: {
     description:
       'Warm editorial cream with quiet chrome that lets text lead — blogs, docs, longform reading',
@@ -976,12 +478,6 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: quiet, professional, dense. Audience — B2B SaaS, fintech, admin
-  // dashboards. Hierarchy: a restrained low-chroma navy on desaturated slate,
-  // with layered surfaces (card→container, popover→container-low) and *visible*
-  // full-strength borders (outline) — the structure does the work so the color
-  // can stay subdued. Primary carries the focus ring; nothing shouts.
   enterprise: {
     description:
       'Restrained navy on slate with visible borders — B2B SaaS, fintech, and admin consoles',
@@ -1052,12 +548,6 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: saturated warm energy. Audience — consumer lifestyle, food, events,
-  // marketing landings. Hierarchy: expressive manufactures a vivid coral primary
-  // and a contrasting tertiary that drives the accent/secondary slots, so two
-  // hot colors set the rhythm against a warm taupe tint. Surfaces stay flat
-  // (card/popover → surface) so the color, not elevation, creates the energy.
   sunset: {
     description:
       'Warm coral energy with a second hot accent — consumer, food, events, and lifestyle apps',
@@ -1128,16 +618,10 @@ export const SHADCN_PRESETS = {
       },
     },
   },
-
-  // why: calm, muted, low-contrast. Audience — wellness, meditation, focus and
-  // journaling apps. Hierarchy: a soft sage seed on tonalSpot, heavily
-  // desaturated into an olive neutral, with everything held close in value so
-  // nothing demands attention. The focus ring is outline (not the brand color)
-  // and borders are soft — the calm comes from the *absence* of contrast jumps.
   sage: {
     description:
       'Muted sage held close in value — calm and focused, for wellness, journaling, and mindfulness',
-    seed: seedOf('#7c8b6f'),
+    seed: seedOf('#478f5c'),
     contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
