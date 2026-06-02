@@ -1,6 +1,6 @@
 import { Toaster } from '@/components/ui/toast'
 import '@/styles/globals.css'
-import { domAnimation, LazyMotion } from 'motion/react'
+import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
 import type { Metadata } from 'next'
 import { Geist, IBM_Plex_Mono, IBM_Plex_Sans, Vidaloka } from 'next/font/google'
 import { Providers } from './_providers'
@@ -78,10 +78,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="md size-full relative">
         <LazyMotion features={domAnimation}>
-          <Providers>
-            <div className="root">{children}</div>
-            <Toaster />
-          </Providers>
+          {/* why: reducedMotion="user" makes every `m` component honor the OS
+              prefers-reduced-motion setting — transform/layout animations snap to
+              their target while opacity still fades. This consolidates what 6+
+              landing components already do by hand (useReducedMotion) and closes
+              the gap where the hero entrance ignored the preference. It also lets
+              the e2e tier emulate reduced-motion to avoid the animating hero
+              container intercepting clicks (see playwright.config.ts). */}
+          <MotionConfig reducedMotion="user">
+            <Providers>
+              <div className="root">{children}</div>
+              <Toaster />
+            </Providers>
+          </MotionConfig>
         </LazyMotion>
       </body>
     </html>

@@ -17,6 +17,26 @@ No mocks beyond `vi.fn()` as a stand-in for caller-provided handlers. If a hook 
 
 Prefer hooks and lib helpers with clear invariants over anything that needs full rendering. Component tests are unblocked but not yet conventionalised — when the first one lands, add it as a second canonical reference here (and widen the coverage carve-out below).
 
+## The E2E tier (Playwright)
+
+There are now **two tiers**. This shard governs the unit tier (`vitest` + `jsdom`);
+the browser tier lives in [`apps/www/e2e/`](../../../e2e/README.md).
+
+Route by failure mode, not by component-vs-hook:
+
+- **Logic / invariants** → `vitest` unit test (this shard). Fast, no browser.
+- **"Sometimes out of sync", render-timing, cross-navigation, hydration** → E2E.
+  `act()` flushes effects synchronously, so a lagging `useEffect` mirror and a
+  render-time sync produce identical final state — both pass a unit test. Only a
+  real browser across a real navigation observes the stale frame. This is the
+  class issue #180 tracks; the prop→state-mirror bug that motivated it could not
+  be caught at the unit tier by construction.
+
+Run: `pnpm --filter @tonex/www e2e` (`e2e:ui` to debug). Authoring conventions and
+the reusable seam helpers (`gotoTheme`, `setSeedHex`, `getSeedHex`, …) are in the
+e2e README — import everything from `e2e/fixtures.ts`, assert on what the user
+sees, seed via the UI (not localStorage), settle hydration before interacting.
+
 ## Config delta
 
 | Setting | Value |
