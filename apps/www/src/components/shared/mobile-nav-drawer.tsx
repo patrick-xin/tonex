@@ -20,7 +20,7 @@ import {
   DrawerViewport,
 } from '@/components/ui/drawer'
 import { ScrollAreaContent, ScrollAreaRoot, ScrollAreaViewport } from '@/components/ui/scroll-area'
-import { SiteLogo } from './site-logo'
+import { SiteLogo } from './chrome/site-logo'
 import { ThemeModeToggle } from './theme-mode-toggle'
 
 // why: app-level mobile navigation. TopNav mounts this `sm:hidden` drawer as the

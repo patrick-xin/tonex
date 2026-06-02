@@ -5,8 +5,8 @@ import { m as motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { ShadcnIcon } from '@/components/icons/shadcn'
 import { Button } from '@/components/ui/button'
-import { PresetsRow } from './_presets-row'
-import { SeedTrigger } from './_seed-trigger'
+import { PresetsRow } from './presets-row'
+import { SeedTrigger } from './seed-trigger'
 
 const container: Variants = {
   hidden: {},
@@ -44,7 +44,7 @@ export function HeroContent() {
       </motion.span>
       <motion.h1
         variants={item}
-        className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8"
+        className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8 font-display"
       >
         Pro-grade color system.
         <br />

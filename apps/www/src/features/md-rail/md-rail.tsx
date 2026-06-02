@@ -11,7 +11,7 @@ export function MdRail() {
       )}
     >
       <MdRailContent />
-      <RailFooter layer="md" />
+      <RailFooter />
     </aside>
   )
 }

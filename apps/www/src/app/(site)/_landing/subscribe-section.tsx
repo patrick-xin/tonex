@@ -1,10 +1,12 @@
 import { ShieldCheck } from 'lucide-react'
 import { SubscribeForm } from '@/features/subscribe'
+import { ShaderDots } from './shader-dot'
 
 export function SubscribeSection() {
   return (
     <section>
-      <div className="mx-auto max-w-2xl px-6 py-20 text-center">
+      <ShaderDots />
+      <div className="mx-auto max-w-2xl px-6 py-6 text-center">
         <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
           Hear when tonex ships something new
         </h2>

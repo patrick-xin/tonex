@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { AboutHero } from './_about-hero'
-import { Team } from './_team'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -9,10 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function AboutPage() {
-  return (
-    <>
-      <AboutHero />
-      <Team />
-    </>
-  )
+  return <AboutHero />
 }

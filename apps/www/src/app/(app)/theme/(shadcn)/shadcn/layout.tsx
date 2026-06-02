@@ -17,7 +17,7 @@ export default function ShadcnLayout({ children }: { children: React.ReactNode }
       <GuideProvider>
         <AppShell
           rail={<ShadcnRailSwitcher />}
-          topNav={<TopNav layer="shadcn" />}
+          topNav={<TopNav />}
           navTabs={<ShadcnNavTabs />}
           mobileActionBar={
             <MobileActionBar
