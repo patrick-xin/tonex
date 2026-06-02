@@ -240,22 +240,23 @@ export function saturationArea(page: Page) {
 // unlocked (click to lock), "Unlock seed" while locked. Match either so a spec
 // can find the control regardless of state; the spec reads/clicks the specific
 // label it expects. Visible-filtered for the same desktop/mobile dual-mount
-// reason as seedField. When locked, every seed setter no-ops at the store seam
-// AND these controls go DOM-disabled: the hex field and picker trigger get a
-// real `disabled` attribute, and each HCT slider disables its underlying Base UI
-// `input[type=range]` (verified live — the value buttons also become
-// unactionable, so a spec must assert disabled, never try to click them).
+// reason as seedField. When locked, every seed setter no-ops at the store seam,
+// the always-on hex field + picker swatch get a real `disabled` attribute, AND
+// the "Source Control" disclosure (HCT/image) force-folds shut — those alternate
+// inputs are inert when the seed can't move, so they tuck away rather than stay
+// reachable-but-disabled (Shadcn/MD SourceColor run setOpen(false) on lock).
 export function seedLockButton(page: Page) {
   return page.getByRole('button', { name: /^(Lock|Unlock) seed$/ }).filter({ visible: true })
 }
 
-// why: the hidden range input Base UI mounts inside each slider is the one
-// element that carries a real `disabled` attribute consistently across all three
-// axes (the Hue/Tone value buttons dim via opacity + an onClick guard, not a
-// `disabled` prop). Asserting toBeDisabled() on it reads the slider's locked
-// state semantically rather than via a brittle opacity class.
-export function hctSliderRangeInput(page: Page, axis: HctAxis) {
-  return hctSlider(page, axis).locator('input[type="range"]')
+// why: the "Source Control" disclosure trigger (AnimatedCollapsible → Base UI
+// Collapsible). Its aria-expanded is the honest read of whether the HCT/image
+// inputs are unfolded; locking the seed flips it to false (the disclosure folds,
+// taking its sliders out of reach). Synchronous with the lock state, so a spec
+// can assert it without racing the collapse animation. Visible-filtered for the
+// desktop/mobile dual-mount.
+export function sourceControlToggle(page: Page) {
+  return page.getByRole('button', { name: 'Source Control' }).filter({ visible: true })
 }
 
 // ── shadcn preset picker (shadcn-presets/) ─────────────────────────────────

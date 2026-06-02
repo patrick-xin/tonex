@@ -87,13 +87,16 @@ way it does, not so it has to re-solve them:
   the inline `input[inputmode="decimal"]` editor (deterministic where a thumb drag
   is flaky). The custom *picker* popover's saturation area, by contrast, *is* a
   nameable `role=slider` — use `saturationArea(page)` and arrow keys.
-- **The seed lock disables controls unevenly — assert on the range input.** When
-  `seedHexLock` is set, the hex field and picker trigger get a real `disabled`
-  attribute, but the Hue/Tone value buttons only *dim* (opacity + an onClick
-  guard, no `disabled` prop) — so clicking one hangs on Playwright's actionability
-  wait. The one signal consistent across all three axes is each slider's hidden
-  `input[type="range"]`, which Base UI disables; use
-  `hctSliderRangeInput(page, axis)` + `toBeDisabled()`, never a value-button click.
+- **The seed lock folds the HCT/image inputs away — assert the disclosure, not the
+  sliders.** When `seedHexLock` is set, the always-on hex field + picker trigger get
+  a real `disabled` attribute, but the HCT/image inputs live in the "Source Control"
+  disclosure, which `ShadcnSourceColor`/`SourceColorTabs` *force-close* on lock
+  (`setOpen(false)`) — so the sliders collapse out of the page entirely. An earlier
+  draft asserted each slider's hidden `input[type="range"]` was `toBeDisabled()`;
+  that only passed by racing the close animation and broke once reduced-motion made
+  the collapse instant. Assert `sourceControlToggle(page)` is
+  `aria-expanded="false"` instead — it flips synchronously with the lock state, no
+  race. (Per-axis disabled state is already unit-tested at the store seam.)
 - **Preset chips match on `^name`, not `name#`.** A button's accessible name
   joins its child elements with a space (`"grove #27B08B"`), so a `#`-adjacent
   regex never fires even though `textContent` has no space (`"grove#27B08B"`).

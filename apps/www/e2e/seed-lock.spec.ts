@@ -2,11 +2,11 @@ import {
   expect,
   getSeedHex,
   gotoTheme,
-  hctSliderRangeInput,
   seedField,
   seedLockButton,
   seedPickerTrigger,
   setSeedHex,
+  sourceControlToggle,
   test,
 } from './fixtures'
 
@@ -31,13 +31,15 @@ test.describe('seed lock', () => {
       page.getByRole('button', { name: 'Unlock seed' }).filter({ visible: true }),
     ).toBeVisible()
 
-    // every seed-entry surface goes disabled: the hex field, the picker swatch,
-    // and all three HCT axes (read via each slider's underlying range input).
+    // the always-on seed surfaces go disabled: the hex field and the picker swatch.
     await expect(seedField(page)).toBeDisabled()
     await expect(seedPickerTrigger(page)).toBeDisabled()
-    for (const axis of ['Hue', 'Chroma', 'Tone'] as const) {
-      await expect(hctSliderRangeInput(page, axis)).toBeDisabled()
-    }
+
+    // and the alternate inputs fold away: locking force-closes the "Source Control"
+    // disclosure (its HCT/image inputs are inert when the seed can't change), so it
+    // collapses and its sliders leave the page. Asserting aria-expanded=false is the
+    // honest contract — the inputs aren't reachable-but-disabled, they're gone.
+    await expect(sourceControlToggle(page)).toHaveAttribute('aria-expanded', 'false')
 
     // and the seed itself can't drift while locked.
     expect(await getSeedHex(page)).toBe(before)
