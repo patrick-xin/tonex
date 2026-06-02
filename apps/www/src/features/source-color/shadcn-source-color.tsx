@@ -1,6 +1,6 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useEffect, useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'

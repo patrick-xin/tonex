@@ -1,8 +1,9 @@
 'use client'
 
-import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_CORE_TOKEN_NAMES, MD_EXTENDED_TOKEN_NAMES, type MdTokenName } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { isDecorative } from '@/features/contrast-checker/decorative'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'

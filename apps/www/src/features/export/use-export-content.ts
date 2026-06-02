@@ -9,11 +9,9 @@ import {
   exportJson,
   exportNativeCss,
   type Mode,
-  selectHydrated,
-  selectPortable,
   selectSeedHex,
-  useSource,
 } from '@tonex/core'
+import { selectHydrated, selectPortable, useSource } from '@tonex/core-react'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { type ExportTab, resolveExportRoute } from './resolve-export-route'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useResolvedTokens } from '@tonex/core'
+import { useResolvedTokens } from '@tonex/core-react'
 import { useActiveMode } from '@/features/theme-mode'
 
 // why: the preview pane is where the shadcn sub-scope lives. <div class="shadcn">

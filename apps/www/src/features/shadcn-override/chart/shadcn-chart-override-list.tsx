@@ -1,8 +1,8 @@
 'use client'
 
-import { useResolvedTokens, useSource } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_CHART_TOKEN_NAMES, type ShadcnChartTokenName } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { ColorTile } from '@/components/shared/color-tile'
 import { SectionHeading } from '@/components/shared/section-heading'
 import { createPopoverHandle, Popover, PopoverContent } from '@/components/ui/popover'

@@ -1,12 +1,12 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import {
   VARIANT_GROUPS_ORDERED,
   type VariantGroup,
   type VariantName,
   variants,
 } from '@tonex/core/variants'
+import { useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CmfSecondSourcePicker } from './cmf-second-source-picker'

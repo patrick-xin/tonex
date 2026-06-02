@@ -1,7 +1,8 @@
 'use client'
 
 import { SpinnerIcon } from '@phosphor-icons/react'
-import { sourceColorHexFromImage, useSource } from '@tonex/core'
+import { sourceColorHexFromImage } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useRef, useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { focusWithinRing } from '@/components/ui/styles'

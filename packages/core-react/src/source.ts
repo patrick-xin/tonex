@@ -2,34 +2,45 @@
 // sub-stores; field-name prefixes (md3*, shadcn*, surface*, cmf*) are the taxonomy
 // (ADR-0006). Lock is a boolean input-gate: seed-mutation setters early-return when
 // seedHexLock is set — never a derived snapshot (ADR-0007).
+// why: ADR-0037 — this store is the editor runtime. It consumes the pure
+// engine through @tonex/core's public surface (main barrel + the `/schema`
+// and `/variants` subpaths), never reaching into core's src. The one-way
+// dep (@tonex/core-react → @tonex/core) is enforced structurally: core's
+// package.json declares no react/zustand, and check-conventions' core-purity
+// rule fails any react/zustand import that drifts back into core/src.
 import { isValidHex } from '@tonex/color-utils'
-import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
-import type { ChartScheme, HueAnchor, ShadcnChartTokenName } from '../chart/schema'
-import type { VariantName } from '../variants'
-import { cmfSecondSourceDisabledReason } from '../variants/cmf-second-source'
-import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from './binding-presets'
-import { isSoftEdgeWeight, withSoftEdges } from './edge-weight'
-import { hctFromHex, hexFromHct } from './hct'
-import type { Mode } from './mode'
-import { paletteOverrideDisabledReason } from './palette-override'
-import { createDebouncedStorage } from './persist-storage'
-import { type PresetAdoptChoices, resolvePresetApply } from './preset-apply'
+import { hctFromHex, type Mode, selectSeedHex } from '@tonex/core'
+import type { NeutralPaletteName } from '@tonex/core/data'
 import {
+  type ChartScheme,
   type CustomColorEntry,
+  cmfSecondSourceDisabledReason,
   DEFAULT_INPUTS,
+  type HueAnchor,
+  isSoftEdgeWeight,
   type MdTokenName,
   type PaletteName,
   type PortableTheme,
+  type PresetAdoptChoices,
+  paletteOverrideDisabledReason,
   parsePortableTheme,
+  resolvePresetApply,
   SCHEMA_VERSION,
+  SHADCN_BINDING_PRESETS,
+  SHADCN_PRESETS,
+  type ShadcnBindingPresetName,
+  type ShadcnChartTokenName,
+  type ShadcnPresetName,
   type ShadcnRoleName,
   type SurfaceAlgo,
   slugifyCustomColorName,
   validateCustomColorEntry,
-} from './schema'
-import { SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
-import type { NeutralPaletteName } from './surface'
+  withSoftEdges,
+} from '@tonex/core/schema'
+import type { VariantName } from '@tonex/core/variants'
+import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
+import { createDebouncedStorage } from './persist-storage'
 
 // why: localStorage key for the source store. Trailing `-v1` is pinned for
 // migration continuity — zustand keys storage by this name and runs `migrate`
@@ -174,17 +185,6 @@ export function flushPersist(): void {
 export function selectPortable(s: SourceState): PortableTheme {
   const { _hydrated: _h, actions: _a, ...portable } = s
   return portable
-}
-
-// why: ADR-0028 — hex projection selector. Returns the user's pasted bytes
-// when `seed.exactHex` is set (preserved across hex-input paths); falls
-// back to `hexFromHct(seed)` once any HCT-axis setter has cleared it.
-// Operates on `Pick<PortableTheme, 'seed'>` so it works on both SourceState
-// and the pure PortableTheme shape (derive.ts, chart/sequential.ts).
-// Every read site that needs a hex calls this — `seed.exactHex` is never
-// read directly outside the selector, so the fallback rule has one home.
-export function selectSeedHex(s: Pick<PortableTheme, 'seed'>): string {
-  return s.seed.exactHex ?? hexFromHct(s.seed)
 }
 
 // why: ADR-0015 — the source-hydration gate. `_hydrated` flips once persist

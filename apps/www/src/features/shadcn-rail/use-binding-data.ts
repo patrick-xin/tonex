@@ -1,8 +1,9 @@
 'use client'
 
-import { evaluateThemeContrast, selectPortable, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { MdTokenName, ShadcnRoleName } from '@tonex/core/schema'
+import { selectPortable, useResolvedTokens, useSource } from '@tonex/core-react'
 import { useShallow } from 'zustand/react/shallow'
 import { MD_TOKEN_ITEM_GROUPS } from '@/features/color-picker'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'

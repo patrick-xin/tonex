@@ -1,9 +1,10 @@
 'use client'
 
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
-import { type Mode, useResolvedTokens } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
+import { useResolvedTokens } from '@tonex/core-react'
 import { useRef, useState } from 'react'
 import { MdIcon } from '@/components/icons/md'
 import { Button } from '@/components/ui/button'

@@ -1,8 +1,9 @@
 'use client'
 
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react'
-import { MODES, selectPortable, useSource } from '@tonex/core'
+import { MODES } from '@tonex/core'
 import { SHADCN_ROLE_NAMES, type ShadcnRoleName } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'

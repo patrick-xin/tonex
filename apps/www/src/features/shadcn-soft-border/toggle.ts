@@ -1,5 +1,5 @@
-import { useSource } from '@tonex/core'
 import type { MdTokenName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { isSoftBorderOn } from './predicate'
 
 // why: which md token each state binds to. Soft = outline-variant (M3's

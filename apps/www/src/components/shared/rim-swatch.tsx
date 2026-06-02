@@ -1,8 +1,8 @@
 'use client'
 
-import { useResolvedTokens } from '@tonex/core'
 import { hexFromOklch, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName } from '@tonex/core/schema'
+import { useResolvedTokens } from '@tonex/core-react'
 import { tv, type VariantProps } from 'tailwind-variants'
 import { useActiveMode } from '@/features/theme-mode/use-active-mode'
 

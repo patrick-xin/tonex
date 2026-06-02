@@ -1,7 +1,7 @@
 'use client'
 
-import { useResolvedTokens } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
+import { useResolvedTokens } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { SectionHeading } from '@/components/shared/section-heading'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'

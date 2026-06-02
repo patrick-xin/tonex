@@ -1,6 +1,7 @@
 'use client'
 
-import { selectHydrated, selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
+import { selectHydrated, useSource } from '@tonex/core-react'
 
 export function SeedInput() {
   const seedHex = useSource(selectSeedHex)

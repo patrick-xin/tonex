@@ -1,11 +1,11 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import {
   findActiveBindingPreset,
   SHADCN_BINDING_PRESETS,
   type ShadcnBindingPresetName,
 } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { applyShadcnBindingPreset } from './apply'
 

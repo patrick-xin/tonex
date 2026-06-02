@@ -1,7 +1,7 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import { type PaletteName, paletteOverrideDisabledReason } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { AnimatedButtonColorPicker } from './animated-button-color-picker'
 
 // why: one row per MCU palette family. Writing here regenerates the family

@@ -1,5 +1,5 @@
-import { useSource } from '@tonex/core'
 import { DEFAULT_SHADCN_ROLE_BINDINGS } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { isSoftBorderOn } from './predicate'
 import { setSoftBorder } from './toggle'

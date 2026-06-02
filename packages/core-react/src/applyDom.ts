@@ -1,5 +1,6 @@
-import { getDerivedTheme, type TokenMap } from './derive'
-import { oklchString } from './oklch'
+import type { TokenMap } from '@tonex/core'
+import { getDerivedTheme } from '@tonex/core/derive-cache'
+import { oklchString } from '@tonex/core/oklch'
 import { selectPortable, useSource } from './source'
 
 const STYLE_ELEMENT_ID = 'tonex-tokens'

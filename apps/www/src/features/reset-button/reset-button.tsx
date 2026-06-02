@@ -1,6 +1,6 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import type { ComponentProps, ReactNode } from 'react'
 import {
   AlertDialog,

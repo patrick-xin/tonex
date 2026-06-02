@@ -26,6 +26,17 @@ const rel = (abs) => relative(ROOT, abs).split('\\').join('/')
 
 const CHECKS = [
   {
+    id: 'core-purity',
+    adr: 'ADR-0037',
+    message:
+      '@tonex/core is the pure engine — no react/zustand imports. The editor runtime (store, hook, DOM sink, persistence) lives in @tonex/core-react.',
+    appliesTo: (path) => path.startsWith('packages/core/src/'),
+    allows: () => false,
+    // import ... from 'react' | 'react-dom' | 'react/*' | 'zustand' | 'zustand/*'
+    lineMatches: (line) => /from\s+['"](react|zustand)([-/][^'"]*)?['"]/.test(line),
+    stripComments: true,
+  },
+  {
     id: 'culori-firewall',
     adr: 'ADR-0025',
     message:
