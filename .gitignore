@@ -16,6 +16,13 @@ NOTES.md
 # Per-developer IDE settings
 .vscode/
 
+# Playwright E2E artifacts (apps/www) — reports/traces/results, never committed.
+# Browser binaries live in ~/.cache/ms-playwright (global), not the repo.
+playwright-report/
+blob-report/
+test-results/
+.last-run.json
+
 # Local knowledge-graph snapshots (graphify) — not committed; kept as
 # point-in-time references for "what changed" comparisons across sessions.
 graphify-out/

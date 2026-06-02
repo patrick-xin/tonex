@@ -14,3 +14,26 @@ jobs:
       - run: pnpm check:adr
       - run: pnpm turbo run typecheck
       - run: pnpm turbo run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # why: only chromium; --with-deps pulls the OS libs a headless browser needs.
+      - run: pnpm --filter @tonex/www exec playwright install --with-deps chromium
+      # why: build once here so the playwright webServer (`pnpm start` under CI)
+      # only boots — keeps the per-test server-start inside the 180s timeout.
+      - run: pnpm --filter @tonex/www build
+      - run: pnpm --filter @tonex/www e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/www/playwright-report/
+          retention-days: 14
