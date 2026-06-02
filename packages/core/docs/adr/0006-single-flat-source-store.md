@@ -14,4 +14,4 @@ The source-of-truth zustand store holds every persisted user choice (seed hex, v
 - The persisted shape (`PortableTheme`) is the flat fields minus runtime-only fields (`_hydrated`, `actions`); flat layout makes the strip mechanical — no traversal, no slot-map.
 - The lock-vs-override pair (per ADR-0007) demonstrates the rule's range: two parallel pinning concerns at materially different shapes (boolean vs per-token mode-keyed hex) live as flat siblings, not nested under a "pinning manifest."
 
-**Code anchors:** `packages/core/src/theme/source.ts` — single flat zustand source store, no slices.
+**Code anchors:** `packages/core-react/src/source.ts` — single flat zustand source store, no slices.

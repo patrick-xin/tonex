@@ -1,11 +1,11 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import {
   type CustomColorEntry,
   slugifyCustomColorName,
   validateCustomColorEntry,
 } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useState } from 'react'
 
 // why: testbed leaf for slice 3 — minimal CRUD surface for customColors. No

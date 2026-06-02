@@ -33,4 +33,4 @@ The flip-via-action rule (point 2) is load-bearing for a different reason: `_hyd
 - **2026-05-09** — the `next-themes` allowlist moved into `features/theme-mode/` (canonical hook relocated from `lib/hooks/use-active-mode.ts`; `_providers.tsx` no longer imports `next-themes`); `useSetMode` got a named home.
 - **2026-05-25** (issue #128 P3) — two bypass-candidate classes got named homes instead of file-level exceptions: `useThemePreference()` for raw preference (incl. `'system'`) and `selectHydrated(state)` for raw `_hydrated` gates, so the bypass greps return zero in product code. Allowlist stays two files; no sentinel change.
 
-**Code anchors:** `packages/core/src/theme/source.ts`, `apps/www/src/features/theme-mode/use-active-mode.ts` — the two hydration-guard flags.
+**Code anchors:** `packages/core-react/src/source.ts`, `apps/www/src/features/theme-mode/use-active-mode.ts` — the two hydration-guard flags.

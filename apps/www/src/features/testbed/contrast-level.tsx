@@ -1,6 +1,6 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useActiveMode } from '@/features/theme-mode'
 
 // why: MCU's contrastLevel input shifts tone offsets across every dynamic

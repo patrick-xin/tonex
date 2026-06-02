@@ -1,8 +1,9 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon, CaretDownIcon } from '@phosphor-icons/react'
-import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
 import { cmfSecondSourceDisabledReason, findActivePreset } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { useShallow } from 'zustand/react/shallow'
 import { HctColorPicker } from '@/components/shared/hct-color-picker'

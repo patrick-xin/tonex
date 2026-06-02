@@ -1,0 +1,16 @@
+{
+  "extends": "@tonex/typescript-config/library.json",
+  "compilerOptions": {
+    "paths": {
+      "@tonex/core": ["../core/src/index.ts"],
+      "@tonex/core/schema": ["../core/src/schema.ts"],
+      "@tonex/core/data": ["../core/src/data.ts"],
+      "@tonex/core/oklch": ["../core/src/oklch.ts"],
+      "@tonex/core/variants": ["../core/src/variants/index.ts"],
+      "@tonex/core/derive-cache": ["../core/src/theme/derive/cache.ts"],
+      "@tonex/color-utils": ["../color-utils/src/index.ts"],
+      "@tonex/mcu": ["../mcu/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

@@ -30,4 +30,4 @@ This is enforced by five concrete commitments:
 - **2026-05-06** (issue #9) — `applyDom` moved from `textContent` replace to per-token `CSSStyleRule.style.setProperty` against four stable rules, diffed. The WYSIWYG contract is preserved: same `DerivedTheme` input as exporters, four scope blocks, mode-as-class-flip, `globals.css` still baked from `formatCss(deriveTheme(DEFAULT_INPUTS))`. The drift-guard test moved to data-layer comparison accordingly. Folded into commitment-4 + the Consequence.
 - *Amendment to ADR-0005 (no date)* — the `css` field is struck from ADR-0005's spine signature; serialization is an exporter concern. The decision is commitment 1; kept reachable here in one hop for a reader coming from ADR-0005.
 
-**Code anchors:** `packages/core/src/theme/applyDom.ts`, `packages/core/src/theme/applyDom.test.ts` — WYSIWYG, enforced by the drift guard.
+**Code anchors:** `packages/core-react/src/applyDom.ts`, `packages/core-react/src/applyDom.test.ts` — WYSIWYG, enforced by the drift guard.

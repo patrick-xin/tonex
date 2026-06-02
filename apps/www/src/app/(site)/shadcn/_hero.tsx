@@ -1,7 +1,8 @@
 'use client'
 
-import { type TokenMap, useResolvedTokens } from '@tonex/core'
+import type { TokenMap } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
+import { useResolvedTokens } from '@tonex/core-react'
 import { m as motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'

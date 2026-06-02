@@ -1,6 +1,7 @@
 'use client'
 
-import { selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
 export function SeedTrigger() {

@@ -1,7 +1,7 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import { HUE_SPREAD_DEFAULT } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 

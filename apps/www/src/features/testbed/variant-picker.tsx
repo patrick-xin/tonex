@@ -1,12 +1,12 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import {
   VARIANT_GROUPS_ORDERED,
   type VariantGroup,
   type VariantName,
   variants,
 } from '@tonex/core/variants'
+import { useSource } from '@tonex/core-react'
 
 const GROUP_LABEL: Record<VariantGroup, string> = {
   cmf: 'CMF',

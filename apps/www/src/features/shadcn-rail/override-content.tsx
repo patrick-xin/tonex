@@ -1,9 +1,10 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
-import { type Mode, useSource } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_CHART_TOKEN_NAMES } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { ContrastBadge } from '@/components/shared/contrast-badge'
 import { Button } from '@/components/ui/button'

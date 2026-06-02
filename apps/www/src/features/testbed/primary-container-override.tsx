@@ -1,6 +1,6 @@
 'use client'
 
-import { useResolvedTokens, useSource } from '@tonex/core'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 
 // why: testing-phase shows both modes side-by-side so verification doesn't
 // require a mode toggle. Production target is single-mode UI driven by

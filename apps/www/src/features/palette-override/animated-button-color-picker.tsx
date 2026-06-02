@@ -1,9 +1,10 @@
 'use client'
 
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react'
-import { type Mode, useResolvedTokens, useSource } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import { hexString, oklchString } from '@tonex/core/oklch'
 import type { MdTokenName, PaletteName } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { cx } from 'tailwind-variants'
 import { HctColorPicker } from '@/components/shared/hct-color-picker'
 import { Button } from '@/components/ui/button'

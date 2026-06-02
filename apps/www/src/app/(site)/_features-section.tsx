@@ -1,7 +1,8 @@
 'use client'
 
-import { type TokenMap, useResolvedTokens } from '@tonex/core'
+import type { TokenMap } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
+import { useResolvedTokens } from '@tonex/core-react'
 import { type MotionValue, m as motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useRef } from 'react'
 import { useActiveMode } from '@/features/theme-mode'

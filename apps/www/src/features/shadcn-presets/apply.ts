@@ -1,5 +1,5 @@
-import { useSource } from '@tonex/core'
 import { type PresetAdoptChoices, SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useBindingBaseline } from '@/lib/stores/binding-baseline'
 
 // why: the single www-side seam for actually applying a theme preset. Delegates

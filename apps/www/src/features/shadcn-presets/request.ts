@@ -1,5 +1,5 @@
-import { useSource } from '@tonex/core'
 import type { ShadcnPresetName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { applyShadcnPreset } from './apply'
 import { presetSwitchNeedsDialog } from './predicate'
 import { presetSwitchDialogHandle } from './preset-dialog'

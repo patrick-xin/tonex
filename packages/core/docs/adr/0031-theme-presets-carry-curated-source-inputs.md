@@ -57,4 +57,4 @@ If a theme is ever serialized into a shareable string, the format should be **by
 
 The size cost of by-value is addressable: index-pack the closed-enum fields — variant, surface palette/algo, and the binding map's md-token targets — and quantize the continuous dials to fixed steps. Two disciplines make such a format durable and should be adopted from its first byte: a **version prefix**, and **append-only** ordering for every enum table an index points into (token names, role order, palette and variant names). Reordering or deleting an entry silently reinterprets every old string.
 
-**Code anchors:** `packages/core/src/theme/source.test.ts`, `packages/core/src/theme/preset-apply.ts` — presets carry curated source inputs.
+**Code anchors:** `packages/core-react/src/source.test.ts`, `packages/core/src/theme/preset-apply.ts` — presets carry curated source inputs.

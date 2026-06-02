@@ -1,6 +1,7 @@
 'use client'
 
-import { CHROMA_HUE_LOCK, maxChroma, useSource } from '@tonex/core'
+import { CHROMA_HUE_LOCK, maxChroma } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useMemo } from 'react'
 import { cn } from 'tailwind-variants'
 import { ChromaSlider } from './chroma-slider'

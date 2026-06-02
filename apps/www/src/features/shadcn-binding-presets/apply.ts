@@ -1,5 +1,5 @@
-import { useSource } from '@tonex/core'
 import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useBindingBaseline } from '@/lib/stores/binding-baseline'
 
 // why: www-side seam for applying a binding preset — pure routing on the core

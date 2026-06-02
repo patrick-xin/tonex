@@ -10,11 +10,9 @@ import {
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
   type SequentialModeOutput,
-  selectPortable,
-  useResolvedTokens,
-  useSource,
 } from '@tonex/core'
 import { MD_CHART_TOKEN_NAMES, SHADCN_CHART_TOKEN_NAMES } from '@tonex/core/schema'
+import { selectPortable, useResolvedTokens, useSource } from '@tonex/core-react'
 import { Fragment, useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'

@@ -12,7 +12,7 @@ import {
   MD_PALETTE_FAMILY_NAMES,
   MD_PALETTE_TONE_NAMES,
 } from '../schema'
-import { selectSeedHex } from '../source'
+import { selectSeedHex } from '../seed'
 import { deriveTheme } from './derive'
 
 // why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the

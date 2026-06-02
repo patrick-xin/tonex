@@ -1,9 +1,13 @@
-// why: engine subpath — the live theme pipeline. `deriveTheme` is the spine;
-// every other export is either a sink that consumes its output (`applyDom`,
-// `exportCss`, `formatCss`, `formatLayer`), a React adapter over the source
-// store (`useSource`, `useResolvedTokens`, `selectPortable`), a domain
-// primitive (`sourceColorHexFromImage`), or a post-MCU transform that derive
-// dispatches into (`applySurfaceTint`, `applySurfaceDesaturate`).
+// why: ADR-0037 — this is the PURE engine barrel. `deriveTheme` is the spine;
+// every other export is either an exporter sink that consumes its output
+// (`exportCss`, `formatCss`, `formatLayer`), a domain primitive
+// (`sourceColorHexFromImage`, `selectSeedHex`), or a post-MCU transform that
+// derive dispatches into (`applySurfaceTint`, `applySurfaceDesaturate`). Zero
+// React, zero zustand, zero DOM — the editor runtime (the source store,
+// `useResolvedTokens`, `applyDom`, persistence) lives in @tonex/core-react.
+// The cache-backed `getDerivedTheme` sits on a dedicated
+// `@tonex/core/derive-cache` subpath, not here, so module-global cache state
+// isn't advertised as part of the pure front door.
 //
 // Schema types live at `@tonex/core/schema`; static palette data at
 // `@tonex/core/data`; oklch conversion at `@tonex/core/oklch`; variant
@@ -24,7 +28,6 @@ export {
   type SequentialOutput,
   type SequentialParams,
 } from './chart'
-export { applyDom } from './theme/applyDom'
 export {
   type ContrastReport,
   evaluateThemeContrast,
@@ -60,14 +63,5 @@ export {
 export { CHROMA_HUE_LOCK, type HctTriplet, hctFromHex, hexFromHct, maxChroma } from './theme/hct'
 export { sourceColorHexFromImage } from './theme/image'
 export { MODES, type Mode } from './theme/mode'
-export {
-  flushPersist,
-  type SourceActions,
-  type SourceState,
-  selectHydrated,
-  selectPortable,
-  selectSeedHex,
-  useSource,
-} from './theme/source'
+export { selectSeedHex } from './theme/seed'
 export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
-export { useResolvedTokens } from './theme/useResolvedTokens'

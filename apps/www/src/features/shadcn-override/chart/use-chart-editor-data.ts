@@ -1,8 +1,9 @@
 'use client'
 
-import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast, type Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import type { ShadcnChartTokenName } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 
 export function useChartEditorData(token: ShadcnChartTokenName, mode: Mode) {

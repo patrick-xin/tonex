@@ -1,6 +1,7 @@
 'use client'
 
-import { type DerivedTheme, type ExportLayer, exportCss, useResolvedTokens } from '@tonex/core'
+import { type DerivedTheme, type ExportLayer, exportCss } from '@tonex/core'
+import { useResolvedTokens } from '@tonex/core-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 

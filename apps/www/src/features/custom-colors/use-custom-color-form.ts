@@ -1,14 +1,8 @@
 'use client'
 
-import {
-  hctFromHex,
-  hexFromHct,
-  maxChroma,
-  previewCustomColor,
-  selectSeedHex,
-  useSource,
-} from '@tonex/core'
+import { hctFromHex, hexFromHct, maxChroma, previewCustomColor, selectSeedHex } from '@tonex/core'
 import { validateCustomColorEntry } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useCallback, useState } from 'react'
 import { chromaGradient, hueGradient, toneGradient } from '@/features/hct-controls'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'

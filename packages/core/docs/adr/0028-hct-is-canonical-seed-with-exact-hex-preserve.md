@@ -34,4 +34,4 @@ seed: {
 
 **Verified by `source.test.ts`** — the setter-tolerance / `CHROMA_HUE_LOCK` suite is the truth-source for the contract this decision turns on: after any chroma- or tone-only setter the hue holds to solver epsilon across the low-chroma probe (#57), a lock-release touch (`chroma` 3.99 → 4.5) preserves hue, and `setSeedHex('#3B82F6')` reads back exactly until an HCT axis is touched (then `exactHex` clears). The `seedHex`-field removal and schema bump are structural, per ADR-0009 c.4.
 
-**Code anchors:** `packages/core/src/theme/source.test.ts`, `packages/core/src/theme/source.ts` — HCT canonical seed with exact-hex preserve.
+**Code anchors:** `packages/core-react/src/source.test.ts`, `packages/core-react/src/source.ts` — HCT canonical seed with exact-hex preserve.

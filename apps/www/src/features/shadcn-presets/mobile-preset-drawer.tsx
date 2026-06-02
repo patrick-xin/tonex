@@ -1,8 +1,8 @@
 'use client'
 
 import { CheckIcon } from '@phosphor-icons/react/ssr'
-import { selectPortable, useSource } from '@tonex/core'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { useShallow } from 'zustand/react/shallow'
 import {

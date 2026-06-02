@@ -1,7 +1,7 @@
 'use client'
 
 import type { TokenMap } from '@tonex/core'
-import { useResolvedTokens } from '@tonex/core'
+import { useResolvedTokens } from '@tonex/core-react'
 import { useActiveMode } from '@/features/theme-mode'
 
 // why: sink is the dev surface for verifying that every md token deriveTheme

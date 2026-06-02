@@ -1,8 +1,8 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import { NEUTRAL_PALETTE_NAMES } from '@tonex/core/data'
 import type { SurfaceAlgo } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useActiveMode } from '@/features/theme-mode'
 
 const ALGOS: ReadonlyArray<{ id: SurfaceAlgo; label: string; hint: string }> = [
