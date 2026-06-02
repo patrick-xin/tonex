@@ -8,6 +8,12 @@ export default defineConfig({
     globals: false,
     environment: 'jsdom',
     passWithNoTests: true,
+    // why: vitest's default include matches BOTH *.test.ts and *.spec.ts, so it
+    // would try to run the Playwright e2e specs (e2e/*.spec.ts) and crash on
+    // `test.describe() ... not expected here`. Unit tests are *.test.ts under src
+    // by convention; e2e is *.spec.ts under e2e/ and owned by Playwright. Pin the
+    // include to the unit convention so the two runners never overlap.
+    include: ['src/**/*.test.ts'],
     setupFiles: ['./vitest.setup.ts'],
     env: {
       NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
