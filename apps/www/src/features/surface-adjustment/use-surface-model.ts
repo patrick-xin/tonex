@@ -1,6 +1,6 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { useActiveMode } from '@/features/theme-mode'
 
 // why: one hook owns all surface store reads/writes so the view stays pure

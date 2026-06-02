@@ -1,7 +1,8 @@
 'use client'
 
-import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
 import { SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { type ReactNode, useId, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 'use client'
 
-import { applyDom } from '@tonex/core'
+import { applyDom } from '@tonex/core-react'
 import { useEffect } from 'react'
 import { ThemeModeProvider } from '@/features/theme-mode'
 

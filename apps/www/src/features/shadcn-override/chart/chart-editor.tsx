@@ -1,7 +1,8 @@
 'use client'
 
-import { type Mode, useSource } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import type { ShadcnChartTokenName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { RoleEditor as RoleEditorShell } from '@/components/shared/role-editor'
 import { useChartEditorData } from './use-chart-editor-data'
 

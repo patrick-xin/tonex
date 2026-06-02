@@ -1,8 +1,9 @@
 'use client'
 
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { evaluateThemeContrast, type Mode, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast, type Mode } from '@tonex/core'
 import { MD_EXTENDED_TOKEN_NAMES } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'

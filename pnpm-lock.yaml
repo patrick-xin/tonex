@@ -89,6 +89,9 @@ importers:
       '@tonex/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@tonex/core-react':
+        specifier: workspace:*
+        version: link:../../packages/core-react
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -244,6 +247,31 @@ importers:
       valibot:
         specifier: ^1.4.0
         version: 1.4.0(typescript@5.9.3)
+    devDependencies:
+      '@tonex/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 3.2.4(vitest@3.2.4(@types/node@22.19.17)(jiti@2.6.1)(jsdom@29.1.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4))
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: 'catalog:'
+        version: 5.1.4(typescript@5.9.3)(vite@7.3.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4))
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@22.19.17)(jiti@2.6.1)(jsdom@29.1.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4)
+
+  packages/core-react:
+    dependencies:
+      '@tonex/color-utils':
+        specifier: workspace:*
+        version: link:../color-utils
+      '@tonex/core':
+        specifier: workspace:*
+        version: link:../core
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@11.1.7)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))

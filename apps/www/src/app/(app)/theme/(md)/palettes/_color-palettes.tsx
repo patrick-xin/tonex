@@ -1,8 +1,9 @@
 'use client'
 
-import { type TokenMap, useResolvedTokens } from '@tonex/core'
+import type { TokenMap } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
+import { useResolvedTokens } from '@tonex/core-react'
 import type { MouseEvent } from 'react'
 import { useState } from 'react'
 import { SectionHeading } from '@/components/shared/section-heading'

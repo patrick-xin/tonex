@@ -1,6 +1,7 @@
 'use client'
 
-import { hexFromHct, selectSeedHex, useSource } from '@tonex/core'
+import { hexFromHct, selectSeedHex } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import {
   animate,
   MotionValue,

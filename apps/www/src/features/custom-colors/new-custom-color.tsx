@@ -1,8 +1,9 @@
 'use client'
 
 import { PlusIcon } from '@phosphor-icons/react'
-import { hctFromHex, hexFromHct, selectSeedHex, useSource } from '@tonex/core'
+import { hctFromHex, hexFromHct, selectSeedHex } from '@tonex/core'
 import { type CustomColorEntry, slugifyCustomColorName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {

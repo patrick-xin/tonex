@@ -1,8 +1,8 @@
 'use client'
 
 import { PaintBrushIcon } from '@phosphor-icons/react'
-import { selectPortable, useSource } from '@tonex/core'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'

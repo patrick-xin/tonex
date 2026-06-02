@@ -1,8 +1,9 @@
 'use client'
 
 import { DotsThreeVerticalIcon, PencilIcon, TrashIcon } from '@phosphor-icons/react'
-import { previewCustomColor, selectSeedHex, useSource } from '@tonex/core'
+import { previewCustomColor, selectSeedHex } from '@tonex/core'
 import { type CustomColorEntry, slugifyCustomColorName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {

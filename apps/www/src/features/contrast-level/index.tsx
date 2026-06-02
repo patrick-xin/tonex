@@ -1,6 +1,6 @@
 'use client'
 
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { Field } from '@/components/ui/field'
 import { Fieldset, FieldsetLegend } from '@/components/ui/fieldset'
 import { RulerSlider } from '@/components/ui/ruler-slider'

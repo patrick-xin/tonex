@@ -1,8 +1,9 @@
 'use client'
 
 import { GodRays } from '@paper-design/shaders-react'
-import { type Mode, useResolvedTokens } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
+import { useResolvedTokens } from '@tonex/core-react'
 import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { useActiveMode } from '@/features/theme-mode'

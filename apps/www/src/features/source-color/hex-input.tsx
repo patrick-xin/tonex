@@ -1,6 +1,7 @@
 'use client'
 
-import { selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'

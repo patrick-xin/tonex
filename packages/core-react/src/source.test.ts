@@ -1,34 +1,26 @@
 // @vitest-environment jsdom
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { ShadcnChartTokenName } from '../chart/schema'
-import {
-  findActiveBindingPreset,
-  SHADCN_BINDING_PRESETS,
-  type ShadcnBindingPresetName,
-} from './binding-presets'
-import { hctFromHex } from './hct'
-import { MODES } from './mode'
+import { hctFromHex, MODES, selectSeedHex } from '@tonex/core'
 import {
   type CustomColorEntry,
   DEFAULT_INPUTS,
+  findActiveBindingPreset,
+  findActivePreset,
   type MdTokenName,
   PALETTE_NAMES,
   type PaletteName,
   type PortableTheme,
   SCHEMA_VERSION,
+  SHADCN_BINDING_PRESETS,
+  SHADCN_PRESETS,
   SHADCN_ROLE_NAMES,
+  type ShadcnBindingPresetName,
+  type ShadcnChartTokenName,
+  type ShadcnPresetName,
   type ShadcnRoleBindings,
-} from './schema'
-import { findActivePreset, SHADCN_PRESETS, type ShadcnPresetName } from './shadcn-presets'
-import {
-  flushPersist,
-  STORAGE_KEY,
-  selectHydrated,
-  selectPortable,
-  selectSeedHex,
-  useSource,
-} from './source'
+} from '@tonex/core/schema'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { flushPersist, STORAGE_KEY, selectHydrated, selectPortable, useSource } from './source'
 
 // why: structural round-trip. NONDEFAULT_INPUTS is typed PortableTheme so
 // adding a schema field surfaces here as a typecheck error — that is the
@@ -680,7 +672,7 @@ describe('useSource persistence round-trip', () => {
     })
 
     it('setSeedHex populates seed.{hue,chroma,tone} from the hex', async () => {
-      const { hctFromHex } = await import('./hct')
+      const { hctFromHex } = await import('@tonex/core')
       const s = useSource.getState()
       s.actions.setSeedHex('#3b82f6')
       const expected = hctFromHex('#3b82f6')
@@ -713,7 +705,7 @@ describe('useSource persistence round-trip', () => {
     })
 
     it('selectSeedHex returns hexFromHct(seed) when exactHex is absent', async () => {
-      const { hexFromHct } = await import('./hct')
+      const { hexFromHct } = await import('@tonex/core')
       // No setter call — DEFAULT_INPUTS.seed.exactHex is '#6750a4' (the
       // project default). Drop into a no-exactHex state via direct setState
       // to exercise the fallback branch.

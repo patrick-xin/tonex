@@ -1,7 +1,8 @@
 'use client'
 
-import { type Mode, useSource } from '@tonex/core'
+import type { Mode } from '@tonex/core'
 import type { MdTokenName } from '@tonex/core/schema'
+import { useSource } from '@tonex/core-react'
 import { RoleEditor as RoleEditorShell } from '@/components/shared/role-editor'
 import { useTokenEditorData } from './use-token-editor-data'
 

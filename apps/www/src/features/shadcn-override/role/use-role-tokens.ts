@@ -1,8 +1,9 @@
 'use client'
 
-import { evaluateThemeContrast, useResolvedTokens, useSource } from '@tonex/core'
+import { evaluateThemeContrast } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { SHADCN_ROLE_NAMES, type ShadcnRoleName } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { type ContrastWarning, toContrastWarning } from '@/features/contrast-checker/warning'
 import { useActiveMode } from '@/features/theme-mode'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useHotkey } from '@tanstack/react-hotkeys'
-import { useSource } from '@tonex/core'
+import { useSource } from '@tonex/core-react'
 import {
   ArrowDownIcon,
   ArrowUpIcon,

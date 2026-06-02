@@ -1,12 +1,13 @@
 'use client'
 
-import { selectPortable, selectSeedHex, useSource } from '@tonex/core'
+import { selectSeedHex } from '@tonex/core'
 import {
   findActivePreset,
   resolvePresetApply,
   SHADCN_PRESETS,
   type ShadcnPresetName,
 } from '@tonex/core/schema'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { useShallow } from 'zustand/react/shallow'
 import { useActiveMode } from '@/features/theme-mode'
 import { presetSwatches } from './preview-swatches'

@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
+import { deriveTheme, hctFromHex, type TokenMap } from '@tonex/core'
+import { oklchString } from '@tonex/core/oklch'
+import {
+  DEFAULT_INPUTS,
+  DEFAULT_SHADCN_ROLE_BINDINGS,
+  type PortableTheme,
+} from '@tonex/core/schema'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { applyDom } from './applyDom'
-import { deriveTheme, type TokenMap } from './derive'
-import { hctFromHex } from './hct'
-import { oklchString } from './oklch'
-import { DEFAULT_INPUTS, DEFAULT_SHADCN_ROLE_BINDINGS, type PortableTheme } from './schema'
 import { selectPortable, useSource } from './source'
 
 const withSeed = (hex: string) => ({

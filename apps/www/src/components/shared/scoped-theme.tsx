@@ -1,9 +1,10 @@
 'use client'
 
-import { deriveTheme, selectPortable, useSource } from '@tonex/core'
+import { deriveTheme } from '@tonex/core'
 import { oklchString } from '@tonex/core/oklch'
 import type { PortableTheme } from '@tonex/core/schema'
 import type { VariantName } from '@tonex/core/variants'
+import { selectPortable, useSource } from '@tonex/core-react'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 

@@ -1,12 +1,13 @@
 'use client'
 
-import { MODES, useResolvedTokens, useSource } from '@tonex/core'
+import { MODES } from '@tonex/core'
 import {
   DEFAULT_SHADCN_ROLE_BINDINGS,
   MD_TOKEN_NAMES,
   type MdTokenName,
   SHADCN_ROLE_NAMES,
 } from '@tonex/core/schema'
+import { useResolvedTokens, useSource } from '@tonex/core-react'
 
 export function ShadcnBindings() {
   const bindings = useSource((s) => s.shadcnRoleBindings)

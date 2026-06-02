@@ -1,11 +1,11 @@
 'use client'
 
-import { useSource } from '@tonex/core'
 import {
   NEUTRAL_PALETTE_NAMES,
   type NeutralPaletteName,
   TAILWIND_PALETTE_OKLCH,
 } from '@tonex/core/data'
+import { useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { Chip } from '@/components/ui/chip'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

@@ -1,32 +1,32 @@
 # Core surface
 
-What `@tonex/core` exposes, by subpath. Read this before importing in `apps/www/` so you don't have to walk core's source to find what's already there. If your need isn't listed, the answer is usually compose in a www feature folder (ADR-0022 rule 5), not extend core.
+What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime) expose, by subpath. Read this before importing in `apps/www/` so you don't have to walk the source to find what's already there. If your need isn't listed, the answer is usually compose in a www feature folder (ADR-0022 rule 5), not extend core.
+
+**The split (ADR-0037):** `@tonex/core` is framework-free — no React, no zustand, no DOM. The stateful editor runtime (the source store, the `useResolvedTokens` hook, `applyDom`, persistence) lives in `@tonex/core-react`, which depends one-way on `@tonex/core`. www imports pure symbols from `@tonex/core` (+ its subpaths) and stateful symbols from `@tonex/core-react`.
 
 ## Subpaths
 
-The package has five entry points (`packages/core/package.json` `exports`):
+`@tonex/core` has six entry points (`packages/core/package.json` `exports`):
 
 | Import path | What's in it | When to reach for it |
 | --- | --- | --- |
-| `@tonex/core` | engine + React adapters | derive, apply, read theme; HCT helpers; `Mode` |
+| `@tonex/core` | pure engine | derive, export, read theme; HCT helpers; `Mode`; `selectSeedHex` |
 | `@tonex/core/schema` | types, constants, validators | token names, palette types, schema parsing |
 | `@tonex/core/oklch` | color-space conversion | hex ↔ oklch round-trips, luminance |
 | `@tonex/core/data` | static palette tables | Tailwind palette, neutral palette names |
 | `@tonex/core/variants` | variant strategies + registry | inspect/list variants in UI |
+| `@tonex/core/derive-cache` | memoized `getDerivedTheme` | the editor runtime's shared derive cache; www almost never imports it directly |
+
+`@tonex/core-react` has one entry point (`.`) — see its section below.
 
 Subpaths are split so each has an independent reason-to-grow. Adding a schema field doesn't widen the engine surface; adding a variant doesn't touch the schema barrel.
 
-## `@tonex/core` — engine
+## `@tonex/core` — pure engine
 
-The live theme pipeline. Most www code imports from here.
+The live theme pipeline, framework-free. Most www code imports from here.
 
-**React adapters**:
-- `useResolvedTokens()` — derived layer output. Returns `null` while the source store is unhydrated. Consumers MUST handle the null per ADR-0015. Canonical read for theme-aware UI.
-- `useSource(selector)` — store reader for *source* state (inputs, overrides). Selector required.
-
-**Derive / sinks**:
+**Derive / export**:
 - `deriveTheme(source)` — pure function, source → `DerivedTheme`. Single colour-logic site (ADR-0017).
-- `applyDom()` — DOM sink; no args. Reads the singleton source store (`useSource.getState()`) and re-renders on `useSource.subscribe(...)`; returns an unsubscribe. Writes a single shared `<style id="tonex-tokens">` in `document.head` with four fixed class-scoped rules (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`) — not `:root`. SSR-safe (no-op when `window` is undefined); only writes once `_hydrated` (ADR-0015). No colour logic here.
 - `exportCss(theme, opts)` — CSS string export. Siblings `exportDart`, `exportJson`, `exportNativeCss` emit the same bundle in their formats (the export dialog's format tabs).
 - `formatCss`, `formatLayer` — formatting helpers.
 - `buildContrastBundle(input)` — paired light/dark contrast bundle.
@@ -40,10 +40,8 @@ The live theme pipeline. Most www code imports from here.
 - `MODES` — tuple `['light', 'dark']`.
 - `Mode` — type `'light' | 'dark'`.
 
-**Source store selectors / internals**:
-- `selectSeedHex(state)` — canonical seed→hex projection (`seed.exactHex ?? hexFromHct(seed)`, ADR-0028). Use this for the seed's hex; never `hctFromHex` a stored hex in product code.
-- `selectHydrated(state)` — the source-hydration gate (`_hydrated`). Named home for gating that needs source state before any token derives (export availability, picker inputs); never read `_hydrated` directly (ADR-0015 amendment 2026-05-25).
-- `selectPortable(state)`, `flushPersist()`, types `SourceActions`, `SourceState` — reach for only when writing store glue.
+**Seed projection** (pure):
+- `selectSeedHex(state)` — canonical seed→hex projection (`seed.exactHex ?? hexFromHct(seed)`, ADR-0028). Pure; operates on any `{ seed }`, so a CLI/SDK calls it without the store (ADR-0016). Use this for the seed's hex; never `hctFromHex` a stored hex in product code. (The store-shaped selectors `selectHydrated` / `selectPortable` and `flushPersist` live in `@tonex/core-react` — see below.)
 
 **Layer / token types**:
 - `DerivedTheme`, `MdLayer`, `ResolvedLayer`, `ShadcnLayer`, `TokenMap`.
@@ -57,6 +55,21 @@ The live theme pipeline. Most www code imports from here.
 **Other**:
 - `sourceColorHexFromImage(file)` — extract dominant colour from an uploaded image.
 - `applySurfaceTint`, `applySurfaceDesaturate` — post-MCU transforms; `derive.ts` dispatches into them, callers rarely need them directly.
+
+## `@tonex/core-react` — editor runtime
+
+The stateful, browser-bound layer (ADR-0037). One entry point: `@tonex/core-react`. Depends one-way on `@tonex/core`. www imports these from here, **not** from `@tonex/core`.
+
+**React adapters**:
+- `useResolvedTokens()` — derived layer output. Returns `null` while the source store is unhydrated. Consumers MUST handle the null per ADR-0015. Canonical read for theme-aware UI.
+- `useSource(selector)` — store reader for *source* state (inputs, overrides). Selector required.
+
+**DOM sink**:
+- `applyDom()` — DOM sink; no args. Reads the singleton source store (`useSource.getState()`) and re-renders on `useSource.subscribe(...)`; returns an unsubscribe. Writes a single shared `<style id="tonex-tokens">` in `document.head` with four fixed class-scoped rules (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`) — not `:root`. SSR-safe (no-op when `window` is undefined); only writes once `_hydrated` (ADR-0015). No colour logic here.
+
+**Store glue** (reach for only when writing store glue):
+- `selectHydrated(state)` — the source-hydration gate (`_hydrated`). Named home for gating that needs source state before any token derives (export availability, picker inputs); never read `_hydrated` directly (ADR-0015 amendment 2026-05-25).
+- `selectPortable(state)`, `flushPersist()`, types `SourceActions`, `SourceState`.
 
 ## `@tonex/core/schema` — types + constants
 
@@ -77,7 +90,7 @@ Pure types, frozen tuples, validators. Free to import widely; cheap.
 - `DEFAULT_INPUTS`, `DEFAULT_SHADCN_ROLE_BINDINGS`
 - `CHART_MODES` / `ChartMode`, `SURFACE_ALGOS` / `SurfaceAlgo`
 - `PALETTE_NAMES` / `PaletteName`, `PALETTE_FAMILIES`
-- `STORAGE_KEY`, `SCHEMA_VERSION`, `SchemaVersion`
+- `SCHEMA_VERSION`, `SchemaVersion`
 - `PortableTheme`, `Seed` (canonical HCT seed + optional `exactHex`, ADR-0028), `PortableThemeSchema`, `parsePortableTheme`
 - `ShadcnRoleBindings`, `CustomColorEntry`
 
@@ -129,6 +142,10 @@ The variant registry; usually only inspect / picker UIs care.
 - Types: `VariantGroup`, `VariantStrategy`.
 
 Individual strategy files (`tonalSpot`, `vibrant`, …) are not exported. `derive.ts` looks them up via `variants[source.variant]`. Don't reach into a strategy file from www.
+
+## `@tonex/core/derive-cache` — memoized derive
+
+- `getDerivedTheme(source, uniformContrast?)` — module-global FIFO cache (cap 6) over `deriveTheme`, keyed on `(source-identity, contrast pair)` (issue #9/#20). The editor runtime (`useResolvedTokens`, `applyDom`) and the exporters share one derive per source change. Exposed on its own subpath, off the pure main barrel, because the cache is module-global mutable state (ADR-0037) — www reads derived tokens via `useResolvedTokens`, not this directly.
 
 ## What is *not* in core
 
