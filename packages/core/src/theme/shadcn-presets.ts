@@ -69,7 +69,7 @@ export const SHADCN_PRESETS = {
     surfacePaletteName: 'zinc',
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
-    surfaceDesaturateLevel: { light: 0.3, dark: 0 },
+    surfaceDesaturateLevel: { light: 0, dark: 0 },
     shadcnRoleBindings: {
       light: {
         '--background': '--color-surface',
@@ -78,8 +78,8 @@ export const SHADCN_PRESETS = {
         '--card-foreground': '--color-on-surface',
         '--popover': '--color-surface-container',
         '--popover-foreground': '--color-on-surface',
-        '--primary': '--color-primary-container',
-        '--primary-foreground': '--color-on-primary-container',
+        '--primary': '--color-primary',
+        '--primary-foreground': '--color-on-primary',
         '--secondary': '--color-secondary-container',
         '--secondary-foreground': '--color-on-secondary-container',
         '--muted': '--color-surface-dim',

@@ -25,7 +25,6 @@ import {
 import { useGuideOptional } from '@/features/onboarding-guide/guide-context'
 import { helpDialogHandle } from '@/lib/handles'
 import { KeyConcepts } from './key-concepts'
-import { QA } from './qa'
 
 export function HelpDialog() {
   // When Help was opened from a paused tour ("Learn more"), closing it resumes
@@ -47,11 +46,12 @@ export function HelpDialog() {
         <DialogOutsideScrollContent>
           <DialogHeader className="mb-4 text-left">
             <DialogTitle className="text-xl font-semibold">Help</DialogTitle>
-            <DialogDescription>Key concepts and usage guide about tonex</DialogDescription>
+            <DialogDescription>
+              tonex generates light/dark theme and keeps them in sync using seed you provide.
+            </DialogDescription>
           </DialogHeader>
           <div className="h-full min-h-screen space-y-6">
             <KeyConcepts section={section ?? null} />
-            <QA section={section ?? null} />
           </div>
           <DialogClose
             className="absolute right-2 top-2"

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/lib/hooks/use-mobile'
+import { ShimmerBorder } from '../../../components/shared/shimmer-border'
 import { LandingLogo } from '../_landing/landing-logo'
 
 const STICK_OFFSET = 80
@@ -45,6 +46,7 @@ export function SiteHeader() {
             'bg-surface/40 backdrop-blur-sm shadow-lg shadow-black/5',
           )}
         />
+        <ShimmerBorder />
         <LandingLogo />
         <Button nativeButton={false} render={<Link href="/theme" />} variant="brand">
           Build your own

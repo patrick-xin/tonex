@@ -4,7 +4,7 @@ export function MdIcon({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
       {...props}
-      className={cn('size-4 text-primary', className)}
+      className={cn('size-4 text-current', className)}
       role="img"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"

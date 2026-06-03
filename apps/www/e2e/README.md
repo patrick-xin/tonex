@@ -59,6 +59,53 @@ test('seed survives a layer switch', async ({ page }) => {
   `crossToLayer` (md ↔ shadcn) click real links and `waitForURL` before settling
   hydration, so a no-op navigation fails as "wrong page", not "field never loaded".
 
+### Selectors: accessible name by default, `data-testid` for identity
+
+Prefer `getByRole` / `getByLabel` / `getByText`. They assert a *user-facing
+contract* and double as free a11y coverage — when one breaks, something a user can
+perceive changed. The ladder is **role → label → text → testid**. Reach for
+`data-testid` only when an element's *identity* can't be reliably expressed by an
+accessible name: the moment a semantic selector needs a uniqueness trick
+(`.or()`, `.first()`, `nth`, structural scoping) or pins to copy that can change
+for non-test reasons, that's the signal to promote to a testid.
+
+Two questions decide it:
+
+1. Could a behaviour-neutral change break this selector? (marketing copy, a second
+   CTA with the same words, a duplicated collection label)
+2. Is the element load-bearing for a flow? (a nav entry, a critical trigger)
+
+**Two yeses → `data-testid`.** One or none → stay semantic. The accessible name is
+the default precisely because it's free a11y signal; keep the testid'd set *small*,
+or you train the suite (and the agents writing it) to ignore accessibility.
+
+**Find and assert are separate handles.** Find by the stable thing; assert on the
+user-visible state. It's correct — often better — to `getByTestId(...).click()`
+then `expect(page).toHaveURL(...)` / assert the rendered value. The selector only
+has to *locate*; the assertion carries the user-facing meaning. (`hctSlider`
+already does this — finds by `data-slot`, asserts on the rendered value.)
+
+**A testid is an API the moment it exists.** Name it for its role in the flow
+(`cta-md`, `seed-preset-<hex>`), never its implementation (`rainbow-button-2`);
+renaming one is a breaking change to the suite.
+
+What lands where in this app:
+
+| Element | Selector | Why |
+|---|---|---|
+| Nav / flow-entry CTAs | `data-testid` (`cta-md`, `cta-shadcn`) | copy-driven + load-bearing; labels collide — the hero "Try tonex" link and the FinalCta pill share the words |
+| Collection items (preset chips, rows) | `data-testid` keyed by their data (`seed-preset-<hex>`) | names aren't unique by design; the hex *is* the identity the spec asserts |
+| Stateful controls (mode toggle, seed lock) | `getByRole` + name | the label encodes the state — `"Switch to dark mode"` breaking *is* the bug to catch |
+| Form fields (seed hex) | `getByLabel` | the accessible name is the real contract |
+| No accessible handle (decorative trigger, shader canvas) | `data-slot` / role anchor, then testid | last resort; never styling classes |
+
+> The case this rule came from: `enterEditor` matched the accessible name "Try
+> tonex" via `getByRole('link').or(getByRole('button'))`. Unique the day it was
+> written — until the FinalCta pill (`RainbowButton`, default children
+> `'Try tonex'`) added a second match and the union went strict-mode-ambiguous.
+> The label was *content*, not *identity*. An agent reading the DOM can't see that
+> collision coming; a testid on the navigating CTA makes the identity explicit.
+
 ### Gotchas already handled by the foundation
 
 You inherit these — they're documented so a new spec knows *why* the seam looks the

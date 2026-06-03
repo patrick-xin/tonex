@@ -124,7 +124,7 @@ function AccordionPanel({
       data-slot="accordion-panel"
       {...props}
     >
-      <div className={cn('p-2 text-sm', className)}>{children}</div>
+      <div className={cn('p-2', className)}>{children}</div>
     </BaseAccordion.Panel>
   )
 }

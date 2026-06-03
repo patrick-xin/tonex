@@ -80,9 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LazyMotion features={domAnimation}>
           {/* why: reducedMotion="user" makes every `m` component honor the OS
               prefers-reduced-motion setting — transform/layout animations snap to
-              their target while opacity still fades. This consolidates what 6+
-              landing components already do by hand (useReducedMotion) and closes
-              the gap where the hero entrance ignored the preference. It also lets
+              their target while opacity still fades. It also lets
               the e2e tier emulate reduced-motion to avoid the animating hero
               container intercepting clicks (see playwright.config.ts). */}
           <MotionConfig reducedMotion="user">

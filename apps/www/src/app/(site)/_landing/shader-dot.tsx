@@ -1,12 +1,22 @@
 'use client'
 
-import { DotOrbit } from '@paper-design/shaders-react'
 import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useResolvedTokens } from '@tonex/core-react'
-import { useReducedMotion } from 'motion/react'
+import { useInView, useReducedMotion } from 'motion/react'
+import dynamic from 'next/dynamic'
+import { useRef } from 'react'
+import { cn } from 'tailwind-variants'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
+
+// why: defer the @paper-design/shaders-react bundle (the route's largest client
+// dep) out of first-load JS — it streams in as a post-hydration chunk. The
+// shader only renders once `palette && noiseReady`, so there's no flash while
+// the chunk loads.
+const DotOrbit = dynamic(() => import('@paper-design/shaders-react').then((m) => m.DotOrbit), {
+  ssr: false,
+})
 
 type Stop = readonly [family: string, tone: number]
 
@@ -65,11 +75,19 @@ function resolveDotColors(theme: ResolvedTokens, mode: Mode) {
   }
 }
 
-export function ShaderDots() {
+export function ShaderDots({ className }: { className?: string }) {
   const theme = useResolvedTokens()
   const mode = useActiveMode()
   const reduceMotion = useReducedMotion()
   const noiseReady = useShaderNoiseReady()
+
+  // why: this field sits well below the fold. Pause it whenever it's off-screen
+  // so its RAF/GPU loop doesn't run through the whole hero→export scroll —
+  // speed=0 idles the shader in place (no remount, GL context stays warm), and
+  // the margin spins it up just before it scrolls in so there's no static-to-
+  // animating pop.
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { margin: '200px 0px' })
 
   // why: both hooks gate on a null pre-hydration state (identical contract).
   // Rendering the shader only once both resolve avoids a first-paint flash in
@@ -77,22 +95,20 @@ export function ShaderDots() {
   const palette = theme && mode ? resolveDotColors(theme, mode) : null
 
   return (
-    <div className="relative h-72 overflow-hidden max-w-7xl mx-auto">
-      <div className="absolute inset-0 z-0">
-        {palette && noiseReady && (
-          <DotOrbit
-            scale={0.5}
-            colors={palette.dots}
-            colorBack="#00000000"
-            stepsPerColor={1}
-            size={1}
-            sizeRange={0.5}
-            spreading={1}
-            speed={reduceMotion ? 0 : 0.5}
-            style={{ width: '100%', height: '100%' }}
-          />
-        )}
-      </div>
+    <div ref={ref} className={cn('relative h-72 overflow-hidden mx-auto', className)}>
+      {palette && noiseReady && (
+        <DotOrbit
+          scale={1}
+          colors={palette.dots}
+          colorBack="#00000000"
+          stepsPerColor={1.5}
+          size={1}
+          sizeRange={0.5}
+          spreading={1}
+          speed={reduceMotion || !inView ? 0 : 0.4}
+          style={{ width: '100%', height: '100%' }}
+        />
+      )}
     </div>
   )
 }

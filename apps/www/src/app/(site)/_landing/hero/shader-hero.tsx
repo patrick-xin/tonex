@@ -1,14 +1,22 @@
 'use client'
 
-import { GodRays } from '@paper-design/shaders-react'
 import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useResolvedTokens } from '@tonex/core-react'
 import { useReducedMotion } from 'motion/react'
+import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
 import { HeroContent } from './hero-content'
+
+// why: defer the @paper-design/shaders-react bundle (the route's largest client
+// dep) out of first-load JS — it streams in as a post-hydration chunk. The
+// shader only renders once `colors && noiseReady`, so there's no flash while
+// the chunk loads.
+const GodRays = dynamic(() => import('@paper-design/shaders-react').then((m) => m.GodRays), {
+  ssr: false,
+})
 
 type Stop = readonly [family: string, tone: number]
 

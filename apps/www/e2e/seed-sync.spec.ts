@@ -4,7 +4,6 @@ import {
   expect,
   getSeedHex,
   gotoTheme,
-  LANDING_PRESETS,
   landingSeedField,
   landingSeedSwatch,
   pickPreset,
@@ -35,24 +34,24 @@ test.describe('seed sync across navigation', () => {
     await page.goto('/')
     await waitForHydrated(page, landingSeedField(page))
 
-    await pickPreset(page, 'Cobalt')
-    await expect(landingSeedField(page)).toHaveValue(LANDING_PRESETS.Cobalt)
+    await pickPreset(page, '#2e5bff') // Cobalt
+    await expect(landingSeedField(page)).toHaveValue('#2e5bff')
 
     // client-side nav (next/link), not a reload — exercises the remount path the
     // store carries the seed through, exactly as the original repro did.
     await enterEditor(page, 'md')
-    await expect(seedField(page)).toHaveValue(LANDING_PRESETS.Cobalt)
+    await expect(seedField(page)).toHaveValue('#2e5bff')
   })
 
   test('a landing preset survives the navigation into the shadcn editor', async ({ page }) => {
     await page.goto('/')
     await waitForHydrated(page, landingSeedField(page))
 
-    await pickPreset(page, 'Tangerine')
-    await expect(landingSeedField(page)).toHaveValue(LANDING_PRESETS.Tangerine)
+    await pickPreset(page, '#ff6a1a') // Tangerine
+    await expect(landingSeedField(page)).toHaveValue('#ff6a1a')
 
     await enterEditor(page, 'shadcn')
-    await expect(seedField(page)).toHaveValue(LANDING_PRESETS.Tangerine)
+    await expect(seedField(page)).toHaveValue('#ff6a1a')
   })
 
   test('an edited seed survives the md ↔ shadcn round trip', async ({ page }) => {
@@ -75,8 +74,8 @@ test.describe('seed sync across navigation', () => {
 
     // #7a2fff → rgb(122, 47, 255); the swatch fill is the seed projected to a
     // background-color, so it must track the field's text value.
-    await pickPreset(page, 'Iris')
-    await expect(landingSeedField(page)).toHaveValue(LANDING_PRESETS.Iris)
+    await pickPreset(page, '#7a2fff') // Iris
+    await expect(landingSeedField(page)).toHaveValue('#7a2fff')
     await expect(landingSeedSwatch(page)).toHaveCSS('background-color', 'rgb(122, 47, 255)')
   })
 

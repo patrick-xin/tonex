@@ -20,7 +20,7 @@ const rulerSliderStyles = tv({
       // while dragging tick-to-tick, so a thumb-only cursor flickers to the
       // track's default between snaps — driving it from base-ui's data-dragging
       // holds a stable grabbing cursor across the whole drag.
-      'cursor-grab data-dragging:cursor-grabbing',
+      'cursor-ew-resize data-dragging:cursor-ew-resize',
       'data-disabled:pointer-events-none data-disabled:opacity-50',
     ],
     control: 'relative flex h-full w-full',
