@@ -8,7 +8,7 @@ export function ShadcnIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor"
       viewBox="0 0 256 256"
-      className={cn('text-on-surface size-[17px]', className)}
+      className={cn('text-current size-4.25', className)}
       {...props}
     >
       <rect width="256" height="256" fill="none"></rect>

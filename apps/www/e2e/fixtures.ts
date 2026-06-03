@@ -86,11 +86,15 @@ export async function setSeedHex(page: Page, hex: string) {
   await expect(field).toHaveValue(hex)
 }
 
-// why: the landing preset row (presets-row.tsx) is the other seed entry point and
-// the one in the original repro (click preset → navigate → out of sync). Click by
-// visible name; the caller asserts the downstream effect.
-export async function pickPreset(page: Page, name: string) {
-  await page.getByRole('button', { name }).click()
+// why: the landing seed swatches (seed-swatches.tsx) are the other seed entry
+// point and the one in the original repro (click preset → navigate → out of
+// sync). Selected by hex, not name: preset names aren't unique (PRESETS2/3 reuse
+// them for different hexes) so a name can't identify a swatch — the hex is the
+// identity, and it's also what the caller asserts downstream. `.first()` because
+// rows repeat (PRESETS2 renders twice); every chip with a given hex commits the
+// identical seed, so any instance is equivalent. See the README selector strategy.
+export async function pickPreset(page: Page, hex: string) {
+  await page.getByTestId(`seed-preset-${hex}`).first().click()
 }
 
 // why: the landing seed surface is SeedTrigger (an inline <input> labelled "Seed
@@ -110,18 +114,6 @@ export function landingSeedSwatch(page: Page) {
   return landingSeedField(page).locator('xpath=preceding-sibling::span[1]')
 }
 
-// why: the landing presets (presets-row.tsx) as name → the seed hex each commits.
-// Specs assert the downstream value without re-hardcoding it per test; if the row
-// changes, this one map updates with it.
-export const LANDING_PRESETS = {
-  Cobalt: '#2e5bff',
-  Tangerine: '#ff6a1a',
-  Sage: '#478f5c',
-  Iris: '#7a2fff',
-  Lagoon: '#00c4c9',
-  Ruby: '#e54666',
-} as const
-
 // why: the cross-layer link in the editor rail (nav-tabs.tsx crossLink). Its label
 // is the *target* layer's display name — "Shadcn" on the md rail, "MD3" on the
 // shadcn rail. Rendered as a Button-as-Link, so match either role to stay robust
@@ -140,16 +132,14 @@ export async function crossToLayer(page: Page, target: ThemeLayer) {
   await waitForHydrated(page)
 }
 
-// why: the landing CTAs into each editor layer (hero-content.tsx) — "Try tonex"
-// → /theme, "shadcn mode" → /theme/shadcn. Client-side next/link navigation, which
-// is what the original repro exercised (set seed on landing, then enter the editor).
-const CTA_LABEL = { md: 'Try tonex', shadcn: 'shadcn mode' } as const
+// why: the landing CTAs into each editor layer (cta-buttons.tsx) — `cta-md`
+// → /theme, `cta-shadcn` → /theme/shadcn. Client-side next/link navigation, which
+// is what the original repro exercised (set seed on landing, then enter the
+// editor). Targeted by data-testid, not label: "Try tonex" is also the FinalCta
+// pill's copy, so a role+name match goes strict-mode-ambiguous — the route the
+// CTA enters is its identity, the words are not (see the README selector strategy).
 export async function enterEditor(page: Page, target: ThemeLayer) {
-  const label = CTA_LABEL[target]
-  await page
-    .getByRole('link', { name: label })
-    .or(page.getByRole('button', { name: label }))
-    .click()
+  await page.getByTestId(`cta-${target}`).click()
   await page.waitForURL((url) => url.pathname === THEME_PATHS[target])
   await waitForHydrated(page)
 }
@@ -262,7 +252,7 @@ export function sourceControlToggle(page: Page) {
 // ── shadcn preset picker (shadcn-presets/) ─────────────────────────────────
 // why: the editor's preset entry point — a secondary icon button labelled
 // "Preset" (shadcn layer only; md has no preset concept per ADR-0026). Distinct
-// from the landing presets-row Tier-1 covers. Opens a popover of preset chips.
+// from the landing seed swatches Tier-1 covers. Opens a popover of preset chips.
 export function presetButton(page: Page) {
   return page.getByRole('button', { name: 'Preset', exact: true }).filter({ visible: true })
 }

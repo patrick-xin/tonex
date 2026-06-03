@@ -1,12 +1,20 @@
 'use client'
 
-import { Heatmap } from '@paper-design/shaders-react'
 import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useResolvedTokens } from '@tonex/core-react'
 import { useReducedMotion } from 'motion/react'
+import dynamic from 'next/dynamic'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
+
+// why: defer the @paper-design/shaders-react bundle (the route's largest client
+// dep) out of first-load JS — it streams in as a post-hydration chunk. The
+// shader only renders once `palette && noiseReady`, so there's no flash while
+// the chunk loads.
+const Heatmap = dynamic(() => import('@paper-design/shaders-react').then((m) => m.Heatmap), {
+  ssr: false,
+})
 
 type Stop = readonly [family: string, tone: number]
 type DotStops = readonly [Stop, Stop, Stop, Stop, Stop, Stop, Stop]

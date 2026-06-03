@@ -8,9 +8,10 @@ import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 // why: the rim angle is an @property-registered custom prop so the browser can
 // interpolate it — plain CSS vars don't animate. Reduced-motion freezes it.
 
-const GRADIENT = 'linear-gradient(var(--rb-angle), #02fcef 0%, #ffb52b 50%, #a02bfe 100%)'
+const GRADIENT =
+  'linear-gradient(var(--rb-angle), var(--color-primary) 0%, var(--color-chart-4) 20%, var(--color-error) 70%, var(--color-tertiary) 100%)'
 
-export function RainbowButton({ children = 'Announcing Tonex' }: { children?: ReactNode }) {
+export function RainbowButton({ children = 'Try tonex' }: { children?: ReactNode }) {
   return (
     <>
       <style>{`
@@ -34,18 +35,18 @@ export function RainbowButton({ children = 'Announcing Tonex' }: { children?: Re
       <button
         type="button"
         className={cn(
-          'rb-rim group relative isolate inline-flex items-center justify-center rounded-full p-px text-sm leading-none',
+          'rb-rim group relative isolate inline-flex items-center justify-center rounded-md p-px text-sm leading-none',
           focusVisiblePrimaryRing,
         )}
       >
         {/* glow: same rotating gradient, blurred + dimmed, parked behind */}
         <span
           aria-hidden
-          className="rb-rim pointer-events-none absolute inset-0 -z-10 rounded-full blur-md transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          className="rb-rim pointer-events-none absolute inset-0 -z-10 rounded-md blur-md transition-opacity duration-300 opacity-0 group-hover:opacity-100"
         />
 
         {/* content pill: solid fill sits 1px in, leaving the rim as a border */}
-        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-surface-container px-4 py-1.5 text-on-surface h-full">
+        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-surface-container px-4 py-2 text-on-surface h-full font-semibold text-base">
           {children}
         </span>
       </button>

@@ -27,7 +27,7 @@ export function SeedTrigger() {
         }}
         maxLength={7}
         spellCheck={false}
-        className="w-[7ch] border-none bg-transparent p-0 font-mono tracking-normal underline decoration-on-surface-variant/30 decoration-dashed underline-offset-4 hover:decoration-on-surface-variant/60 focus:text-on-surface focus:decoration-on-surface focus:outline-none text-sm"
+        className="w-[7ch] border-none bg-transparent p-0 font-mono tracking-normal underline decoration-on-surface-variant/30 decoration-dashed underline-offset-4 hover:decoration-on-surface-variant/60 focus:text-on-surface focus:decoration-on-surface focus:outline-none"
       />
     </span>
   )

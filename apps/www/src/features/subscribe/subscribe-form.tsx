@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Field, FieldControl, FieldError, FieldLabel } from '@/components/ui/field'
+import { Field, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { toast } from '@/components/ui/toast'
 
@@ -48,27 +48,33 @@ export function SubscribeForm() {
           setSubmitting(false)
         }
       }}
-      className="gap-4 text-left"
+      className="gap-2 text-left"
     >
       <Field name="email">
-        <FieldLabel>Email</FieldLabel>
-        <FieldControl autoComplete="email" placeholder="you@example.com" required type="email" />
+        <FieldDescription className="text-on-surface text-sm">
+          Get occasional product updates.
+        </FieldDescription>
+        <div className="flex items-center gap-2">
+          <FieldControl autoComplete="email" placeholder="you@example.com" required type="email" />
+          <Button disabled={submitting} isLoading={submitting} type="submit">
+            {submitting && <Loader2 className="size-4 animate-spin" />} Subscribe
+          </Button>
+        </div>
+
         <FieldError />
-      </Field>
-      {/* why: honeypot — humans don't fill it (hidden from view + AT, keyboard
+
+        {/* why: honeypot — humans don't fill it (hidden from view + AT, keyboard
           skipped); bots that auto-fill all inputs by name do. Server treats
           a non-empty value as a silent reject. */}
-      <input
-        aria-hidden="true"
-        autoComplete="off"
-        className="absolute left-[-9999px] h-0 w-0 opacity-0"
-        name="website"
-        tabIndex={-1}
-        type="text"
-      />
-      <Button disabled={submitting} isLoading={submitting} type="submit">
-        {submitting && <Loader2 className="size-4 animate-spin" />} Keep me posted
-      </Button>
+        <input
+          aria-hidden="true"
+          autoComplete="off"
+          className="absolute left-[-9999px] h-0 w-0 opacity-0"
+          name="website"
+          tabIndex={-1}
+          type="text"
+        />
+      </Field>
     </Form>
   )
 }

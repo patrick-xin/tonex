@@ -37,6 +37,15 @@ the reusable seam helpers (`gotoTheme`, `setSeedHex`, `getSeedHex`, …) are in 
 e2e README — import everything from `e2e/fixtures.ts`, assert on what the user
 sees, seed via the UI (not localStorage), settle hydration before interacting.
 
+**Selector strategy: accessible name by default, `data-testid` for identity.**
+Use `getByRole`/`getByLabel`/`getByText` for the free a11y assertion; promote to
+`data-testid` only when identity can't be expressed by an accessible name — the
+element is load-bearing *and* its label is copy that can change or collide (nav
+CTAs, duplicated collection items). Find by the stable handle, assert on what the
+user sees; keep the testid'd set small and name it for its flow role (`cta-md`),
+not its implementation. The decision rule, the two-question test, and the
+per-element classification table live in the [e2e README](../../../e2e/README.md#selectors-accessible-name-by-default-data-testid-for-identity).
+
 ## Config delta
 
 | Setting | Value |

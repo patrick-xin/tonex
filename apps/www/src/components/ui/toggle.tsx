@@ -24,6 +24,7 @@ const toggleVariants = tv({
       default: 'bg-transparent',
       outline:
         'bg-transparent border border-outline-variant shadow-xs data-pressed:border-primary/12',
+      ghost: 'bg-transparent',
     },
   },
   defaultVariants: {

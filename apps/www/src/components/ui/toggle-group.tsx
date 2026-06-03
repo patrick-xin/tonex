@@ -8,7 +8,7 @@ import type { toggleVariants } from '@/components/ui/toggle'
 import { focusVisibleRing } from './styles'
 
 const ToggleGroupContext = React.createContext<{
-  variant: 'default' | 'outline'
+  variant: 'default' | 'outline' | 'ghost'
   size: 'default' | 'sm' | 'lg' | 'xs'
   spacing: number
   orientation: 'horizontal' | 'vertical'
@@ -45,6 +45,7 @@ const styles = tv({
       outline: {
         item: 'border border-outline-variant shadow-xs data-pressed:border-primary/12',
       },
+      ghost: {},
     },
     orientation: {
       horizontal: { root: 'flex-row' },

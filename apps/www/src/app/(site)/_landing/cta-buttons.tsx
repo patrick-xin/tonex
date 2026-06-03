@@ -22,12 +22,16 @@ export function CtaButtons({ className }: { className?: string }) {
       variants={item}
       className={cn('flex flex-wrap items-center gap-4 w-full', className)}
     >
+      {/* data-testid: this CTA's label ("Try tonex") is marketing copy that also
+          appears on the FinalCta pill — identity for the e2e flow is the route it
+          enters, not the words. See e2e/README.md selector strategy. */}
       <Button
         variant="brand"
         nativeButton={false}
         render={<Link href="/theme" />}
         size="lg"
         className="px-8 h-12 text-base font-semibold shadow-2xl"
+        data-testid="cta-md"
       >
         Try tonex
         <ArrowRight className="ml-2 size-5" />
@@ -38,6 +42,7 @@ export function CtaButtons({ className }: { className?: string }) {
         size="lg"
         className="px-8 h-12 text-base font-medium"
         render={<Link href="/theme/shadcn" />}
+        data-testid="cta-shadcn"
       >
         Shadcn mode
         <ShadcnIcon className="ml-2 size-5" />

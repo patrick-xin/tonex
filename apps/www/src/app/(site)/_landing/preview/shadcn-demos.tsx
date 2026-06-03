@@ -20,7 +20,7 @@ import {
   SocialLinks,
 } from '../../../(app)/theme/(shadcn)/shadcn/blocks/_components'
 
-export function ShadcnDemos() {
+export default function ShadcnDemos() {
   // why: Preferences / PayoutThreshold / RecentTransactions portal their
   // popups through this ref so the overlay lands back inside `.shadcn` scope.
   const portalRef = useRef<HTMLDivElement | null>(null)

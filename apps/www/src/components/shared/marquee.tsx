@@ -46,10 +46,13 @@ export function Marquee({
     <div
       {...props}
       className={cn(
-        'group flex gap-(--gap) overflow-hidden [--duration:40s] [--gap:1rem]',
+        'group flex gap-(--gap) [--duration:40s] [--gap:1rem]',
         {
-          'flex-row': !vertical,
-          'flex-col': vertical,
+          // Clip only the scroll axis so perpendicular decorations (glows,
+          // shadows, focus rings, hover scale) bleed instead of being sliced.
+          // clip + visible is the one overflow combo CSS leaves un-coerced.
+          'flex-row overflow-x-clip overflow-y-visible': !vertical,
+          'flex-col overflow-y-clip overflow-x-visible': vertical,
         },
         className,
       )}
@@ -60,10 +63,10 @@ export function Marquee({
           <div
             key={String(i)}
             className={cn('flex shrink-0 justify-around gap-(--gap)', {
-              'animate-marquee flex-row': !vertical,
-              'animate-marquee-vertical flex-col': vertical,
-              'group-hover:[animation-play-state:paused]': pauseOnHover,
-              '[animation-direction:reverse]': reverse,
+              // 'animate-marquee flex-row': !vertical,
+              // 'animate-marquee-vertical flex-col': vertical,
+              // 'group-hover:[animation-play-state:paused]': pauseOnHover,
+              // '[animation-direction:reverse]': reverse,
             })}
           >
             {children}

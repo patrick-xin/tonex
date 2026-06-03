@@ -1,9 +1,7 @@
 'use client'
 
 import { m as motion, type Variants } from 'motion/react'
-import { CtaButtons } from './cta-buttons'
-import { PresetsRow } from './presets-row'
-import { SeedTrigger } from './seed-trigger'
+import { CtaButtons } from '../cta-buttons'
 
 const container: Variants = {
   hidden: {},
@@ -35,17 +33,14 @@ export function HeroContent() {
       <motion.span
         variants={item}
         className="mb-5 inline-flex items-center flex-wrap text-xs font-mono uppercase tracking-widest text-on-surface-variant gap-4"
-      >
-        <PresetsRow />
-        <SeedTrigger />
-      </motion.span>
+      ></motion.span>
       <motion.h1
         variants={item}
         className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8 font-display"
       >
         Pro-grade color system.
         <br />
-        Yours only.
+        Yours colors, reimagined.
       </motion.h1>
       <motion.p
         variants={item}

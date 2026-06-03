@@ -192,7 +192,7 @@ export function KpiSparkCard({
         </div>
 
         <p className="text-xs text-on-surface-variant">Last 30 days</p>
-        <div className="rounded-lg border border-outline-variant p-2 h-30">
+        <div className="h-30">
           <ChartKpiSpark data={data} showB={showB} />
         </div>
       </CardContent>
