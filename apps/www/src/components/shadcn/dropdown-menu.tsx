@@ -28,7 +28,7 @@ function DropdownMenuContent({
   ...props
 }: MenuPrimitive.Popup.Props &
   Pick<MenuPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'> & {
-    containerRef: React.RefObject<HTMLDivElement | null>
+    containerRef?: React.RefObject<HTMLDivElement | null>
   }) {
   return (
     <MenuPrimitive.Portal container={containerRef}>

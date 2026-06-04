@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Field, FieldControl, FieldDescription, FieldError } from '@/components/ui/field'
+import { Field, FieldControl, FieldError } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { toast } from '@/components/ui/toast'
 
@@ -51,15 +51,10 @@ export function SubscribeForm() {
       className="gap-2 text-left"
     >
       <Field name="email">
-        <FieldDescription className="text-on-surface text-sm">
-          Get occasional product updates.
-        </FieldDescription>
-        <div className="flex items-center gap-2">
-          <FieldControl autoComplete="email" placeholder="you@example.com" required type="email" />
-          <Button disabled={submitting} isLoading={submitting} type="submit">
-            {submitting && <Loader2 className="size-4 animate-spin" />} Subscribe
-          </Button>
-        </div>
+        <FieldControl autoComplete="email" placeholder="you@example.com" required type="email" />
+        <Button disabled={submitting} isLoading={submitting} type="submit">
+          {submitting && <Loader2 className="size-4 animate-spin" />} Subscribe
+        </Button>
 
         <FieldError />
 

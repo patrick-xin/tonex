@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { ChartMixedAxes } from './chart-mixed-axes'
+import ChartMixedAxes from './chart-mixed-axes'
 import { DataTable } from './data-table'
 import { KpiSparkGrid } from './kpi-card'
 

@@ -138,7 +138,7 @@ export function ChartKpiSpark({
   )
 }
 
-export function KpiSparkCard({
+export default function KpiSparkCard({
   title,
   description,
   value,
@@ -234,7 +234,7 @@ export function KpiSparkGrid() {
         showB={false}
         title="Refund Rate"
         trend="up"
-        value="0.42%" // single-series variant
+        value="0.42%"
       />
     </div>
   )

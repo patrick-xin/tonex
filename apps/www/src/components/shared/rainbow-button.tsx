@@ -1,17 +1,14 @@
 'use client'
 
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { cn } from 'tailwind-variants'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
-// PROTOTYPE — rainbow-border pill: a rotating gradient ring around a solid pill.
-// why: the rim angle is an @property-registered custom prop so the browser can
-// interpolate it — plain CSS vars don't animate. Reduced-motion freezes it.
-
 const GRADIENT =
   'linear-gradient(var(--rb-angle), var(--color-primary) 0%, var(--color-chart-4) 20%, var(--color-error) 70%, var(--color-tertiary) 100%)'
 
-export function RainbowButton({ children = 'Try tonex' }: { children?: ReactNode }) {
+export function RainbowButton({ children = 'Enter app' }: { children?: ReactNode }) {
   return (
     <>
       <style>{`
@@ -46,8 +43,8 @@ export function RainbowButton({ children = 'Try tonex' }: { children?: ReactNode
         />
 
         {/* content pill: solid fill sits 1px in, leaving the rim as a border */}
-        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-surface-container px-4 py-2 text-on-surface h-full font-semibold text-base">
-          {children}
+        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-surface px-3 sm:px-4 py-1.5 sm:py-2 text-on-surface h-full font-semibold text-sm">
+          <Link href="/theme">{children}</Link>
         </span>
       </button>
     </>

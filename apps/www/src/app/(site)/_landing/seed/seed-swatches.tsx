@@ -5,7 +5,7 @@ import { useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { HexRimSwatch } from './hex-rim-swatch'
-import { PRESETS1, PRESETS2, PRESETS3 } from './preset-colors'
+import { PRESETS1, PRESETS2, PRESETS3, PRESETS4 } from './preset-colors'
 
 type Preset = { name: string; hex: string }
 
@@ -35,7 +35,7 @@ function SeedSwatches() {
       <div className="flex gap-4 pt-8 pb-2 sm:pb-4">{PRESETS1.map(chip)}</div>
       <div className="flex gap-4 pb-2 sm:pb-4 -translate-x-12">{PRESETS2.map(chip)}</div>
       <div className="flex gap-4 pb-2 sm:pb-4 translate-x-6">{PRESETS3.map(chip)}</div>
-      <div className="flex gap-4 pb-2 sm:pb-4 -translate-x-4">{PRESETS2.map(chip)}</div>
+      <div className="flex gap-4 pb-2 sm:pb-6 -translate-x-4">{PRESETS4.map(chip)}</div>
     </div>
   )
 }

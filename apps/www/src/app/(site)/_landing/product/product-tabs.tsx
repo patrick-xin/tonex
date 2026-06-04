@@ -1,11 +1,25 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
+import { DemoLoader } from '@/components/shared/demo-loader'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
-import { ChartMixedAxes } from '../../../(app)/theme/(md)/dashboard-preview/_components/chart-mixed-axes'
-import { KpiSparkGrid } from '../../../(app)/theme/(md)/dashboard-preview/_components/kpi-card'
 import { AppFan } from './app-fan'
 import { ProductPoster } from './poster'
+
+const ChartMixedAxes = dynamic(
+  () => import('../../../(app)/theme/(md)/dashboard-preview/_components/chart-mixed-axes'),
+  {
+    loading: () => <DemoLoader />,
+  },
+)
+
+const KpiSparkCard = dynamic(
+  () => import('../../../(app)/theme/(md)/dashboard-preview/_components/kpi-card'),
+  {
+    loading: () => <DemoLoader />,
+  },
+)
 
 const PRODUCT_TABS = [
   { value: 'poster', label: 'Marketing' },
@@ -43,12 +57,29 @@ export function ProductTabs() {
       <TabsPanel value="apps" className="flex w-full justify-center">
         <AppFan />
       </TabsPanel>
-      <TabsPanel value="dashboard" className="flex w-screen justify-center">
-        <div className="flex flex-col gap-4 xl:gap-6 w-full">
-          <div className="h-120">
+      <TabsPanel value="dashboard" className="flex w-full justify-center max-w-5xl">
+        <div className="flex flex-col gap-4 w-full">
+          <div className="h-110">
             <ChartMixedAxes />
           </div>
-          <KpiSparkGrid />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <KpiSparkCard
+              badge="MTD"
+              delta="+12.4%"
+              description="Net inflow"
+              title="Revenue"
+              trend="up"
+              value="$128,430"
+            />
+            <KpiSparkCard
+              badge="Runway"
+              delta="+4.9%"
+              description="Operating costs"
+              title="Burn"
+              trend="down"
+              value="$54,210"
+            />
+          </div>
         </div>
       </TabsPanel>
     </Tabs>

@@ -1,22 +1,14 @@
 'use client'
 
+import { GodRays } from '@paper-design/shaders-react'
 import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useResolvedTokens } from '@tonex/core-react'
 import { useReducedMotion } from 'motion/react'
-import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
 import { HeroContent } from './hero-content'
-
-// why: defer the @paper-design/shaders-react bundle (the route's largest client
-// dep) out of first-load JS — it streams in as a post-hydration chunk. The
-// shader only renders once `colors && noiseReady`, so there's no flash while
-// the chunk loads.
-const GodRays = dynamic(() => import('@paper-design/shaders-react').then((m) => m.GodRays), {
-  ssr: false,
-})
 
 type Stop = readonly [family: string, tone: number]
 
@@ -30,8 +22,6 @@ type Stop = readonly [family: string, tone: number]
 // flip the tone selection per mode rather than the hue — light floats mid tones
 // over a near-white base, dark glows over a near-black one. Same seed hues.
 //
-// Paper-design blends in gamma sRGB, not OKLab; gradient midpoints aren't
-// perceptually interpolated. Fine for ambient atmosphere.
 const PALETTE: Record<
   Mode,
   { rays: readonly [Stop, Stop, Stop, Stop, Stop]; back: Stop; bloom: Stop }
@@ -118,12 +108,12 @@ export function ShaderHero() {
   const colors = theme && mode ? resolveRayColors(theme, mode) : null
 
   return (
-    <section className="relative isolate flex min-h-dvh flex-col overflow-hidden px-4 md:px-12 lg:px-16">
+    <section className="relative isolate flex min-h-svh flex-col overflow-hidden px-4 md:px-12 lg:px-16">
       {/* why: lock the shader canvas to the *largest* viewport height (lvh,
           constant) instead of inheriting the section's dvh. On mobile, dvh
           shrinks/grows as the address bar shows/hides, which resizes the canvas
           and slides GodRays' resolution-dependent ray origin. Pinning to a
-          fixed lvh keeps the convergence point put; the bar just clips the
+          fixed svh keeps the convergence point put; the bar just clips the
           bottom of an ambient background. */}
       <div ref={shaderRef} className="absolute inset-x-0 top-0 z-0 h-lvh">
         {colors && noiseReady && (
@@ -146,7 +136,6 @@ export function ShaderHero() {
           />
         )}
       </div>
-
       {/* scrim — denser on the left so the headline stays legible over the shader */}
       <div
         aria-hidden
@@ -156,7 +145,6 @@ export function ShaderHero() {
             'linear-gradient(90deg, color-mix(in oklch, var(--color-surface) 80%, transparent) 0%, color-mix(in oklch, var(--color-surface) 32%, transparent) 55%, transparent 100%)',
         }}
       />
-
       <div className="relative z-10 flex flex-1 min-h-0 items-center py-20 sm:py-24">
         <div className="w-full max-w-6xl">
           <HeroContent />

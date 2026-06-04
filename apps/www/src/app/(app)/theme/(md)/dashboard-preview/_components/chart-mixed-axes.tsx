@@ -26,7 +26,7 @@ const chartConfig = {
   revenue: { color: 'var(--chart-1)', label: 'Revenue' },
 } satisfies ChartConfig
 
-export function ChartMixedAxes() {
+export default function ChartMixedAxes() {
   const [activeSeries, setActiveSeries] = React.useState<string[]>(Object.keys(chartConfig))
   const showFinancials = activeSeries.includes('revenue') || activeSeries.includes('expenses')
   return (

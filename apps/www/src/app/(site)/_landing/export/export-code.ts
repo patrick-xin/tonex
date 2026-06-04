@@ -1,12 +1,7 @@
 import type { ExportTab } from '@/features/export'
 
 export const EXPORT_CODE: Record<ExportTab, string> = {
-  Tailwind: `
-@import "tailwindcss";
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
+  Tailwind: `@theme inline {
   --color-primary: var(--color-primary);
   --color-on-primary: var(--color-on-primary);
   --color-primary-container: var(--color-primary-container);

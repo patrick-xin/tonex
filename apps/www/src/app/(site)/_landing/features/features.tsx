@@ -1,61 +1,89 @@
-import { Blend, Command, ImagePlus, Palette, Save, Sparkles } from 'lucide-react'
+import { BarChart3, Command, Eye, Palette, Save, Settings2, Sparkles, Unlock } from 'lucide-react'
 import type { ComponentType, CSSProperties, SVGProps } from 'react'
+import { TailwindCSSIcon } from '../../../../components/icons/tailwind'
+import { ShimmerBorder } from '../../../../components/shared/shimmer-border'
 import { SectionHeader } from '../section-header'
 
-// lucide icons are plain svg components — widen to their common shape so the map
-// can hold any of them (mirrors export-tabs' IconComponent).
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>
 
-type FeatureId = 'ecosystems' | 'logo' | 'colors' | 'keyboard' | 'presets' | 'autosave'
+type FeatureId =
+  | 'accessibility'
+  | 'tune'
+  | 'colors'
+  | 'keyboard'
+  | 'presets'
+  | 'autosave'
+  | 'charts'
+  | 'tailwind'
+  | 'tokens'
 
 const FEATURES: { id: FeatureId; title: string; body: string; accent: string }[] = [
   {
-    id: 'ecosystems',
-    title: 'Two ecosystems, one source',
-    body: 'Generate a shadcn theme and a Material Design 3 theme from the same color — both ready to export, no work done twice.',
+    id: 'accessibility',
+    title: 'Readable by default',
+    body: 'Every text-and-background pair is checked against WCAG as you work. Adjust contrast when you need to meet a stricter bar.',
     accent: 'var(--color-chart-1)',
   },
   {
-    id: 'logo',
-    title: 'Start from a logo',
-    body: 'Drop in a logo or photo and Tonex pulls your color straight out of it — no eyedropper, no guesswork.',
-    accent: 'var(--color-chart-3)',
+    id: 'tune',
+    title: 'Tune any color, and it stays coherent',
+    body: 'Warm your neutrals, re-point a role, lock an exact brand color — adjust by feel and the rest of the palette re-balances to stay coherent around every change.',
+    accent: 'var(--color-tertiary)',
   },
   {
     id: 'colors',
     title: 'Bring your own colors',
-    body: 'Add a highlight or a category color and it auto-tunes to sit naturally beside the rest — in both light and dark.',
-    accent: 'var(--color-chart-5)',
+    body: 'Add a brand-new color — a highlight, a category, a seasonal accent — and tonex tunes it to sit naturally beside the rest, in both light and dark.',
+    accent: 'var(--color-chart-4)',
   },
   {
     id: 'keyboard',
-    title: 'Keyboard-fast',
-    body: 'A command menu and shortcuts put every action — switch modes, export, check contrast — one keystroke away.',
+    title: 'Optimize for DX',
+    body: 'Command menu, keyboard shortcuts, light/dark mode toggle, and copy-paste exports keep you in flow — every action a keystroke away, nothing that breaks your rhythm.',
     accent: 'var(--color-chart-2)',
   },
   {
     id: 'presets',
-    title: 'Ready-made presets',
-    body: 'Not sure where to start? Begin from a hand-crafted preset and tune from there.',
-    accent: 'var(--color-outline)',
+    title: 'Skip the blank page',
+    body: 'Open a hand-crafted preset and make it yours, or ship it as-is — start from something considered instead of an empty canvas.',
+    accent: 'var(--color-chart-3)',
   },
   {
     id: 'autosave',
-    title: 'Saves as you go',
-    body: 'Your work persists automatically in your browser — no sign-up, nothing to lose on refresh.',
+    title: 'Pick up where you left off',
+    body: "Your palette saves to your browser automatically. Close the tab, come back, and it's exactly where you left it — no account, nothing to lose.",
+    accent: 'var(--color-chart-5)',
+  },
+  {
+    id: 'charts',
+    title: 'Color your charts automatically',
+    body: 'Get chart-ready scales automatically — single-hue, multi-hue, or polychrome — pick the spread that fits your data instead of hand-picking series colors.',
+    accent: 'var(--color-error)',
+  },
+  {
+    id: 'tailwind',
+    title: 'Pick any Tailwind color',
+    body: 'Pick from the full Tailwind palette right inside the color picker — every shade mapped and ready to drop into a Tailwind project.',
+    accent: 'var(--color-primary-container)',
+  },
+  {
+    id: 'tokens',
+    title: 'Unlock extended tokens',
+    body: 'Turn on an extended token set when you need finer control — more named color roles for complex systems.',
     accent: 'var(--color-secondary)',
   },
 ]
 
-// Keyed by feature id. Exhaustive Record, so adding a FeatureId forces a matching
-// icon here (no silent fallback) — same contract as export-tabs' icon map.
 const icons: Record<FeatureId, IconComponent> = {
-  ecosystems: Blend,
-  logo: ImagePlus,
+  accessibility: Eye,
+  tune: Settings2,
   colors: Palette,
   keyboard: Command,
   presets: Sparkles,
   autosave: Save,
+  charts: BarChart3,
+  tailwind: TailwindCSSIcon,
+  tokens: Unlock,
 }
 
 function FeatureCard({
@@ -72,12 +100,17 @@ function FeatureCard({
   return (
     <div
       style={{ '--accent': accent } as CSSProperties}
-      className="flex flex-col gap-3 rounded-md border border-outline-variant/60 bg-surface-container-low p-6 transition-colors duration-200 hover:border-[color-mix(in_oklab,var(--accent)_60%,var(--color-outline-variant))]"
+      className="flex w-64 shrink-0 snap-start flex-col gap-3 rounded-md border border-transparent bg-surface-container-low p-6 transition-colors duration-200 group sm:w-auto sm:shrink relative"
     >
-      <span className="inline-flex size-8 items-center justify-center rounded-md bg-[color-mix(in_oklab,var(--accent)_14%,transparent)] text-(--accent)">
+      <ShimmerBorder className="via-[color-mix(in_oklab,var(--accent),transparent)]" />
+      <ShimmerBorder
+        side="bottom"
+        className="via-[color-mix(in_oklab,var(--accent),transparent)]"
+      />
+      <span className="inline-flex size-8 items-center justify-center rounded-md bg-[color-mix(in_oklab,var(--accent)_14%,transparent)] text-on-surface-variant group-hover:bg-[color-mix(in_oklab,var(--accent)_30%,transparent)] transition-colors duration-300">
         <Icon className="size-4" />
       </span>
-      <h3 className="text-lg font-medium text-on-surface">{title}</h3>
+      <div className="text-lg font-medium text-on-surface">{title}</div>
       <p className="text-sm text-on-surface-variant">{body}</p>
     </div>
   )
@@ -85,14 +118,14 @@ function FeatureCard({
 
 export function Features() {
   return (
-    <section className="mx-auto py-12 sm:py-24">
+    <section className="relative mx-auto py-12 sm:py-24 isolate">
       <div className="mx-auto max-w-6xl px-4">
         <SectionHeader
           align="start"
           heading="Everything else you'd reach for"
           description="The details that add up."
         />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <FeatureCard
               key={feature.id}

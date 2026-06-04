@@ -35,3 +35,6 @@ entities.json
 # env files (secrets — never commit)
 .env*
 !.env.example
+
+# fallow churn-analysis cache
+.fallow/

@@ -1,4 +1,6 @@
-import { motion, useReducedMotion } from 'motion/react'
+'use client'
+
+import { m as motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 export const BrandHover = ({

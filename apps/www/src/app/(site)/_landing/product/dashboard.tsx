@@ -45,8 +45,6 @@ const ACTIVITY = [
   { id: 'josh', name: 'Josh Wiggins', product: 'Salomon Shoes XA' },
 ] as const
 
-// Deterministic series (literal data, not Math.random) so SSR and client agree.
-// Values are percentages of the chart height; sold stacks above return.
 const SERIES = [
   { day: 'Mon', sold: 30, ret: 14 },
   { day: 'Tue', sold: 54, ret: 18 },
@@ -97,10 +95,6 @@ type NavId = (typeof NAV)[number]['id']
 
 const VIEW_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] } as const
 
-// ── primitives ───────────────────────────────────────────────────────────────
-
-// Round avatar placeholder, built from the container tone so it recolors with
-// the family. A faint user glyph stands in for the real photo.
 function Avatar({ className, label = 'avatar' }: { className?: string; label?: string }) {
   return (
     <span
@@ -115,8 +109,6 @@ function Avatar({ className, label = 'avatar' }: { className?: string; label?: s
     </span>
   )
 }
-
-// Faux phone status bar — sells the "this is an app screen" framing.
 function StatusBar() {
   return (
     <div className="flex shrink-0 items-center justify-between px-6 pt-4 pb-1 text-xs font-medium text-on-surface">
@@ -130,8 +122,6 @@ function StatusBar() {
   )
 }
 
-// Round icon button on the production Button — shared hover/active/focus-ring
-// treatment for free. Neutral on-surface-variant tint; pass a text-* override.
 function IconButton({
   children,
   label,
@@ -200,8 +190,6 @@ function BottomNav({
     </nav>
   )
 }
-
-// ── dashboard view (overview) ─────────────────────────────────────────────────
 
 function StatPanel({
   label,
@@ -319,8 +307,6 @@ function DashboardView({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   )
 }
 
-// ── analytics view (sales chart) ──────────────────────────────────────────────
-
 function Chart() {
   return (
     <div className="flex gap-2">
@@ -432,7 +418,6 @@ function AnalyticsView({
           ))}
         </div>
       </div>
-
       <BottomNav active="analytics" onNavigate={onNavigate} />
     </>
   )
@@ -459,7 +444,7 @@ export function DashboardCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex h-[44rem] max-h-[88vh] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] bg-surface text-on-surface shadow-2xl border border-outline-variant/40 border-t-0',
+        'relative flex h-180 max-h-[88vh] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] shadow-2xl border border-outline-variant/40 border-t-0 bg-surface',
         className,
       )}
     >
@@ -475,13 +460,5 @@ export function DashboardCard({ className }: { className?: string }) {
         </motion.div>
       </AnimatePresence>
     </div>
-  )
-}
-
-export function DashboardSection() {
-  return (
-    <section className="flex min-h-dvh w-full items-center justify-center px-4 py-12 sm:px-6">
-      <DashboardCard />
-    </section>
   )
 }
