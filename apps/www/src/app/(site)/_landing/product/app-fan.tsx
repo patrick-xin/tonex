@@ -23,7 +23,7 @@ export function AppFan() {
     <FanDeckHover
       items={APPS}
       geometry={{ spreadX: 150, dipY: 24, tilt: 10, stackX: 8, stackY: 5, stackTilt: 3 }}
-      stageClassName="h-[46rem] w-[56rem]"
+      stageClassName="size-[50rem]"
     />
   )
 }

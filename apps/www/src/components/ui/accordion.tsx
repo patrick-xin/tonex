@@ -53,7 +53,7 @@ const summaryVariants = tv({
         'hover:bg-[color-mix(in_srgb,var(--color-on-secondary-container)_8%,var(--color-secondary-container))]',
         '',
       ],
-      underline: 'text-on-surface hover:underline py-2',
+      underline: 'text-on-surface hover:underline decoration-outline-variant py-2',
     },
   },
   defaultVariants: {

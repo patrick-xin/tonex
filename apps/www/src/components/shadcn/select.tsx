@@ -69,10 +69,10 @@ function SelectContent({
     SelectPrimitive.Positioner.Props,
     'align' | 'alignOffset' | 'side' | 'sideOffset' | 'alignItemWithTrigger'
   > & {
-    containerRef: React.RefObject<HTMLDivElement | null>
+    containerRef?: React.RefObject<HTMLDivElement | null>
   }) {
   return (
-    <SelectPrimitive.Portal container={containerRef.current}>
+    <SelectPrimitive.Portal container={containerRef?.current}>
       <SelectPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}

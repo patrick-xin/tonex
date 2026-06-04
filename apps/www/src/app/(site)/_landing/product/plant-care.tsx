@@ -95,11 +95,6 @@ const ABOUT = [{ id: 'light', icon: Sun, label: 'Moderate light' }] as const
 
 const VIEW_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] } as const
 
-// ── primitives ───────────────────────────────────────────────────────────────
-
-// Plant-art placeholder, built from the container tone so it reads as the
-// "photo" slot and recolors with the family. A faint leaf glyph stands in for
-// the real foliage shot.
 function PlantArt({
   className,
   icon: Icon = Leaf,
@@ -125,7 +120,6 @@ function PlantArt({
   )
 }
 
-// Faux phone status bar — sells the "this is an app screen" framing.
 function StatusBar() {
   return (
     <div className="flex shrink-0 items-center justify-between px-6 pt-4 pb-1 text-xs font-medium text-on-surface">
@@ -139,8 +133,6 @@ function StatusBar() {
   )
 }
 
-// Round icon button built on the production Button (ghost) — gets the shared
-// hover/active/focus-ring treatment for free.
 function IconButton({
   children,
   label,
@@ -167,7 +159,6 @@ function IconButton({
   )
 }
 
-// The "⋮" overflow action on the detail page, as a real dropdown menu.
 function MoreMenu({ label = 'More options' }: { label?: string }) {
   return (
     <DropdownMenu>
@@ -191,8 +182,6 @@ function MoreMenu({ label = 'More options' }: { label?: string }) {
     </DropdownMenu>
   )
 }
-
-// ── today view (daily checklist) ──────────────────────────────────────────────
 
 function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
   return (
@@ -249,8 +238,6 @@ function TodayView({ onOpen }: { onOpen: () => void }) {
     </div>
   )
 }
-
-// ── detail view (single plant) ────────────────────────────────────────────────
 
 function FactCard({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
@@ -313,8 +300,6 @@ function DetailView({ onBack }: { onBack: () => void }) {
   )
 }
 
-// The phone frame on its own — standalone (PlantCareSection) or as a fan card.
-// Width is the 22rem design size, clamped to the viewport on tiny screens.
 export function PlantCareCard({ className }: { className?: string }) {
   const [view, setView] = useState<PlantView>('today')
   const reduce = useReducedMotion() === true
@@ -331,7 +316,7 @@ export function PlantCareCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex h-[44rem] max-h-[88vh] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] bg-surface text-on-surface shadow-2xl border border-outline-variant/40 border-t-0',
+        'relative flex h-180 max-h-[88vh] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] shadow-2xl border border-outline-variant/40 border-t-0 bg-surface',
         className,
       )}
     >
@@ -347,13 +332,5 @@ export function PlantCareCard({ className }: { className?: string }) {
         </motion.div>
       </AnimatePresence>
     </div>
-  )
-}
-
-export function PlantCareSection() {
-  return (
-    <section className="flex min-h-dvh w-full items-center justify-center px-4 py-12 sm:px-6">
-      <PlantCareCard />
-    </section>
   )
 }

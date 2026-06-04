@@ -1,4 +1,3 @@
-import { RecolorLogo } from '../../components/icons/recolor'
 import { SiteFooter } from './_components/site-footer'
 import { SiteHeader } from './_components/site-header'
 import { ExportSection } from './_landing/export/export-section'
@@ -8,7 +7,6 @@ import { ShaderHero } from './_landing/hero/shader-hero'
 import { PreviewSection } from './_landing/preview/preview'
 import { ProductSection } from './_landing/product/product'
 import { SeedSection } from './_landing/seed/seed-section'
-import { ShaderDots } from './_landing/shader-dot'
 
 export default function LandingPage() {
   return (
@@ -20,8 +18,6 @@ export default function LandingPage() {
       <ProductSection />
       <ExportSection />
       <Features />
-      <ShaderDots className="h-64 w-full" />
-      <RecolorLogo />
       <FinalCta />
       <SiteFooter />
     </>

@@ -19,7 +19,7 @@ import {
 } from '@/components/shadcn/dropdown-menu'
 import { Table, TableBody, TableCell, TableRow } from '@/components/shadcn/table'
 
-export function RecentTransactions({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) {
+export function RecentTransactions({ ref }: { ref?: React.RefObject<HTMLDivElement | null> }) {
   return (
     <Card className="w-full">
       <CardHeader>

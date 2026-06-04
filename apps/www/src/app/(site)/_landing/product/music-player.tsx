@@ -56,9 +56,7 @@ const TRACKS: Track[] = [
   { n: '05', title: 'Pink And Golden Billows', artist: 'Brambles', len: '2:58' },
 ]
 
-// Deterministic bar heights (Math.sin, not Math.random) so SSR and client agree
-// — no hydration mismatch. The first PROGRESS fraction reads as "played". Each
-// bar carries a stable id so the render isn't keyed by array index.
+// Deterministic bar heights
 const BAR_COUNT = 44
 const PROGRESS = 0.38
 const BARS = Array.from({ length: BAR_COUNT }, (_, i) => ({
@@ -74,10 +72,6 @@ const ALBUM_ACTIONS = [
 
 const VIEW_TRANSITION = { duration: 0.28, ease: [0.22, 1, 0.36, 1] } as const
 
-// ── primitives ───────────────────────────────────────────────────────────────
-
-// Dark cover-art placeholder, built from the container tone so it reads as the
-// "photo" slot and recolors with the family.
 function AlbumArt({ className, label = 'cover' }: { className?: string; label?: string }) {
   return (
     <div
@@ -92,7 +86,6 @@ function AlbumArt({ className, label = 'cover' }: { className?: string; label?: 
   )
 }
 
-// Faux phone status bar — sells the "this is an app screen" framing.
 function StatusBar() {
   return (
     <div className="flex shrink-0 items-center justify-between px-6 pt-4 pb-1 text-xs font-medium text-on-surface">
@@ -128,9 +121,6 @@ function TopBar({
   )
 }
 
-// Round icon button built on the production Button (ghost) — gets the shared
-// hover/active/focus-ring treatment for free. Neutral on-surface-variant tint
-// by default; pass a text-* class to override per call.
 function IconButton({
   children,
   label,
@@ -157,9 +147,6 @@ function IconButton({
   )
 }
 
-// The "…" overflow action, as a real dropdown menu (production component).
-// Menu items are inert in the mock. Trigger styling is passed in so it can be a
-// bare header affordance, a row button, or a filled chip.
 function MoreMenu({
   label = 'More options',
   iconClassName,
@@ -230,8 +217,6 @@ function BottomNav({
   )
 }
 
-// ── player view (Now Playing) ─────────────────────────────────────────────────
-
 function PlayerView({ onNavigate }: { onNavigate: (id: (typeof NAV)[number]['id']) => void }) {
   const [playing, setPlaying] = useState(true)
   return (
@@ -292,7 +277,6 @@ function PlayerView({ onNavigate }: { onNavigate: (id: (typeof NAV)[number]['id'
             <span>{NOW.duration}</span>
           </div>
         </div>
-
         <div className="flex items-center justify-between">
           <IconButton label="Shuffle">
             <Shuffle className="size-5" />
@@ -326,8 +310,6 @@ function PlayerView({ onNavigate }: { onNavigate: (id: (typeof NAV)[number]['id'
     </>
   )
 }
-
-// ── library view (album track list) ───────────────────────────────────────────
 
 function TrackRow({ track }: { track: Track }) {
   return (
@@ -404,7 +386,6 @@ function LibraryView({
           </IconButton>
         }
       />
-
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 pb-2">
         <div className="flex gap-4">
           <AlbumArt className="size-24 shrink-0" label="cover" />
@@ -455,8 +436,6 @@ function LibraryView({
   )
 }
 
-// The phone frame on its own — standalone (MusicPlayerSection) or as a fan card.
-// Width is the 22rem design size, clamped to the viewport on tiny screens.
 export function MusicPlayerCard({ className }: { className?: string }) {
   const [view, setView] = useState<MusicView>('player')
   const reduce = useReducedMotion() === true
@@ -479,7 +458,7 @@ export function MusicPlayerCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex h-[44rem] max-h-[88vh] w-[min(22rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] shadow-2xl border border-outline-variant/40 border-t-0 bg-surface',
+        'relative flex h-180 max-h-[88vh] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[2.5rem] shadow-2xl border border-outline-variant/40 border-t-0 bg-surface',
         className,
       )}
     >
@@ -495,13 +474,5 @@ export function MusicPlayerCard({ className }: { className?: string }) {
         </motion.div>
       </AnimatePresence>
     </div>
-  )
-}
-
-export function MusicPlayerSection() {
-  return (
-    <section className="flex min-h-dvh w-full items-center justify-center px-4 py-12 sm:px-6">
-      <MusicPlayerCard />
-    </section>
   )
 }

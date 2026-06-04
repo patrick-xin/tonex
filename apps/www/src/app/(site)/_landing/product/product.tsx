@@ -8,9 +8,7 @@ export function ProductSection() {
         heading="One identity, on every surface"
         description="Send the same theme to your products. No patchwork, no drift between channels, because none of it was built twice."
       />
-      <div className="flex w-full flex-1 items-center justify-center">
-        <ProductTabs />
-      </div>
+      <ProductTabs />
     </section>
   )
 }

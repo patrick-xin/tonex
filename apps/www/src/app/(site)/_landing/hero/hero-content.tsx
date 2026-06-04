@@ -40,7 +40,7 @@ export function HeroContent() {
       >
         Pro-grade color system.
         <br />
-        Yours colors, reimagined.
+        Yours only.
       </motion.h1>
       <motion.p
         variants={item}

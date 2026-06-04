@@ -33,7 +33,7 @@ export function CtaButtons({ className }: { className?: string }) {
         className="px-8 h-12 text-base font-semibold shadow-2xl"
         data-testid="cta-md"
       >
-        Try tonex
+        Try Tonex
         <ArrowRight className="ml-2 size-5" />
       </Button>
       <Button

@@ -30,7 +30,10 @@ export function PreviewTabs() {
       onValueChange={(value) => setTab(value as ProductTab)}
       className="min-h-0 flex-1"
     >
-      <TabsListContent className="mx-auto w-96 mb-6" indicatorClassName="bg-secondary-container">
+      <TabsListContent
+        className="sm:mx-auto sm:w-96 mb-6 mx-4"
+        indicatorClassName="bg-secondary-container"
+      >
         <TabsTab
           value="shadcn"
           className="text-on-surface-variant hover:text-on-surface data-active:text-on-secondary-container"
@@ -44,11 +47,11 @@ export function PreviewTabs() {
           <TonexLogo className="size-4.25" /> Tonex
         </TabsTab>
       </TabsListContent>
-      <div className="overflow-x-auto overflow-y-hidden overscroll-x-contain mask-[linear-gradient(to_bottom,black_80%,transparent)] min-w-0">
-        <TabsPanel value="shadcn">
+      <div className="overflow-x-auto overflow-y-hidden sm:overscroll-x-contain mask-[linear-gradient(to_bottom,black_80%,transparent)] min-w-0 h-[60vh] px-4 sm:px-0">
+        <TabsPanel value="shadcn" className="max-h-full">
           <ShadcnDemos />
         </TabsPanel>
-        <TabsPanel value="md">
+        <TabsPanel value="md" className="max-h-full">
           <MdDemos />
         </TabsPanel>
       </div>

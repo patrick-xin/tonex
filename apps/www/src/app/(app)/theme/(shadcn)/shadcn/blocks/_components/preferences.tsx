@@ -34,7 +34,7 @@ const CURRENCIES = [
   { label: 'JPY — Japanese Yen', value: 'jpy' },
 ]
 
-export function Preferences({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) {
+export function Preferences({ ref }: { ref?: React.RefObject<HTMLDivElement | null> }) {
   return (
     <Card className="w-full">
       <CardHeader>
