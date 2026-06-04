@@ -320,10 +320,14 @@ describe('applyDom (jsdom integration)', () => {
       }
     }
 
-    // why: drive 60 slider-style ticks where only the seed (and thus argb
-    // values) shifts — the key set is stable across the whole sweep.
-    for (let i = 0; i < 60; i++) {
-      const v = (i * 4).toString(16).padStart(2, '0')
+    // why: drive a sweep of slider-style ticks where only the seed (and thus
+    // argb values) shifts — the key set is stable across the whole sweep. Each
+    // distinct seed is a derive-cache miss (FIFO size 6), so every tick is a
+    // full MCU deriveTheme; 12 ticks proves "stable key set → no removeProperty"
+    // while keeping this synchronous test well clear of the 5s timeout on slow
+    // CI runners (60 derives straddled the boundary and flaked — issue #25).
+    for (let i = 0; i < 12; i++) {
+      const v = (i * 20).toString(16).padStart(2, '0')
       useSource.getState().actions.setSeedHex(`#${v}50a4`)
     }
 
