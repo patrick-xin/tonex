@@ -122,11 +122,18 @@ way it does, not so it has to re-solve them:
   compile. No-op under CI's prod build.
 - **`seedField` targets the field by its accessible name, and visible-filters.**
   The editor mounts the rail twice (desktop aside + `sm:hidden` mobile drawer), so
-  the seed input renders twice. It's addressed by its accessible name ("Seed color
-  hex") rather than by id — the id is now per-mount unique (`useId`, after the
+  the seed input renders twice. It's addressed by its accessible name ("Seed color,
+  hex or oklch") rather than by id — the id is now per-mount unique (`useId`, after the
   duplicate-`id="hex-input"` bug this suite surfaced was fixed under #180).
   Filtering to the visible match keeps helpers pointed at the field the user sees;
-  don't re-handle the twin per spec.
+  don't re-handle the twin per spec. **That accessible name is copy-volatile *and*
+  load-bearing.** When the field gained oklch paste (5b2919c) the label widened from
+  `"Seed color hex"`, and because every editor *and* landing spec routes through
+  `seedField`/`landingSeedField`, the whole suite went red at once on a change with
+  no behavioural meaning. By this doc's own two-yeses rule that makes the seed input
+  a `data-testid` promotion candidate (tracked as a follow-up issue); until that
+  lands, any edit to this label must update both accessors in `fixtures.ts` and this
+  note together.
 - **HCT sliders are anchored on `[data-slot="slider"]` + label text, not role.**
   Base UI's slider thumb exposes no nameable `role=slider` until late client
   mount, and each slider also carries a hidden `<input type="range">`. So
