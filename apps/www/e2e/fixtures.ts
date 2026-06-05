@@ -39,15 +39,16 @@ export const THEME_PATHS = {
 export type ThemeLayer = keyof typeof THEME_PATHS
 
 // why: the canonical seed hex field (source-color/hex-input.tsx). Targeted by its
-// accessible name ("Seed color hex", set via aria-label when the visible "Hex"
-// label is hidden in the rail) — NOT by id: the editor mounts the rail twice (the
-// desktop aside `hidden sm:flex` + the `sm:hidden` mobile drawer) and the id is
-// now per-mount unique (useId), so an id selector no longer addresses it. Two
-// mounts still exist, so visible-filter keeps every helper pointed at the field
-// the user sees. exact:true so it can't bleed into the landing field, whose name
-// is the superset "Seed color hex value".
+// accessible name ("Seed color, hex or oklch", set via aria-label when the visible
+// "Hex" label is hidden in the rail) — NOT by id: the editor mounts the rail twice
+// (the desktop aside `hidden sm:flex` + the `sm:hidden` mobile drawer) and the id is
+// now per-mount unique (useId), so an id selector no longer addresses it. Two mounts
+// still exist, so visible-filter keeps every helper pointed at the field the user
+// sees. The name widened from "Seed color hex" when the field gained oklch paste
+// (5b2919c); exact:true pins the whole name. The landing SeedTrigger now shares this
+// exact label, but renders on a different route, so the two never collide on a page.
 export function seedField(page: Page) {
-  return page.getByLabel('Seed color hex', { exact: true }).filter({ visible: true })
+  return page.getByLabel('Seed color, hex or oklch', { exact: true }).filter({ visible: true })
 }
 
 // why: the store rehydrates from localStorage *after* first paint (the ADR-0015
@@ -98,12 +99,13 @@ export async function pickPreset(page: Page, hex: string) {
 }
 
 // why: the landing seed surface is SeedTrigger (an inline <input> labelled "Seed
-// color hex value" + a decorative swatch), NOT the editor's #hex-input. Its own
+// color, hex or oklch" + a decorative swatch), NOT the editor's #hex-input. Its own
 // accessor so landing specs read the seed the user sees there. Same fixed
-// useHexFieldState hook underneath — so this and #hex-input can never disagree
-// on the active seed, which is the invariant the seed-sync specs assert.
+// useHexFieldState hook underneath — so this and #hex-input can never disagree on
+// the active seed, which is the invariant the seed-sync specs assert. The label now
+// matches the editor field's exactly; the two only ever render on separate routes.
 export function landingSeedField(page: Page) {
-  return page.getByLabel('Seed color hex value')
+  return page.getByLabel('Seed color, hex or oklch', { exact: true })
 }
 
 // why: the swatch rendered immediately before the landing seed input (aria-hidden,
