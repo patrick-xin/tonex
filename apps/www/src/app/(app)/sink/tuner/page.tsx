@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ShadcnDashboardLoader } from '../dashboard/_components'
+import { ShadcnDashboardLoader } from '../../theme/(shadcn)/shadcn/dashboard/_components'
 
 export const metadata: Metadata = {
   title: 'Tuner',
