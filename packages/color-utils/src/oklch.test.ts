@@ -1,6 +1,6 @@
 import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
-import { argbFromOklch, hexFromOklch, hexString, oklchString } from './oklch'
+import { argbFromOklch, hexFromColorInput, hexFromOklch, hexString, oklchString } from './oklch'
 
 const OKLCH = /^oklch\((-?[\d.]+) (-?[\d.]+) (-?[\d.]+)\)$/
 
@@ -139,5 +139,49 @@ describe('round-trip invariant — independent inverse oracle', () => {
             drifters.push(`rgb(${r},${g},${b}) -> ${hexString(argb)} -> rgb(${r1},${g1},${b1})`)
         }
     expect(drifters).toEqual([])
+  })
+})
+
+// why: the seed-input transducer. The seed field accepts two color formats — a
+// 6-digit hex and a canonical `oklch(L C H)` (the form shadcn/tweakcn emit) —
+// and projects both to one sRGB hex for `setSeedHex`. This is SEED-ONLY by
+// design: returning a hex (never preserving the oklch) is exactly why it's safe
+// on the seed (a lossy derivation input, not a WYSIWYG-pinned token) and must
+// NOT be wired into the override/custom/role pickers, whose pinned value has to
+// equal the export. Canonical-only: non-canonical oklch (percent-L, alpha,
+// commas) is INVALID here, not normalized — the lenient parser is deferred. It
+// composes the strict `argbFromOklch` firewall (ADR-0025), never relaxes it.
+describe('hexFromColorInput — seed-input transducer (hex | canonical oklch -> hex)', () => {
+  it('passes a valid 6-digit hex through unchanged', () => {
+    expect(hexFromColorInput('#aabbcc')).toBe('#aabbcc')
+    expect(hexFromColorInput('#ABCDEF')).toBe('#ABCDEF')
+  })
+
+  it('converts a canonical oklch(L C H) to its sRGB hex', () => {
+    // why: assert against hexFromOklch rather than a hardcoded literal so a
+    // culori math shift moves both sides together (no false red).
+    expect(hexFromColorInput('oklch(0.205 0 0)')).toBe(hexFromOklch('oklch(0.205 0 0)'))
+    expect(hexFromColorInput('oklch(0.546 0.245 262.881)')).toBe(
+      hexFromOklch('oklch(0.546 0.245 262.881)'),
+    )
+  })
+
+  it('gamut-maps an out-of-sRGB oklch (CSS Color 4), matching the firewall', () => {
+    // why: reuses the value already pinned in the firewall suite above —
+    // yellow-400 is one of the ~33% of TAILWIND_PALETTE_OKLCH outside sRGB.
+    expect(hexFromColorInput('oklch(0.852 0.199 91.936)')).toBe('#fcc800')
+  })
+
+  it('returns null for non-canonical oklch — canonical-only, no lenient parse', () => {
+    expect(hexFromColorInput('oklch(85% 0.1 200)')).toBeNull() // percent L
+    expect(hexFromColorInput('oklch(0.6 0.2 30 / 0.5)')).toBeNull() // alpha
+    expect(hexFromColorInput('oklch(0.6, 0.2, 30)')).toBeNull() // commas
+  })
+
+  it('returns null for anything that is neither a valid hex nor a canonical oklch', () => {
+    expect(hexFromColorInput('#abc')).toBeNull() // 3-digit — isValidHex rejects
+    expect(hexFromColorInput('garbage')).toBeNull()
+    expect(hexFromColorInput('')).toBeNull()
+    expect(hexFromColorInput('rgb(1 2 3)')).toBeNull()
   })
 })

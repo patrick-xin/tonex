@@ -114,7 +114,7 @@ export function RecentTransactions({ className, ...props }: React.ComponentProps
                     <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
                       <MoreHorizontal />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" matchAnchorWidth={false}>
                       <DropdownMenuItem>View details</DropdownMenuItem>
                       <DropdownMenuItem>Add note</DropdownMenuItem>
                       <DropdownMenuItem>Categorize</DropdownMenuItem>

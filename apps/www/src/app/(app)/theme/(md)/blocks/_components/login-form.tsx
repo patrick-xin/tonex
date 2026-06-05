@@ -69,13 +69,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
           </form>
         </CardContent>
       </Card>
-      <p className="px-6 text-center">
-        By clicking continue, you agree to our{' '}
-        {/* biome-ignore lint/a11y/useValidAnchor: demo placeholder link in showcase block */}
-        <a href="#">Terms of Service</a> and{' '}
-        {/* biome-ignore lint/a11y/useValidAnchor: demo placeholder link in showcase block */}
-        <a href="#">Privacy Policy</a>.
-      </p>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
-import { isValidHex } from '@tonex/color-utils'
+import { hexFromOklch, isValidHex } from '@tonex/color-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { useHexFieldState } from './use-hex-field-state'
 
@@ -56,5 +56,43 @@ describe('useHexFieldState', () => {
 
     rerender({ value: '#111111', onChange })
     expect(result.current.hexInput).toBe('#111111')
+  })
+})
+
+// why: the seed field opts into oklch paste (shadcn/tweakcn `oklch(L C H)`);
+// the token-pinning pickers (override/custom/role) do NOT. The opt-in flag is
+// the line — the default-false path must stay byte-identical to the hex-only
+// contract above, so oklch can never leak into a WYSIWYG-pinned picker.
+describe('useHexFieldState — acceptOklch (seed only)', () => {
+  const renderOklch = (onChange: (hex: string) => void, value = '#000000') =>
+    renderHook(({ value, onChange }) => useHexFieldState(value, onChange, { acceptOklch: true }), {
+      initialProps: { value, onChange },
+    })
+
+  it('commits a canonical oklch as its converted hex and flips the buffer to show it', () => {
+    const onChange = vi.fn()
+    const { result } = renderOklch(onChange)
+    const seed = 'oklch(0.205 0 0)'
+    const expected = hexFromOklch(seed)
+
+    act(() => result.current.handleChange(seed))
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(expected)
+    expect(result.current.hexInput).toBe(expected)
+  })
+
+  it('still passes a plain hex straight through when opted in', () => {
+    const onChange = vi.fn()
+    const { result } = renderOklch(onChange)
+    act(() => result.current.handleChange('#ff0000'))
+    expect(onChange).toHaveBeenCalledWith('#ff0000')
+    expect(result.current.hexInput).toBe('#ff0000')
+  })
+
+  it('rejects oklch when NOT opted in — the WYSIWYG line for token-pinning pickers', () => {
+    const onChange = vi.fn()
+    const { result } = render(onChange)
+    act(() => result.current.handleChange('oklch(0.205 0 0)'))
+    expect(onChange).not.toHaveBeenCalled()
   })
 })

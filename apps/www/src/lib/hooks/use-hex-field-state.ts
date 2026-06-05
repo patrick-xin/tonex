@@ -1,6 +1,6 @@
 'use client'
 
-import { isValidHex } from '@tonex/color-utils'
+import { hexFromColorInput, isValidHex } from '@tonex/color-utils'
 import { type FocusEvent, useRef, useState } from 'react'
 
 // why: every hex-typing site in the rail wants the same buffered shape: a
@@ -14,7 +14,18 @@ import { type FocusEvent, useRef, useState } from 'react'
 // what this field accepts can never drift from what the engine accepts. Focus
 // also selects the whole value so the field is type-to-replace. Spread the
 // returned `inputProps` onto the <Input> to wire focus/blur.
-export function useHexFieldState(value: string, onChange: (hex: string) => void) {
+//
+// `acceptOklch` opts a field into pasting a canonical `oklch(L C H)` (the form
+// shadcn/tweakcn emit): it's converted to its sRGB hex on commit. SEED ONLY —
+// the seed is a lossy derivation input, not a WYSIWYG-pinned token, so the
+// gamut projection is safe there. The token-pinning pickers (override/custom/
+// role) leave it off, so oklch can never leak into a value that must equal the
+// export. Default false keeps the path byte-identical to the hex-only contract.
+export function useHexFieldState(
+  value: string,
+  onChange: (hex: string) => void,
+  options?: { acceptOklch?: boolean },
+) {
   const [hexInput, setHexInput] = useState(value)
   const [lastSynced, setLastSynced] = useState(value)
   const isFocused = useRef(false)
@@ -34,8 +45,19 @@ export function useHexFieldState(value: string, onChange: (hex: string) => void)
   }
 
   const handleChange = (next: string) => {
-    setHexInput(next)
-    if (isValidHex(next)) onChange(next)
+    // why: opt-in oklch (seed only) — hexFromColorInput passes a valid hex
+    // through and converts a canonical oklch(L C H) to its sRGB hex, else null.
+    // The default path is the bare isValidHex gate, so oklch never reaches a
+    // token-pinning picker (the WYSIWYG line).
+    let resolved: string | null
+    if (options?.acceptOklch) resolved = hexFromColorInput(next)
+    else resolved = isValidHex(next) ? next : null
+
+    // why: an oklch paste resolves to a different string than what was typed —
+    // flip the buffer to the sRGB hex so the field shows the gamut-mapped result
+    // (honest about the projection). A plain hex resolves to itself: a no-op.
+    setHexInput(resolved && resolved !== next ? resolved : next)
+    if (resolved) onChange(resolved)
   }
 
   const inputProps = {

@@ -46,7 +46,7 @@ export function ShadcnRailContent() {
           <SurfaceAdjustment />
           <CustomColorList />
           <Button
-            className="w-full justify-between px-2! group leading-snug"
+            className="w-full justify-between px-2! group leading-snug font-semibold"
             variant="ghost"
             onClick={() => setMode('overrides')}
           >
@@ -59,7 +59,7 @@ export function ShadcnRailContent() {
             />
           </Button>
           <Button
-            className="w-full justify-between px-2! group leading-snug"
+            className="w-full justify-between px-2! group leading-snug font-semibold"
             variant="ghost"
             onClick={() => setMode('bindings')}
           >

@@ -12,7 +12,13 @@ export function HexInput({ hideLabel = false }: { hideLabel?: boolean }) {
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
 
-  const { hexInput, handleChange, inputProps } = useHexFieldState(seedHex, setSeedHex)
+  // why: the seed is the one field that opts into oklch paste — shadcn/tweakcn
+  // users arrive with an `oklch(L C H)` brand color and can drop it straight in
+  // (converted to its sRGB hex on commit). Seed-only by design; the token-pinning
+  // pickers stay hex-only so oklch never lands on a WYSIWYG-pinned value.
+  const { hexInput, handleChange, inputProps } = useHexFieldState(seedHex, setSeedHex, {
+    acceptOklch: true,
+  })
 
   // why: the editor renders this rail twice (desktop aside + sm:hidden mobile
   // drawer), so a hard-coded id would collide — two elements sharing it is
@@ -29,16 +35,18 @@ export function HexInput({ hideLabel = false }: { hideLabel?: boolean }) {
           id={hexInputId}
           // why: this is the seed input; when the visible "Hex" label is hidden
           // (the rail uses hideLabel) it would otherwise have no accessible name.
-          aria-label={hideLabel ? 'Seed color hex' : undefined}
+          aria-label={hideLabel ? 'Seed color, hex or oklch' : undefined}
           className="font-mono w-full"
           inputSize="sm"
           type="text"
           value={hexInput}
           onChange={(e) => handleChange(e.target.value)}
           {...inputProps}
-          maxLength={7}
+          // why: no maxLength — the seed accepts a pasted oklch(L C H) (~26
+          // chars), not just a 7-char hex. The commit gate (hexFromColorInput)
+          // is what bounds validity, not the field length.
           spellCheck={false}
-          placeholder="#00021d"
+          placeholder="#00021d or oklch(…)"
         />
       </div>
     </div>
