@@ -5,5 +5,9 @@ import { Testbed } from '@/features/testbed'
 // even though every interactive piece is client-side. Open-item #2 closes
 // here — 'use client' lives at the leaves, not the route.
 export default function SinkPage() {
-  return <Testbed />
+  return (
+    <div className="p-6">
+      <Testbed />
+    </div>
+  )
 }
