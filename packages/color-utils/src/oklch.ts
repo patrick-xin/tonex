@@ -1,5 +1,6 @@
 import { argbFromHex, hexFromArgb } from '@tonex/mcu'
 import { converter, toGamut } from 'culori'
+import { isValidHex } from './hex'
 
 // why: hex→argb boundary primitive. Re-exported so consumers (and the
 // `@tonex/core/oklch` surface above) get hex→argb without importing
@@ -90,6 +91,21 @@ export function oklchFromHex(hex: string): string {
 
 export function hexFromOklch(value: string): string {
   return hexFromArgb(argbFromOklch(value))
+}
+
+// why: the seed-input transducer. The seed field accepts two color formats — a
+// 6-digit hex and a canonical `oklch(L C H)` (the form shadcn/tweakcn emit) —
+// and projects both to one sRGB hex for `setSeedHex`. Returning a hex (never
+// the oklch) is exactly why it's safe on the seed (a lossy derivation input,
+// not a WYSIWYG-pinned token) and why it must NOT back the override/custom/role
+// pickers. Canonical-only: a non-canonical oklch fails OKLCH_PATTERN and returns
+// null rather than being normalized — the lenient parser is deferred. Composes
+// the strict argbFromOklch firewall (ADR-0025); never relaxes it.
+export function hexFromColorInput(value: string): string | null {
+  const trimmed = value.trim()
+  if (isValidHex(trimmed)) return trimmed
+  if (OKLCH_PATTERN.test(trimmed)) return hexFromOklch(trimmed)
+  return null
 }
 
 // why: ADR-0021 commitment 1 — argb-canonical TokenMaps. `oklchString` and

@@ -4,6 +4,7 @@ export {
   argbComponents,
   argbFromHex,
   argbFromOklch,
+  hexFromColorInput,
   hexFromOklch,
   hexString,
   oklchFromArgb,
