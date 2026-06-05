@@ -1,0 +1,52 @@
+name: E2E
+# why: the browser tier (Playwright) is the long pole — chromium install + a full
+# `next build` + 26 serial specs. It does NOT run on every PR (cost adds up fast
+# with several agent sessions open at once). Instead it runs:
+#   - on master push        — the post-merge backstop
+#   - on manual dispatch     — kick it before a key merge
+#   - on PRs labelled run-e2e — opt a specific PR into the browser gate
+# A PR without the label never spends a runner on e2e (the job is skipped, not
+# queued). Because of that, e2e must NOT be a required status check in branch
+# protection, or unlabelled PRs would block forever on a check that never reports.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+  pull_request:
+    # `labeled` fires the run the moment run-e2e is added; synchronize/opened keep a
+    # labelled PR validating as it gets more commits. Unlabelled events still fire
+    # but the job's `if` skips them, so they cost nothing.
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  e2e:
+    # run on any non-PR trigger (master push / manual dispatch), or on a PR only
+    # when it carries the run-e2e label.
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'run-e2e')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # why: only chromium; --with-deps pulls the OS libs a headless browser needs.
+      - run: pnpm --filter @tonex/www exec playwright install --with-deps chromium
+      # why: build once here so the playwright webServer (`pnpm start` under CI)
+      # only boots — keeps the per-test server-start inside the 180s timeout.
+      - run: pnpm --filter @tonex/www build
+      - run: pnpm --filter @tonex/www e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/www/playwright-report/
+          retention-days: 14
