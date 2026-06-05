@@ -98,6 +98,32 @@ export async function pickPreset(page: Page, hex: string) {
   await page.getByTestId(`seed-preset-${hex}`).first().click()
 }
 
+// why: the seed-sync invariant is "ANY landing preset survives the navigation" —
+// the specific color was never the contract. The preset palette is curated
+// marketing data (preset-colors.ts) that gets re-picked with no behavioural
+// meaning; the 2026 landing restructure (PR #187) swapped every hex and silently
+// broke specs that hard-coded one. So derive the hex from whatever chip renders
+// first, click it, and return it — the caller asserts the field/swatch track *that*
+// value. Palette-independent by construction. Use this, not a literal hex, whenever
+// the test only needs *a* preset, not a *particular* one.
+export async function pickFirstPreset(page: Page): Promise<string> {
+  const chip = page.locator('[data-testid^="seed-preset-"]').first()
+  const testId = await chip.getAttribute('data-testid')
+  if (!testId) throw new Error('no seed-preset chip rendered on the landing page')
+  await chip.click()
+  return testId.replace('seed-preset-', '')
+}
+
+// why: the landing swatch fill is the seed hex projected straight to an sRGB
+// background-color (every preset is an in-gamut 6-digit hex, so it's a verbatim
+// byte→channel map, no gamut work). Lets a palette-independent spec assert the
+// swatch tracks the runtime-derived seed without re-hard-coding an rgb() triple.
+export function hexToRgbCss(hex: string): string {
+  const n = hex.replace('#', '')
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(n.slice(i, i + 2), 16))
+  return `rgb(${r}, ${g}, ${b})`
+}
+
 // why: the landing seed surface is SeedTrigger (an inline <input> labelled "Seed
 // color, hex or oklch" + a decorative swatch), NOT the editor's #hex-input. Its own
 // accessor so landing specs read the seed the user sees there. Same fixed

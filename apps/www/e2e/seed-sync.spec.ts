@@ -4,9 +4,10 @@ import {
   expect,
   getSeedHex,
   gotoTheme,
+  hexToRgbCss,
   landingSeedField,
   landingSeedSwatch,
-  pickPreset,
+  pickFirstPreset,
   seedField,
   setSeedHex,
   test,
@@ -34,24 +35,24 @@ test.describe('seed sync across navigation', () => {
     await page.goto('/')
     await waitForHydrated(page, landingSeedField(page))
 
-    await pickPreset(page, '#2e5bff') // Cobalt
-    await expect(landingSeedField(page)).toHaveValue('#2e5bff')
+    const hex = await pickFirstPreset(page)
+    await expect(landingSeedField(page)).toHaveValue(hex)
 
     // client-side nav (next/link), not a reload — exercises the remount path the
     // store carries the seed through, exactly as the original repro did.
     await enterEditor(page, 'md')
-    await expect(seedField(page)).toHaveValue('#2e5bff')
+    await expect(seedField(page)).toHaveValue(hex)
   })
 
   test('a landing preset survives the navigation into the shadcn editor', async ({ page }) => {
     await page.goto('/')
     await waitForHydrated(page, landingSeedField(page))
 
-    await pickPreset(page, '#ff6a1a') // Tangerine
-    await expect(landingSeedField(page)).toHaveValue('#ff6a1a')
+    const hex = await pickFirstPreset(page)
+    await expect(landingSeedField(page)).toHaveValue(hex)
 
     await enterEditor(page, 'shadcn')
-    await expect(seedField(page)).toHaveValue('#ff6a1a')
+    await expect(seedField(page)).toHaveValue(hex)
   })
 
   test('an edited seed survives the md ↔ shadcn round trip', async ({ page }) => {
@@ -72,11 +73,11 @@ test.describe('seed sync across navigation', () => {
     await page.goto('/')
     await waitForHydrated(page, landingSeedField(page))
 
-    // #7a2fff → rgb(122, 47, 255); the swatch fill is the seed projected to a
-    // background-color, so it must track the field's text value.
-    await pickPreset(page, '#7a2fff') // Iris
-    await expect(landingSeedField(page)).toHaveValue('#7a2fff')
-    await expect(landingSeedSwatch(page)).toHaveCSS('background-color', 'rgb(122, 47, 255)')
+    // the swatch fill is the seed projected to a background-color, so it must track
+    // the field's text value — assert both against the same runtime-derived hex.
+    const hex = await pickFirstPreset(page)
+    await expect(landingSeedField(page)).toHaveValue(hex)
+    await expect(landingSeedSwatch(page)).toHaveCSS('background-color', hexToRgbCss(hex))
   })
 
   test('a seed edited in the editor flows back to the landing seed surface', async ({ page }) => {
