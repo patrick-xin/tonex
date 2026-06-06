@@ -13,5 +13,5 @@ export const shadcnNavConfig: NavConfig = {
   ],
   // why: ADR-0021 commitment 8 — shadcn routes pass a single tab.
   exportTabs: ['shadcn'],
-  crossLink: { label: 'MD3', href: '/theme' },
+  crossLink: { label: 'MD', href: '/theme' },
 }

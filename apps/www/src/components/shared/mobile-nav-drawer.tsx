@@ -123,9 +123,9 @@ function pickActiveHref(pathname: string): string | null {
 }
 
 const ITEMS = [
-  { href: '/', label: 'Home' },
-  { href: '/theme', label: 'MD3' },
-  { href: '/theme/shadcn', label: 'Shadcn' },
-  { href: '/about', label: 'About' },
-  { href: '/roadmap', label: 'Roadmap' },
+  { href: '/', label: 'home' },
+  { href: '/theme', label: 'material theme' },
+  { href: '/theme/shadcn', label: 'shadcn' },
+  { href: '/about', label: 'about' },
+  { href: '/roadmap', label: 'roadmap' },
 ] as const

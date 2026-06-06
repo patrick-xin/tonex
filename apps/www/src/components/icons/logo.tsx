@@ -46,19 +46,15 @@ function TonexLogoDuo({ className, ...props }: ComponentProps<'svg'>) {
       aria-hidden="true"
       viewBox="0 0 116 138"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('size-6', className)}
+      className={cn('size-full', className)}
       {...props}
     >
       <path
+        fill="#7e66bc"
         data-slot="tonex-logo-primary"
-        className="fill-primary-container"
         d="M116 0L90 2L45 82L77 138L101 137L73 81Z"
       />
-      <path
-        data-slot="tonex-logo-accent"
-        className="fill-tertiary"
-        d="M10 27L21 56L0 95L25 96L49 54L33 28Z"
-      />
+      <path fill="#70b4fa" data-slot="tonex-logo-accent" d="M10 27L21 56L0 95L25 96L49 54L33 28Z" />
     </svg>
   )
 }

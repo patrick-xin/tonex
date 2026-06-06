@@ -48,7 +48,7 @@ export function CustomColorList() {
         <div className="leading-snug font-semibold text-sm">Custom Colors</div>
         <NewCustomColor iconSize="icon-xs" icon />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-h-64 overflow-y-scroll no-scrollbar mask-[linear-gradient(to_bottom,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)]">
         {customColors.map((cc) => (
           <CustomColorCard
             key={cc.id}

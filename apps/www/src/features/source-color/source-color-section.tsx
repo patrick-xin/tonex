@@ -3,6 +3,7 @@
 import { selectSeedHex } from '@tonex/core'
 import { useSource } from '@tonex/core-react'
 import { cn } from 'tailwind-variants'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ColorPicker, TwColorPicker } from '@/features/color-picker'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ColorLock } from './color-lock'
@@ -26,7 +27,16 @@ export function SourceColorSection() {
         <div
           className={cn('font-medium text-xs text-on-surface-variant', seedHexLock && 'opacity-38')}
         >
-          Current Seed
+          <Tooltip>
+            <TooltipTrigger
+              delay={100}
+              render={<span>Current Seed</span>}
+              className={cn('cursor-help', seedHexLock && 'opacity-38')}
+            />
+            <TooltipContent side="right">
+              Supported oklch value format: <span className="font-mono">oklch(0.7 0.1 327)</span>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

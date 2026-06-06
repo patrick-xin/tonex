@@ -23,7 +23,12 @@ export function SectionHeader({
         className,
       )}
     >
-      <h2 className={cn('text-balance text-4xl font-medium sm:text-5xl', headingClassName)}>
+      <h2
+        className={cn(
+          'text-balance text-4xl font-medium sm:text-5xl lg:text-6xl',
+          headingClassName,
+        )}
+      >
         {heading}
       </h2>
       <p className="max-w-xl text-balance text-base text-on-surface-variant sm:text-[1.2rem] mb-12">

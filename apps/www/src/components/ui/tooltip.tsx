@@ -52,7 +52,7 @@ function TooltipArrow({
         'flex items-center justify-center',
         'data-[side=bottom]:-top-2 data-[side=bottom]:rotate-0',
         'data-[side=left]:-right-3 data-[side=left]:rotate-90',
-        'data-[side=right]:-left-3 data-[side=right]:-rotate-90',
+        'data-[side=right]:left-[-13.5px] data-[side=right]:-rotate-90',
         'data-[side=top]:-bottom-2 data-[side=top]:rotate-180',
         className,
       )}
