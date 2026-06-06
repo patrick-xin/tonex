@@ -75,7 +75,7 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
   }, [selected])
 
   return (
-    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar border-b border-b-px border-outline-variant/80 mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)] overflow-hidden px-2">
+    <div className="flex gap-2 items-center justify-between flex-none overflow-x-auto no-scrollbar mask-[linear-gradient(to_right,transparent,black_0.5rem,black_calc(100%-0.5rem),transparent)] overflow-hidden px-2 h-14">
       <Tabs
         className="flex-1"
         value={tabs.find((tab) => tab.href === pathname)?.label || tabs[0]?.label}
@@ -83,7 +83,7 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
         <TabsList className="gap-6">
           {tabs.map((tab, index) => (
             <TabsTab
-              className="sm:w-28 data-active:text-on-surface flex-1 h-12"
+              className="sm:w-28 text-on-surface-variant hover:text-on-surface data-active:text-on-surface flex-1 h-full"
               nativeButton={false}
               key={tab.label}
               value={tab.label}
@@ -109,7 +109,7 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
               </div>
             </TabsTab>
           ))}
-          <TabsIndicator className="bg-primary-container -bottom-1.5 left-0 h-2 translate-x-(--active-tab-left) translate-y-0" />
+          <TabsIndicator className="bg-primary-container -bottom-1.5 left-0 h-0.5 translate-x-(--active-tab-left) translate-y-0" />
         </TabsList>
       </Tabs>
       <div className="items-center gap-2 hidden sm:flex">

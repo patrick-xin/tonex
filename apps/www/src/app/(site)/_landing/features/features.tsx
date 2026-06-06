@@ -1,7 +1,7 @@
 import { BarChart3, Command, Eye, Palette, Save, Settings2, Sparkles, Unlock } from 'lucide-react'
 import type { ComponentType, CSSProperties, SVGProps } from 'react'
-import { TailwindCSSIcon } from '../../../../components/icons/tailwind'
-import { ShimmerBorder } from '../../../../components/shared/shimmer-border'
+import { TailwindCSSIcon } from '@/components/icons/tailwind'
+import { ShimmerBorder } from '@/components/shared/shimmer-border'
 import { SectionHeader } from '../section-header'
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>
@@ -123,7 +123,7 @@ export function Features() {
         <SectionHeader
           align="start"
           heading="Everything else you'd reach for"
-          description="The details that add up."
+          description="The smaller decisions, already made, the polish is there before you ask for it."
         />
         <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
           {FEATURES.map((feature) => (

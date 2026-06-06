@@ -35,7 +35,7 @@ function SeedSwatches() {
       <div className="flex gap-4 pt-8 pb-2 sm:pb-4">{PRESETS1.map(chip)}</div>
       <div className="flex gap-4 pb-2 sm:pb-4 -translate-x-12">{PRESETS2.map(chip)}</div>
       <div className="flex gap-4 pb-2 sm:pb-4 translate-x-6">{PRESETS3.map(chip)}</div>
-      <div className="flex gap-4 pb-2 sm:pb-6 -translate-x-4">{PRESETS4.map(chip)}</div>
+      <div className="flex gap-4 pb-2 sm:pb-8 -translate-x-4">{PRESETS4.map(chip)}</div>
     </div>
   )
 }

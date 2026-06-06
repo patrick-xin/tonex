@@ -33,7 +33,9 @@ export function HeroContent() {
       <motion.span
         variants={item}
         className="mb-5 inline-flex items-center flex-wrap text-xs font-mono uppercase tracking-widest text-on-surface-variant gap-4"
-      ></motion.span>
+      >
+        preview beta
+      </motion.span>
       <motion.h1
         variants={item}
         className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8 font-display"

@@ -7,12 +7,16 @@ import { mergeMdEmission } from './format'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +
-//    :root + .dark) — md users adopt our token namespace wholesale. Selectors
-//    are root-level so the file drops into the consumer project with no
-//    `class="md"` wrapper required. Editor-app internal globals.css (via
-//    `formatCss` / `pnpm bake`) keeps `.md` / `html.dark .md` because it
+//    :root + .dark) — md users adopt our token namespace wholesale. Follows
+//    shadcn-cli's variable convention: `:root`/`.dark` carry BARE semantic
+//    names (`--primary`) and `@theme inline` bridges each into the Tailwind
+//    `--color-*` namespace (`--color-primary: var(--primary)`), so `bg-primary`
+//    resolves while the raw var reads as `--primary`. Selectors are root-level
+//    so the file drops into the consumer project with no `class="md"` wrapper
+//    required. Editor-app internal globals.css (via `formatCss` / `pnpm bake`)
+//    keeps `.md` / `html.dark .md` AND the `--color-*` names because it
 //    coexists with `.shadcn` in the same document — `exportCss` is for
-//    downstream users and that constraint doesn't apply.
+//    downstream users and those constraints don't apply.
 //  - 'shadcn': :root + .dark, paste-ready. The shadcn audience replaces
 //    the role blocks shadcn-cli scaffolded; root selectors are the drop-in
 //    target. `includeHeader` (off by default) prepends the Tailwind v4
@@ -76,9 +80,28 @@ function projectArgb(argb: number, fmt: 'oklch' | 'hex'): string {
   return fmt === 'hex' ? hexString(argb) : oklchString(argb)
 }
 
-function block(selector: string, tokens: TokenMap, fmt: 'oklch' | 'hex'): string {
+// why: shadcn-pattern bridge. The derive layer keys md tokens in the Tailwind
+// color namespace (`--color-primary`), but the md export mirrors shadcn-cli's
+// globals.css: `:root`/`.dark` hold BARE semantic names (`--primary`) and
+// `@theme inline` maps each back into the namespace (`--color-primary:
+// var(--primary)`). This strips the `--color-` prefix at the emission seam.
+// Non-color tokens (no prefix) pass through unchanged, so a future
+// `--radius`-style token would bridge as a self-reference, exactly as shadcn.
+function bareName(name: string): string {
+  return name.startsWith('--color-') ? `--${name.slice('--color-'.length)}` : name
+}
+
+// why: `mapName` rewrites each declaration's property name at stringification.
+// The md path passes `bareName` so `:root`/`.dark`/tier blocks emit bare
+// semantic names; shadcn (already bare-keyed) uses the identity default.
+function block(
+  selector: string,
+  tokens: TokenMap,
+  fmt: 'oklch' | 'hex',
+  mapName: (name: string) => string = (n) => n,
+): string {
   const decls = Object.entries(tokens)
-    .map(([name, argb]) => `  ${name}: ${projectArgb(argb, fmt)};`)
+    .map(([name, argb]) => `  ${mapName(name)}: ${projectArgb(argb, fmt)};`)
     .join('\n')
   return `${selector} {\n${decls}\n}`
 }
@@ -189,16 +212,16 @@ export function exportCss(
       '',
       '@custom-variant dark (&:is(.dark *));',
       '',
-      themeInlineBlock(tokens, (t) => t),
+      themeInlineBlock(tokens, bareName),
       '',
     ]
     for (const [tier, theme] of tiers) {
       const lightTokens = buildMdRuleTokens(theme, 'light', tier, opts)
       const darkTokens = buildMdRuleTokens(theme, 'dark', tier, opts)
       lines.push(
-        block(MD_SELECTOR[tier].light, lightTokens, opts.colorFormat),
+        block(MD_SELECTOR[tier].light, lightTokens, opts.colorFormat, bareName),
         '',
-        block(MD_SELECTOR[tier].dark, darkTokens, opts.colorFormat),
+        block(MD_SELECTOR[tier].dark, darkTokens, opts.colorFormat, bareName),
         '',
       )
     }
@@ -246,7 +269,7 @@ export function exportCss(
     parts.push(
       themeInlineBlock(
         customSlugTokens.map((t) => `--color-${t.slice(2)}`),
-        (u) => `--${u.slice('--color-'.length)}`,
+        bareName,
       ),
       '',
     )

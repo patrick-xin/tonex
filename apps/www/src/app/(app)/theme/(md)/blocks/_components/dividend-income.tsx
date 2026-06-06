@@ -42,28 +42,6 @@ const HOLDINGS = [
       { q: 'Q4', value: 218 },
     ],
   },
-  {
-    name: 'Apple AAPL',
-    shares: '85 Shares',
-    amount: '$340.00',
-    data: [
-      { q: 'Q1', value: 60 },
-      { q: 'Q2', value: 70 },
-      { q: 'Q3', value: 120 },
-      { q: 'Q4', value: 90 },
-    ],
-  },
-  {
-    name: 'Realty Income',
-    shares: '320 Shares',
-    amount: '$1,139.50',
-    data: [
-      { q: 'Q1', value: 240 },
-      { q: 'Q2', value: 260 },
-      { q: 'Q3', value: 280 },
-      { q: 'Q4', value: 360 },
-    ],
-  },
 ]
 
 const miniChartConfig = {

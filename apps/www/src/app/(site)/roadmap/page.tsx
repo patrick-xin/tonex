@@ -1,4 +1,10 @@
 import type { Metadata } from 'next'
+import { SiteFooter } from '../_components/site-footer'
+import { SiteHeader } from '../_components/site-header'
+import { FinalCta } from '../_landing/final-cta/final-cta'
+import { SectionHeader } from '../_landing/section-header'
+import { AboutHero } from '../about/_components/about-hero'
+import { Releases } from './_components/releases'
 
 export const metadata: Metadata = {
   title: 'Roadmap',
@@ -7,9 +13,19 @@ export const metadata: Metadata = {
 
 export default function RoadmapPage() {
   return (
-    <section className="mx-auto max-w-4xl px-6 py-20 text-center">
-      <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">Roadmap</h1>
-      <p className="mt-4 text-balance text-on-surface-variant">More soon.</p>
-    </section>
+    <>
+      <SiteHeader />
+      <AboutHero />
+      <div className="px-6 py-12 sm:py-24 space-y-20">
+        <div className="space-y-12 pt-8">
+          <SectionHeader heading="Roadmap" description=" Everything that already works today. " />
+          <div className="max-w-3xl mx-auto">
+            <Releases />
+          </div>
+        </div>
+      </div>
+      <FinalCta />
+      <SiteFooter />
+    </>
   )
 }

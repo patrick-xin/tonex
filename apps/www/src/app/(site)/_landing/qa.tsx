@@ -285,14 +285,11 @@ export const QA_ITEMS: QAItemData[] = [
 
 export const QAItem = ({ id, question, answer }: QAItemData) => {
   return (
-    <AccordionItem id={id} variant="underline" value={id}>
-      <AccordionSummary
-        variant="underline"
-        className="text-[1.2rem] hover:text-primary hover:decoration-0"
-      >
+    <AccordionItem id={id} value={id} className="border-0 py-1">
+      <AccordionSummary className="text-[1.2rem] bg-surface-container p-4 rounded-md">
         {question}
       </AccordionSummary>
-      <AccordionPanel className="mb-3 px-0 space-y-2 text-on-surface-variant">
+      <AccordionPanel className="space-y-2 text-on-surface-variant px-4 pt-4 pb-2">
         {answer}
       </AccordionPanel>
     </AccordionItem>

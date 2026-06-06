@@ -16,7 +16,7 @@ const arrowVariants = tv({
         borderDark: 'fill-none dark:fill-outline-variant',
       },
       tooltip: {
-        fill: 'fill-surface dark:fill-surface-container-highest',
+        fill: 'fill-surface-container',
         borderLight: 'fill-outline-variant dark:fill-none',
         borderDark: 'fill-none dark:fill-outline-variant',
       },

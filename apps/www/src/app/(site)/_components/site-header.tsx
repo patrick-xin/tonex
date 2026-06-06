@@ -4,7 +4,9 @@ import { m, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/reac
 import { useEffect, useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { SiteLogo } from '@/components/shared/chrome/site-logo'
+import { DrawerMobileNavigation } from '@/components/shared/mobile-nav-drawer'
 import { RainbowButton } from '@/components/shared/rainbow-button'
+import { ThemeModeToggle } from '@/components/shared/theme-mode-toggle'
 import { useIsMobile } from '@/lib/hooks/use-mobile'
 
 const STICK_OFFSET = 80
@@ -63,10 +65,20 @@ export function SiteHeader() {
           initial={false}
           animate={{ opacity: isStuck ? 1 : 0 }}
           transition={transition}
-          className={cn('pointer-events-none absolute inset-0 -z-10 rounded-md')}
+          className={cn(
+            'pointer-events-none absolute inset-0 -z-10 rounded-md bg-surface-container-low/10 backdrop-blur-xs',
+          )}
         />
-        <SiteLogo />
-        <RainbowButton />
+        <SiteLogo className="size-6" />
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block">
+            <ThemeModeToggle showShortcut />
+          </div>
+          <RainbowButton />
+          <div className="md:hidden">
+            <DrawerMobileNavigation />
+          </div>
+        </div>
       </m.div>
     </header>
   )

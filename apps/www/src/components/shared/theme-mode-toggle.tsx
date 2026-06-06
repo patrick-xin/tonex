@@ -1,7 +1,8 @@
 'use client'
 
-import { MoonIcon, SunIcon } from '@phosphor-icons/react/ssr'
+import { MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { cn } from 'tailwind-variants'
+import { Kbd } from '@/components/ui/kbd'
 import { Toggle } from '@/components/ui/toggle'
 import { useThemeToggle } from '@/features/theme-mode'
 
@@ -12,7 +13,13 @@ import { useThemeToggle } from '@/features/theme-mode'
 // background is neutralised so it reads as a ghost icon button alongside its
 // rail-footer siblings; the icon swap alone carries state (Base UI Toggle
 // render-prop pattern), not a filled chip.
-export function ThemeModeToggle({ className }: { className?: string }) {
+export function ThemeModeToggle({
+  className,
+  showShortcut = false,
+}: {
+  className?: string
+  showShortcut?: boolean
+}) {
   const { mode, isDark, label, toggle } = useThemeToggle()
   // why: mode is null until next-themes reconciles on the client (useActiveMode
   // contract). One Toggle, controlled the whole time — `pressed` stays defined
@@ -30,7 +37,7 @@ export function ThemeModeToggle({ className }: { className?: string }) {
       onPressedChange={toggle}
       size="sm"
       className={cn(
-        'text-on-surface-variant hover:bg-primary/8',
+        'text-on-surface-variant hover:bg-primary/8 flex items-center gap-2',
         'data-pressed:bg-transparent data-pressed:text-on-surface-variant data-pressed:hover:bg-primary/8',
         className,
       )}
@@ -42,6 +49,9 @@ export function ThemeModeToggle({ className }: { className?: string }) {
             <SunIcon weight="fill" className="size-5" />
           ) : (
             <MoonIcon weight="fill" className="size-5" />
+          )}
+          {showShortcut && (
+            <Kbd className="bg-surface-container-highest hidden md:inline-flex">D</Kbd>
           )}
         </button>
       )}

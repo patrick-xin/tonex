@@ -1,20 +1,12 @@
 'use client'
 
+import { Heatmap } from '@paper-design/shaders-react'
 import type { Mode } from '@tonex/core'
 import { hexString } from '@tonex/core/oklch'
 import { useResolvedTokens } from '@tonex/core-react'
 import { useReducedMotion } from 'motion/react'
-import dynamic from 'next/dynamic'
 import { useActiveMode } from '@/features/theme-mode'
 import { useShaderNoiseReady } from '@/lib/shader-noise-gate'
-
-// why: defer the @paper-design/shaders-react bundle (the route's largest client
-// dep) out of first-load JS — it streams in as a post-hydration chunk. The
-// shader only renders once `palette && noiseReady`, so there's no flash while
-// the chunk loads.
-const Heatmap = dynamic(() => import('@paper-design/shaders-react').then((m) => m.Heatmap), {
-  ssr: false,
-})
 
 type Stop = readonly [family: string, tone: number]
 type DotStops = readonly [Stop, Stop, Stop, Stop, Stop, Stop, Stop]
@@ -48,7 +40,7 @@ function resolveDotColors(theme: ResolvedTokens, mode: Mode) {
   return { dots: PALETTE[mode].map(pick) }
 }
 
-export function LandingLogo() {
+export default function LandingLogo() {
   const theme = useResolvedTokens()
   const mode = useActiveMode()
   const reduceMotion = useReducedMotion()
@@ -62,10 +54,11 @@ export function LandingLogo() {
     <div>
       {palette && noiseReady && (
         <Heatmap
-          width={40}
-          height={40}
+          width={160}
+          height={160}
           image="/logo.svg"
-          colors={palette.dots}
+          // colors={palette.dots}
+          colors={['#7e66bc', '#70b4fa', '#E6D7FF', '#0047AB']}
           // Transparent backdrop — the logo glyph composites over whatever's
           // behind it. NOT "transparent": paper-design's color parser only reads
           // #/rgb/hsl and falls back to opaque black for any keyword, so the
@@ -73,12 +66,12 @@ export function LandingLogo() {
           // in-shader, so alpha 0 contributes nothing.
           colorBack="#00000000"
           contour={0.5}
-          angle={0}
+          angle={-100}
           noise={0}
           innerGlow={0.5}
           outerGlow={0}
           speed={reduceMotion ? 0 : 1}
-          scale={0.75}
+          scale={1}
         />
       )}
     </div>

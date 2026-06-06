@@ -45,8 +45,8 @@ export const ColorLock = ({ className }: { className?: string }) => {
         }
       />
       <TooltipContent>
-        <p>{seedHexLock ? 'Unlock seed' : 'Lock seed'}</p>
-        <KbdGroup className="mt-1">
+        <span>{seedHexLock ? 'Unlock seed' : 'Lock seed'}</span>
+        <KbdGroup className="ml-2">
           <Kbd className="h-4 min-w-4">⌘</Kbd>
           <Kbd className="h-4 min-w-4">L</Kbd>
         </KbdGroup>

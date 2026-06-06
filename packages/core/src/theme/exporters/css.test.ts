@@ -47,6 +47,20 @@ function projectMergedMd(
   return projectLayer({ ...core, ...extended })
 }
 
+// why: md export adopts the shadcn pattern — :root/.dark carry BARE semantic
+// names (`--primary`), bridged to the Tailwind `--color-*` namespace in
+// `@theme inline` (`--color-primary: var(--primary)`). The derive layer still
+// keys md tokens as `--color-*`, so block comparisons rekey the expected layer
+// to bare names; bridge assertions map a namespace name to its bare source.
+const bareName = (name: string): string =>
+  name.startsWith('--color-') ? `--${name.slice('--color-'.length)}` : name
+
+function bareKeys(record: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(record)) out[bareName(k)] = v
+  return out
+}
+
 const withCustomColor: PortableTheme = {
   ...DEFAULT_INPUTS,
   customColors: [
@@ -79,17 +93,17 @@ describe('exportCss(bundle, "md") — lean defaults', () => {
     // rule-block emission so user paste stays consistent.
     expect(out).toMatch(/@theme inline\s*\{/)
     for (const tok of Object.keys(theme.md.light)) {
-      expect(out).toContain(`${tok}: var(${tok});`)
+      expect(out).toContain(`${tok}: var(${bareName(tok)});`)
     }
     // extended, chart, and palette names absent
     for (const tok of Object.keys(theme.md.lightExtended)) {
-      expect(out).not.toContain(`${tok}: var(${tok});`)
+      expect(out).not.toContain(`${tok}: var(${bareName(tok)});`)
     }
     for (const tok of Object.keys(theme.md.lightChart)) {
-      expect(out).not.toContain(`${tok}: var(${tok});`)
+      expect(out).not.toContain(`${tok}: var(${bareName(tok)});`)
     }
     for (const tok of Object.keys(theme.md.palette)) {
-      expect(out).not.toContain(`${tok}: var(${tok});`)
+      expect(out).not.toContain(`${tok}: var(${bareName(tok)});`)
     }
   })
 
@@ -100,12 +114,12 @@ describe('exportCss(bundle, "md") — lean defaults', () => {
     // adding a scope class. Contrast tiers layer on the same axis via
     // `.contrast-medium` / `.dark.contrast-medium` (see multi-contrast tests).
     const md = parseBlock(out, ':root')
-    expect(md).toEqual(projectLayer(theme.md.light))
+    expect(md).toEqual(bareKeys(projectLayer(theme.md.light)))
   })
 
   it('.dark block values match theme.md.dark token-for-token (core only)', () => {
     const dark = parseBlock(out, '.dark')
-    expect(dark).toEqual(projectLayer(theme.md.dark))
+    expect(dark).toEqual(bareKeys(projectLayer(theme.md.dark)))
   })
 })
 
@@ -117,17 +131,17 @@ describe('exportCss with includeExtended: true', () => {
 
   it(':root block carries core + extended merged token-for-token', () => {
     const md = parseBlock(out, ':root')
-    expect(md).toEqual(projectMergedMd(theme, 'light'))
+    expect(md).toEqual(bareKeys(projectMergedMd(theme, 'light')))
   })
 
   it('.dark block carries core + extended merged for dark mode', () => {
     const dark = parseBlock(out, '.dark')
-    expect(dark).toEqual(projectMergedMd(theme, 'dark'))
+    expect(dark).toEqual(bareKeys(projectMergedMd(theme, 'dark')))
   })
 
   it('@theme inline lists every core + extended token name', () => {
     for (const tok of [...Object.keys(theme.md.light), ...Object.keys(theme.md.lightExtended)]) {
-      expect(out).toContain(`${tok}: var(${tok});`)
+      expect(out).toContain(`${tok}: var(${bareName(tok)});`)
     }
   })
 })
@@ -255,12 +269,12 @@ describe('exportCss(bundle, "md") with customColors', () => {
 
   it('emits md custom-color tokens in :root/.dark and registers them in @theme inline', () => {
     const root = parseBlock(out, ':root')
-    expect(root['--color-brand']).toBeDefined()
-    expect(root['--color-on-brand']).toBeDefined()
-    expect(root['--color-brand-container']).toBeDefined()
-    expect(root['--color-on-brand-container']).toBeDefined()
-    expect(out).toContain('--color-brand: var(--color-brand);')
-    expect(out).toContain('--color-on-brand: var(--color-on-brand);')
+    expect(root['--brand']).toBeDefined()
+    expect(root['--on-brand']).toBeDefined()
+    expect(root['--brand-container']).toBeDefined()
+    expect(root['--on-brand-container']).toBeDefined()
+    expect(out).toContain('--color-brand: var(--brand);')
+    expect(out).toContain('--color-on-brand: var(--on-brand);')
   })
 })
 
@@ -293,13 +307,13 @@ describe('exportCss with multi-contrast bundle', () => {
   it('contrast-medium block carries medium-tier core values (lean defaults)', () => {
     const out = exportCss(bundle, 'md')
     const medium = parseBlock(out, '.contrast-medium')
-    expect(medium).toEqual(projectLayer(mediumTheme.md.light))
+    expect(medium).toEqual(bareKeys(projectLayer(mediumTheme.md.light)))
   })
 
   it('contrast-high block carries high-tier core values (lean defaults)', () => {
     const out = exportCss(bundle, 'md')
     const high = parseBlock(out, '.contrast-high')
-    expect(high).toEqual(projectLayer(highTheme.md.light))
+    expect(high).toEqual(bareKeys(projectLayer(highTheme.md.light)))
   })
 
   it('shadcn ignores contrast tiers — only :root + .dark emit even when bundle carries medium/high', () => {
@@ -340,8 +354,8 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       // transform/round on the hex branch, NOT a bug inside hexString itself —
       // that round-trips in color-utils oklch.test.ts. ADR-0017 / ADR-0021.
       const out = exportCss(bundle, 'md', { colorFormat: 'hex' })
-      expect(parseBlock(out, ':root')).toEqual(projectLayer(theme.md.light, 'hex'))
-      expect(parseBlock(out, '.dark')).toEqual(projectLayer(theme.md.dark, 'hex'))
+      expect(parseBlock(out, ':root')).toEqual(bareKeys(projectLayer(theme.md.light, 'hex')))
+      expect(parseBlock(out, '.dark')).toEqual(bareKeys(projectLayer(theme.md.dark, 'hex')))
     })
   })
 
@@ -349,17 +363,17 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
     it('off (default): chart tokens absent from :root and .dark', () => {
       const out = exportCss(bundle, 'md')
       const md = parseBlock(out, ':root')
-      expect(md['--color-chart-1']).toBeUndefined()
-      expect(md['--color-chart-5']).toBeUndefined()
+      expect(md['--chart-1']).toBeUndefined()
+      expect(md['--chart-5']).toBeUndefined()
     })
 
     it('on: chart tokens present in :root (light) and .dark (dark)', () => {
       const out = exportCss(bundle, 'md', { includeChart: true })
       const md = parseBlock(out, ':root')
       const dark = parseBlock(out, '.dark')
-      expect(md['--color-chart-1']).toBeDefined()
-      expect(md['--color-chart-5']).toBeDefined()
-      expect(dark['--color-chart-1']).toBeDefined()
+      expect(md['--chart-1']).toBeDefined()
+      expect(md['--chart-5']).toBeDefined()
+      expect(dark['--chart-1']).toBeDefined()
     })
 
     it('on: shadcn emits chart with shadcn naming', () => {
@@ -389,9 +403,9 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       const out = exportCss(bundle, 'md', { includePalette: true })
       const md = parseBlock(out, ':root')
       const dark = parseBlock(out, '.dark')
-      expect(md['--color-primary-50']).toBeDefined()
+      expect(md['--primary-50']).toBeDefined()
       // dark block does NOT carry palette (cascade picks them up from :root)
-      expect(dark['--color-primary-50']).toBeUndefined()
+      expect(dark['--primary-50']).toBeUndefined()
     })
 
     it('multi-contrast + includePalette: palette value declares once across the file', () => {
@@ -405,7 +419,7 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       // single `@theme inline` registration line (`: var(...)`). Palette is
       // mode/contrast-invariant so the value should declare once even across
       // 3 contrast tiers and 2 modes.
-      const matches = out.match(/--color-primary-50:\s+(?:oklch|#)/g) ?? []
+      const matches = out.match(/--primary-50:\s+(?:oklch|#)/g) ?? []
       expect(matches.length).toBe(1)
     })
 
@@ -416,7 +430,7 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       // value resolves via the :root declaration at use site (cascade).
       const out = exportCss(bundle, 'md', { includePalette: true })
       for (const tok of Object.keys(theme.md.palette)) {
-        expect(out).toContain(`${tok}: var(${tok});`)
+        expect(out).toContain(`${tok}: var(${bareName(tok)});`)
       }
     })
 
@@ -425,7 +439,7 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       // appear exactly once in @theme inline regardless of tier or mode.
       const out = exportCss(bundle, 'md', { includePalette: true })
       // sample one token; the registration line is structurally fixed.
-      const matches = out.match(/--color-primary-50: var\(--color-primary-50\);/g) ?? []
+      const matches = out.match(/--color-primary-50: var\(--primary-50\);/g) ?? []
       expect(matches.length).toBe(1)
     })
   })
@@ -434,17 +448,17 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
     it('off (default): extended tokens absent from :root', () => {
       const out = exportCss(bundle, 'md')
       const md = parseBlock(out, ':root')
-      expect(md['--color-surface-tint']).toBeUndefined()
-      expect(md['--color-shadow']).toBeUndefined()
+      expect(md['--surface-tint']).toBeUndefined()
+      expect(md['--shadow']).toBeUndefined()
     })
 
     it('on: extended tokens present in both light and dark blocks', () => {
       const out = exportCss(bundle, 'md', { includeExtended: true })
       const md = parseBlock(out, ':root')
       const dark = parseBlock(out, '.dark')
-      expect(md['--color-surface-tint']).toBeDefined()
-      expect(md['--color-shadow']).toBeDefined()
-      expect(dark['--color-surface-tint']).toBeDefined()
+      expect(md['--surface-tint']).toBeDefined()
+      expect(md['--shadow']).toBeDefined()
+      expect(dark['--surface-tint']).toBeDefined()
     })
 
     it('on: extended cascades across contrast tiers when variants are also on', () => {
@@ -458,8 +472,8 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
       }
       const out = exportCss(multi, 'md', { includeExtended: true })
       const medium = parseBlock(out, '.contrast-medium')
-      expect(medium['--color-surface-tint']).toBeDefined()
-      expect(medium['--color-shadow']).toBeDefined()
+      expect(medium['--surface-tint']).toBeDefined()
+      expect(medium['--shadow']).toBeDefined()
     })
   })
 
@@ -484,14 +498,14 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
     it('custom-color slugs present under all-off lean defaults', () => {
       const out = exportCss(bundleWithCustom, 'md')
       const md = parseBlock(out, ':root')
-      expect(md['--color-brand']).toBeDefined()
-      expect(md['--color-on-brand']).toBeDefined()
+      expect(md['--brand']).toBeDefined()
+      expect(md['--on-brand']).toBeDefined()
     })
 
     it('custom-color slugs present with hex format', () => {
       const out = exportCss(bundleWithCustom, 'md', { colorFormat: 'hex' })
       const md = parseBlock(out, ':root')
-      expect(md['--color-brand']).toMatch(/^#[0-9a-f]{6}$/i)
+      expect(md['--brand']).toMatch(/^#[0-9a-f]{6}$/i)
     })
 
     it('custom-color slugs persist with extended + chart + palette all on', () => {
@@ -501,8 +515,8 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
         includePalette: true,
       })
       const md = parseBlock(out, ':root')
-      expect(md['--color-brand']).toBeDefined()
-      expect(md['--color-on-brand']).toBeDefined()
+      expect(md['--brand']).toBeDefined()
+      expect(md['--on-brand']).toBeDefined()
     })
   })
 })

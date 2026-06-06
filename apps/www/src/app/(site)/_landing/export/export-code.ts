@@ -1,35 +1,35 @@
 import type { ExportTab } from '@/features/export'
 
 export const EXPORT_CODE: Record<ExportTab, string> = {
-  Tailwind: `@theme inline {
-  --color-primary: var(--color-primary);
-  --color-on-primary: var(--color-on-primary);
-  --color-primary-container: var(--color-primary-container);
-  --color-on-primary-container: var(--color-on-primary-container);
-  --color-secondary: var(--color-secondary);
-  --color-on-secondary: var(--color-on-secondary);
-  --color-secondary-container: var(--color-secondary-container);
-  --color-on-secondary-container: var(--color-on-secondary-container);
-  --color-tertiary: var(--color-tertiary);
-  --color-on-tertiary: var(--color-on-tertiary);
-  --color-tertiary-container: var(--color-tertiary-container);
-  --color-on-tertiary-container: var(--color-on-tertiary-container);
-  --color-error: var(--color-error);
-  --color-on-error: var(--color-on-error);
-  --color-error-container: var(--color-error-container);
-  --color-on-error-container: var(--color-on-error-container);
-  --color-surface: var(--color-surface);
-  --color-on-surface: var(--color-on-surface);
-  --color-on-surface-variant: var(--color-on-surface-variant);
-  --color-surface-dim: var(--color-surface-dim);
-  --color-surface-bright: var(--color-surface-bright);
-  --color-surface-container-lowest: var(--color-surface-container-lowest);
-  --color-surface-container-low: var(--color-surface-container-low);
-  --color-surface-container: var(--color-surface-container);
-  --color-surface-container-high: var(--color-surface-container-high);
-  --color-surface-container-highest: var(--color-surface-container-highest);
-  --color-outline: var(--color-outline);
-  --color-outline-variant: var(--color-outline-variant);
+  Tailwind: `:root {
+  --primary: oklch(0.4537 0.1307 293.26);
+  --on-primary: oklch(0.9202 0.0461 302.03);
+  --primary-container: oklch(0.4955 0.1305 293.71);
+  --on-primary-container: oklch(0.9803 0.0134 314.76);
+  --secondary: oklch(0.4909 0.0563 297.4);
+  --on-secondary: oklch(0.983 0.0123 317.74);
+  --secondary-container: oklch(0.8841 0.0574 299.71);
+  --on-secondary-container: oklch(0.417 0.0551 296.46);
+  --tertiary: oklch(0.4478 0.0923 295.35);
+  --on-tertiary: oklch(0.9202 0.0461 302.03);
+  --tertiary-container: oklch(0.4906 0.0922 295.5);
+  --on-tertiary-container: oklch(0.9803 0.0134 314.76);
+  --error: oklch(0.5003 0.1278 17.99);
+  --on-error: oklch(0.982 0.0087 26.02);
+  --error-container: oklch(0.7497 0.1411 17.25);
+  --on-error-container: oklch(0.2987 0.1101 18.17);
+  --surface: oklch(0.983 0.0123 317.74);
+  --on-surface: oklch(0.3203 0.0359 298.11);
+  --on-surface-variant: oklch(0.4885 0.0355 297.56);
+  --surface-dim: oklch(0.8912 0.0365 301.4);
+  --surface-bright: oklch(0.983 0.0123 317.74);
+  --surface-container-lowest: oklch(1 0 0);
+  --surface-container-low: oklch(0.9676 0.0199 308.23);
+  --surface-container: oklch(0.9503 0.0295 305.12);
+  --surface-container-high: oklch(0.9328 0.0322 303.47);
+  --surface-container-highest: oklch(0.9167 0.0378 302.46);
+  --outline: oklch(0.5835 0.0356 299.2);
+  --outline-variant: oklch(0.7663 0.0365 301.91);
 }
 `,
   CSS: `:root {

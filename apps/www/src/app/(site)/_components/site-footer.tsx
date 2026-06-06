@@ -37,45 +37,46 @@ export function SiteFooter() {
       <ShimmerBorder />
       <div className="mx-auto w-full max-w-7xl px-4 pt-12 sm:px-6 sm:pt-16">
         <div className="grid gap-12 md:grid-cols-2">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-3">
-              <SiteLogo />
-              <span className="text-lg font-semibold text-on-surface">Tonex</span>
-            </div>
-            <p className="max-w-xs text-sm text-on-surface-variant">
-              Turn your color into a complete, accessible color system, grounded in real color
-              science.
-            </p>
-            <ul className="-ml-2 flex items-center gap-1">
-              <li>
-                <XLink />
-              </li>
-              <li>
-                <GitHubLink />
-              </li>
-            </ul>
-          </div>
+          <SiteLogo className="size-10" />
           <div className="flex flex-col gap-10 sm:flex-row sm:justify-between md:justify-end md:gap-16">
             <nav aria-label="Site">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-on-surface-variant/70">
-                Resources
-              </h2>
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">
+                Tonex
+              </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
-                  <FooterLink href="/theme">MD theme</FooterLink>
+                  <FooterLink href="/theme">material theme</FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/theme/shadcn">Shadcn mode</FooterLink>
+                  <FooterLink href="/theme/shadcn">shadcn mode</FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/">Home</FooterLink>
+                  <FooterLink href="/about">about</FooterLink>
+                </li>
+              </ul>
+            </nav>
+            <nav aria-label="Site">
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">
+                Resources
+              </div>
+              <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
+                <li>
+                  <FooterLink href="/roadmap">roadmap</FooterLink>
                 </li>
               </ul>
             </nav>
           </div>
         </div>
-        <div className="mt-12 py-4">
+        <div className="mt-12 py-4 flex items-center gap-4">
           <p className="text-xs text-on-surface-variant">© 2026 tonex</p>
+          <ul className="flex items-center gap-1">
+            <li>
+              <XLink />
+            </li>
+            <li>
+              <GitHubLink />
+            </li>
+          </ul>
         </div>
       </div>
       <div aria-hidden className="mb-[-10%]">
