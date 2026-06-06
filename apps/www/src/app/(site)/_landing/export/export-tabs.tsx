@@ -36,7 +36,7 @@ const EXPORT_TABS: ExportTabConfig[] = (Object.keys(EXPORT_CODE) as ExportTab[])
   icon: icons[value.toLowerCase() as Lowercase<ExportTab>],
 }))
 
-export function ExportTabs() {
+export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, string> }) {
   const [tab, setTab] = useState<ExportTab>('Tailwind')
   return (
     <Tabs
@@ -70,10 +70,11 @@ export function ExportTabs() {
               <div className="bg-yellow-500 size-3 rounded-full" />
               <div className="bg-green-500 size-3 rounded-full" />
             </div>
-            <pre className="h-[50vh] bg-surface-container-low p-4 font-mono text-xs text-on-surface-variant whitespace-pre">
+            <div className="h-[50vh] bg-surface-container-low overflow-hidden relative text-xs">
               <ShimmerBorder />
-              {EXPORT_CODE[value]}
-            </pre>
+              {/* biome-ignore lint/security/noDangerouslySetInnerHtml: server-highlighted static demo code from a hardcoded constant */}
+              <div dangerouslySetInnerHTML={{ __html: highlighted[value] }} />
+            </div>
           </div>
         </TabsPanel>
       ))}

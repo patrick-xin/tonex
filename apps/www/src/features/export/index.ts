@@ -3,4 +3,5 @@
 // (export-content-display, use-export-content, export-controls,
 // export-filters) stay private to this feature.
 export { ExportButton } from './export-button'
+export { tabToHighlightLang } from './highlight-lang'
 export type { ExportTab } from './use-export-content'

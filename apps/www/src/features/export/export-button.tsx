@@ -30,6 +30,7 @@ import {
   tabSupportsFormat,
   tabUsesMode,
 } from './export-filters'
+import { tabToHighlightLang } from './highlight-lang'
 import { type ExportTab, useExportContent } from './use-export-content'
 
 // why: ADR-0021 commitment 8 — route-agnostic. md routes pass
@@ -151,14 +152,17 @@ export const ExportButton = ({
               </TabsList>
               {tabs.map((tab) => (
                 <TabsPanel key={tab} value={tab} className="flex h-full min-h-0 flex-col">
-                  <ExportContentDisplay content={exportContent} />
+                  <ExportContentDisplay
+                    content={exportContent}
+                    lang={tabToHighlightLang(exportTab)}
+                  />
                   <ExportControls exportContent={exportContent} ext={ext} />
                 </TabsPanel>
               ))}
             </Tabs>
           ) : (
             <div className="flex min-h-0 min-w-0 flex-col">
-              <ExportContentDisplay content={exportContent} />
+              <ExportContentDisplay content={exportContent} lang={tabToHighlightLang(exportTab)} />
               <ExportControls exportContent={exportContent} ext={ext} />
             </div>
           )}
