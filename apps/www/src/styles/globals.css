@@ -2,6 +2,7 @@
 @import "./base.css";
 @import "./toast.css";
 @import "./tonex.css";
+@import "./shiki.css";
 
 /* why: next-themes uses attribute="class" — `.dark` lands on <html>. Tailwind
    v4's default `dark:` variant follows prefers-color-scheme; without this
