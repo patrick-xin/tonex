@@ -63,11 +63,12 @@ export function MenuColorPicker() {
               exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
               transition={effectsTransition}
               className="flex items-center justify-center pointer-events-none"
-              style={{
-                color: open ? 'var(--color-on-secondary)' : 'var(--color-on-primary)',
-              }}
             >
-              {open ? <XIcon size={20} weight="bold" /> : <PaletteIcon size={28} />}
+              {open ? (
+                <XIcon size={20} weight="bold" className="text-on-secondary" />
+              ) : (
+                <PaletteIcon size={28} className="text-on-primary" />
+              )}
             </m.span>
           </AnimatePresence>
         </PopoverTrigger>
