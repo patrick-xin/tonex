@@ -69,9 +69,9 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
               <div className="bg-red-500 size-3 rounded-full" />
               <div className="bg-yellow-500 size-3 rounded-full" />
               <div className="bg-green-500 size-3 rounded-full" />
+              <ShimmerBorder />
             </div>
             <div className="h-[50vh] bg-surface-container-low overflow-hidden relative text-xs">
-              <ShimmerBorder />
               {/* biome-ignore lint/security/noDangerouslySetInnerHtml: server-highlighted static demo code from a hardcoded constant */}
               <div dangerouslySetInnerHTML={{ __html: highlighted[value] }} />
             </div>

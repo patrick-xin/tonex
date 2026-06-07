@@ -1,3 +1,4 @@
+export { BlocksDemo } from './blocks-demo'
 export { ContributionHistory } from './contribution-history'
 export { CoverArt } from './cover-art'
 export { DividendIncome } from './dividend-income'

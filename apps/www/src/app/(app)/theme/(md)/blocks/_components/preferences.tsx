@@ -29,7 +29,7 @@ const CURRENCIES = [
 
 export function Preferences() {
   return (
-    <Card className="max-w-sm">
+    <Card className="sm:max-w-sm">
       <CardHeader>
         <CardTitle>Preferences</CardTitle>
         <CardDescription>Manage your account settings and notifications.</CardDescription>
