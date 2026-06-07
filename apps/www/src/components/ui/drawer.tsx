@@ -182,7 +182,7 @@ const drawerContentStyles = tv({
   slots: {
     viewport: 'fixed inset-0 flex',
     popup: [
-      'relative flex flex-col gap-2 surface-dialog',
+      'relative flex flex-col gap-2 bg-surface',
       'drawer-popup overflow-y-auto overscroll-contain group/drawer-content *:data-[slot=scroll-area-root]:min-h-0',
     ],
   },
@@ -193,7 +193,7 @@ const drawerContentStyles = tv({
         popup: [
           'w-full h-auto',
           'px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px)+var(--drawer-bleed))]',
-          'sm:px-6 sm:pt-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--drawer-bleed))]',
+          'sm:px-6 sm:pt-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--drawer-bleed))] border-t border-outline-variant rounded-t-2xl',
         ],
       },
       left: {
@@ -301,10 +301,10 @@ function SnapDrawerContent({
       >
         <BaseDrawer.Popup
           className={cn(
-            'relative flex flex-col surface-dialog',
+            'relative flex flex-col bg-surface',
             'drawer-snap-popup w-full',
             layout === 'inset' && 'rounded-2xl',
-            layout === 'fullBleed' && 'rounded-t-2xl',
+            layout === 'fullBleed' && 'rounded-t-2xl border-t border-outline-variant',
             layout === 'responsive' && 'rounded-2xl sm:rounded-t-2xl sm:rounded-b-none',
             className,
           )}

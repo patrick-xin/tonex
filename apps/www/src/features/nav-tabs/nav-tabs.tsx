@@ -28,6 +28,11 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
   const router = useRouter()
   const [selected, setSelected] = useState<number | null>(null)
   const { tabs, exportTabs, crossLink } = config
+  // why: the cross-layer link always points at the *other* editor layer. Derive
+  // the target so its e2e handle names its role in the flow (cross-md /
+  // cross-shadcn), not its copy — the label ("MD" / "Shadcn") is product text
+  // that can change for non-test reasons. See e2e/README.md selector strategy.
+  const crossTarget = config.layer === 'md' ? 'shadcn' : 'md'
 
   useHotkeys(
     tabs.map((tab, index) => ({
@@ -129,6 +134,7 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
           variant="link"
           nativeButton={false}
           render={<Link href={crossLink.href} />}
+          data-testid={`cross-${crossTarget}`}
         >
           {crossLink.label}
         </Button>

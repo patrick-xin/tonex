@@ -14,6 +14,7 @@ import {
 } from 'motion/react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { cn } from 'tailwind-variants'
+import { WHEEL_RINGS } from './wheel-config'
 
 function usePointerPosition() {
   const x = useMotionValue(0)
@@ -65,8 +66,6 @@ function hctHex(hue: number, chroma: number, tone: number): string {
   return hexFromHct({ hue, chroma, tone })
 }
 
-const DEFAULT_SEED_HEX = '#6750a4'
-
 interface ColorDotProps {
   ring: number
   index: number
@@ -80,6 +79,12 @@ interface ColorDotProps {
   radius: number
   ringRadius: number
   dotSize: number
+  // why: the hub (ring 0) renders the *live* seed instead of a fixed color, so
+  // the two seed surfaces (wheel + landing swatches) can't drift; the generated
+  // rings carry their own chroma/tone from WHEEL_RINGS.
+  seedHex: string
+  chroma: number
+  tone: number
   selectedHex: string | null
   onSelectHex: (hex: string | null) => void
 }
@@ -97,6 +102,9 @@ function ColorDot({
   radius,
   ringRadius,
   dotSize,
+  seedHex,
+  chroma,
+  tone,
   selectedHex,
   onSelectHex,
 }: ColorDotProps) {
@@ -104,12 +112,9 @@ function ColorDot({
   const angle = calculateAngle(index, totalInRing)
   const { x: baseX, y: baseY } = calculateBasePosition(angle, baseRadius)
 
-  let dotHex = DEFAULT_SEED_HEX
-  if (ring !== 0) {
-    const hctHue = calculateHue(angle)
-    const [chroma, tone] = ring === 1 ? [30, 85] : [80, 60]
-    dotHex = hctHex(hctHue, chroma, tone)
-  }
+  // why: the hub mirrors the live seed; outer rings generate their hue from the
+  // dot's angle at the ring's configured chroma/tone.
+  const dotHex = ring === 0 ? seedHex : hctHex(calculateHue(angle), chroma, tone)
 
   const isSelected = selectedHex !== null && selectedHex === dotHex
 
@@ -179,6 +184,10 @@ function ColorDot({
         onSelectHex(isSelected ? null : dotHex)
       }}
       aria-label={`Seed color ${dotHex}`}
+      // data-testid: the hub is the singular live-seed readout (named by role); the
+      // ring dots are selectable values keyed by the hex they commit, mirroring the
+      // landing swatches' seed-preset-<hex>. See e2e/README.md selector strategy.
+      data-testid={ring === 0 ? 'seed-hub' : `seed-dot-${dotHex}`}
     >
       <motion.div
         className="absolute inset-0 rounded-full border-2 border-white mix-blend-overlay pointer-events-none"
@@ -321,11 +330,24 @@ export function AnimatedColorPicker({
     }
   }, [])
 
-  const rings = [{ count: 1 }, { count: 6 }, { count: 12 }]
-  const dots: Array<{ ring: number; index: number; totalInRing: number }> = []
-  rings.forEach((ring, ringIndex) => {
+  // ring 0 is the single hub dot (live seed, no generated color); the rest come
+  // from WHEEL_RINGS so the wheel's offered values have one named source.
+  const dots: Array<{
+    ring: number
+    index: number
+    totalInRing: number
+    chroma: number
+    tone: number
+  }> = [{ ring: 0, index: 0, totalInRing: 1, chroma: 0, tone: 0 }]
+  WHEEL_RINGS.forEach((ring, ringIndex) => {
     for (let i = 0; i < ring.count; i++) {
-      dots.push({ ring: ringIndex, index: i, totalInRing: ring.count })
+      dots.push({
+        ring: ringIndex + 1,
+        index: i,
+        totalInRing: ring.count,
+        chroma: ring.chroma,
+        tone: ring.tone,
+      })
     }
   })
 
@@ -430,6 +452,9 @@ export function AnimatedColorPicker({
               radius={radius}
               ringRadius={ringRadius}
               dotSize={dotSize}
+              seedHex={seedHex}
+              chroma={dot.chroma}
+              tone={dot.tone}
               pushMagnitude={pushMagnitude}
               pushSpring={pushSpring}
               selectedHex={selectedHex}

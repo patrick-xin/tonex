@@ -142,17 +142,15 @@ export function landingSeedSwatch(page: Page) {
   return landingSeedField(page).locator('xpath=preceding-sibling::span[1]')
 }
 
-// why: the cross-layer link in the editor rail (nav-tabs.tsx crossLink). Its label
-// is the *target* layer's display name — "Shadcn" on the md rail, "MD3" on the
-// shadcn rail. Rendered as a Button-as-Link, so match either role to stay robust
-// to that wrapper. This is the md ↔ shadcn navigation the Tier-1 round-trip rides.
-const CROSS_LINK_LABEL = { md: 'MD3', shadcn: 'Shadcn' } as const
+// why: the cross-layer link in the editor rail (nav-tabs.tsx crossLink) — the
+// md ↔ shadcn navigation the Tier-1 round-trip rides. Found by testid keyed to the
+// target layer (`cross-md` / `cross-shadcn`), mirroring enterEditor's `cta-${target}`.
+// It's load-bearing AND its label is product copy — the README's "two yeses →
+// data-testid" case: an earlier draft matched the accessible name and silently broke
+// when the fixture expected "MD3" but the rail shipped "MD". The testid names the
+// flow, not the words; the URL assertion below carries the user-facing meaning.
 export async function crossToLayer(page: Page, target: ThemeLayer) {
-  const label = CROSS_LINK_LABEL[target]
-  await page
-    .getByRole('link', { name: label, exact: true })
-    .or(page.getByRole('button', { name: label, exact: true }))
-    .click()
+  await page.getByTestId(`cross-${target}`).click()
   // why: assert we actually landed on the target layer before waiting on its seed
   // field — a navigation that silently no-ops then fails as "wrong page", not as a
   // confusing "field never hydrated".
@@ -251,6 +249,36 @@ export function pickerHexField(page: Page) {
 // flaky pointer drag.
 export function saturationArea(page: Page) {
   return page.getByRole('slider', { name: /saturation/i })
+}
+
+// ── menu color picker (color-picker/custom/menu-color-picker.tsx) ──────────
+// why: the marketing-page seed entry (about/roadmap) — a FAB that opens the
+// AnimatedColorPicker wheel. The trigger's accessible name ("Menu color picker")
+// is its only stable handle; the wheel mounts only once the popover is open.
+export function menuPickerTrigger(page: Page) {
+  return page.getByRole('button', { name: 'Menu color picker' })
+}
+
+// why: the wheel's hub (center dot) renders the LIVE seed read from the shared
+// source store — so asserting its color is asserting the committed seed without a
+// page navigation. Named by role (`seed-hub`), not keyed by hex like the ring
+// dots, because it's the singular current-seed readout, not a pickable value; its
+// hex rides in the aria-label. See e2e/README.md selector strategy.
+export function menuSeedHub(page: Page) {
+  return page.getByTestId('seed-hub')
+}
+
+// why: the wheel's selectable ring dots carry `seed-dot-<hex>` keyed by the hex
+// they commit — the same hex-is-the-identity rule as the landing swatches'
+// `seed-preset-<hex>` (the dots are HCT-generated and have no names). Clicks the
+// first ring dot and returns its hex, so a spec asserts the hub tracks *that*
+// value rather than a hard-coded color — palette-independent by construction.
+export async function pickWheelDot(page: Page): Promise<string> {
+  const dot = page.locator('[data-testid^="seed-dot-"]').first()
+  const testId = await dot.getAttribute('data-testid')
+  if (!testId) throw new Error('no wheel dot rendered in the menu color picker')
+  await dot.click()
+  return testId.replace('seed-dot-', '')
 }
 
 // ── seed lock (source-color/color-lock.tsx) ────────────────────────────────

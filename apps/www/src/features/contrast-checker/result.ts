@@ -23,29 +23,35 @@ export interface ResultMeta {
   dotClass: string
 }
 
+// why: pass/warn render through the INTERNAL tnx semantic tokens (success /
+// warning) as MD base/on pairs — `bg-tnx-X text-on-tnx-X`, mirroring fail's
+// `bg-error text-on-error`. No dark: needed: each tnx token mode-switches its
+// own value (light = vivid base, dark = muted container shade) WITHIN its role,
+// so the base/on pairing stays correct in both modes. fail rides the seed error
+// role, swapping base→container in dark for a softer badge; none stays neutral.
 export const RESULT: Record<Result, ResultMeta> = {
   pass: {
     label: 'Pass',
     note: 'readable, good contrast',
-    badgeClass: 'text-green-600 dark:text-green-400 bg-green-600/10 dark:bg-green-400/10',
-    dotClass: 'bg-green-600 dark:bg-green-400',
+    badgeClass: 'text-on-tnx-success bg-tnx-success',
+    dotClass: 'bg-tnx-success dark:bg-on-tnx-success',
   },
   fail: {
     label: 'Hard to read',
     note: 'text is too faint against its background',
-    badgeClass: 'text-red-600 dark:text-red-400 bg-red-600/10 dark:bg-red-400/10',
-    dotClass: 'bg-red-600 dark:bg-red-400',
+    badgeClass: 'text-on-error-container bg-error-container',
+    dotClass: 'bg-error-container dark:bg-error',
   },
   warn: {
     label: 'Faint',
     note: 'a border, icon, or fill is low-contrast; fine for some uses',
-    badgeClass: 'text-amber-600 dark:text-amber-400 bg-amber-600/10 dark:bg-amber-400/10',
-    dotClass: 'bg-amber-600 dark:bg-amber-400',
+    badgeClass: 'text-on-tnx-warning bg-tnx-warning',
+    dotClass: 'bg-tnx-warning',
   },
   none: {
     label: 'Decorative',
     note: 'purely visual, no contrast needed',
-    badgeClass: 'bg-surface-container text-on-surface-variant',
+    badgeClass: 'bg-surface-container-highest text-on-surface-variant',
     dotClass: 'bg-surface-container ring ring-outline-variant/60',
   },
 }

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
+import { MenuColorPicker } from '@/features/color-picker/custom/menu-color-picker'
 import { SiteFooter } from '../_components/site-footer'
 import { SiteHeader } from '../_components/site-header'
 import { FinalCta } from '../_landing/final-cta/final-cta'
 import { AboutHero } from './_components/about-hero'
-import { Decoration } from './_components/decoration'
+import { Decorations } from './_components/decorations'
 import { StoryGap } from './_components/story-gap'
 import { StoryMoment } from './_components/story-moment'
 import { StorySolution } from './_components/story-solution'
@@ -27,9 +28,12 @@ export default function AboutPage() {
           <StoryMoment />
           <StoryGap />
           <StorySolution />
-          <Decoration />
+          <Decorations />
         </div>
       </section>
+      <div className="fixed bottom-6 right-6 z-30">
+        <MenuColorPicker />
+      </div>
       <FinalCta />
       <SiteFooter />
     </>

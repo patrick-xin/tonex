@@ -19,7 +19,7 @@ export function SeedTrigger() {
     <span className="inline-flex items-center gap-2.5">
       <span
         aria-hidden
-        className="inline-block size-3 rounded-full shadow-sm"
+        className="inline-block size-3 rounded-full shadow-sm animate-pulse"
         style={{ backgroundColor: seedHex }}
       />
       <input

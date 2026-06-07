@@ -10,8 +10,8 @@ export const mdNavConfig: NavConfig = {
     { label: 'Overview', href: '/theme', icon: LayoutDashboard },
     { label: 'Color Roles', href: '/theme/color-roles', icon: Layers },
     { label: 'Palettes', href: '/theme/palettes', icon: Palette },
-    { label: 'Dashboard Preview', href: '/theme/dashboard-preview', icon: LayoutDashboard },
     { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
+    { label: 'Dashboard Preview', href: '/theme/dashboard-preview', icon: LayoutDashboard },
   ],
   // why: ADR-0021 commitment 8 — md routes pass these tabs. CSS is the
   // framework-agnostic native-CSS sibling of Tailwind (--md-sys-color-* +
