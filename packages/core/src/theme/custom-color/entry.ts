@@ -75,6 +75,14 @@ export function validateCustomColorEntry(
     return `name cannot produce a slug ending with "-container" (got "${slug}")`
   if (slug.endsWith('-foreground'))
     return `name cannot produce a slug ending with "-foreground" (got "${slug}")`
+  // why: `tnx-` is our reserved vendor namespace for INTERNAL app-chrome
+  // semantic tokens (--color-tnx-success / -warning / -info, hand-authored in
+  // globals.css, never seed-derived). Custom colours emit --color-{slug} into
+  // the live `.md` scope, which — since <body class="md"> — would override our
+  // global --color-tnx-* and hijack the app's own status colours. Reserving the
+  // whole prefix (vs the bare words) keeps `success`/`warning`/`info` free for
+  // users while making the collision structurally impossible. Like `--tw-`.
+  if (slug.startsWith('tnx-')) return `name cannot use the reserved "tnx-" prefix (got "${slug}")`
   if (reservedSlugs().has(slug)) return `name "${slug}" collides with a reserved md or shadcn token`
   if (existingSlugs.has(slug)) return `name "${slug}" duplicates an existing custom color`
   if (!isValidHex(entry.hex)) return `hex must be a 6-digit "#rrggbb" value`

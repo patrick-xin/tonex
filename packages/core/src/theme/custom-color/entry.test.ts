@@ -60,6 +60,17 @@ describe('validateCustomColorEntry', () => {
     )
   })
 
+  it('rejects slugs using the reserved "tnx-" vendor prefix', () => {
+    expect(validateCustomColorEntry({ name: 'Tnx Success', hex: '#000000' }, empty)).toMatch(/tnx-/)
+    expect(validateCustomColorEntry({ name: 'tnx-info', hex: '#000000' }, empty)).toMatch(/tnx-/)
+  })
+
+  it('keeps success/warning/info free for users (only the tnx- prefix is reserved)', () => {
+    expect(validateCustomColorEntry({ name: 'Success', hex: '#22c55e' }, empty)).toBeNull()
+    expect(validateCustomColorEntry({ name: 'Warning', hex: '#f59e0b' }, empty)).toBeNull()
+    expect(validateCustomColorEntry({ name: 'Info', hex: '#3b82f6' }, empty)).toBeNull()
+  })
+
   it('rejects duplicate slug against existing set', () => {
     const existing = new Set(['success'])
     expect(validateCustomColorEntry({ name: 'Success', hex: '#22c55e' }, existing)).toMatch(
