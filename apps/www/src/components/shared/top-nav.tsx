@@ -9,7 +9,7 @@ import { DrawerMobileNavigation } from './mobile-nav-drawer'
 export function TopNav() {
   return (
     <header className="flex h-12 items-center justify-between gap-2 px-2 sm:hidden flex-none border-b border-b-outline-variant/80">
-      <SiteLogo />
+      <SiteLogo className="size-6 ml-2" />
       <DrawerMobileNavigation />
     </header>
   )

@@ -6,6 +6,7 @@ import { SiteLogo } from '@/components/shared/chrome/site-logo'
 import { XLink } from '@/components/shared/chrome/x-link'
 import { ShimmerBorder } from '@/components/shared/shimmer-border'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
+import { ROUTES, SITE_CONFIG } from '@/lib/site-config'
 import { BrandHover } from './brand-hover'
 
 function FooterLink({
@@ -41,17 +42,19 @@ export function SiteFooter() {
           <div className="flex flex-col gap-10 sm:flex-row sm:justify-between md:justify-end md:gap-16">
             <nav aria-label="Site">
               <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">
-                Tonex
+                {SITE_CONFIG.brand}
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
-                  <FooterLink href="/theme">material theme</FooterLink>
+                  <FooterLink href={ROUTES.materialTheme.href}>
+                    {ROUTES.materialTheme.label}
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/theme/shadcn">shadcn mode</FooterLink>
+                  <FooterLink href={ROUTES.shadcn.href}>{ROUTES.shadcn.label}</FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/about">about</FooterLink>
+                  <FooterLink href={ROUTES.about.href}>{ROUTES.about.label}</FooterLink>
                 </li>
               </ul>
             </nav>
@@ -61,14 +64,14 @@ export function SiteFooter() {
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
-                  <FooterLink href="/roadmap">roadmap</FooterLink>
+                  <FooterLink href={ROUTES.roadmap.href}>{ROUTES.roadmap.label}</FooterLink>
                 </li>
               </ul>
             </nav>
           </div>
         </div>
         <div className="mt-12 py-4 flex items-center gap-4">
-          <p className="text-xs text-on-surface-variant">© 2026 tonex</p>
+          <p className="text-xs text-on-surface-variant">© 2026 {SITE_CONFIG.brand}</p>
           <ul className="flex items-center gap-1">
             <li>
               <XLink />

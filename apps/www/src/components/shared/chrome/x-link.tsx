@@ -1,12 +1,14 @@
 import { XLogoIcon } from '@phosphor-icons/react/dist/ssr'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { SITE_CONFIG } from '@/lib/site-config'
 
 export function XLink() {
   return (
     <Button
       nativeButton={false}
-      render={<Link rel="noreferrer" target="_blank" href="https://x.com/alpesdream" />}
+      aria-label="X"
+      render={<Link rel="noreferrer" target="_blank" href={SITE_CONFIG.social.x} />}
       variant="ghost"
       size="icon-sm"
     >
