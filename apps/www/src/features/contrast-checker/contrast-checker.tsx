@@ -2,6 +2,7 @@
 
 import { useHotkey } from '@tanstack/react-hotkeys'
 import { evaluateThemeContrast, type Mode } from '@tonex/core'
+import { applyLevel, isDecorative, summarizeContrast } from '@tonex/core/audit'
 import { MD_EXTENDED_TOKEN_NAMES } from '@tonex/core/schema'
 import { useResolvedTokens, useSource } from '@tonex/core-react'
 import { XIcon } from 'lucide-react'
@@ -25,12 +26,9 @@ import { useActiveMode } from '@/features/theme-mode'
 import { checkContrastDialogHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
-import { applyLevel } from './apply-level'
 import { ContrastInfo } from './contrast-info'
 import { ContrastTable } from './contrast-table'
-import { isDecorative } from './decorative'
 import { RESULT } from './result'
-import { summarizeContrast } from './summary'
 import type { Filter, Level, ResultFilter } from './types'
 
 // why: showExtended (UiPrefs) hides MD3 extended roles on the md route — the

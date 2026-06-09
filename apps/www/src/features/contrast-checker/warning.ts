@@ -1,6 +1,6 @@
 import type { PairResult } from '@tonex/core'
+import { isDecorative } from '@tonex/core/audit'
 import { hexString } from '@tonex/core/oklch'
-import { isDecorative } from './decorative'
 
 // why: unified data shape for every shadcn contrast warning surface (rails,
 // color-roles, role override list, popover editors). Sourced from a PairResult

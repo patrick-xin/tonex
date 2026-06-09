@@ -1,7 +1,10 @@
-// why: the audit opens on "All" with a tally so failures are seen in proportion
-// (most of the theme passes) instead of leading with a bare failure list. Pure so
-// the counts are unit-tested without rendering the dialog. Splits text vs UI fails
-// because they carry different severity (red = fix before shipping; amber = judgment call).
+// why: the gate tally — splits the audited pairs into pass / textFail / uiFail /
+// exempt so a caller (the www audit dialog's "All" view, and the auditTheme
+// gate) reads failures in proportion instead of leading with a bare failure
+// list. text vs UI fails are split because they carry different severity: a
+// failing TEXT pair (red) blocks the gate; a failing non-text/UI pair (amber) is
+// a judgment call that never blocks. Pure so the counts are unit-tested without
+// rendering anything.
 type SummaryPair = { effectivePasses: boolean; pair: { intent: 'text' | 'non-text' } }
 export type ContrastSummary = { pass: number; textFail: number; uiFail: number; exempt: number }
 

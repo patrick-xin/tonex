@@ -6,7 +6,7 @@ What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime
 
 ## Subpaths
 
-`@tonex/core` has six entry points (`packages/core/package.json` `exports`):
+`@tonex/core` has seven entry points (`packages/core/package.json` `exports`):
 
 | Import path | What's in it | When to reach for it |
 | --- | --- | --- |
@@ -16,6 +16,7 @@ What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime
 | `@tonex/core/data` | static palette tables | Tailwind palette, neutral palette names |
 | `@tonex/core/variants` | variant strategies + registry | inspect/list variants in UI |
 | `@tonex/core/derive-cache` | memoized `getDerivedTheme` | the editor runtime's shared derive cache; www almost never imports it directly |
+| `@tonex/core/audit` | WCAG contrast verdict layer | gate a theme (`auditTheme`) or any pair list (`auditPairs`); the per-pair helpers (`applyLevel`, `resultOf`, `summarizeContrast`, `isDecorative`) the www contrast checker consumes |
 
 `@tonex/core-react` has one entry point (`.`) — see its section below.
 
@@ -147,12 +148,21 @@ Individual strategy files (`tonalSpot`, `vibrant`, …) are not exported. `deriv
 
 - `getDerivedTheme(source, uniformContrast?)` — module-global FIFO cache (cap 6) over `deriveTheme`, keyed on `(source-identity, contrast pair)` (issue #9/#20). The editor runtime (`useResolvedTokens`, `applyDom`) and the exporters share one derive per source change. Exposed on its own subpath, off the pure main barrel, because the cache is module-global mutable state (ADR-0037) — www reads derived tokens via `useResolvedTokens`, not this directly.
 
+## `@tonex/core/audit` — WCAG verdict layer
+
+The contrast verdict layer, lifted out of the www contrast checker so the engine owns the gate (not the web app). Two functions over one scorer:
+
+- `auditPairs(theme, pairs, { level? })` — the **primitive**: score an arbitrary `ContrastPair[]` against a `DerivedTheme` in both modes, returning `{ ok, results }`. Runs the uncached engine scorer, so any pair list is fair game (the CLI / foreign-fill `check` path).
+- `auditTheme(theme, { level?, customColors?, includeBrand? })` — the **gate** over the canonical `CONTRAST_PAIRS` (the static spec set), returning `{ ok, level, failures, warnings, exempt, summary }`. Wired through the WeakMap-cached `evaluateThemeContrast` and its `includeBrand` / `customColors` opt-ins.
+- **BLESSED gate policy:** `ok` fails on **text** failures only — a failing non-text/UI pair is reported as a `warn` but never blocks. Decorative pairs (the outline-variant set) are exempt: `'none'`, counted in `summary.exempt`.
+- Helpers also exported (the www checker's verdict pieces, single-sourced here): `applyLevel`, `levelThreshold`, `resultOf`, `summarizeContrast`, `isDecorative`, plus types `Level`, `Result`, `EvaluatedPair`, `ContrastSummary`, `EvaluatedAuditPair`.
+
 ## What is *not* in core
 
 Common reaches that belong in www, not core:
 
 - **`useThemeToggle`, `useActiveMode`, `useSetMode`** — `apps/www/src/features/theme-mode/`. The only files allowed to import from `next-themes` (ADR-0015 amendment 2026-05-09).
-- **Contrast utilities, role groupings, role-editor logic** — `apps/www/src/features/color-roles-list/`.
+- **Contrast *presentation* (badges, legend copy, row grouping, dual-intent collapse), role-editor logic** — `apps/www/src/features/contrast-checker/` + `color-roles-list/`. The pure *verdict* now lives in `@tonex/core/audit` (above); only the presentational shell stays app-side.
 - **Export job UI / wiring** — `apps/www/src/features/export-*/`.
 
 Pattern: when you find yourself composing 2–3 core hooks plus null-handling across multiple components, lift the composition into a feature folder hook (per ADR-0022 rule 5). Don't re-export core from a generic www barrel.

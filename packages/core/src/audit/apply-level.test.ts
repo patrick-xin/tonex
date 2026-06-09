@@ -1,7 +1,6 @@
 import { hexString } from '@tonex/color-utils'
-import type { PairResult } from '@tonex/core'
-import type { ContrastPair } from '@tonex/core/schema'
 import { describe, expect, it } from 'vitest'
+import type { ContrastPair, PairResult } from '../theme/contrast'
 import { applyLevel, levelThreshold } from './apply-level'
 
 // why: AA/AAA is a runtime threshold override on top of the per-pair

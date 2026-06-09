@@ -11,6 +11,7 @@
 // risk within the folder.
 
 export {
+  buildReport,
   type ContrastReport,
   evaluateThemeContrast,
   type PairResult,

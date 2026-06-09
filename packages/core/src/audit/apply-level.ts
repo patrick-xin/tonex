@@ -1,5 +1,5 @@
-import type { PairResult } from '@tonex/core'
-import { hexString } from '@tonex/core/oklch'
+import { hexString } from '../oklch'
+import type { PairResult } from '../theme/contrast'
 import type { EvaluatedPair, Level } from './types'
 
 // why: AA/AAA is a runtime threshold override on top of the per-pair

@@ -1,8 +1,8 @@
+import type { ContrastSummary } from '@tonex/core/audit'
 import { cx } from 'tailwind-variants'
 import { Chip } from '@/components/ui/chip'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { RESULT, RESULT_ORDER } from './result'
-import type { ContrastSummary } from './summary'
 
 // why: the audit's plain-language key + tally, isolated from Body so copy and
 // visual redesign happen here without touching the dialog's data wiring. Both
