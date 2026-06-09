@@ -220,6 +220,31 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@22.19.17)(jiti@2.6.1)(jsdom@29.1.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4)
 
+  packages/cli:
+    dependencies:
+      '@tonex/color-utils':
+        specifier: workspace:*
+        version: link:../color-utils
+      '@tonex/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@tonex/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      tsx:
+        specifier: ^4.20.6
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: 'catalog:'
+        version: 5.1.4(typescript@5.9.3)(vite@7.3.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4))
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@22.19.17)(jiti@2.6.1)(jsdom@29.1.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4)
+
   packages/color-utils:
     dependencies:
       '@tonex/mcu':

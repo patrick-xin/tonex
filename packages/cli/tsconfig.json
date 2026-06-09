@@ -1,0 +1,11 @@
+{
+  "extends": "@tonex/typescript-config/library.json",
+  "compilerOptions": {
+    "paths": {
+      "@tonex/core": ["../core/src/index.ts"],
+      "@tonex/core/schema": ["../core/src/schema.ts"],
+      "@tonex/color-utils": ["../color-utils/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}
