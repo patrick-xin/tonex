@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useLayer } from '@/lib/layer-context'
 import { makeLiveAnchor, useGuide } from './guide-context'
 import { OnboardingGuide, type ResolvedGuideStep } from './onboarding-guide'
@@ -15,17 +14,15 @@ export function OnboardingTour() {
   const layer = useLayer()
   const { open, setOpen, suspended, suspend, getAnchor } = useGuide()
 
-  const steps = React.useMemo<ResolvedGuideStep[]>(
-    () =>
-      getSteps(layer).map((step) => ({
-        title: step.title,
-        description: step.description,
-        side: step.side,
-        learnMore: step.learnMore,
-        anchor: makeLiveAnchor(getAnchor, step.anchorKey),
-      })),
-    [layer, getAnchor],
-  )
+  const steps: ResolvedGuideStep[] = getSteps(layer).map((step) => ({
+    title: step.title,
+    popoverTitle: step.popoverTitle,
+    description: step.description,
+    side: step.side,
+    learnMore: step.learnMore,
+    illustration: step.illustration,
+    anchor: makeLiveAnchor(getAnchor, step.anchorKey),
+  }))
 
   return (
     <OnboardingGuide
@@ -36,7 +33,6 @@ export function OnboardingTour() {
       steps={steps}
       welcomeTitle={TOUR_WELCOME.title}
       welcomeDescription={TOUR_WELCOME.description}
-      welcomeLearnMore={TOUR_WELCOME.learnMore}
     />
   )
 }

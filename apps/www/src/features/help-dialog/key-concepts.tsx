@@ -52,7 +52,6 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
   const { value, setValue } = useHelpSectionOpen(section, 'concepts', [])
   return (
     <div className="space-y-2">
-      <h3 className="text-lg font-semibold">Key Concepts</h3>
       <Accordion
         className="w-full text-base"
         value={value}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TOUR_STEPS, TOUR_WELCOME } from '@/features/onboarding-guide'
+import { TOUR_STEPS } from '@/features/onboarding-guide'
 import { HELP_SECTIONS, openItemsFor } from './help-sections'
 
 describe('openItemsFor', () => {
@@ -34,9 +34,5 @@ describe('tour learnMore drift guard', () => {
         expect(HELP_SECTIONS).toHaveProperty(step.learnMore)
       }
     }
-  })
-
-  it('the welcome learnMore resolves to a real help section', () => {
-    expect(HELP_SECTIONS).toHaveProperty(TOUR_WELCOME.learnMore)
   })
 })

@@ -23,35 +23,35 @@ import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 const SCENES = {
-  cooking: { brightness: [90], colorTemp: [70], volume: [30], fade: [0] },
-  dining: { brightness: [50], colorTemp: [40], volume: [20], fade: [60] },
-  nightlight: { brightness: [15], colorTemp: [20], volume: [0], fade: [80] },
-  focus: { brightness: [100], colorTemp: [85], volume: [0], fade: [0] },
+  movie: { intensity: [40], warmth: [30], speed: [10], saturation: [50] },
+  reading: { intensity: [85], warmth: [60], speed: [0], saturation: [70] },
+  party: { intensity: [100], warmth: [50], speed: [80], saturation: [100] },
+  relax: { intensity: [30], warmth: [80], speed: [20], saturation: [40] },
 } as const
 
 export function KitchenIsland() {
   const [enabled, setEnabled] = React.useState(true)
-  const [scene, setScene] = React.useState('cooking')
-  const [brightness, setBrightness] = React.useState([90])
-  const [colorTemp, setColorTemp] = React.useState([70])
-  const [volume, setVolume] = React.useState([30])
-  const [fade, setFade] = React.useState([0])
+  const [scene, setScene] = React.useState('movie')
+  const [intensity, setIntensity] = React.useState([40])
+  const [warmth, setWarmth] = React.useState([30])
+  const [speed, setSpeed] = React.useState([10])
+  const [saturation, setSaturation] = React.useState([50])
 
   const handleSceneChange = (value: string) => {
     if (!value) return
     setScene(value)
     const preset = SCENES[value as keyof typeof SCENES]
-    setBrightness([...preset.brightness])
-    setColorTemp([...preset.colorTemp])
-    setVolume([...preset.volume])
-    setFade([...preset.fade])
+    setIntensity([...preset.intensity])
+    setWarmth([...preset.warmth])
+    setSpeed([...preset.speed])
+    setSaturation([...preset.saturation])
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Kitchen Island</CardTitle>
-        <CardDescription>Hue Color Ambient</CardDescription>
+        <CardTitle>Living Room</CardTitle>
+        <CardDescription>Smart Lighting Control</CardDescription>
         <CardAction>
           <Switch checked={enabled} onCheckedChange={setEnabled} />
         </CardAction>
@@ -61,22 +61,22 @@ export function KitchenIsland() {
           <span className="sr-only">Scenes</span>
           <ToggleGroup
             value={[scene]}
-            onValueChange={(value) => handleSceneChange(value[0] ?? 'cooking')}
+            onValueChange={(value) => handleSceneChange(value[0] ?? 'movie')}
             variant="outline"
             spacing={1}
             className="flex-wrap"
           >
-            <ToggleGroupItem value="cooking" disabled={!enabled}>
-              Cooking
+            <ToggleGroupItem value="movie" disabled={!enabled}>
+              Movie
             </ToggleGroupItem>
-            <ToggleGroupItem value="dining" disabled={!enabled}>
-              Dining
+            <ToggleGroupItem value="reading" disabled={!enabled}>
+              Reading
             </ToggleGroupItem>
-            <ToggleGroupItem value="nightlight" disabled={!enabled}>
-              Nightlight
+            <ToggleGroupItem value="party" disabled={!enabled}>
+              Party
             </ToggleGroupItem>
-            <ToggleGroupItem value="focus" disabled={!enabled}>
-              Focus
+            <ToggleGroupItem value="relax" disabled={!enabled}>
+              Relax
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -86,14 +86,12 @@ export function KitchenIsland() {
               <SunIcon />
             </ItemMedia>
             <ItemContent className="flex-row items-center gap-3">
-              <ItemTitle className="shrink-0">Brightness</ItemTitle>
+              <ItemTitle className="shrink-0">Intensity</ItemTitle>
             </ItemContent>
             <ItemActions className="flex-1">
               <Slider
-                value={brightness}
-                onValueChange={(value) =>
-                  setBrightness(Array.isArray(value) ? [...value] : [value])
-                }
+                value={intensity}
+                onValueChange={(value) => setIntensity(Array.isArray(value) ? [...value] : [value])}
                 max={100}
                 disabled={!enabled}
                 className="w-full"
@@ -105,12 +103,12 @@ export function KitchenIsland() {
               <ThermometerIcon />
             </ItemMedia>
             <ItemContent className="flex-row items-center gap-3">
-              <ItemTitle className="shrink-0">Color Temp</ItemTitle>
+              <ItemTitle className="shrink-0">Warmth</ItemTitle>
             </ItemContent>
             <ItemActions className="flex-1">
               <Slider
-                value={colorTemp}
-                onValueChange={(value) => setColorTemp(Array.isArray(value) ? [...value] : [value])}
+                value={warmth}
+                onValueChange={(value) => setWarmth(Array.isArray(value) ? [...value] : [value])}
                 max={100}
                 disabled={!enabled}
               />
@@ -121,12 +119,12 @@ export function KitchenIsland() {
               <Volume2Icon />
             </ItemMedia>
             <ItemContent className="flex-row items-center gap-3">
-              <ItemTitle className="shrink-0">Volume</ItemTitle>
+              <ItemTitle className="shrink-0">Speed</ItemTitle>
             </ItemContent>
             <ItemActions className="flex-1">
               <Slider
-                value={volume}
-                onValueChange={(value) => setVolume(Array.isArray(value) ? [...value] : [value])}
+                value={speed}
+                onValueChange={(value) => setSpeed(Array.isArray(value) ? [...value] : [value])}
                 max={100}
                 disabled={!enabled}
               />
@@ -137,12 +135,14 @@ export function KitchenIsland() {
               <TimerIcon />
             </ItemMedia>
             <ItemContent className="flex-row items-center gap-3">
-              <ItemTitle className="shrink-0">Fade</ItemTitle>
+              <ItemTitle className="shrink-0">Saturation</ItemTitle>
             </ItemContent>
             <ItemActions className="flex-1">
               <Slider
-                value={fade}
-                onValueChange={(value) => setFade(Array.isArray(value) ? [...value] : [value])}
+                value={saturation}
+                onValueChange={(value) =>
+                  setSaturation(Array.isArray(value) ? [...value] : [value])
+                }
                 max={100}
                 disabled={!enabled}
               />

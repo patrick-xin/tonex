@@ -34,4 +34,19 @@ describe('getSteps', () => {
     expect(getSteps('md').map((s) => s.anchorKey)).toContain('seed-color')
     expect(getSteps('shadcn').map((s) => s.anchorKey)).toContain('seed-color')
   })
+
+  // why: the rail diverges by layer — binding preset, token overrides, and role
+  // bindings are shadcn-only controls, palette override is md-only. A step that
+  // surfaced in the wrong layer would spotlight a control that isn't on screen.
+  it('gates shadcn-only rail steps to shadcn', () => {
+    for (const key of ['binding-preset', 'token-overrides', 'role-bindings']) {
+      expect(getSteps('shadcn').map((s) => s.key)).toContain(key)
+      expect(getSteps('md').map((s) => s.key)).not.toContain(key)
+    }
+  })
+
+  it('gates the palette-override rail step to md', () => {
+    expect(getSteps('md').map((s) => s.key)).toContain('palette-override')
+    expect(getSteps('shadcn').map((s) => s.key)).not.toContain('palette-override')
+  })
 })

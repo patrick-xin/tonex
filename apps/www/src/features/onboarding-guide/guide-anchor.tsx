@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import type * as React from 'react'
 import { useGuideOptional } from './guide-context'
 
 // why: lets a server-rendered control opt into the tour registry without
@@ -18,12 +18,9 @@ export function GuideAnchor({
 }) {
   const guide = useGuideOptional()
 
-  const ref = React.useCallback(
-    (el: HTMLElement | null) => {
-      guide?.registerAnchor(anchorKey, el)
-    },
-    [guide, anchorKey],
-  )
+  const ref = (el: HTMLElement | null) => {
+    guide?.registerAnchor(anchorKey, el)
+  }
 
   return (
     <div ref={ref} className={className}>
