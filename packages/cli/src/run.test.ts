@@ -50,3 +50,31 @@ describe('tonex generate — the walking skeleton', () => {
     expect(err).toMatch(/generate/i)
   })
 })
+
+// why: step B adds `--variant` (default cmf) and `--format json|css` (default
+// css). Kept deliberately small — two cases that pin the load-bearing
+// behaviour (the format switch works; a param actually reaches the engine)
+// without over-specifying every default/error per flag, so adjusting one param
+// later doesn't churn a wall of tests. (`--mode` is absent on purpose: css/json
+// co-emit both modes, so mode only bites the single-mode design.md exporter at
+// step D.)
+describe('tonex generate — params (step B)', () => {
+  const SEED = '#3b82f6'
+
+  it('--format picks the output language (css by default, json on request)', () => {
+    const css = capture(['generate', '--seed', SEED])
+    expect(css.code).toBe(0)
+    expect(css.out).toContain('--primary')
+
+    const json = capture(['generate', '--seed', SEED, '--format', 'json'])
+    expect(json.code).toBe(0)
+    expect(() => JSON.parse(json.out)).not.toThrow()
+  })
+
+  it('--variant reaches the engine — a different scheme yields different output', () => {
+    const cmf = capture(['generate', '--seed', SEED, '--variant', 'cmf'])
+    const mono = capture(['generate', '--seed', SEED, '--variant', 'monochrome'])
+    expect(mono.code).toBe(0)
+    expect(mono.out).not.toBe(cmf.out)
+  })
+})

@@ -4,6 +4,7 @@
     "paths": {
       "@tonex/core": ["../core/src/index.ts"],
       "@tonex/core/schema": ["../core/src/schema.ts"],
+      "@tonex/core/variants": ["../core/src/variants/index.ts"],
       "@tonex/color-utils": ["../color-utils/src/index.ts"]
     }
   },
