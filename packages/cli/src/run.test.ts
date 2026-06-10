@@ -97,3 +97,69 @@ describe('tonex check — the contrast gate (step C)', () => {
     expect(report.summary).toBeDefined()
   })
 })
+
+// why: step C.5 adds the pair-check ORACLE — the in-loop machine answer to "does
+// this fg/bg pairing clear contrast?" that stops an agent mis-pairing tokens when
+// it projects our raw values into a foreign tool's slots. Theme-free (the agent
+// already holds the hexes), so `check` overloads onto two new forms: a single
+// positional pair and a batch `--pairs`, both honoring --aaa (level) and --large
+// (text size). Kept small per [[feedback_minimal_robust_tests]] — one case per
+// load-bearing branch (verdict+exit, level, size, batch enumeration), not a matrix.
+describe('tonex check — the pair oracle (step C.5)', () => {
+  it('verdicts a single fg/bg pair: clears AA → exit 0, fails AA → exit 1 with the ratio', () => {
+    expect(capture(['check', '#000000', '#ffffff']).code).toBe(0)
+    const fail = capture(['check', '#949494', '#ffffff']) // ~3.03
+    expect(fail.code).toBe(1)
+    expect(fail.out).toMatch(/3\.0/) // the failing ratio is reported, not a bare exit 1
+  })
+
+  it('--aaa raises the bar: a mid pair clears AA but fails AAA', () => {
+    const pair = ['check', '#5b5b5b', '#ffffff'] // ~6.79
+    expect(capture(pair).code).toBe(0) // clears AA text (4.5)
+    expect(capture([...pair, '--aaa']).code).toBe(1) // but not AAA text (7)
+  })
+
+  it('--large relaxes to the large-text threshold', () => {
+    const pair = ['check', '#ff0000', '#ffffff'] // ~4.0
+    expect(capture(pair).code).toBe(1) // fails normal text (4.5)
+    expect(capture([...pair, '--large']).code).toBe(0) // clears large text (3.0)
+  })
+
+  it('--pairs batch fails on any offender and names which pair failed', () => {
+    const pairs = JSON.stringify([
+      ['#000000', '#ffffff'],
+      ['#949494', '#ffffff'], // ~3.03, the offender
+    ])
+    const { code, out } = capture(['check', '--pairs', pairs])
+    expect(code).toBe(1)
+    expect(out).toContain('#949494') // enumerated, so the agent's next move is targeted
+
+    const allPass = capture(['check', '--pairs', JSON.stringify([['#000000', '#ffffff']])])
+    expect(allPass.code).toBe(0)
+  })
+
+  it('rejects a malformed pair instead of silently passing', () => {
+    expect(capture(['check', '#000000', 'not-a-hex']).code).toBe(1)
+    expect(capture(['check', '--pairs', '[["#000000","nope"]]']).code).toBe(1)
+  })
+})
+
+// why: step C.5 also exposes MCU's existing `contrastLevel` as a `--contrast
+// <0..1>` flag — the palette-LAYER remedy (raise contrast, re-derive) for AAA
+// pairs that re-mapping can't fix. Pure flag-plumbing through the shared
+// parseSource (so `check --seed` honors it too); two cases — it reaches the
+// engine, and the [0,1] bound is enforced.
+describe('tonex generate — --contrast (step C.5)', () => {
+  const SEED = '#3b82f6'
+
+  it('--contrast reaches the engine — a raised level shifts the output', () => {
+    const base = capture(['generate', '--seed', SEED])
+    const high = capture(['generate', '--seed', SEED, '--contrast', '1'])
+    expect(high.code).toBe(0)
+    expect(high.out).not.toBe(base.out)
+  })
+
+  it('rejects an out-of-range contrast level', () => {
+    expect(capture(['generate', '--seed', SEED, '--contrast', '5']).code).toBe(1)
+  })
+})
