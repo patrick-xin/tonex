@@ -78,3 +78,22 @@ describe('tonex generate — params (step B)', () => {
     expect(mono.out).not.toBe(cmf.out)
   })
 })
+
+// why: step C wires Slice 0's `auditTheme` into a process gate — the second
+// consumer of @tonex/core/audit. Small surface: the gate maps onto the exit
+// code, and `--json` carries the verdict. (A failing gate isn't reachable via
+// seed-only input — tonex passes by construction — so that branch is exercised
+// at step E over foreign pairs, not here.)
+describe('tonex check — the contrast gate (step C)', () => {
+  it('audits the derived theme and exits 0 when it passes', () => {
+    expect(capture(['check', '--seed', '#3b82f6']).code).toBe(0)
+  })
+
+  it('--json emits a parseable report carrying the ok verdict', () => {
+    const { code, out } = capture(['check', '--seed', '#3b82f6', '--json'])
+    expect(code).toBe(0)
+    const report = JSON.parse(out)
+    expect(report.ok).toBe(true)
+    expect(report.summary).toBeDefined()
+  })
+})
