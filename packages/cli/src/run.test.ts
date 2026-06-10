@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { run } from './run'
 
-// why: the Slice 1 step A acceptance contract — the walking skeleton. It pins
-// the command's OBSERVABLE behaviour (exit code + what it prints), not the
-// exact CSS bytes: a clean seed derives a theme and prints shadcn CSS at exit
-// 0; a bad/missing seed or unknown command exits 1 with a message. This proves
-// the whole wire is live — package, arg parse, `@tonex/core` import, derive,
-// print — without spawning a process. Richer params (`--variant`, `--mode`,
-// `--format`) land in step B against this same `run` surface.
+// why: the v0 CLI acceptance contract. These pin OBSERVABLE behaviour — exit code
+// + what is printed — at the pure `run(argv, io)` boundary, not the exact CSS/JSON
+// bytes, so re-tuning a palette doesn't churn the suite. The exit-code taxonomy is
+// load-bearing and asserted directly: 0 = clean, 1 = a contrast TEXT pair failed
+// (fix the artifact), 2 = a usage/input error (fix the call). Kept minimal per
+// [[feedback_minimal_robust_tests]]: one case per load-bearing branch, not a matrix.
+
+const OK = 0
+const GATE = 1
+const USAGE = 2
 
 function capture(argv: string[]) {
   const out: string[] = []
@@ -16,150 +19,175 @@ function capture(argv: string[]) {
   return { code, out: out.join(''), err: err.join('') }
 }
 
-describe('tonex generate — the walking skeleton', () => {
-  it('derives a theme from --seed and prints shadcn CSS at exit 0', () => {
-    const { code, out } = capture(['generate', '--seed', '#3b82f6'])
-    expect(code).toBe(0)
+describe('tonex generate', () => {
+  const SEED = '#3b82f6'
+
+  it('derives a theme from --seed and prints the shadcn :root/.dark block at exit 0', () => {
+    const { code, out } = capture(['generate', '--seed', SEED])
+    expect(code).toBe(OK)
     expect(out).toContain('--primary')
     expect(out).toContain('.dark')
   })
 
-  it('routes the seed through the engine — different seeds give different CSS', () => {
-    const a = capture(['generate', '--seed', '#3b82f6'])
+  it('routes the seed through the engine — different seeds give different output', () => {
+    const a = capture(['generate', '--seed', SEED])
     const b = capture(['generate', '--seed', '#ef4444'])
-    expect(a.code).toBe(0)
-    expect(b.code).toBe(0)
     expect(a.out).not.toBe(b.out)
-  })
-
-  it('missing --seed exits 1 with a message naming the seed flag', () => {
-    const { code, err } = capture(['generate'])
-    expect(code).toBe(1)
-    expect(err).toMatch(/seed/i)
-  })
-
-  it('an invalid seed hex exits 1', () => {
-    const { code, err } = capture(['generate', '--seed', 'not-a-hex'])
-    expect(code).toBe(1)
-    expect(err).toMatch(/invalid/i)
-  })
-
-  it('an unknown command exits 1 and points at the usage', () => {
-    const { code, err } = capture(['frobnicate'])
-    expect(code).toBe(1)
-    expect(err).toMatch(/generate/i)
-  })
-})
-
-// why: step B adds `--variant` (default cmf) and `--format json|css` (default
-// css). Kept deliberately small — two cases that pin the load-bearing
-// behaviour (the format switch works; a param actually reaches the engine)
-// without over-specifying every default/error per flag, so adjusting one param
-// later doesn't churn a wall of tests. (`--mode` is absent on purpose: css/json
-// co-emit both modes, so mode only bites the single-mode design.md exporter at
-// step D.)
-describe('tonex generate — params (step B)', () => {
-  const SEED = '#3b82f6'
-
-  it('--format picks the output language (css by default, json on request)', () => {
-    const css = capture(['generate', '--seed', SEED])
-    expect(css.code).toBe(0)
-    expect(css.out).toContain('--primary')
-
-    const json = capture(['generate', '--seed', SEED, '--format', 'json'])
-    expect(json.code).toBe(0)
-    expect(() => JSON.parse(json.out)).not.toThrow()
   })
 
   it('--variant reaches the engine — a different scheme yields different output', () => {
     const cmf = capture(['generate', '--seed', SEED, '--variant', 'cmf'])
     const mono = capture(['generate', '--seed', SEED, '--variant', 'monochrome'])
-    expect(mono.code).toBe(0)
+    expect(mono.code).toBe(OK)
     expect(mono.out).not.toBe(cmf.out)
   })
-})
 
-// why: step C wires Slice 0's `auditTheme` into a process gate — the second
-// consumer of @tonex/core/audit. Small surface: the gate maps onto the exit
-// code, and `--json` carries the verdict. (A failing gate isn't reachable via
-// seed-only input — tonex passes by construction — so that branch is exercised
-// at step E over foreign pairs, not here.)
-describe('tonex check — the contrast gate (step C)', () => {
-  it('audits the derived theme and exits 0 when it passes', () => {
-    expect(capture(['check', '--seed', '#3b82f6']).code).toBe(0)
+  it('--to json emits a parseable document; --to yaml a single-mode colors: block', () => {
+    const json = capture(['generate', '--seed', SEED, '--to', 'json'])
+    expect(json.code).toBe(OK)
+    expect(() => JSON.parse(json.out)).not.toThrow()
+
+    const yaml = capture(['generate', '--seed', SEED, '--to', 'yaml'])
+    expect(yaml.code).toBe(OK)
+    expect(yaml.out.startsWith('colors:')).toBe(true)
+    expect(yaml.out).not.toContain('.dark') // single-mode, not the dual css block
   })
 
-  it('--json emits a parseable report carrying the ok verdict', () => {
-    const { code, out } = capture(['check', '--seed', '#3b82f6', '--json'])
-    expect(code).toBe(0)
-    const report = JSON.parse(out)
-    expect(report.ok).toBe(true)
-    expect(report.summary).toBeDefined()
-  })
-})
-
-// why: step C.5 adds the pair-check ORACLE — the in-loop machine answer to "does
-// this fg/bg pairing clear contrast?" that stops an agent mis-pairing tokens when
-// it projects our raw values into a foreign tool's slots. Theme-free (the agent
-// already holds the hexes), so `check` overloads onto two new forms: a single
-// positional pair and a batch `--pairs`, both honoring --aaa (level) and --large
-// (text size). Kept small per [[feedback_minimal_robust_tests]] — one case per
-// load-bearing branch (verdict+exit, level, size, batch enumeration), not a matrix.
-describe('tonex check — the pair oracle (step C.5)', () => {
-  it('verdicts a single fg/bg pair: clears AA → exit 0, fails AA → exit 1 with the ratio', () => {
-    expect(capture(['check', '#000000', '#ffffff']).code).toBe(0)
-    const fail = capture(['check', '#949494', '#ffffff']) // ~3.03
-    expect(fail.code).toBe(1)
-    expect(fail.out).toMatch(/3\.0/) // the failing ratio is reported, not a bare exit 1
+  it('--mode picks which mode yaml emits (light default; dark differs); a bad mode is exit 2', () => {
+    const light = capture(['generate', '--seed', SEED, '--to', 'yaml'])
+    const dark = capture(['generate', '--seed', SEED, '--to', 'yaml', '--mode', 'dark'])
+    expect(dark.code).toBe(OK)
+    expect(dark.out).not.toBe(light.out)
+    expect(capture(['generate', '--seed', SEED, '--to', 'yaml', '--mode', 'sideways']).code).toBe(
+      USAGE,
+    )
   })
 
-  it('--aaa raises the bar: a mid pair clears AA but fails AAA', () => {
-    const pair = ['check', '#5b5b5b', '#ffffff'] // ~6.79
-    expect(capture(pair).code).toBe(0) // clears AA text (4.5)
-    expect(capture([...pair, '--aaa']).code).toBe(1) // but not AAA text (7)
+  it('--tint / --desaturate reach the engine and are mutually exclusive (exit 2)', () => {
+    const base = capture(['generate', '--seed', SEED])
+    const desat = capture(['generate', '--seed', SEED, '--desaturate', '0.5'])
+    expect(desat.code).toBe(OK)
+    expect(desat.out).not.toBe(base.out)
+    expect(capture(['generate', '--seed', SEED, '--tint', '0.5', '--desaturate', '0.5']).code).toBe(
+      USAGE,
+    )
   })
 
-  it('--large relaxes to the large-text threshold', () => {
-    const pair = ['check', '#ff0000', '#ffffff'] // ~4.0
-    expect(capture(pair).code).toBe(1) // fails normal text (4.5)
-    expect(capture([...pair, '--large']).code).toBe(0) // clears large text (3.0)
-  })
-
-  it('--pairs batch fails on any offender and names which pair failed', () => {
-    const pairs = JSON.stringify([
-      ['#000000', '#ffffff'],
-      ['#949494', '#ffffff'], // ~3.03, the offender
-    ])
-    const { code, out } = capture(['check', '--pairs', pairs])
-    expect(code).toBe(1)
-    expect(out).toContain('#949494') // enumerated, so the agent's next move is targeted
-
-    const allPass = capture(['check', '--pairs', JSON.stringify([['#000000', '#ffffff']])])
-    expect(allPass.code).toBe(0)
-  })
-
-  it('rejects a malformed pair instead of silently passing', () => {
-    expect(capture(['check', '#000000', 'not-a-hex']).code).toBe(1)
-    expect(capture(['check', '--pairs', '[["#000000","nope"]]']).code).toBe(1)
-  })
-})
-
-// why: step C.5 also exposes MCU's existing `contrastLevel` as a `--contrast
-// <0..1>` flag — the palette-LAYER remedy (raise contrast, re-derive) for AAA
-// pairs that re-mapping can't fix. Pure flag-plumbing through the shared
-// parseSource (so `check --seed` honors it too); two cases — it reaches the
-// engine, and the [0,1] bound is enforced.
-describe('tonex generate — --contrast (step C.5)', () => {
-  const SEED = '#3b82f6'
-
-  it('--contrast reaches the engine — a raised level shifts the output', () => {
+  it('--contrast reaches the engine; an out-of-range level is a usage error (exit 2)', () => {
     const base = capture(['generate', '--seed', SEED])
     const high = capture(['generate', '--seed', SEED, '--contrast', '1'])
-    expect(high.code).toBe(0)
+    expect(high.code).toBe(OK)
     expect(high.out).not.toBe(base.out)
+    expect(capture(['generate', '--seed', SEED, '--contrast', '5']).code).toBe(USAGE)
   })
 
-  it('rejects an out-of-range contrast level', () => {
-    expect(capture(['generate', '--seed', SEED, '--contrast', '5']).code).toBe(1)
+  it('bad inputs are usage errors (exit 2): missing seed, invalid hex, unknown flag/command', () => {
+    expect(capture(['generate']).code).toBe(USAGE) // missing --seed
+    expect(capture(['generate']).err).toMatch(/seed/i)
+    expect(capture(['generate', '--seed', 'not-a-hex']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', 'not-a-hex']).err).toMatch(/invalid/i)
+    expect(capture(['generate', '--seed', SEED, '--varinat', 'cmf']).code).toBe(USAGE) // typo'd flag
+    expect(capture(['frobnicate']).code).toBe(USAGE)
+  })
+})
+
+// why: `check` is the contrast gate, overloaded across forms that share one
+// exit-code contract (0 clears the level, 1 a text pair fails, 2 a bad call).
+describe('tonex check — whole-theme gate', () => {
+  const SEED = '#6750a4'
+
+  it('audits the derived theme and exits 0 when it passes; --json carries the ok verdict', () => {
+    expect(capture(['check', '--seed', '#3b82f6']).code).toBe(OK)
+    const report = JSON.parse(capture(['check', '--seed', '#3b82f6', '--json']).out)
+    expect(report.ok).toBe(true)
+  })
+
+  it('--find-contrast reports the minimum passing --contrast in one call', () => {
+    const { code, out } = capture(['check', '--seed', SEED, '--aaa', '--find-contrast'])
+    expect(code).toBe(OK)
+    expect(out).toMatch(/FOUND/)
+    expect(out).toMatch(/--contrast 0\.89/) // verified boundary for this seed
+  })
+
+  it('--mode scopes the gate to one projection — dark clears where the both-mode union fails', () => {
+    // at AAA contrast 0.8 the light projection still fails, so the default gate blocks…
+    expect(capture(['check', '--seed', SEED, '--aaa', '--contrast', '0.8']).code).toBe(GATE)
+    // …but dark already clears, so scoping to it passes (matches a --mode dark yaml).
+    expect(
+      capture(['check', '--seed', SEED, '--aaa', '--contrast', '0.8', '--mode', 'dark']).code,
+    ).toBe(OK)
+  })
+
+  it('--mode narrows the find-contrast remedy — dark needs less contrast than the union', () => {
+    const both = JSON.parse(
+      capture(['check', '--seed', SEED, '--aaa', '--find-contrast', '--json']).out,
+    )
+    const dark = JSON.parse(
+      capture(['check', '--seed', SEED, '--aaa', '--find-contrast', '--mode', 'dark', '--json'])
+        .out,
+    )
+    expect(both.reachable).toBe(true)
+    expect(dark.reachable).toBe(true)
+    expect(dark.minContrast).toBeLessThan(both.minContrast)
+  })
+})
+
+// why: the pair oracle — the in-loop "does this fg/bg clear contrast?" answer that
+// stops an agent mis-pairing tokens. Theme-free (the agent holds the hexes). A
+// contrast failure is exit 1 (the artifact); a malformed hex is exit 2 (the call).
+describe('tonex check — pair oracle', () => {
+  it('verdicts a single pair: clears → 0, fails → 1 with the ratio reported', () => {
+    expect(capture(['check', '#000000', '#ffffff']).code).toBe(OK)
+    const fail = capture(['check', '#949494', '#ffffff']) // ~3.03
+    expect(fail.code).toBe(GATE)
+    expect(fail.out).toMatch(/3\.0/) // the failing ratio, not a bare exit 1
+  })
+
+  it('--aaa raises the bar and --large relaxes it', () => {
+    const mid = ['check', '#5b5b5b', '#ffffff'] // ~6.79
+    expect(capture(mid).code).toBe(OK) // clears AA text
+    expect(capture([...mid, '--aaa']).code).toBe(GATE) // but not AAA text
+    const lo = ['check', '#ff0000', '#ffffff'] // ~4.0
+    expect(capture(lo).code).toBe(GATE) // fails normal text
+    expect(capture([...lo, '--large']).code).toBe(OK) // clears large text
+  })
+
+  it('--pairs batches the check and names which pair failed', () => {
+    const { code, out } = capture([
+      'check',
+      '--pairs',
+      JSON.stringify([
+        ['#000000', '#ffffff'],
+        ['#949494', '#ffffff'], // the offender
+      ]),
+    ])
+    expect(code).toBe(GATE)
+    expect(out).toContain('#949494')
+    expect(capture(['check', '--pairs', JSON.stringify([['#000000', '#ffffff']])]).code).toBe(OK)
+  })
+
+  it('a malformed hex is a usage error (exit 2), not a silent pass', () => {
+    expect(capture(['check', '#000000', 'not-a-hex']).code).toBe(USAGE)
+    expect(capture(['check', '--pairs', '[["#000000","nope"]]']).code).toBe(USAGE)
+  })
+})
+
+// why: help and describe are first-class discovery surfaces — exit 0 on stdout so an
+// agent's reflexive probe doesn't read as a failure, and `describe` is parseable.
+describe('tonex — discovery surface', () => {
+  it('help (bare / help / --help) prints usage to stdout at exit 0', () => {
+    for (const argv of [[], ['help'], ['--help']]) {
+      const { code, out } = capture(argv)
+      expect(code).toBe(OK)
+      expect(out).toMatch(/usage: tonex/)
+    }
+  })
+
+  it('describe emits the parseable machine surface with the exit-code taxonomy', () => {
+    const { code, out } = capture(['describe'])
+    expect(code).toBe(OK)
+    const payload = JSON.parse(out)
+    expect(payload.exitCodes['2']).toBeDefined()
+    expect(payload.commands.check).toBeDefined()
   })
 })
