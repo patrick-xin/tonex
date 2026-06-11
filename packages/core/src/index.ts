@@ -49,6 +49,8 @@ export {
 export {
   buildContrastBundle,
   buildDesignMdColors,
+  COLOR_FORMATS,
+  type ColorFormat,
   type ContrastBundle,
   type ExportLayer,
   type ExportOptions,

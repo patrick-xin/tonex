@@ -2,7 +2,7 @@ import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { MD_TOKEN_NAMES } from '../schema'
-import type { ContrastBundle, ExportOptions } from './bundle'
+import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 import { mergeMdEmission } from './format'
 
 // why: framework-agnostic Material Design CSS — the artifact a non-Tailwind
@@ -47,7 +47,7 @@ function emitName(name: string, mdSysPrefix: boolean): string {
 }
 
 interface ResolvedOptions {
-  colorFormat: 'oklch' | 'hex'
+  colorFormat: ColorFormat
   mdSysPrefix: boolean
   includeExtended: boolean
   includeChart: boolean

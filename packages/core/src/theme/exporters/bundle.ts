@@ -31,13 +31,22 @@ export interface ContrastBundle {
   high?: DerivedTheme
 }
 
+// why: the colour-encoding axis as a runtime tuple, not a re-inlined union.
+// Every exporter projects the argb-canonical TokenMap to one of these at the
+// stringify seam (ADR-0021); a consumer that surfaces the choice as a flag
+// (the CLI's `--format`) needs the *values*, not just the type, so per ADR-0016
+// the tuple lives in core and callers import it instead of hardcoding
+// `['oklch','hex']`. `oklch` first = the default. Type derives from the tuple.
+export const COLOR_FORMATS = ['oklch', 'hex'] as const
+export type ColorFormat = (typeof COLOR_FORMATS)[number]
+
 // why: ADR-0021 commitment 6 — the dialog options object. All fields are
 // optional and default to today's lean output. Shared across
 // `buildContrastBundle` (reads includeContrastVariants) and `exportCss`
 // (reads everything else). Slice 3 wires `includeContrastVariants` only;
 // slice 4 wires `colorFormat` + the include* tier filters.
 export interface ExportOptions {
-  colorFormat?: 'oklch' | 'hex'
+  colorFormat?: ColorFormat
   includeExtended?: boolean
   includePalette?: boolean
   includeChart?: boolean

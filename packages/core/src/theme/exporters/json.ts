@@ -10,7 +10,7 @@ import {
   MD_TOKEN_NAMES,
   type PortableTheme,
 } from '../schema'
-import type { ContrastBundle, ExportOptions } from './bundle'
+import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 
 // why: paste-ready JSON shaped like Material Theme Builder's export, populated
 // with tonex's own derived tokens (ADR-0029 — match the target's shape, ship
@@ -34,8 +34,6 @@ import type { ContrastBundle, ExportOptions } from './bundle'
 // exportJson is the thin serializer; (2) it also reads `source` because MTB's
 // `seed`, `coreColors`, and `description` provenance have no home in the
 // derived bundle.
-
-type ColorFormat = 'oklch' | 'hex'
 
 // why: one custom-color entry as MTB lists it under `extendedColors`. Maps
 // 1:1 from tonex's CustomColorEntry: hex → color, blend → harmonized (MTB's
