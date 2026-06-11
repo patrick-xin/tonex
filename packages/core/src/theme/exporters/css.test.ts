@@ -171,21 +171,60 @@ describe('exportCss(bundle, "shadcn")', () => {
 })
 
 describe('exportCss(bundle, "shadcn") with includeHeader: true', () => {
-  // why: opt-in bootstrap for green-field shadcn projects. Prepends the
-  // Tailwind v4 incantation (import + @custom-variant dark) so a fresh
-  // globals.css works out of the box; existing shadcn projects keep the
-  // toggle off and paste only :root/.dark.
+  // why: opt-in bootstrap for green-field shadcn projects. Emits a COMPLETE
+  // drop-in globals.css mirroring shadcn-cli's stock template: Tailwind v4
+  // incantation + a core-role @theme inline (the bridge that makes
+  // bg-primary etc. resolve in a project with no pre-existing shadcn
+  // globals.css) + :root/.dark + the static --radius scale and @layer base.
+  // Existing shadcn projects keep the toggle off and paste only :root/.dark.
   const theme = deriveTheme(DEFAULT_INPUTS)
   const out = exportCss({ default: theme }, 'shadcn', { includeHeader: true })
 
-  it('prepends @import "tailwindcss" and @custom-variant dark', () => {
+  it('prepends both @import lines and @custom-variant dark', () => {
     expect(out).toContain('@import "tailwindcss";')
+    expect(out).toContain('@import "shadcn/tailwind.css";')
     expect(out).toContain('@custom-variant dark (&:is(.dark *));')
   })
 
-  it(':root + .dark blocks still emit (header is additive)', () => {
-    expect(parseBlock(out, ':root')).toEqual(projectLayer(theme.shadcn.light))
+  it('bridges every core shadcn role into the --color-* namespace via @theme inline', () => {
+    // why: THE bug fix. Without this block a green-field project has only
+    // bare --primary in :root and no --color-primary, so bg-primary /
+    // text-foreground / border-border don't resolve. shadcn-cli's stock
+    // globals.css ships this bridge; our bootstrap output must too.
+    expect(out).toMatch(/@theme inline\s*\{/)
+    expect(out).toContain('--color-background: var(--background);')
+    expect(out).toContain('--color-primary: var(--primary);')
+    expect(out).toContain('--color-foreground: var(--foreground);')
+    expect(out).toContain('--color-border: var(--border);')
+    expect(out).toContain('--color-sidebar-ring: var(--sidebar-ring);')
+  })
+
+  it('registers the static --radius scale in @theme inline', () => {
+    expect(out).toContain('--radius-lg: var(--radius);')
+    expect(out).toContain('--radius-sm: calc(var(--radius) * 0.6);')
+    expect(out).toContain('--radius-4xl: calc(var(--radius) * 2.6);')
+  })
+
+  it(':root carries --radius and otherwise matches shadcn.light; .dark matches shadcn.dark', () => {
+    const { '--radius': radius, ...rootColors } = parseBlock(out, ':root')
+    expect(radius).toBe('0.625rem')
+    expect(rootColors).toEqual(projectLayer(theme.shadcn.light))
     expect(parseBlock(out, '.dark')).toEqual(projectLayer(theme.shadcn.dark))
+  })
+
+  it('emits the shadcn @layer base boilerplate', () => {
+    expect(out).toContain('@layer base {')
+    expect(out).toContain('@apply border-border outline-ring/50;')
+    expect(out).toContain('@apply bg-background text-foreground;')
+  })
+
+  it('emits exactly one @theme inline block (no duplicate trailing block)', () => {
+    const customOut = exportCss({ default: deriveTheme(withCustomColor) }, 'shadcn', {
+      includeHeader: true,
+    })
+    expect(customOut.match(/@theme inline/g)).toHaveLength(1)
+    // the custom slug rides in the single top block, not a separate trailing one
+    expect(customOut).toContain('--color-brand: var(--brand);')
   })
 })
 
