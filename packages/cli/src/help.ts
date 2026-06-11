@@ -25,6 +25,10 @@ commands:
   check    --pairs '<json>' [--aaa] [--large] [--json]
       Batch-verify a JSON array of [fg, bg] hex pairs; exit 1 if any fail,
       enumerating the offenders and their ratios.
+  check    --seed <hex> --pairs '<json>' [--variant <name>] [--mode light|dark] [--aaa] [--json]
+      Batch-verify [fg, bg] TOKEN-NAME pairs (the names from generate output)
+      against the derived theme; exit 1 if a text pair fails, 2 if a name is
+      unknown (with a did-you-mean).
   describe
       Print the machine-readable surface (commands, flags, contrast policy).
 

@@ -20,4 +20,6 @@ export {
   CONTRAST_PAIRS,
   type ContrastPair,
   customColorContrastPairs,
+  type ResolveContrastPairsResult,
+  resolveContrastPairs,
 } from './pairs'

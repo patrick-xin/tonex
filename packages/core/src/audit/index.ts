@@ -22,6 +22,17 @@ import {
   type ContrastReport,
   evaluateThemeContrast,
 } from '../theme/contrast'
+
+// why: bare token-name → ContrastPair resolution lives in contrast/pairs.ts (it
+// builds pairs from core's token vocabulary) but is re-exported here so the
+// CLI's `check --seed --pairs` form imports the resolver and `auditPairs` from
+// the one `@tonex/core/audit` surface — resolve names, then score them through
+// the same engine gate as the whole-theme audit.
+export {
+  type ResolveContrastPairsResult,
+  resolveContrastPairs,
+} from '../theme/contrast'
+
 import type { CustomColorEntry } from '../theme/custom-color/entry'
 import type { DerivedTheme } from '../theme/derive'
 import { MODES, type Mode } from '../theme/mode'

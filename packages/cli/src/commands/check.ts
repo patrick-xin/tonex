@@ -5,13 +5,15 @@
 // `--find-contrast`) derive then run @tonex/core/audit — the engine owns that
 // scorer (the CLI never re-scores). The present flags pick the form.
 import { argbFromHex, contrastRatio, isValidHex } from '@tonex/color-utils'
-import { deriveTheme, type Mode, MODES } from '@tonex/core'
+import { deriveTheme, MODES, type Mode } from '@tonex/core'
 import {
   type AuditThemeResult,
+  auditPairs,
   auditTheme,
   type EvaluatedAuditPair,
   type Level,
   levelThreshold,
+  resolveContrastPairs,
 } from '@tonex/core/audit'
 import { DEFAULT_VARIANT } from '@tonex/core/variants'
 import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
@@ -33,7 +35,13 @@ export function check(argv: readonly string[], io: Io): number {
   const args = parsed.args
 
   if (hasFlag(args, '--find-contrast')) return findMinContrast(args, io)
-  if (hasFlag(args, '--pairs')) return checkPairs(args, io)
+  // why: --pairs has two forms on one flag — without --seed the entries are raw
+  // hexes scored theme-free; WITH --seed they are token NAMES resolved against
+  // the derived theme and scored through the engine gate. Presence of --seed is
+  // the switch (the agent copied token names out of `generate` output).
+  if (hasFlag(args, '--pairs')) {
+    return hasFlag(args, '--seed') ? checkNamedPairs(args, io) : checkPairs(args, io)
+  }
   if (hasFlag(args, '--seed')) return checkTheme(args, io)
   return checkPair(args, io)
 }
@@ -204,24 +212,10 @@ function checkPair(args: ParsedArgs, io: Io): number {
 // only the offenders. For tools that FUSE roles onto one slot, the caller must
 // include every (fg,bg) that slot touches — this checks each listed pair on its own.
 function checkPairs(args: ParsedArgs, io: Io): number {
-  const raw = flagValue(args, '--pairs')
-  if (raw === undefined) {
-    io.err(`tonex: --pairs needs a JSON array of [fg, bg] hex pairs\n`)
-    return USAGE
-  }
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    io.err(`tonex: --pairs is not valid JSON\n`)
-    return USAGE
-  }
-  if (!Array.isArray(parsed) || parsed.length === 0) {
-    io.err(`tonex: --pairs must be a non-empty JSON array of [fg, bg] hex pairs\n`)
-    return USAGE
-  }
+  const entries = parsePairsArray(flagValue(args, '--pairs'), io)
+  if (typeof entries === 'number') return entries
   const pairs: [string, string][] = []
-  for (const p of parsed) {
+  for (const p of entries) {
     if (!Array.isArray(p) || p.length !== 2 || !isValidHex(p[0]) || !isValidHex(p[1])) {
       io.err(`tonex: each --pairs entry must be [fgHex, bgHex]; bad entry ${JSON.stringify(p)}\n`)
       return USAGE
@@ -266,6 +260,105 @@ function checkPairs(args: ParsedArgs, io: Io): number {
     `FAIL — ${label}: ${failures.length} of ${results.length} pairs below threshold\n${lines}\n`,
   )
   return GATE
+}
+
+// why: the token-NAME batch — `check --seed <hex> --pairs '[["--fg","--bg"],…]'`.
+// The entries are token names the agent copied from `generate` output; --seed
+// flips --pairs from the theme-FREE raw-hex path to this theme-AWARE one. We
+// resolve the bare names to layer-tagged pairs in core (resolveContrastPairs —
+// an unrecognized name comes back as a did-you-mean USAGE error, not a deep
+// scorer throw), then score them through the SAME engine gate as the whole-theme
+// audit (auditPairs), so a named-pair verdict and the gate can't disagree.
+// Checked as TEXT (the legibility question); the canonical non-text pairs are the
+// whole-theme gate's job, so --large doesn't apply here and is noted if passed.
+function checkNamedPairs(args: ParsedArgs, io: Io): number {
+  const entries = parsePairsArray(flagValue(args, '--pairs'), io)
+  if (typeof entries === 'number') return entries
+  const names: [string, string][] = []
+  for (const p of entries) {
+    if (
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      typeof p[0] !== 'string' ||
+      typeof p[1] !== 'string'
+    ) {
+      io.err(
+        `tonex: each --pairs entry must be [fg, bg] token names; bad entry ${JSON.stringify(p)}\n`,
+      )
+      return USAGE
+    }
+    names.push([p[0], p[1]])
+  }
+
+  const source = parseSource(args, io)
+  if (typeof source === 'number') return source
+  const mode = modeOf(args, io)
+  if (typeof mode === 'number') return mode
+
+  if (hasFlag(args, '--large')) {
+    io.err(`tonex: note — --large is ignored for token-name --pairs (checked as text)\n`)
+  }
+
+  const resolved = resolveContrastPairs(names)
+  if (!resolved.ok) {
+    io.err(`tonex: ${resolved.errors.join('\n       ')}\n`)
+    return USAGE
+  }
+
+  const level = levelOf(args)
+  // why: auditPairs scores BOTH modes; a named pair fails if it fails in either
+  // (unless --mode scopes the verdict to one). 'fail' ⇔ a failing TEXT pair, so
+  // ok ⇔ every listed pair is legible in the audited mode(s).
+  let results = auditPairs(deriveTheme(source), resolved.pairs, { level }).results
+  if (mode) results = results.filter((r) => r.mode === mode)
+  const failures = results.filter((r) => r.result === 'fail')
+  const ok = failures.length === 0
+
+  const scope = mode ? ` (${mode} only)` : ''
+  if (hasFlag(args, '--json')) {
+    io.out(
+      `${JSON.stringify({ mode: mode ?? 'both', ok, level, results: results.map(leanRow) }, null, 2)}\n`,
+    )
+    return ok ? OK : GATE
+  }
+
+  const LEVEL = level.toUpperCase()
+  if (ok) {
+    io.out(`PASS — ${LEVEL} text contrast${scope}: ${names.length} named pair(s) clear\n`)
+    return OK
+  }
+  // why: count the agent's INPUT pairs (deduped across modes), not the mode-rows
+  // — they gave a short explicit list and think in those terms; the enumerated
+  // lines below carry the per-mode detail.
+  const failingPairs = new Set(failures.map((r) => `${r.pair.fg} ${r.pair.bg}`)).size
+  const lines = failures.map(failureLine).join('\n')
+  io.out(
+    `FAIL — ${LEVEL} text contrast${scope}: ${failingPairs} of ${names.length} named pair(s) below threshold\n${lines}\n  fix: pair against a higher-contrast token, or raise --contrast\n`,
+  )
+  return GATE
+}
+
+// why: the shared --pairs reader — JSON parse + non-empty 2-tuple ARRAY shape,
+// the part both forms share. The per-ENTRY check differs (hex vs token name) and
+// stays in each caller so the error names what that form expects. Returns the
+// raw entries or an exit code (already written to stderr).
+function parsePairsArray(raw: string | undefined, io: Io): unknown[] | number {
+  if (raw === undefined) {
+    io.err(`tonex: --pairs needs a JSON array of [fg, bg] pairs\n`)
+    return USAGE
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    io.err(`tonex: --pairs is not valid JSON\n`)
+    return USAGE
+  }
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    io.err(`tonex: --pairs must be a non-empty JSON array of [fg, bg] pairs\n`)
+    return USAGE
+  }
+  return parsed
 }
 
 // why: --aaa is the only level knob (AA is the default and needs no flag), shared

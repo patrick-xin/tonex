@@ -1,6 +1,11 @@
-import type { MdChartTokenName, ShadcnChartTokenName } from '../../chart/schema'
+import {
+  MD_CHART_TOKEN_NAMES,
+  type MdChartTokenName,
+  SHADCN_CHART_TOKEN_NAMES,
+  type ShadcnChartTokenName,
+} from '../../chart/schema'
 import { type CustomColorEntry, slugifyCustomColorName } from '../custom-color/entry'
-import type { MdTokenName, ShadcnRoleName } from '../schema'
+import { MD_TOKEN_NAMES, type MdTokenName, SHADCN_ROLE_NAMES, type ShadcnRoleName } from '../schema'
 
 // why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
 // spec semantics (`on-X` always pairs with `X`; `-foreground` always pairs
@@ -722,4 +727,109 @@ export function customColorContrastPairs(
     )
   }
   return pairs
+}
+
+export type ResolveContrastPairsResult =
+  | { ok: true; pairs: ContrastPair[] }
+  | { ok: false; errors: string[] }
+
+// why: resolve agent-supplied BARE token names into scored ContrastPairs — the
+// `tonex check --seed --pairs '[["--muted-foreground","--card"],…]'` path. The
+// agent copies token names straight out of `generate` output and asks "is this
+// pairing legible?" without re-pasting resolved hex. Sibling of
+// `customColorContrastPairs`: both build ContrastPair[] from runtime input the
+// closed CONTRAST_PAIRS tuple can't enumerate.
+//
+// Layer is INFERRED from the name (the four token tuples are disjoint by
+// construction): `--color-chart-N`→md-chart, `--chart-N`→shadcn-chart,
+// `--color-*`→md, any other `--*`→shadcn — exactly the layer `layerMapFor`
+// reads, so a resolved pair indexes the same merged TokenMap `evaluatePair`
+// will. A pair whose fg/bg are different families (md vs shadcn) is rejected:
+// the scorer reads both sides from ONE map, so cross-family is unscoreable.
+// Unknown names come back as a did-you-mean error rather than letting
+// evaluatePair throw deep in the scorer. Intent defaults to text (the strict
+// 4.5 legibility bar — the dominant agent question); the per-level threshold is
+// re-applied downstream by applyLevel, so this only sets the baked baseline.
+export function resolveContrastPairs(
+  pairs: readonly (readonly [string, string])[],
+  { intent = 'text' }: { intent?: ContrastPair['intent'] } = {},
+): ResolveContrastPairsResult {
+  const threshold = intent === 'text' ? TEXT_THRESHOLD : NON_TEXT_THRESHOLD
+  const resolved: ContrastPair[] = []
+  const errors: string[] = []
+  for (const [fg, bg] of pairs) {
+    const fgFamily = familyOf(fg)
+    const bgFamily = familyOf(bg)
+    if (fgFamily === undefined) {
+      errors.push(unknownTokenError(fg))
+      continue
+    }
+    if (bgFamily === undefined) {
+      errors.push(unknownTokenError(bg))
+      continue
+    }
+    if (fgFamily !== bgFamily) {
+      errors.push(
+        `"${fg}" (${fgFamily}) and "${bg}" (${bgFamily}) are in different layers — a pair must be within one layer`,
+      )
+      continue
+    }
+    const chart = isChartToken(fg) || isChartToken(bg)
+    const layer: ContrastPair['layer'] =
+      fgFamily === 'md' ? (chart ? 'md-chart' : 'md') : chart ? 'shadcn-chart' : 'shadcn'
+    resolved.push({ fg, bg, layer, intent, threshold })
+  }
+  return errors.length > 0 ? { ok: false, errors } : { ok: true, pairs: resolved }
+}
+
+// why: the merged maps `buildReport` builds per layer — md and md-chart share
+// the md family (md-chart = md ∪ chart), shadcn and shadcn-chart the shadcn
+// family. A pair must stay within one family because the scorer reads fg and bg
+// from a single map. undefined = not a known token in any layer.
+const MD_NAMES = new Set<string>([...MD_TOKEN_NAMES, ...MD_CHART_TOKEN_NAMES])
+const SHADCN_NAMES = new Set<string>([...SHADCN_ROLE_NAMES, ...SHADCN_CHART_TOKEN_NAMES])
+const CHART_NAMES = new Set<string>([...MD_CHART_TOKEN_NAMES, ...SHADCN_CHART_TOKEN_NAMES])
+const ALL_NAMES: readonly string[] = [...MD_NAMES, ...SHADCN_NAMES]
+
+function familyOf(name: string): 'md' | 'shadcn' | undefined {
+  if (MD_NAMES.has(name)) return 'md'
+  if (SHADCN_NAMES.has(name)) return 'shadcn'
+  return undefined
+}
+
+function isChartToken(name: string): boolean {
+  return CHART_NAMES.has(name)
+}
+
+// why: a did-you-mean over core's whole token vocabulary — core owns the names,
+// so the nearest-match suggestion is a domain query, not CLI presentation (the
+// CLI just prints this). Same edit-distance cap (< 3) the flag parser uses, so
+// an unrelated token is never suggested.
+function unknownTokenError(token: string): string {
+  let best: string | undefined
+  let bestDist = 3
+  for (const name of ALL_NAMES) {
+    const d = editDistance(token, name)
+    if (d < bestDist) {
+      bestDist = d
+      best = name
+    }
+  }
+  return best
+    ? `"${token}" is not a known token (did you mean "${best}"?)`
+    : `"${token}" is not a known token`
+}
+
+function editDistance(a: string, b: string): number {
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0]
+    row[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j]
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1))
+      prev = tmp
+    }
+  }
+  return row[b.length]
 }

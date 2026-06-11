@@ -181,6 +181,47 @@ describe('tonex check — pair oracle', () => {
   })
 })
 
+// why: with --seed, --pairs entries are token NAMES the agent copied from
+// `generate` output — resolved against the derived theme and scored through the
+// engine gate (not raw hex). The exit taxonomy splits cleanly: a failing named
+// pair is GATE (the artifact), an unrecognized name is USAGE (the call).
+describe('tonex check — token-name pairs (theme-aware --pairs)', () => {
+  const SEED = '#3b82f6'
+
+  it('--seed flips --pairs to token names: a designed text pair clears, a subtle one fails by name', () => {
+    const pass = capture([
+      'check',
+      '--seed',
+      SEED,
+      '--pairs',
+      JSON.stringify([['--foreground', '--background']]),
+    ])
+    expect(pass.code).toBe(OK)
+    const fail = capture([
+      'check',
+      '--seed',
+      SEED,
+      '--pairs',
+      JSON.stringify([['--muted', '--background']]), // a subtle surface read as text
+    ])
+    expect(fail.code).toBe(GATE)
+    expect(fail.out).toContain('--muted')
+  })
+
+  it('an unknown token name is a usage error (exit 2) with a did-you-mean, not a silent pass', () => {
+    const r = capture([
+      'check',
+      '--seed',
+      SEED,
+      '--pairs',
+      JSON.stringify([['--foregroundd', '--background']]),
+    ])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toContain('did you mean')
+    expect(r.err).toContain('"--foreground"') // the suggested token
+  })
+})
+
 // why: help and describe are first-class discovery surfaces — exit 0 on stdout so an
 // agent's reflexive probe doesn't read as a failure, and `describe` is parseable.
 describe('tonex — discovery surface', () => {

@@ -16,7 +16,7 @@ The point of this layout is that you change a concern by opening *its* file, wit
 
 - `run.ts` — **JUST dispatch.** The pure `run(argv, io)` seam + the subcommand switch. Owns nothing else.
 - `commands/generate.ts` — the `generate` command: target (`--to`), encoding (`--format`), mode projection.
-- `commands/check.ts` — the `check` command: all contrast forms (whole-theme gate, `--find-contrast` oracle, ad-hoc `<fg> <bg>`, `--pairs`) **and their output formatters**. Forms cleave on theme-free (raw hex, color-utils) vs theme-aware (derive + `@tonex/core/audit`).
+- `commands/check.ts` — the `check` command: all contrast forms (whole-theme gate, `--find-contrast` oracle, ad-hoc `<fg> <bg>`, `--pairs`) **and their output formatters**. Forms cleave on theme-free (raw hex, color-utils) vs theme-aware (derive + `@tonex/core/audit`). `--pairs` straddles the seam: raw hex without `--seed`, token names *with* it (resolved by core's `resolveContrastPairs`, scored by `auditPairs`) — presence of `--seed` is the switch.
 - `source.ts` — the shared seed→`PortableTheme` resolver both commands call (`--seed`/`--variant`/`--contrast`/`--tint`/`--desaturate`). Change the input contract here, once.
 - `spec.ts` — flag schema-as-data + the enum membership guards (`isTarget`/`isMode`/`isColorFormat`) + `describe`.
 - `args.ts` — the generic parser the schema feeds. `io.ts` — the `Io` seam + exit codes. `help.ts` — the usage text. `cli.ts` — the bin (the only `process.*`).
