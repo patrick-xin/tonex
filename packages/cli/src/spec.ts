@@ -5,7 +5,7 @@
 // both its runner and its `spec` command; tonex's analogue exposes the WHOLE
 // surface (flags + the contrast verdict policy) so an agent learns what blocks vs.
 // warns BEFORE running, with zero dependency on the skill doc.
-import { MODES } from '@tonex/core'
+import { COLOR_FORMATS, type ColorFormat, MODES, type Mode } from '@tonex/core'
 import { type Level, levelThreshold } from '@tonex/core/audit'
 import { DEFAULT_VARIANT, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
@@ -53,6 +53,17 @@ const checkMode: FlagSpec = {
   values: MODES,
   description: 'scope the audit to one mode (default both, the stricter union)',
 }
+// why: the color ENCODING for the emitted block — `oklch` (default) or `hex`.
+// Values come from core's `COLOR_FORMATS` tuple (ADR-0016: a runtime tuple the
+// CLI consumes lives in core, not re-inlined here), so adding a format in core
+// surfaces it here for free. shadcn and json honor it; yaml (design.md) is
+// always hex and ignores it.
+const format: FlagSpec = {
+  name: '--format',
+  type: 'enum',
+  values: COLOR_FORMATS,
+  description: 'color encoding for shadcn/json output: oklch (default) or hex; yaml is always hex',
+}
 const contrast: FlagSpec = {
   name: '--contrast',
   type: 'unit',
@@ -95,7 +106,7 @@ const findContrast: FlagSpec = {
     'with --seed: report the minimum --contrast level that clears the target level, in one call (no manual search)',
 }
 
-export const GENERATE_FLAGS = [seed, variant, to, mode, contrast, tint, desaturate] as const
+export const GENERATE_FLAGS = [seed, variant, to, mode, format, contrast, tint, desaturate] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
 // parser validates against the UNION so a typo'd flag is still caught, while each
@@ -115,8 +126,21 @@ export const CHECK_FLAGS = [
   findContrast,
 ] as const
 
+// why: the membership guards that validate a raw flag string against its enum
+// tuple — grouped with the tuples they check (sibling to the FlagSpec `values`).
+// The command handlers call these so an out-of-set value is a loud usage error,
+// not a silent default; `isMode` is shared by both commands (generate's emitted
+// block, check's audit scope), so it lives here once rather than in either.
 export function isTarget(value: string): value is Target {
   return (TARGETS as readonly string[]).includes(value)
+}
+
+export function isMode(value: string): value is Mode {
+  return (MODES as readonly string[]).includes(value)
+}
+
+export function isColorFormat(value: string): value is ColorFormat {
+  return (COLOR_FORMATS as readonly string[]).includes(value)
 }
 
 // why: the machine-readable surface — commands+flags (from the same specs the

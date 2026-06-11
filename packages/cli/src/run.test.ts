@@ -73,6 +73,15 @@ describe('tonex generate', () => {
     )
   })
 
+  it('--format picks the shadcn color encoding (oklch default; hex on request); a bad format is exit 2', () => {
+    expect(capture(['generate', '--seed', SEED]).out).toContain('oklch(') // default
+    const hex = capture(['generate', '--seed', SEED, '--format', 'hex'])
+    expect(hex.code).toBe(OK)
+    expect(hex.out).not.toContain('oklch(')
+    expect(hex.out).toMatch(/#[0-9a-f]{6}/i)
+    expect(capture(['generate', '--seed', SEED, '--format', 'rgb']).code).toBe(USAGE)
+  })
+
   it('--contrast reaches the engine; an out-of-range level is a usage error (exit 2)', () => {
     const base = capture(['generate', '--seed', SEED])
     const high = capture(['generate', '--seed', SEED, '--contrast', '1'])

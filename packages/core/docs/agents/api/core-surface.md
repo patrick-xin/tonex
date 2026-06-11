@@ -1,6 +1,6 @@
 # Core surface
 
-What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime) expose, by subpath. Read this before importing in `apps/www/` so you don't have to walk the source to find what's already there. If your need isn't listed, the answer is usually compose in a www feature folder (ADR-0022 rule 5), not extend core.
+What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime) expose, by subpath. **Read this before importing `@tonex/core` in any consumer** — `apps/www`, the `tonex` CLI, `@tonex/core-react`, a future MCP server — so you don't have to walk the source to find what's already there. If your need isn't listed: in www, compose it in a feature folder (ADR-0022 rule 5); in any other consumer, if it's engine behaviour the gap belongs in core — add it there first, then import (ADR-0016). Either way **don't re-derive, re-encode, or re-score in the consumer** — that logic, and its contrast/encoding guarantees, lives here.
 
 **The split (ADR-0037):** `@tonex/core` is framework-free — no React, no zustand, no DOM. The stateful editor runtime (the source store, the `useResolvedTokens` hook, `applyDom`, persistence) lives in `@tonex/core-react`, which depends one-way on `@tonex/core`. www imports pure symbols from `@tonex/core` (+ its subpaths) and stateful symbols from `@tonex/core-react`.
 
@@ -29,6 +29,7 @@ The live theme pipeline, framework-free. Most www code imports from here.
 **Derive / export**:
 - `deriveTheme(source)` — pure function, source → `DerivedTheme`. Single colour-logic site (ADR-0017).
 - `exportCss(theme, opts)` — CSS string export. Siblings `exportDart`, `exportJson`, `exportNativeCss` emit the same bundle in their formats (the export dialog's format tabs).
+- `COLOR_FORMATS` / `ColorFormat` — the colour-encoding tuple `ExportOptions.colorFormat` accepts (`'oklch'` default, `'hex'`). Projection happens at the exporter stringify seam (ADR-0021); a consumer surfacing the choice (the CLI's `--format`) imports the *tuple* for its values rather than re-inlining the union (ADR-0016).
 - `formatCss`, `formatLayer` — formatting helpers.
 - `buildContrastBundle(input)` — paired light/dark contrast bundle.
 - `evaluateThemeContrast(theme, customColors?)` → `ContrastReport` (`{ light, dark }` of `PairResult`) — pure contrast analysis over a `DerivedTheme`, off the spine (ADR-0025 c.8). Backs the role-editor contrast surfaces; `PairResult` is one fg/bg result.
@@ -169,4 +170,4 @@ Pattern: when you find yourself composing 2–3 core hooks plus null-handling ac
 
 ## When this doc is wrong
 
-Hand-curated index. If `rg "from '@tonex/core" apps/www/src` shows an import that isn't listed here, this doc is stale — update it. If you need something that *should* exist and doesn't, the gap belongs in core; flag it before working around it in www.
+Hand-curated index. If `rg "from '@tonex/core" apps/www/src packages/cli/src packages/core-react/src` shows an import that isn't listed here, this doc is stale — update it. If you need something that *should* exist and doesn't, the gap belongs in core; flag it before working around it in the consumer.
