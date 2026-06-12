@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getLLMText } from '@/features/docs/utils/get-llm-text'
 import { source } from '@/features/docs/utils/source'
 
-export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/docs/[[...slug]]'>) {
+export async function GET(_req: Request, { params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug } = await params
 
   const page = source.getPage(slug)

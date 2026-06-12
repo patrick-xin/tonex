@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "postinstall": "fumadocs-mdx",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,7 +14,7 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "fumadocs-mdx && tsc --noEmit",
     "bake": "tsx scripts/bake-tokens.ts"
   },
   "dependencies": {
