@@ -84,8 +84,11 @@ function getStaticReport(theme: DerivedTheme): ContrastReport {
 // pairs run the identical path — custom md tokens live in the core
 // md.{light,dark} bucket (ADR-0021 c.3) and custom shadcn tokens in
 // shadcn.{light,dark}, so layerMapFor routes the *-custom layers to the same
-// merged maps the static md/shadcn pairs use.
-function buildReport(theme: DerivedTheme, pairs: readonly ContrastPair[]): ContrastReport {
+// merged maps the static md/shadcn pairs use. Exported (not just module-private)
+// so the `./audit` primitive `auditPairs` can score an ARBITRARY pair list off
+// the same scorer — `evaluateThemeContrast` keeps its WeakMap cache for the
+// static set and is NOT routed through here.
+export function buildReport(theme: DerivedTheme, pairs: readonly ContrastPair[]): ContrastReport {
   // why: md pairs span both core (`on-X / X`) and extended (`on-X-fixed`,
   // `inverse-on-surface`) tokens — DerivedTheme partitions those by emission
   // policy (ADR-0021 commitment 2), but contrast evaluation is one of the

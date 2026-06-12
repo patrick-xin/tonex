@@ -1,0 +1,25 @@
+{
+  "name": "@tonex/cli",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "tonex": "./src/cli.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tonex/color-utils": "workspace:*",
+    "@tonex/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@tonex/typescript-config": "workspace:*",
+    "tsx": "^4.20.6",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  }
+}

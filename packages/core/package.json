@@ -9,7 +9,8 @@
     "./oklch": "./src/oklch.ts",
     "./data": "./src/data.ts",
     "./variants": "./src/variants/index.ts",
-    "./derive-cache": "./src/theme/derive/cache.ts"
+    "./derive-cache": "./src/theme/derive/cache.ts",
+    "./audit": "./src/audit/index.ts"
   },
   "scripts": {
     "test": "vitest run",

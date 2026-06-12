@@ -12,6 +12,8 @@
 
 export {
   buildContrastBundle,
+  COLOR_FORMATS,
+  type ColorFormat,
   type ContrastBundle,
   type ExportOptions,
 } from './bundle'

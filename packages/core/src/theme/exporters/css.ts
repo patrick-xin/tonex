@@ -2,7 +2,7 @@ import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { SHADCN_ROLE_NAMES } from '../schema'
-import type { ContrastBundle, ExportOptions } from './bundle'
+import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 import { mergeMdEmission } from './format'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
@@ -170,7 +170,7 @@ function tiersOf(bundle: ContrastBundle): Array<[ContrastTier, DerivedTheme]> {
 }
 
 interface ResolvedOptions {
-  colorFormat: 'oklch' | 'hex'
+  colorFormat: ColorFormat
   includeExtended: boolean
   includePalette: boolean
   includeChart: boolean

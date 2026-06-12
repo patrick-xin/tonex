@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { summarizeContrast } from './summary'
 
-// why: the audit opens on "All" with a tally so failures read in proportion
-// (most of the theme passes) instead of leading with a bare failure list. The
-// counts split text vs UI fails because they carry different severity (red =
-// fix before shipping; amber = judgment call).
+// why: the gate tally splits the audited set into pass / textFail / uiFail /
+// exempt so failures read in proportion (most of a real theme passes) instead
+// of leading with a bare failure list. text vs UI fails are split because they
+// carry different severity (red = blocks the gate; amber = judgment call).
 const pass = { effectivePasses: true, pair: { intent: 'text' as const } }
 const textFail = { effectivePasses: false, pair: { intent: 'text' as const } }
 const uiFail = { effectivePasses: false, pair: { intent: 'non-text' as const } }

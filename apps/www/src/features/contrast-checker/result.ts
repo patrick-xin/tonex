@@ -1,16 +1,14 @@
-import { isDecorative } from './decorative'
+import type { Result } from '@tonex/core/audit'
 import type { DualIntentTier } from './dual-intent'
-import type { EvaluatedPair } from './types'
 
-// why: the result/severity axis is THE source of truth for the audit — the
-// status badge, legend chip, summary tally, and result filter all map from
-// these four values, so none can drift into its own vocabulary (the bug issue
-// #1 exposed). The values are semantic, NOT presentational: 'fail'/'warn' name
-// the severity, while the human label ("Hard to read"/"Faint") is data hanging
-// off them — change the copy and no logic moves. pass = clears the bar, fail =
+// why: the result/severity axis (Result + resultOf) is THE source of truth for
+// the audit — now owned by the engine's `@tonex/core/audit` module and
+// re-exported here so this feature's existing `./result` consumers don't churn.
+// The values are semantic, NOT presentational: pass = clears the bar, fail =
 // text too faint (must fix), warn = a UI/non-text judgment call, none =
-// decorative/exempt.
-export type Result = 'pass' | 'fail' | 'warn' | 'none'
+// decorative/exempt. The presentation (labels, badge classes) lives below,
+// app-side — change the copy and no engine logic moves.
+export { type Result, resultOf } from '@tonex/core/audit'
 
 export interface ResultMeta {
   /** badge + legend label */
@@ -60,21 +58,12 @@ export const RESULT: Record<Result, ResultMeta> = {
 // descending (fail → warn), then the exempt carve-out trailing.
 export const RESULT_ORDER: readonly Result[] = ['pass', 'fail', 'warn', 'none']
 
-// why: the single classification point — resolves a pair's evaluation into one
-// result. Decorative short-circuits (no WCAG requirement); then pass; then a
-// fail splits by role — failing text is 'fail' (red, must fix), failing
-// non-text is 'warn' (amber, judgment call). Mirrors summarizeContrast's
-// textFail/uiFail split so the tally and the row badges always agree.
-export function resultOf(p: EvaluatedPair): Result {
-  if (isDecorative(p.pair)) return 'none'
-  if (p.effectivePasses) return 'pass'
-  return p.pair.intent === 'text' ? 'fail' : 'warn'
-}
-
 // why: maps the collapsed --destructive tier onto a result so its badge colour
 // matches the rest of the table. 'fills-only' is the amber 'warn' band — though
 // the row keeps the more specific "Fills only" wording (see TIER_LABEL). 'fail'
-// clears neither bar, so as text it's a hard-to-read 'fail'.
+// clears neither bar, so as text it's a hard-to-read 'fail'. Stays app-side
+// because DualIntentTier is a www-only presentation concern (the --destructive
+// dual-intent row collapse).
 export function tierResult(tier: DualIntentTier): Result {
   return tier === 'pass' ? 'pass' : tier === 'fills-only' ? 'warn' : 'fail'
 }
