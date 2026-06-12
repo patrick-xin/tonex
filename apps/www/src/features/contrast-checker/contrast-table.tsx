@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { cx } from 'tailwind-variants'
 import {
   Table,
@@ -114,6 +114,21 @@ function ResultBadge({ result, label }: { result: Result; label?: string }) {
   )
 }
 
+// why: the table can't horizontally scroll on mobile (container is
+// overflow-x-clip there) so the trailing Status column gets clipped off-screen —
+// status is the one verdict a user must see. HTML tables can't reorder cells via
+// CSS, so we dual-render: a LEADING copy shown only on mobile (sm:hidden) and the
+// existing TRAILING copy shown only on desktop (hidden sm:table-cell). Exactly
+// one is display:none at any breakpoint, so the grid stays 6 columns wide
+// (COL_COUNT/colSpan unchanged) and the rowSpan head-cell layout is untouched.
+function StatusCell({ badge, edge }: { badge: ReactNode; edge: 'leading' | 'trailing' }) {
+  return edge === 'leading' ? (
+    <TableCell className="sm:hidden">{badge}</TableCell>
+  ) : (
+    <TableCell className="text-right hidden sm:table-cell">{badge}</TableCell>
+  )
+}
+
 // why: destructive tiers borrow shared result colours via tierResult, but the
 // amber 'fills-only' band keeps its more specific wording — "Fills only" reads
 // truer than "Faint" for a token that's fine as an icon/border/fill. pass/fail
@@ -131,8 +146,10 @@ const TIER_LABEL: Record<DualIntentTier, string | undefined> = {
 // supplies the swatches and number.
 function DualIntentRow({ bundle }: { bundle: DualIntentBundle }) {
   const { text, nonText, tier } = bundle
+  const badge = <ResultBadge result={tierResult(tier)} label={TIER_LABEL[tier]} />
   return (
     <TableRow className="border-outline-variant/40">
+      <StatusCell badge={badge} edge="leading" />
       <TableCell className="w-64 align-middle">
         <TokenCell name={text.pair.fg} hex={text.fgHex} />
       </TableCell>
@@ -146,9 +163,7 @@ function DualIntentRow({ bundle }: { bundle: DualIntentBundle }) {
       <TableCell className="text-right font-mono text-sm tabular-nums text-on-surface-variant">
         {text.effectiveThreshold} / {nonText.effectiveThreshold}
       </TableCell>
-      <TableCell className="text-right">
-        <ResultBadge result={tierResult(tier)} label={TIER_LABEL[tier]} />
-      </TableCell>
+      <StatusCell badge={badge} edge="trailing" />
     </TableRow>
   )
 }
@@ -176,8 +191,10 @@ function PairRow({
   // bundle visually reads as one block; intermediate rows are border-transparent.
   const isBundleTail = bundleIndex === bundleSize - 1
   const rowBorder = isBundleTail ? 'border-outline-variant/40' : 'border-transparent'
+  const badge = <ResultBadge result={decorative ? 'none' : resultOf(pair)} />
   return (
     <TableRow className={rowBorder}>
+      <StatusCell badge={badge} edge="leading" />
       {isBundleHead && (
         <>
           <TableCell rowSpan={bundleSize} className="w-64 align-middle">
@@ -202,9 +219,7 @@ function PairRow({
       <TableCell className="text-right font-mono text-sm tabular-nums">
         {decorative ? '—' : pair.effectiveThreshold}
       </TableCell>
-      <TableCell className="text-right">
-        <ResultBadge result={decorative ? 'none' : resultOf(pair)} />
-      </TableCell>
+      <StatusCell badge={badge} edge="trailing" />
     </TableRow>
   )
 }
@@ -256,15 +271,16 @@ export function ContrastTable({
   const decorativeBundles = bundle(visibleDecorative)
 
   return (
-    <Table containerClassName="overflow-x-clip -mx-1.5">
+    <Table containerClassName="overflow-x-clip sm:-mx-1.5">
       <TableHeader className="sticky top-0 z-10 bg-surface">
         <TableRow className="hover:bg-surface border-outline-variant/60">
+          <TableHead className="sm:hidden">Status</TableHead>
           <TableHead>Foreground</TableHead>
           <TableHead>Background</TableHead>
           <TableHead>Type</TableHead>
           <TableHead className="text-right">Ratio</TableHead>
           <TableHead className="text-right">Target</TableHead>
-          <TableHead className="text-right">Status</TableHead>
+          <TableHead className="text-right hidden sm:table-cell">Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

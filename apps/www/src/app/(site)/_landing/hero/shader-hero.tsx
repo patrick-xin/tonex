@@ -136,15 +136,6 @@ export function ShaderHero() {
           />
         )}
       </div>
-      {/* scrim — denser on the left so the headline stays legible over the shader */}
-      <div
-        aria-hidden
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(90deg, color-mix(in oklch, var(--color-surface) 80%, transparent) 0%, color-mix(in oklch, var(--color-surface) 32%, transparent) 55%, transparent 100%)',
-        }}
-      />
       <div className="relative z-10 flex flex-1 min-h-0 items-center py-20 sm:py-24">
         <div className="w-full max-w-6xl">
           <HeroContent />

@@ -64,7 +64,7 @@ export function GuideProvider({ children }: { children: React.ReactNode }) {
     if (open && railVisible === false) setOpenState(false)
   }, [open, railVisible])
 
-  const setOpen = React.useCallback((next: boolean) => {
+  const setOpen = (next: boolean) => {
     if (!next) {
       // A single fire-and-forget first-run flag. The Cookie Store API is async
       // and unsupported in Safari; this mirrors the shadcn sidebar's cookie write.
@@ -72,42 +72,42 @@ export function GuideProvider({ children }: { children: React.ReactNode }) {
       document.cookie = `${COOKIE_KEY}=1; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax`
     }
     setOpenState(next)
-  }, [])
+  }
 
   // Pause for a "Learn more" detour: close the tour modal but keep its step (the
   // OnboardingGuide guards its step-reset on `suspended`). setOpenState, not
   // setOpen, so a pause doesn't burn the first-run cookie.
-  const suspend = React.useCallback(() => {
+  const suspend = () => {
     suspendedRef.current = true
     setSuspended(true)
     setOpenState(false)
-  }, [])
+  }
 
   // Only a tour-initiated pause reopens — a plain Help close (H hotkey, command
   // menu) must not pop the tour open.
-  const resume = React.useCallback(() => {
+  const resume = () => {
     if (!suspendedRef.current) return
     suspendedRef.current = false
     setSuspended(false)
     setOpenState(true)
-  }, [])
+  }
 
   // why: the registry is a flat string→element Map (last-writer-wins). The rail
   // and its mobile drawer render the SAME content, so a key would register twice
   // — but the tour is desktop-only and the closed drawer is unmounted, leaving a
   // single live instance per key. A future mobile tour must make resolution
   // visibility-aware before it can rely on rail anchors.
-  const registerAnchor = React.useCallback((key: string, el: HTMLElement | null) => {
+  const registerAnchor = (key: string, el: HTMLElement | null) => {
     if (el) {
       anchors.current.set(key, el)
     } else {
       anchors.current.delete(key)
     }
-  }, [])
+  }
 
-  const getAnchor = React.useCallback((key: string) => {
+  const getAnchor = (key: string) => {
     return anchors.current.get(key) ?? null
-  }, [])
+  }
 
   return (
     <GuideContext.Provider

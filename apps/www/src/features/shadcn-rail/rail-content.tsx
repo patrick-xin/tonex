@@ -8,6 +8,7 @@ import { AnimatedCollapsible } from '@/components/shared/animated-collapsible'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CustomColorList } from '@/features/custom-colors'
+import { GuideAnchor } from '@/features/onboarding-guide'
 import { SchemeVariantsToggle } from '@/features/scheme-variant'
 import { BindingPresetToggle } from '@/features/shadcn-binding-presets'
 import { ShadcnSourceColor } from '@/features/source-color'
@@ -37,40 +38,50 @@ export function ShadcnRailContent() {
       >
         <div className="space-y-1">
           <ShadcnSourceColor />
-          <AnimatedCollapsible variant="ghost" title="Scheme Variant">
-            <SchemeVariantsToggle />
-          </AnimatedCollapsible>
-          <AnimatedCollapsible variant="ghost" title="Binding Preset">
-            <BindingPresetToggle />
-          </AnimatedCollapsible>
+          <GuideAnchor anchorKey="scheme-variant">
+            <AnimatedCollapsible variant="ghost" title="Scheme Variant">
+              <SchemeVariantsToggle />
+            </AnimatedCollapsible>
+          </GuideAnchor>
+          <GuideAnchor anchorKey="binding-preset">
+            <AnimatedCollapsible variant="ghost" title="Binding Preset">
+              <BindingPresetToggle />
+            </AnimatedCollapsible>
+          </GuideAnchor>
           <SurfaceAdjustment />
-          <CustomColorList />
-          <Button
-            className="w-full justify-between px-2! group leading-snug font-semibold"
-            variant="ghost"
-            onClick={() => setMode('overrides')}
-          >
-            Token Overrides
-            <CaretRightIcon
-              weight="bold"
-              className={cn(
-                'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
-              )}
-            />
-          </Button>
-          <Button
-            className="w-full justify-between px-2! group leading-snug font-semibold"
-            variant="ghost"
-            onClick={() => setMode('bindings')}
-          >
-            Role Bindings
-            <CaretRightIcon
-              weight="bold"
-              className={cn(
-                'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
-              )}
-            />
-          </Button>
+          <GuideAnchor anchorKey="custom-colors">
+            <CustomColorList />
+          </GuideAnchor>
+          <GuideAnchor anchorKey="role-bindings">
+            <Button
+              className="w-full justify-between px-2! group leading-snug font-semibold"
+              variant="ghost"
+              onClick={() => setMode('bindings')}
+            >
+              Role Bindings
+              <CaretRightIcon
+                weight="bold"
+                className={cn(
+                  'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
+                )}
+              />
+            </Button>
+          </GuideAnchor>
+          <GuideAnchor anchorKey="token-overrides">
+            <Button
+              className="w-full justify-between px-2! group leading-snug font-semibold"
+              variant="ghost"
+              onClick={() => setMode('overrides')}
+            >
+              Token Overrides
+              <CaretRightIcon
+                weight="bold"
+                className={cn(
+                  'size-3 transition-[transform,color] duration-200 text-on-surface-variant group-hover:text-on-surface',
+                )}
+              />
+            </Button>
+          </GuideAnchor>
         </div>
       </ScrollArea>
     </m.div>

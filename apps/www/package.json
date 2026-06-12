@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "postinstall": "fumadocs-mdx",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,7 +14,7 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "fumadocs-mdx && tsc --noEmit",
     "bake": "tsx scripts/bake-tokens.ts"
   },
   "dependencies": {
@@ -35,6 +36,9 @@
     "@tonex/core-react": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
+    "fumadocs-core": "^16.9.3",
+    "fumadocs-mdx": "^15.0.11",
     "lucide-react": "^1.14.0",
     "match-sorter": "^8.3.0",
     "motion": "^12.38.0",
@@ -46,6 +50,7 @@
     "react-dom": "^19.0.0",
     "react-email": "^6.1.5",
     "recharts": "^3.8.1",
+    "rehype-pretty-code": "^0.14.3",
     "resend": "^6.12.3",
     "shiki": "^4.2.0",
     "sonner": "^2.0.7",
@@ -58,10 +63,12 @@
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@tailwindcss/postcss": "^4.0.0",
+    "@tailwindcss/typography": "^0.5.20",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@tonex/typescript-config": "workspace:*",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

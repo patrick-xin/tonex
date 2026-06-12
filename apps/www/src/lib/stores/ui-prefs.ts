@@ -15,18 +15,24 @@ interface UiPrefs {
   // not using brand. Distinct from showExtended only in scope: extended is many
   // roles worth a separate export choice; brand is one pair, so one switch.
   brandEnabled: boolean
+  // why: persisted so the user's package manager choice (npm/pnpm/yarn/bun)
+  // is remembered across pages and sessions. Keyed by groupId so independent
+  // tab groups don't interfere. Null means "use the block's defaultValue".
+  tabGroupValues: Record<string, string>
 }
 
 const DEFAULT_UI_PREFS: UiPrefs = {
   showExtended: false,
   twPickerEnabled: true,
   brandEnabled: false,
+  tabGroupValues: {},
 }
 
 interface UiPrefsActions {
   setShowExtended(next: boolean): void
   setTwPickerEnabled(next: boolean): void
   setBrandEnabled(next: boolean): void
+  setTabGroupValue(groupId: string, value: string): void
   setHydrated(): void
   reset(): void
 }
@@ -62,6 +68,8 @@ export const useUiPrefs = create<UiPrefsState>()(
         setShowExtended: (next) => set({ showExtended: next }),
         setTwPickerEnabled: (next) => set({ twPickerEnabled: next }),
         setBrandEnabled: (next) => set({ brandEnabled: next }),
+        setTabGroupValue: (groupId, value) =>
+          set((s) => ({ tabGroupValues: { ...s.tabGroupValues, [groupId]: value } })),
         setHydrated: () => set({ _hydrated: true }),
         reset: () => set({ ...DEFAULT_UI_PREFS }),
       },

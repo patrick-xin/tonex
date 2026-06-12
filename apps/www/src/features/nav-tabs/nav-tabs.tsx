@@ -125,7 +125,9 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
             <ExportButton tabs={exportTabs} icon />
           </GuideAnchor>
           {config.layer !== 'md' && <PresetPicker />}
-          <Settings layer={config.layer} />
+          <GuideAnchor anchorKey="settings">
+            <Settings layer={config.layer} />
+          </GuideAnchor>
           <ContrastChecker layer={config.layer} />
           <HelpDialog />
         </TooltipProvider>
