@@ -8,6 +8,7 @@ Rules are split per surface so you load only what your task touches. **Read the 
 | where a type or constant lives — core vs www | [types.md](types.md) |
 | state — local vs store, which store | [state.md](state.md) |
 | layout, chrome vs canvas, per-layer routes (`app/(app)/theme/…`) | [layout.md](layout.md) |
+| a `page.tsx`/`layout.tsx` — static vs partial prerender, `'use cache'`, `params` | [rendering.md](rendering.md) |
 | input affordances — disable vs warn | [interactions.md](interactions.md) |
 | any component file — naming, why-lines, React conventions | [components.md](components.md) |
 | how a component looks/behaves — tokens, focus rings, motion, a11y | [interface-guidelines.md](interface-guidelines.md) |

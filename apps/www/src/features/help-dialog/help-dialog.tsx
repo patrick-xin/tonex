@@ -46,9 +46,7 @@ export function HelpDialog() {
         <DialogOutsideScrollContent>
           <DialogHeader className="mb-4 text-left">
             <DialogTitle className="text-xl font-semibold">Help</DialogTitle>
-            <DialogDescription>
-              tonex generates light/dark theme and keeps them in sync using seed you provide.
-            </DialogDescription>
+            <DialogDescription>Key concepts</DialogDescription>
           </DialogHeader>
           <div className="h-full min-h-screen space-y-6">
             <KeyConcepts section={section ?? null} />

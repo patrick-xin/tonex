@@ -1,4 +1,5 @@
 @theme inline {
+  --radius: 0.8rem;
   /* Chrome (Plex Sans) is the default UI/body sans; Mono (Plex Mono) the
      universal code/numerals face. Loaded in app/layout.tsx. The .shadcn scope
      re-points --font-chrome at Geist (globals.css) for the preview. */
@@ -59,7 +60,7 @@
 
 /* For popups with translucent effect, including bg color, radii, shadow, animation, and outline */
 @utility surface-popup-blur {
-  @apply relative bg-surface/80 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-lg rounded-md shadow-sm overlay-outline animate-popup-blur;
+  @apply relative bg-surface/40 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-sm rounded-md shadow-sm overlay-outline animate-popup-blur;
 }
 
 /* @utility surface-popup-blur {

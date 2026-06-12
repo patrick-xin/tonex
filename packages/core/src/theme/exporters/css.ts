@@ -71,6 +71,33 @@ const SHADCN_SELECTOR = {
   dark: '.dark',
 } as const
 
+// why: shadcn-cli's stock globals.css ships a --radius scale and a base
+// layer alongside the color tokens. tonex models only color, but the
+// green-field bootstrap output (`includeHeader`) must be a COMPLETE drop-in
+// globals.css — so we emit shadcn's canonical radius + base boilerplate
+// verbatim. These are static constants (the seed never changes them); they
+// ride only the bootstrap path, so the default "replace shadcn-cli's blocks"
+// output stays byte-identical. Mirrors `exporters/temp.md`.
+const SHADCN_RADIUS_ROOT = '--radius: 0.625rem;'
+const SHADCN_RADIUS_SCALE: ReadonlyArray<readonly [string, string]> = [
+  ['--radius-sm', 'calc(var(--radius) * 0.6)'],
+  ['--radius-md', 'calc(var(--radius) * 0.8)'],
+  ['--radius-lg', 'var(--radius)'],
+  ['--radius-xl', 'calc(var(--radius) * 1.4)'],
+  ['--radius-2xl', 'calc(var(--radius) * 1.8)'],
+  ['--radius-3xl', 'calc(var(--radius) * 2.2)'],
+  ['--radius-4xl', 'calc(var(--radius) * 2.6)'],
+]
+const SHADCN_BASE_LAYER = `@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}`
+
 type ContrastTier = keyof typeof MD_SELECTOR
 
 // why: colorspace projection at the seam (ADR-0021 commitment 1). Adding a
@@ -109,6 +136,27 @@ function block(
 function themeInlineBlock(utilityNames: string[], sourceFor: (name: string) => string): string {
   const decls = utilityNames.map((u) => `  ${u}: var(${sourceFor(u)});`).join('\n')
   return `@theme inline {\n${decls}\n}`
+}
+
+// why: the bootstrap (`includeHeader`) @theme inline. Green-field projects have
+// no pre-existing shadcn globals.css carrying the role→namespace bridge, so we
+// emit it ourselves: every BARE role/slug name (`--primary`) maps to its
+// Tailwind utility (`--color-primary: var(--primary)`) — the single thing that
+// makes `bg-primary` / `border-border` resolve. Bridges exactly the roles whose
+// values land in :root/.dark (core always; chart only when includeChart;
+// custom slugs + opt-in brand always), so no declaration dangles. The static
+// --radius scale follows the color bridges, matching shadcn-cli's template.
+function bootstrapThemeInline(
+  theme: DerivedTheme,
+  customSlugTokens: string[],
+  opts: ResolvedOptions,
+): string {
+  const bare: string[] = [...SHADCN_ROLE_NAMES]
+  if (opts.includeChart) bare.push(...Object.keys(theme.shadcn.lightChart))
+  bare.push(...customSlugTokens)
+  const colorDecls = bare.map((b) => `  --color-${b.slice(2)}: var(${b});`)
+  const radiusDecls = SHADCN_RADIUS_SCALE.map(([u, v]) => `  ${u}: ${v};`)
+  return `@theme inline {\n${[...colorDecls, ...radiusDecls].join('\n')}\n}`
 }
 
 // why: enumerate tiers present in the bundle in canonical order. Default
@@ -246,14 +294,31 @@ export function exportCss(
   }
   const parts: string[] = []
   if (opts.includeHeader) {
-    parts.push('@import "tailwindcss";', '', '@custom-variant dark (&:is(.dark *));', '')
+    // bootstrap: full drop-in globals.css. The core-role @theme inline (which
+    // existing shadcn projects already have, hence omitted on the default path)
+    // rides here, carrying the custom slugs too — so no trailing block below.
+    parts.push(
+      '@import "tailwindcss";',
+      '@import "shadcn/tailwind.css";',
+      '',
+      '@custom-variant dark (&:is(.dark *));',
+      '',
+      bootstrapThemeInline(defaultTheme, customSlugTokens, opts),
+      '',
+    )
   }
+  const lightBlock = block(
+    SHADCN_SELECTOR.light,
+    buildShadcnRuleTokens(defaultTheme, 'light', opts),
+    opts.colorFormat,
+  )
   parts.push(
-    block(
-      SHADCN_SELECTOR.light,
-      buildShadcnRuleTokens(defaultTheme, 'light', opts),
-      opts.colorFormat,
-    ),
+    // why: bootstrap :root carries shadcn's static --radius as its first decl
+    // (shadcn components reference it); inject after the opening brace. The
+    // default path leaves :root color-only.
+    opts.includeHeader
+      ? lightBlock.replace('{\n', `{\n  ${SHADCN_RADIUS_ROOT}\n`)
+      : lightBlock,
     '',
     block(
       SHADCN_SELECTOR.dark,
@@ -262,10 +327,14 @@ export function exportCss(
     ),
     '',
   )
-  if (customSlugTokens.length > 0) {
-    // why: shadcn keys are `--{slug}` / `--{slug}-foreground`; the matching
-    // Tailwind v4 utility name is `--color-{slug}`. Drop the leading `--`
-    // and prepend `--color-` to bridge between the two namespaces.
+  if (opts.includeHeader) {
+    parts.push(SHADCN_BASE_LAYER, '')
+  } else if (customSlugTokens.length > 0) {
+    // why: default path — the consumer's existing globals.css already bridges
+    // the core roles, so we append a @theme inline registering ONLY the custom
+    // slugs. shadcn keys are `--{slug}` / `--{slug}-foreground`; the matching
+    // Tailwind v4 utility name is `--color-{slug}`. Drop the leading `--` and
+    // prepend `--color-` to bridge between the two namespaces.
     parts.push(
       themeInlineBlock(
         customSlugTokens.map((t) => `--color-${t.slice(2)}`),

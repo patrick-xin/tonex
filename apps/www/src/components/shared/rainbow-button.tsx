@@ -44,10 +44,7 @@ export function RainbowButton({ children = 'Enter app' }: { children?: ReactNode
 
         {/* content pill: solid fill sits 1px in, leaving the rim as a border */}
         <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-surface-container text-on-surface h-full font-semibold text-sm">
-          <Link
-            className={cn('px-3 sm:px-4 py-1.5 sm:py-2 rounded-md', focusVisiblePrimaryRing)}
-            href="/theme"
-          >
+          <Link className={cn('px-3 py-1.5 rounded-md', focusVisiblePrimaryRing)} href="/theme">
             {children}
           </Link>
         </span>

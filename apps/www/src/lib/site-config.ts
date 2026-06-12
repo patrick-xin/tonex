@@ -30,6 +30,7 @@ export const ROUTES = {
   materialTheme: { value: 'material-theme', label: 'Material Theme', href: '/theme' },
   shadcn: { value: 'shadcn', label: 'Shadcn', href: '/theme/shadcn' },
   about: { value: 'about', label: 'About', href: '/about' },
+  docs: { value: 'docs', label: 'Docs', href: '/docs/introduction' },
   roadmap: { value: 'roadmap', label: 'Roadmap', href: '/roadmap' },
 } satisfies Record<string, SiteRoute>
 

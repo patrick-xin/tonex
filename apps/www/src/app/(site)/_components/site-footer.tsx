@@ -64,6 +64,9 @@ export function SiteFooter() {
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
+                  <FooterLink href={ROUTES.docs.href}>{ROUTES.docs.label}</FooterLink>
+                </li>
+                <li>
                   <FooterLink href={ROUTES.roadmap.href}>{ROUTES.roadmap.label}</FooterLink>
                 </li>
               </ul>

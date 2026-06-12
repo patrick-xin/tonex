@@ -90,7 +90,10 @@ function PreviewCardContent({
         sideOffset={sideOffset}
       >
         <BasePreviewCard.Popup
-          className={cn('w-64 rounded-md p-4 shadow-md animate-popup', className)}
+          className={cn(
+            'w-64 rounded-md p-4 shadow-md animate-popup bg-surface-container',
+            className,
+          )}
           data-slot="preview-card-content"
           {...props}
         >
