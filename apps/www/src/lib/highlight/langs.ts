@@ -4,6 +4,6 @@
 // the highlighter's lazy lang loads (highlighter.ts) and any tab→lang mapping
 // (features/export) agreeing on one list, and bounds the bundle to what we
 // actually render.
-export const HIGHLIGHT_LANGS = ['css', 'json', 'dart', 'yaml'] as const
+export const HIGHLIGHT_LANGS = ['css', 'json', 'dart', 'yaml', 'bash'] as const
 
 export type HighlightLang = (typeof HIGHLIGHT_LANGS)[number]

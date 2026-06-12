@@ -20,6 +20,7 @@ export function getHighlighter(): Promise<HighlighterCore> {
       import('@shikijs/langs/json'),
       import('@shikijs/langs/dart'),
       import('@shikijs/langs/yaml'),
+      import('@shikijs/langs/bash'),
     ],
     themes: HIGHLIGHT_THEMES,
     engine: createJavaScriptRegexEngine(),

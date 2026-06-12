@@ -15,6 +15,7 @@ describe('useUiPrefs', () => {
       showExtended: false,
       twPickerEnabled: true,
       brandEnabled: false,
+      tabGroupValues: {},
       _hydrated: false,
     })
   })
@@ -25,6 +26,7 @@ describe('useUiPrefs', () => {
       showExtended: false,
       twPickerEnabled: true,
       brandEnabled: false,
+      tabGroupValues: {},
       _hydrated: false,
     })
   })
@@ -34,10 +36,12 @@ describe('useUiPrefs', () => {
     expect(s.showExtended).toBe(false)
     expect(s.twPickerEnabled).toBe(true)
     expect(s.brandEnabled).toBe(false)
+    expect(s.tabGroupValues).toEqual({})
     expect(s._hydrated).toBe(false)
     expect(typeof s.actions.setShowExtended).toBe('function')
     expect(typeof s.actions.setTwPickerEnabled).toBe('function')
     expect(typeof s.actions.setBrandEnabled).toBe('function')
+    expect(typeof s.actions.setTabGroupValue).toBe('function')
     expect(typeof s.actions.reset).toBe('function')
   })
 
@@ -85,9 +89,34 @@ describe('useUiPrefs', () => {
     useUiPrefs.getState().actions.setTwPickerEnabled(false)
     useUiPrefs.getState().actions.setBrandEnabled(true)
     const prefs = selectUiPrefs(useUiPrefs.getState())
-    expect(prefs).toEqual({ showExtended: true, twPickerEnabled: false, brandEnabled: true })
+    expect(prefs).toEqual({
+      showExtended: true,
+      twPickerEnabled: false,
+      brandEnabled: true,
+      tabGroupValues: {},
+    })
     expect('_hydrated' in prefs).toBe(false)
     expect('actions' in prefs).toBe(false)
+  })
+
+  it('setTabGroupValue sets and updates a keyed entry in tabGroupValues', () => {
+    useUiPrefs.getState().actions.setTabGroupValue('package-manager', 'pnpm')
+    expect(useUiPrefs.getState().tabGroupValues['package-manager']).toBe('pnpm')
+    useUiPrefs.getState().actions.setTabGroupValue('package-manager', 'bun')
+    expect(useUiPrefs.getState().tabGroupValues['package-manager']).toBe('bun')
+  })
+
+  it('setTabGroupValue does not clobber unrelated group entries', () => {
+    useUiPrefs.getState().actions.setTabGroupValue('package-manager', 'pnpm')
+    useUiPrefs.getState().actions.setTabGroupValue('other-group', 'b')
+    expect(useUiPrefs.getState().tabGroupValues['package-manager']).toBe('pnpm')
+    expect(useUiPrefs.getState().tabGroupValues['other-group']).toBe('b')
+  })
+
+  it('reset() clears tabGroupValues back to empty object', () => {
+    useUiPrefs.getState().actions.setTabGroupValue('package-manager', 'pnpm')
+    useUiPrefs.getState().actions.reset()
+    expect(useUiPrefs.getState().tabGroupValues).toEqual({})
   })
 
   it('partialize excludes _hydrated and actions from persisted state', () => {
