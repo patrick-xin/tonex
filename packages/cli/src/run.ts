@@ -5,6 +5,7 @@
 // handler and owns nothing else. Each command lives in `commands/`; the shared
 // seed→theme resolver in `source.ts`; the flag schema (parsed + introspected) in
 // `spec.ts`; the IO seam + exit codes in `io.ts`; the usage text in `help.ts`.
+import { adjust } from './commands/adjust'
 import { check } from './commands/check'
 import { generate } from './commands/generate'
 import { HELP } from './help'
@@ -30,6 +31,8 @@ export function run(argv: readonly string[], io: Io): number {
       return generate(rest, io)
     case 'check':
       return check(rest, io)
+    case 'adjust':
+      return adjust(rest, io)
     case 'describe':
       io.out(`${JSON.stringify(describePayload(), null, 2)}\n`)
       return OK

@@ -106,6 +106,17 @@ const findContrast: FlagSpec = {
   description:
     'with --seed: report the minimum --contrast level that clears the target level, in one call (no manual search)',
 }
+// why: `adjust`'s only command-specific flag — a JSON batch of shift requests,
+// mirroring core's `adjustTokens` shape and the existing `--pairs` precedent. The
+// per-request mode lives INSIDE each entry, so `adjust` needs no `--mode` flag (the
+// theme is mode-agnostic; both modes are derived). Token-domain validity is core's
+// gate; the CLI only shape-checks the entries (ADR-0039 c.1 — agent-first JSON).
+const shifts: FlagSpec = {
+  name: '--shifts',
+  type: 'json',
+  description:
+    'JSON array of {mode, token, dTone?, dChroma?} ±HCT shift requests (at least one axis per entry)',
+}
 
 export const GENERATE_FLAGS = [seed, variant, to, mode, format, contrast, tint, desaturate] as const
 
@@ -126,6 +137,12 @@ export const CHECK_FLAGS = [
   pairs,
   findContrast,
 ] as const
+
+// why: `adjust` reuses the shared seed→theme knobs (parseSource reads them) plus its
+// own `--shifts` batch and `--json`. No `--mode` (per-request mode is inside each
+// shift entry). Feeding this tuple to parseArgs makes a typo'd adjust flag a loud
+// did-you-mean usage error for free.
+export const ADJUST_FLAGS = [seed, variant, contrast, tint, desaturate, shifts, json] as const
 
 // why: the membership guards that validate a raw flag string against its enum
 // tuple — grouped with the tuples they check (sibling to the FlagSpec `values`).
@@ -172,6 +189,11 @@ export function describePayload() {
           'check --seed <hex> --pairs <json> [--variant] [--mode] [--aaa] [--json] — batch of [fg,bg] TOKEN-NAME pairs against the derived theme',
         ],
         flags: CHECK_FLAGS.map(flagInfo),
+      },
+      adjust: {
+        summary:
+          'Shift named md tokens by a relative ±HCT delta (tone+chroma) and print before/after facts plus the gamut-clamped achieved delta. Exits 0 (clean) or 2 (bad call); never gates contrast — run `check` for that.',
+        flags: ADJUST_FLAGS.map(flagInfo),
       },
       describe: {
         summary:

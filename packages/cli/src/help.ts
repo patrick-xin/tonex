@@ -29,6 +29,11 @@ commands:
       Batch-verify [fg, bg] TOKEN-NAME pairs (the names from generate output)
       against the derived theme; exit 1 if a text pair fails, 2 if a name is
       unknown (with a did-you-mean).
+  adjust   --seed <hex> [--variant <name>] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>] --shifts '<json>' [--json]
+      Shift named md tokens by a relative ±HCT delta (a JSON array of
+      {mode, token, dTone?, dChroma?}) and print before/after facts plus
+      the gamut-clamped achieved delta. Exit 0 on a clean shift, 2 on a bad
+      token name / malformed --shifts. Never gates contrast — run check for that.
   describe
       Print the machine-readable surface (commands, flags, contrast policy).
 
