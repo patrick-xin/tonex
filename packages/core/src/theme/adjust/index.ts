@@ -6,3 +6,11 @@
 // honesty loop.
 export { shiftHct } from './shift-hct'
 export type { HctDelta, ShiftResult } from './shift-hct'
+
+// why: the source-aware adjusters (#198) build on shiftHct. adjustTokens
+// derives once and returns per-token before/after/achieved FACTS (pure, no
+// persist); applyAdjustments folds those facts into md3TokenOverrides (the
+// persist seam core owns). The CLI (#199) imports both from @tonex/core/adjust.
+export { adjustTokens } from './adjust-tokens'
+export type { AdjustRequest, AdjustResult } from './adjust-tokens'
+export { applyAdjustments } from './apply-adjustments'
