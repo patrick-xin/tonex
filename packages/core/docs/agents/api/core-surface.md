@@ -6,7 +6,7 @@ What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime
 
 ## Subpaths
 
-`@tonex/core` has seven entry points (`packages/core/package.json` `exports`):
+`@tonex/core` has eight entry points (`packages/core/package.json` `exports`):
 
 | Import path | What's in it | When to reach for it |
 | --- | --- | --- |
@@ -17,6 +17,7 @@ What `@tonex/core` (the pure engine) and `@tonex/core-react` (the editor runtime
 | `@tonex/core/variants` | variant strategies + registry | inspect/list variants in UI |
 | `@tonex/core/derive-cache` | memoized `getDerivedTheme` | the editor runtime's shared derive cache; www almost never imports it directly |
 | `@tonex/core/audit` | WCAG contrast verdict layer | gate a theme (`auditTheme`) or any pair list (`auditPairs`); the per-pair helpers (`applyLevel`, `resultOf`, `summarizeContrast`, `isDecorative`) the www contrast checker consumes |
+| `@tonex/core/adjust` | relative ±HCT token adjustment | `adjustTokens` returns per-token before/after/achieved facts; `applyAdjustments` persists them into `md3TokenOverrides`. Leaf primitive `shiftHct` (tone+chroma shift) lives here too |
 
 `@tonex/core-react` has one entry point (`.`) — see its section below.
 

@@ -10,7 +10,8 @@
     "./data": "./src/data.ts",
     "./variants": "./src/variants/index.ts",
     "./derive-cache": "./src/theme/derive/cache.ts",
-    "./audit": "./src/audit/index.ts"
+    "./audit": "./src/audit/index.ts",
+    "./adjust": "./src/theme/adjust/index.ts"
   },
   "scripts": {
     "test": "vitest run",

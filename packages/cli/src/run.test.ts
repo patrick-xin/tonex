@@ -222,6 +222,48 @@ describe('tonex check — token-name pairs (theme-aware --pairs)', () => {
   })
 })
 
+// why: `adjust` surfaces core's adjustTokens — it shifts named md tokens by a ±HCT
+// delta and prints before/after FACTS. It never gates contrast, so the exit taxonomy
+// is just 0 (clean) / 2 (bad call): a bad token name / malformed --shifts / missing
+// --seed is USAGE, never GATE. Core owns the token-domain throw; the CLI maps it to 2.
+describe('tonex adjust', () => {
+  const SEED = '#3b82f6'
+  const SHIFT = JSON.stringify([
+    { mode: 'light', token: '--color-primary', dTone: -5, dChroma: 3 },
+  ])
+
+  it('shifts a named token and prints before/after at exit 0', () => {
+    const { code, out } = capture(['adjust', '--seed', SEED, '--shifts', SHIFT])
+    expect(code).toBe(OK)
+    expect(out).toContain('--color-primary')
+    expect(out).toMatch(/#[0-9a-f]{6}.*→.*#[0-9a-f]{6}/i) // before → after
+  })
+
+  it('--json emits a parseable { shifts } report with before/after/achieved', () => {
+    const { code, out } = capture(['adjust', '--seed', SEED, '--shifts', SHIFT, '--json'])
+    expect(code).toBe(OK)
+    const report = JSON.parse(out)
+    expect(report.shifts).toHaveLength(1)
+    expect(report.shifts[0].before).toMatch(/^#[0-9a-f]{6}$/i)
+    expect(report.shifts[0].after).toMatch(/^#[0-9a-f]{6}$/i)
+    expect(report.shifts[0].achieved).toBeDefined()
+  })
+
+  it('an unknown token name is a usage error (exit 2), never a gate', () => {
+    const bad = JSON.stringify([{ mode: 'light', token: '--color-nope', dTone: -5 }])
+    const r = capture(['adjust', '--seed', SEED, '--shifts', bad])
+    expect(r.code).toBe(USAGE) // core's throw mapped to 2, not GATE
+  })
+
+  it('bad calls are usage errors (exit 2): missing seed, bad --shifts JSON, no axis', () => {
+    expect(capture(['adjust', '--shifts', SHIFT]).code).toBe(USAGE) // missing --seed
+    expect(capture(['adjust', '--seed', SEED]).code).toBe(USAGE) // missing --shifts
+    expect(capture(['adjust', '--seed', SEED, '--shifts', 'not-json']).code).toBe(USAGE)
+    const noAxis = JSON.stringify([{ mode: 'light', token: '--color-primary' }])
+    expect(capture(['adjust', '--seed', SEED, '--shifts', noAxis]).code).toBe(USAGE)
+  })
+})
+
 // why: help and describe are first-class discovery surfaces — exit 0 on stdout so an
 // agent's reflexive probe doesn't read as a failure, and `describe` is parseable.
 describe('tonex — discovery surface', () => {
@@ -239,5 +281,6 @@ describe('tonex — discovery surface', () => {
     const payload = JSON.parse(out)
     expect(payload.exitCodes['2']).toBeDefined()
     expect(payload.commands.check).toBeDefined()
+    expect(payload.commands.adjust).toBeDefined() // surfaced from the same specs
   })
 })
