@@ -42,6 +42,12 @@ The CLI describes its own contract in machine-readable form, so an agent learns 
 
 *Road not taken:* (a) a CLI that needs an external skill doc to be usable — un-introspectable, contract drifts from prose; (b) a CLI that bakes per-target adapters into the binary — coupling a stable engine to an unbounded, fast-moving set of foreign vocabularies. Self-description keeps the contract honest at generation time; skill-side projection keeps the CLI stable while the agent's foreign-tool knowledge evolves independently: the CLI emits canonical values, the agent + skill project them into each foreign vocabulary.
 
+## 7. The durable artifact is recipe-canonical and value-disposable, and defers to a foreign source of truth
+
+Decision 3 makes durable state a file the agent writes; this fixes what that file *is*. It is **canonical in format, disposable in content**: its header is the **recipe** — the seed plus the few derivation knobs — the irreplaceable input, while its values are a deterministic, re-derivable cache of that recipe, re-encoded by core on demand (Decision 2). So while it exists the file is a real, spec'd artifact other tools consume; the moment the recipe changes it is throwaway and regenerated — a *derived* artifact, never a *source* one. Two scope limits follow. The file is the **color layer only** — it never accretes prose, components, typography, or spacing; those belong to the app or to a format above us. And when the project already carries a foreign **source-of-truth** artifact that holds intent (a DESIGN.md, say), tonex **serves** it — fills its color block — rather than reconciling against it or standing up a competing source; tonex is authoritative for the color *values*, never for the intent above them.
+
+*Road not taken:* a stateful artifact tonex owns and reconciles against a foreign file — pulling hand-edits back into it, holding a binding manifest, arbitrating whose value wins on a regenerate. Rejected: it rebuilds the foreign tool's job inside ours, re-introduces exactly the reverse/reconcile state Decision 3 exists to delete, and makes tonex a second source of truth for intent it doesn't own. A forward-only derived artifact that defers upward keeps the engine a colors-and-facts producer (Decision 6) and keeps every value reproducible from its recipe.
+
 **Why this posture, in one line:** the scarce resource is the agent's generation-time attention and a contract it can trust across a loop; every decision above spends the engine's simplicity to buy the agent a small, deterministic, self-describing surface, and puts every open-ended choice on the side that can actually make it.
 
 **Consequence:**
@@ -50,5 +56,6 @@ The CLI describes its own contract in machine-readable form, so an agent learns 
 - The exit taxonomy's *stability* is a hard contract: adding a category is a deliberate, breaking change to agent control flow, not a casual addition.
 - Structurally the CLI is core's second consumer in the package graph (ADR-0011's split-trigger, realized by ADR-0037); it folds core, imports only public subpaths, and never reaches into core's `src`.
 - Human-facing niceties (colored output for human eyes, spinners, interactive prompts) are out of scope by Decision 1 — if a human ergonomic is ever wanted, it is a separate surface, not bolted onto the agent contract.
+- The durable artifact (Decision 7) is derived, not source: always reproducible from its recipe, so it is regenerated or discarded freely and never hand-curated into a second source of truth. A foreign intent-bearing file, when present, outranks it; tonex fills that file's color block and does not reconcile back from it.
 
 **Code anchors:** none — a package-wide posture ADR governing every file in `@tonex/cli`; it has no single code home. The contracts it justifies are stated imperatively in packages/cli/CLAUDE.md ("Keep exactly") and embodied at the run(argv, io) seam. Numbered per ADR-0011 §5; never renumber.

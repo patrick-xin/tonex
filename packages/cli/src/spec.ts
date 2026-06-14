@@ -10,12 +10,14 @@ import { type Level, levelThreshold } from '@tonex/core/audit'
 import { DEFAULT_VARIANT, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
 
-// why: the output TARGET — which document `generate` prints. `shadcn` is the
-// paste-ready :root/.dark block (oklch, both modes); `yaml` is the single-mode
-// design.md `colors:` block (hex); `json` is the Material Theme JSON reshape (a
-// www-shaped export reused as-is for this phase). Named by DESTINATION, never by
-// encoding.
-export const TARGETS = ['shadcn', 'yaml', 'json'] as const
+// why: the output TARGET — which document `generate` prints. `colors` is tonex's
+// OWN canonical colors.json (recipe header + both-mode role values, ADR-0039
+// Decision 7 — the artifact the skill projects FROM); the rest are projections of
+// it into a foreign vocabulary: `shadcn` the paste-ready :root/.dark block (oklch,
+// both modes), `yaml` the single-mode design.md `colors:` block (hex), `json` the
+// Material Theme JSON reshape (a www-shaped export reused as-is for this phase).
+// Named by DESTINATION, never by encoding.
+export const TARGETS = ['colors', 'shadcn', 'yaml', 'json'] as const
 export type Target = (typeof TARGETS)[number]
 
 const seed: FlagSpec = {
@@ -35,13 +37,14 @@ const to: FlagSpec = {
   type: 'enum',
   values: TARGETS,
   description:
-    'output target: shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON (default shadcn)',
+    'output target: colors (canonical colors.json), shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON (default shadcn)',
 }
 const mode: FlagSpec = {
   name: '--mode',
   type: 'enum',
   values: MODES,
-  description: 'which mode yaml emits (default light); shadcn co-emits both and ignores it',
+  description:
+    'which mode yaml emits (default light); colors/shadcn/json co-emit both and ignore it',
 }
 // why: check's `--mode` is the SAME axis as generate's but scopes the AUDIT rather
 // than the emitted block — narrows the verdict to one mode so a single-mode yaml
@@ -176,7 +179,7 @@ export function describePayload() {
     commands: {
       generate: {
         summary:
-          'Derive a theme from a seed hex and print it (shadcn :root/.dark, or a design.md colors: block).',
+          'Derive a theme from a seed hex and print it for one --to target: the canonical colors.json (recipe header + both-mode role values), the shadcn :root/.dark block, a design.md colors: block, or Material Theme JSON.',
         flags: GENERATE_FLAGS.map(flagInfo),
       },
       check: {

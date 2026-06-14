@@ -53,6 +53,24 @@ describe('tonex generate', () => {
     expect(yaml.out).not.toContain('.dark') // single-mode, not the dual css block
   })
 
+  it('--to colors emits the canonical colors.json: recipe header + both-mode role values; --format sets the encoding', () => {
+    const colors = capture(['generate', '--seed', SEED, '--to', 'colors'])
+    expect(colors.code).toBe(OK)
+    const doc = JSON.parse(colors.out)
+    // header is the re-derivable recipe; values are both modes, mode-major
+    expect(doc.seed).toBe(SEED)
+    expect(doc).toMatchObject({ variant: 'cmf', format: 'oklch' })
+    expect(doc.light).toHaveProperty('primary')
+    expect(doc.dark).toHaveProperty('primary')
+    expect(doc.light.primary).toMatch(/^oklch\(/)
+    // --format flips the encoding AND the file's self-declared format field
+    const hex = JSON.parse(
+      capture(['generate', '--seed', SEED, '--to', 'colors', '--format', 'hex']).out,
+    )
+    expect(hex.format).toBe('hex')
+    expect(hex.light.primary).toMatch(/^#[0-9a-f]{6}$/)
+  })
+
   it('--mode picks which mode yaml emits (light default; dark differs); a bad mode is exit 2', () => {
     const light = capture(['generate', '--seed', SEED, '--to', 'yaml'])
     const dark = capture(['generate', '--seed', SEED, '--to', 'yaml', '--mode', 'dark'])
@@ -228,9 +246,7 @@ describe('tonex check — token-name pairs (theme-aware --pairs)', () => {
 // --seed is USAGE, never GATE. Core owns the token-domain throw; the CLI maps it to 2.
 describe('tonex adjust', () => {
   const SEED = '#3b82f6'
-  const SHIFT = JSON.stringify([
-    { mode: 'light', token: '--color-primary', dTone: -5, dChroma: 3 },
-  ])
+  const SHIFT = JSON.stringify([{ mode: 'light', token: '--color-primary', dTone: -5, dChroma: 3 }])
 
   it('shifts a named token and prints before/after at exit 0', () => {
     const { code, out } = capture(['adjust', '--seed', SEED, '--shifts', SHIFT])

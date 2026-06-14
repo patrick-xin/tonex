@@ -30,6 +30,7 @@ The live theme pipeline, framework-free. Most www code imports from here.
 **Derive / export**:
 - `deriveTheme(source)` — pure function, source → `DerivedTheme`. Single colour-logic site (ADR-0017).
 - `exportCss(theme, opts)` — CSS string export. Siblings `exportDart`, `exportJson`, `exportNativeCss` emit the same bundle in their formats (the export dialog's format tabs).
+- `exportColorsJson(source, bundle, opts)` / `buildColorsJson(...)` → `ColorsJson` — tonex's **canonical** `colors.json`: a recipe header (`seed` / `variant` / `contrast` / `surface` / `format`) plus both-mode role values (full `MD_TOKEN_NAMES` roster, mode-major, kebab keys), encoded per `opts.colorFormat`. This is the artifact the skill projects FROM (ADR-0039 Decision 7), distinct from the foreign-projection sinks (`exportDesignMd`, `exportJson`) that reshape the same theme INTO a competitor's vocabulary. Surfaced as `tonex generate --to colors`.
 - `COLOR_FORMATS` / `ColorFormat` — the colour-encoding tuple `ExportOptions.colorFormat` accepts (`'oklch'` default, `'hex'`). Projection happens at the exporter stringify seam (ADR-0021); a consumer surfacing the choice (the CLI's `--format`) imports the *tuple* for its values rather than re-inlining the union (ADR-0016).
 - `formatCss`, `formatLayer` — formatting helpers.
 - `buildContrastBundle(input)` — paired light/dark contrast bundle.

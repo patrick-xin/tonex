@@ -1,21 +1,23 @@
 // why: `generate` derives the theme and prints it for one output target — the
-// shadcn :root/.dark block, the single-mode design.md `colors:` yaml, or the
-// Material Theme JSON. It surfaces core's knobs (`--to`/`--format`/`--mode`) as
-// flags and projects core's values; it owns no color logic of its own.
+// canonical colors.json, the shadcn :root/.dark block, the single-mode design.md
+// `colors:` yaml, or the Material Theme JSON. It surfaces core's knobs
+// (`--to`/`--format`/`--mode`) as flags and projects core's values; it owns no
+// color logic of its own.
 import {
   buildContrastBundle,
   COLOR_FORMATS,
+  type ExportOptions,
+  exportColorsJson,
   exportCss,
   exportDesignMd,
-  type ExportOptions,
   exportJson,
-  type Mode,
   MODES,
+  type Mode,
 } from '@tonex/core'
 import { flagValue, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
-import { GENERATE_FLAGS, isColorFormat, isMode, isTarget, type Target, TARGETS } from '../spec'
+import { GENERATE_FLAGS, isColorFormat, isMode, isTarget, TARGETS, type Target } from '../spec'
 
 // why: `generate` derives the theme and prints it for one output target — the
 // shadcn :root/.dark block or the single-mode design.md `colors:` yaml.
@@ -52,10 +54,10 @@ export function generate(argv: readonly string[], io: Io): number {
   const bundle = buildContrastBundle(source)
 
   // why: yaml (the design.md colors block) has no light/dark axis, so it alone
-  // reads `--mode` to pick which projection to emit. shadcn and json co-emit BOTH
-  // modes; passing `--mode` to them is a no-op, so we say so on stderr (an agent
-  // that wanted a single mode would otherwise see plausible output and never
-  // notice) — without changing the exit code.
+  // reads `--mode` to pick which projection to emit. colors, shadcn, and json
+  // co-emit BOTH modes; passing `--mode` to them is a no-op, so we say so on
+  // stderr (an agent that wanted a single mode would otherwise see plausible
+  // output and never notice) — without changing the exit code.
   if (target === 'yaml') {
     const modeArg = flagValue(args, '--mode')
     if (modeArg !== undefined && !isMode(modeArg)) {
@@ -69,13 +71,16 @@ export function generate(argv: readonly string[], io: Io): number {
   if (flagValue(args, '--mode') !== undefined) {
     io.err(`tonex: note — --mode is ignored for ${target} (it emits both modes)\n`)
   }
-  // why: json is the Material Theme JSON reshape — a www-oriented export reused
-  // as-is for this phase (its shape will likely change for the agent fill path);
-  // shadcn is the paste-ready oklch :root/.dark block.
+  // why: colors is tonex's canonical colors.json (recipe header + both-mode role
+  // values, ADR-0039 Decision 7); json is the Material Theme JSON reshape (a
+  // www-oriented export reused as-is for this phase, its shape will likely change
+  // for the agent fill path); shadcn is the paste-ready oklch :root/.dark block.
   io.out(
-    target === 'json'
-      ? exportJson(source, bundle, exportOptions)
-      : exportCss(bundle, 'shadcn', exportOptions),
+    target === 'colors'
+      ? exportColorsJson(source, bundle, exportOptions)
+      : target === 'json'
+        ? exportJson(source, bundle, exportOptions)
+        : exportCss(bundle, 'shadcn', exportOptions),
   )
   return OK
 }

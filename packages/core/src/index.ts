@@ -47,13 +47,16 @@ export {
   type TokenMap,
 } from './theme/derive'
 export {
+  buildColorsJson,
   buildContrastBundle,
   buildDesignMdColors,
   COLOR_FORMATS,
   type ColorFormat,
+  type ColorsJson,
   type ContrastBundle,
   type ExportLayer,
   type ExportOptions,
+  exportColorsJson,
   exportCss,
   exportDart,
   exportDesignMd,
