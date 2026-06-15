@@ -3,7 +3,7 @@ name: tonex
 description: Use when theming an app or design system from a brand color, building a light+dark token system, or whenever WCAG contrast must hold across both modes — anytime you would otherwise hand-pick hex values.
 ---
 
-# Tonex
+# tonex
 
 Builds a complete light+dark color system from one seed hex using Google's Material Color Utilities (MCU). You fill the project's color layer from the seed and own nothing else — not components, not spacing, not the rest of a design file.
 
@@ -21,7 +21,7 @@ The seed is one brand hex, the single irreplaceable input. It may be in the requ
 
 - Talk about the product, its audience, and the feeling they want.
 - Propose a candidate in plain terms: "For a calm, trustworthy SaaS I'd lean toward a mid-blue — does #3b82f6 feel right, or would you like something warmer?"
-- Get their confirmation before proceeding. Don't extract a color from an image unasked, and don't pick from a multi-color palette without proposing first.
+- Get confirmation before proceeding.
 
 ### 2. Check contrast
 
@@ -43,9 +43,9 @@ Use the exact same recipe as step 2 — same `--seed`, `--variant`, `--contrast`
 
 **Open your target's recipe before you generate — it carries the paste pattern and the per-target gotchas. Don't guess the mapping.**
 
-- shadcn / Tailwind → open [targets/shadcn.md](targets/shadcn.md), then `--to shadcn` → paste into `globals.css`
-- design.md → open [targets/design-md.md](targets/design-md.md), then `--to yaml --mode <light|dark>`
-- Material Theme Builder JSON → open [targets/json.md](targets/json.md), then `--to json`
+- shadcn / Tailwind → open [references/shadcn.md](references/shadcn.md), then `--to shadcn` → paste into `globals.css`
+- design.md → open [references/design-md.md](references/design-md.md), then `--to yaml --mode <light|dark>`
+- Material Theme Builder JSON → open [references/json.md](references/json.md), then `--to json`
 - No built-in target → [REFERENCE.md § authoring into a target with no built-in projection](REFERENCE.md#authoring-into-a-target-with-no-built-in-projection) is the mapping cookbook — **read it first**, then `--to colors`, map its token keys to the target's slots, and verify every pairing with `check --pairs`
 
 **Side path — nudge one token without re-seeding:** `tonex adjust --shifts '…'` (never gates contrast) → re-run step 2. Detail in [REFERENCE.md](REFERENCE.md#adjusting-one-token).
@@ -78,4 +78,4 @@ Before you call the theme done, confirm:
 
 - Variant groups, surface knobs (`--tint` / `--desaturate`), reading oklch values → [REFERENCE.md](REFERENCE.md#choosing-a-variant)
 - Authoring into a target with no built-in projection, contrast policy, exit-code playbook → [REFERENCE.md](REFERENCE.md)
-- Exact flag contract → `tonex describe`
+- **The full option menu + exact flag contract → `tonex describe`** — every variant, binding, target, and flag with its default, machine-readable. It is the authoritative surface: if any prose in this skill disagrees with it, `describe` wins. Run it when the user wants to explore the options tonex offers (don't invent choices or stay silent on them), or to drive tonex with no skill loaded.

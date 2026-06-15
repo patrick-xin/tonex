@@ -93,7 +93,7 @@ The same MD3 token wears a different name per command. Pick the name that matche
 
 ## Authoring into a target with no built-in projection
 
-`--to shadcn|yaml|json` are the built-in projections — each has its own guide: [shadcn](targets/shadcn.md), [design.md](targets/design-md.md), [json](targets/json.md). For any other target you build the projection by hand — this is the skill's job, not the CLI's.
+`--to shadcn|yaml|json` are the built-in projections — each has its own guide: [shadcn](references/shadcn.md), [design.md](references/design-md.md), [json](references/json.md). For any other target you build the projection by hand — this is the skill's job, not the CLI's.
 
 Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
 
@@ -109,6 +109,8 @@ The cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part. When
 
 ## Contrast policy (what `check` blocks vs. warns)
 
+This table and the thresholds below mirror `tonex describe`'s `contrast` field (the authoritative policy + numbers; trust it if they ever disagree). What's here is the *interpretation* the field can't carry.
+
 | pair kind | verdict | effect on exit code |
 | --- | --- | --- |
 | text on its background | **block** | failure → exit `1` |
@@ -120,6 +122,8 @@ The cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part. When
 - The remedy ladder for a text failure: `--find-contrast` to get the minimum `--contrast` → re-generate → re-check. If `UNREACHABLE`, gate at AA.
 
 ## Exit-code playbook
+
+The codes mirror `tonex describe`'s `exitCodes` (authoritative; trust it if they ever disagree). The *response* to each is the judgment below.
 
 | exit | meaning | what to do |
 | --- | --- | --- |
@@ -154,4 +158,4 @@ Add `--json` to `check` and `adjust` for machine-readable output.
 
 ## End-to-end examples
 
-End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [targets/shadcn.md](targets/shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
+End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [references/shadcn.md](references/shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
