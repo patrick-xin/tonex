@@ -1,22 +1,52 @@
 {
-  "name": "@tonex/cli",
+  "name": "tonex",
   "version": "0.0.1",
-  "private": true,
+  "description": "Turn a brand seed color into a complete light+dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's Material Color Utilities. Stop hand-picking hex.",
+  "keywords": [
+    "color",
+    "theme",
+    "design-system",
+    "design-tokens",
+    "wcag",
+    "contrast",
+    "accessibility",
+    "material-design",
+    "mcu",
+    "shadcn",
+    "tailwind",
+    "oklch",
+    "cli"
+  ],
+  "homepage": "https://github.com/patrick-xin/tonex",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patrick-xin/tonex.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "author": "Patrick Xin (https://github.com/patrick-xin)",
   "type": "module",
   "bin": {
-    "tonex": "./src/cli.ts"
+    "tonex": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
+    "build": "node build.mjs",
+    "prepublishOnly": "node build.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@tonex/color-utils": "workspace:*",
-    "@tonex/core": "workspace:*"
-  },
   "devDependencies": {
+    "@tonex/color-utils": "workspace:*",
+    "@tonex/core": "workspace:*",
     "@tonex/typescript-config": "workspace:*",
+    "esbuild": "^0.28.0",
     "tsx": "^4.20.6",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "catalog:",
