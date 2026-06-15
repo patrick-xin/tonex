@@ -15,23 +15,23 @@ tonex generate --seed '#3b82f6' --to colors
   "contrast": 0,
   "surface": { "algo": "desaturate", "level": 0 },
   "format": "oklch",           // the file declares its own encoding
-  "light": { "primary": "oklch(0.492 0.18 257.73)", "on-primary": "…", /* ~50 tokens */ },
-  "dark":  { "primary": "…", /* same ~50 tokens */ }
+  "light": { "primary": "oklch(0.492 0.18 257.73)", "on-primary": "…", /* 28 core roles */ },
+  "dark":  { "primary": "…", /* same 28 roles */ }
 }
 ```
 
 - **Header = recipe, body = cache.** The header is the few inputs that can't be recovered; every value under `light`/`dark` re-derives from it. Change the header → regenerate. Never hand-edit a value into the body — that creates a second source of truth the next regenerate silently discards.
 - **Both modes, always.** Unlike `--to yaml`, this artifact is not single-mode; `--mode` is ignored.
-- **Full roster.** All ~50 MD3 color tokens (core + extended: `*-fixed`, `*-fixed-dim`, `inverse-*`, `shadow`, `scrim`, …) — wider than the lean shadcn/design.md targets, because this is the source you author *from*, not a paste target itself.
+- **Core roster by default; `--extended` widens it.** The roster is a *capacity ladder*, not a taxonomy. The default 28 **core** roles (the accents, their containers, the full `surface-container-*` family, outlines) are the sufficient baseline for most projects. `--extended` adds the 22 **extended** roles (`*-fixed`, `*-dim`, `inverse-*`, `surface-tint`, `shadow`, `scrim`) — reach for it only when a target has slots core doesn't cover (inverted surfaces, modal scrims, tones that hold across modes). The question is "does core cover this project's slots?", not "is this a Material feature?". (A further rung — raw palette tones 0..100 — isn't exposed yet.)
 - **One encoding per file**, chosen by `--format oklch|hex`. To re-encode, re-run with the other format — don't convert values yourself.
 
 ## Choosing a variant
 
-`--variant` picks the algorithm that derives the system from the seed. Default is **`cmf`** — keep it unless the user asks for a different feel. The ten variants fall into four groups (the authoritative per-variant tag is in `tonex describe`):
+`--variant` picks the algorithm that derives the system from the seed. Default is **`cmf`** — keep it unless the user asks for a different feel. The ten variants fall into four groups — this table mirrors `tonex describe`'s `variants` field (the authoritative group→variant map; trust it if they ever disagree):
 
 | group | feel | variants |
 | --- | --- | --- |
-| `cmf` | the 2025/26 spec scheme — balanced, stands structurally apart (extra roles, fixed colors) | `cmf` |
+| `cmf` | modern fidelity — balanced, stands structurally apart (extra roles, fixed colors) | `cmf` |
 | `standard` | source-faithful — stays close to the seed | `tonalSpot`, `fidelity`, `content` |
 | `expressive` | high-chroma, playful — intentionally diverges from the seed | `vibrant`, `expressive`, `rainbow`, `fruitSalad` |
 | `subdued` | low-chroma / near-grayscale | `neutral`, `monochrome` |
@@ -52,11 +52,27 @@ Both make a too-tinted background less colorful, but they are **not inverses** �
 
 | | `--tint <0..1>` | `--desaturate <0..1>` |
 | --- | --- | --- |
-| `0` | **maximum** effect — repaints surfaces with a neutral palette (zinc), no brand character | **no-op** — MCU surfaces untouched |
+| `0` | **maximum** effect — repaints surfaces with the chosen neutral palette, no brand character | **no-op** — MCU surfaces untouched |
 | `1` | that neutral nudged back toward the primary's hue | chroma forced to 0 (fully neutral) |
 | mechanism | swaps in a chosen neutral identity, blends brand hue back | scales MCU's chroma down on its own hue |
 
 So `--tint 0` and `--desaturate 0` do **opposite** things — they are not one knob with a sign. `desaturate` drains the brand out of MCU's own surface; `tint` replaces the surface with a fixed neutral and dials brand back in. Pass one, never both.
+
+`--tint-palette` picks the neutral identity (default `zinc`). Only consumed when `--tint` is set:
+
+| palette | character |
+| --- | --- |
+| `slate` | cool blue-grey |
+| `gray` | neutral grey |
+| `zinc` | neutral grey, slightly warmer (default) |
+| `neutral` | true neutral |
+| `stone` | warm grey |
+| `taupe` | warm beige |
+| `mauve` | muted violet |
+| `mist` | cool blue-grey, lighter |
+| `olive` | warm yellow-green |
+
+The palettes are Tailwind v4 neutrals (plus four project-extended ones: `taupe`, `mauve`, `mist`, `olive`). At `--tint 0` the output is the pure chosen palette at each token's MCU tone, so the choice matters most near level 0 — at level 1 the surfaces converge toward the primary's hue regardless.
 
 ## Reading oklch values
 
@@ -77,7 +93,7 @@ The same MD3 token wears a different name per command. Pick the name that matche
 
 ## Authoring into a target with no built-in projection
 
-`--to shadcn|yaml|json` are the built-in projections — each has its own guide: [shadcn](targets/shadcn.md), [design.md](targets/design-md.md), [json](targets/json.md). For any other target you build the projection by hand — this is the skill's job, not the CLI's (ADR-0039: the CLI emits canonical values; the agent authors them into the target).
+`--to shadcn|yaml|json` are the built-in projections — each has its own guide: [shadcn](targets/shadcn.md), [design.md](targets/design-md.md), [json](targets/json.md). For any other target you build the projection by hand — this is the skill's job, not the CLI's.
 
 Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
 

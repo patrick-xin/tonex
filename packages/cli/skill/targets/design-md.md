@@ -8,7 +8,7 @@ Its `colors:` block is a flat map of **M3 / MCU color tokens → sRGB hex** — 
 
 ## tonex fills the color block — it never reads the file
 
-tonex **authors** the `colors:` block from a seed; it never parses an existing DESIGN.md and never reconciles against it (ADR-0039 Decision 7). The DESIGN.md is the foreign source of truth for *everything except color* — tonex owns only the color block. Overwrite that block; leave the rest of the file alone.
+tonex **authors** the `colors:` block from a seed; it never parses an existing DESIGN.md and never reconciles against it. The DESIGN.md is the foreign source of truth for *everything except color* — tonex owns only the color block. Overwrite that block; leave the rest of the file alone.
 
 ## How
 

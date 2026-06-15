@@ -2,8 +2,9 @@
 // theme `generate` would produce, so the seed/variant/contrast/surface parsing
 // lives here once and both `commands/generate` and `commands/check` call it —
 // the locality that keeps the input contract from drifting between them.
-import { isValidHex } from '@tonex/color-utils'
+import { hexFromColorInput } from '@tonex/color-utils'
 import { hctFromHex } from '@tonex/core'
+import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
 import { DEFAULT_INPUTS, type PortableTheme } from '@tonex/core/schema'
 import { DEFAULT_VARIANT, type VariantName, variants } from '@tonex/core/variants'
 import { flagValue, type ParsedArgs } from './args'
@@ -15,14 +16,24 @@ import { type Io, USAGE } from './io'
 // writing the error) so callers `if (typeof x === 'number') return x`. All errors
 // here are usage errors (the call is wrong), hence exit 2. Seed-only input is the
 // settled v0 contract; `exactHex` preserves the user's exact bytes (ADR-0028).
+//
+// why: the seed accepts core's `hexFromColorInput` contract — a 6-digit hex OR a
+// canonical `oklch(L C H)` (the form shadcn/tweakcn emit), projected to one sRGB
+// hex. It is safe HERE precisely because the seed is a lossy derivation input, not
+// a WYSIWYG-pinned token (an out-of-gamut oklch loses chroma) — `exactHex` records
+// the PROJECTED hex, never the raw oklch, mirroring the www seed seam. Surfacing,
+// not re-implementing: core owns the firewall (ADR-0025); we never relax it.
 export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
-  const seed = flagValue(args, '--seed')
-  if (seed === undefined) {
-    io.err(`tonex: missing required --seed <hex>\n\n${HELP}\n`)
+  const seedInput = flagValue(args, '--seed')
+  if (seedInput === undefined) {
+    io.err(`tonex: missing required --seed <color>\n\n${HELP}\n`)
     return USAGE
   }
-  if (!isValidHex(seed)) {
-    io.err(`tonex: invalid seed hex "${seed}" — use a 6-digit form, e.g. #3b82f6\n`)
+  const seed = hexFromColorInput(seedInput)
+  if (seed === null) {
+    io.err(
+      `tonex: invalid seed "${seedInput}" — use a 6-digit hex (#3b82f6) or a canonical oklch(L C H)\n`,
+    )
     return USAGE
   }
 
@@ -56,9 +67,19 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   // (a bare boolean would be a no-op, since DEFAULT_INPUTS surface is desaturate@0).
   const tintArg = flagValue(args, '--tint')
   const desaturateArg = flagValue(args, '--desaturate')
+  const paletteArg = flagValue(args, '--tint-palette')
   if (tintArg !== undefined && desaturateArg !== undefined) {
     io.err(`tonex: --tint and --desaturate are mutually exclusive (surface uses one algo)\n`)
     return USAGE
+  }
+  if (paletteArg !== undefined && !(NEUTRAL_PALETTE_NAMES as readonly string[]).includes(paletteArg)) {
+    io.err(
+      `tonex: unknown tint palette "${paletteArg}"\n  one of: ${NEUTRAL_PALETTE_NAMES.join(', ')}\n`,
+    )
+    return USAGE
+  }
+  if (paletteArg !== undefined && tintArg === undefined) {
+    io.err(`tonex: note — --tint-palette is only consumed when --tint is set\n`)
   }
   let surface: Partial<PortableTheme> = {}
   if (tintArg !== undefined) {
@@ -67,7 +88,11 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
       io.err(parsed.error)
       return USAGE
     }
-    surface = { surfaceAlgo: 'tint', surfaceTintLevel: uniform(parsed.value) }
+    surface = {
+      surfaceAlgo: 'tint',
+      surfaceTintLevel: uniform(parsed.value),
+      ...(paletteArg !== undefined ? { surfacePaletteName: paletteArg as NeutralPaletteName } : {}),
+    }
   } else if (desaturateArg !== undefined) {
     const parsed = parseUnit(desaturateArg, '--desaturate')
     if ('error' in parsed) {

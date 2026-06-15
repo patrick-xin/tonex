@@ -7,7 +7,9 @@
 // warns BEFORE running, with zero dependency on the skill doc.
 import { COLOR_FORMATS, type ColorFormat, MODES, type Mode } from '@tonex/core'
 import { type Level, levelThreshold } from '@tonex/core/audit'
-import { DEFAULT_VARIANT, variants } from '@tonex/core/variants'
+import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
+import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from '@tonex/core/schema'
+import { DEFAULT_VARIANT, VARIANT_GROUPS_ORDERED, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
 
 // why: the output TARGET — which document `generate` prints. `colors` is tonex's
@@ -22,29 +24,31 @@ export type Target = (typeof TARGETS)[number]
 
 const seed: FlagSpec = {
   name: '--seed',
-  type: 'hex',
+  type: 'color',
   required: true,
-  description: 'seed hex color, 6-digit (e.g. #3b82f6)',
+  description: 'seed color: a 6-digit hex (#3b82f6) or a canonical oklch(L C H) string',
 }
 const variant: FlagSpec = {
   name: '--variant',
   type: 'enum',
   values: Object.keys(variants),
-  description: `color scheme (default ${DEFAULT_VARIANT})`,
+  default: DEFAULT_VARIANT,
+  description: 'color scheme',
 }
 const to: FlagSpec = {
   name: '--to',
   type: 'enum',
   values: TARGETS,
+  default: 'shadcn',
   description:
-    'output target: colors (canonical colors.json), shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON (default shadcn)',
+    'output target: colors (canonical colors.json), shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON',
 }
 const mode: FlagSpec = {
   name: '--mode',
   type: 'enum',
   values: MODES,
-  description:
-    'which mode yaml emits (default light); colors/shadcn/json co-emit both and ignore it',
+  default: 'light',
+  description: 'which mode yaml emits; colors/shadcn/json co-emit both and ignore it',
 }
 // why: check's `--mode` is the SAME axis as generate's but scopes the AUDIT rather
 // than the emitted block — narrows the verdict to one mode so a single-mode yaml
@@ -54,7 +58,8 @@ const checkMode: FlagSpec = {
   name: '--mode',
   type: 'enum',
   values: MODES,
-  description: 'scope the audit to one mode (default both, the stricter union)',
+  default: 'both',
+  description: 'scope the audit to one mode; absent = both modes (the stricter union)',
 }
 // why: the color ENCODING for the emitted block — `oklch` (default) or `hex`.
 // Values come from core's `COLOR_FORMATS` tuple (ADR-0016: a runtime tuple the
@@ -65,17 +70,51 @@ const format: FlagSpec = {
   name: '--format',
   type: 'enum',
   values: COLOR_FORMATS,
-  description: 'color encoding for shadcn/json output: oklch (default) or hex; yaml is always hex',
+  default: 'oklch',
+  description:
+    'color encoding for color values in output: oklch or hex. generate: shadcn/json/colors honor it, yaml is always hex. check/adjust: --json output honors it, text output is always hex.',
 }
 const contrast: FlagSpec = {
   name: '--contrast',
   type: 'unit',
-  description: 'MCU palette contrast level 0..1 (default 0) — the palette-layer AAA remedy',
+  default: 0,
+  description: 'MCU palette contrast level 0..1 — the palette-layer AAA remedy',
+}
+// why: the roster TIER — a capacity ladder, not a taxonomy. Core (28 roles) is the
+// sufficient baseline most projects need; --extended widens to core + extended (50)
+// when core doesn't cover the target's slots (fixed/inverse/dim/scrim roles). Maps
+// to core's `ExportOptions.includeExtended`; honored by colors/yaml/json, a no-op
+// for shadcn (its roster is fixed by the bindings). A further rung — raw palette
+// tones 0..100 — is unbuilt; this flag stays boolean until that lands.
+const extended: FlagSpec = {
+  name: '--extended',
+  type: 'boolean',
+  description:
+    'widen the roster from core (28 roles, the sufficient baseline) to core + extended (50); reach for it only when core does not cover the target slots. colors/yaml/json honor it; shadcn is unaffected',
+}
+// why: the shadcn role→md-token routing preset. Only consumed by --to shadcn;
+// ignored (with a note) for other targets. The binding is pure routing — it does
+// not touch the recipe (variant/surface/contrast), so the same seed+recipe can
+// be projected into different shadcn slot arrangements without re-deriving.
+const binding: FlagSpec = {
+  name: '--binding',
+  type: 'enum',
+  values: Object.keys(SHADCN_BINDING_PRESETS),
+  default: 'default',
+  description: 'shadcn role→md-token routing preset (only consumed by --to shadcn)',
 }
 const tint: FlagSpec = {
   name: '--tint',
   type: 'unit',
   description: 'surface tint strength 0..1; 0 = max neutral (exclusive with --desaturate)',
+}
+const tintPalette: FlagSpec = {
+  name: '--tint-palette',
+  type: 'enum',
+  values: NEUTRAL_PALETTE_NAMES,
+  default: 'zinc',
+  description:
+    'neutral palette the tint algo repaints surfaces with (only consumed when --tint is set)',
 }
 const desaturate: FlagSpec = {
   name: '--desaturate',
@@ -121,7 +160,19 @@ const shifts: FlagSpec = {
     'JSON array of {mode, token, dTone?, dChroma?} ±HCT shift requests (at least one axis per entry)',
 }
 
-export const GENERATE_FLAGS = [seed, variant, to, mode, format, contrast, tint, desaturate] as const
+export const GENERATE_FLAGS = [
+  seed,
+  variant,
+  to,
+  binding,
+  mode,
+  format,
+  extended,
+  contrast,
+  tint,
+  tintPalette,
+  desaturate,
+] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
 // parser validates against the UNION so a typo'd flag is still caught, while each
@@ -133,9 +184,11 @@ export const CHECK_FLAGS = [
   contrast,
   checkMode,
   tint,
+  tintPalette,
   desaturate,
   aaa,
   large,
+  format,
   json,
   pairs,
   findContrast,
@@ -145,7 +198,17 @@ export const CHECK_FLAGS = [
 // own `--shifts` batch and `--json`. No `--mode` (per-request mode is inside each
 // shift entry). Feeding this tuple to parseArgs makes a typo'd adjust flag a loud
 // did-you-mean usage error for free.
-export const ADJUST_FLAGS = [seed, variant, contrast, tint, desaturate, shifts, json] as const
+export const ADJUST_FLAGS = [
+  seed,
+  variant,
+  contrast,
+  tint,
+  tintPalette,
+  desaturate,
+  shifts,
+  format,
+  json,
+] as const
 
 // why: the membership guards that validate a raw flag string against its enum
 // tuple — grouped with the tuples they check (sibling to the FlagSpec `values`).
@@ -162,6 +225,14 @@ export function isMode(value: string): value is Mode {
 
 export function isColorFormat(value: string): value is ColorFormat {
   return (COLOR_FORMATS as readonly string[]).includes(value)
+}
+
+export function isTintPalette(value: string): value is NeutralPaletteName {
+  return (NEUTRAL_PALETTE_NAMES as readonly string[]).includes(value)
+}
+
+export function isBinding(value: string): value is ShadcnBindingPresetName {
+  return Object.hasOwn(SHADCN_BINDING_PRESETS, value)
 }
 
 // why: the machine-readable surface — commands+flags (from the same specs the
@@ -216,9 +287,29 @@ export function describePayload() {
         aaa: { text: levelThreshold('text', 'aaa'), large: levelThreshold('non-text', 'aaa') },
       },
     },
-    variants: Object.keys(variants),
+    variants: variantTaxonomy(),
     targets: [...TARGETS],
+    bindings: bindingCatalog(),
   }
+}
+
+// why: the flat variant NAMES already ride on the --variant flag's `values`, so
+// describe.variants instead projects what the enum can't — the engine's group
+// taxonomy (group → names, groups in VARIANT_GROUPS_ORDERED, names in registry
+// order). An agent picks a feel ("more vivid" → expressive) and resolves it to a
+// concrete variant from one field, never guessing the look it can't see. The tag
+// is owned by core (`VariantStrategy.group`); this is a pure projection of it.
+function bindingCatalog(): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(SHADCN_BINDING_PRESETS).map(([name, p]) => [name, p.description]),
+  )
+}
+
+function variantTaxonomy(): Record<string, string[]> {
+  const taxonomy: Record<string, string[]> = {}
+  for (const group of VARIANT_GROUPS_ORDERED) taxonomy[group] = []
+  for (const [name, strategy] of Object.entries(variants)) taxonomy[strategy.group].push(name)
+  return taxonomy
 }
 
 function flagInfo(s: FlagSpec) {
@@ -227,6 +318,10 @@ function flagInfo(s: FlagSpec) {
     type: s.type,
     ...(s.required ? { required: true } : {}),
     ...(s.values ? { values: [...s.values] } : {}),
+    // why: surface the default as its own field (omitted when there is none — `0` is
+    // a real default, so guard on undefined, not falsiness) so the value omitting the
+    // flag yields is parseable, not buried in `description`.
+    ...(s.default !== undefined ? { default: s.default } : {}),
     description: s.description,
   }
 }

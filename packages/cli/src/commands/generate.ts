@@ -14,10 +14,19 @@ import {
   MODES,
   type Mode,
 } from '@tonex/core'
-import { flagValue, parseArgs } from '../args'
+import { SHADCN_BINDING_PRESETS } from '@tonex/core/schema'
+import { flagValue, hasFlag, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
-import { GENERATE_FLAGS, isColorFormat, isMode, isTarget, TARGETS, type Target } from '../spec'
+import {
+  GENERATE_FLAGS,
+  isBinding,
+  isColorFormat,
+  isMode,
+  isTarget,
+  TARGETS,
+  type Target,
+} from '../spec'
 
 // why: `generate` derives the theme and prints it for one output target — the
 // shadcn :root/.dark block or the single-mode design.md `colors:` yaml.
@@ -30,8 +39,22 @@ export function generate(argv: readonly string[], io: Io): number {
   }
   const args = parsed.args
 
-  const source = parseSource(args, io)
+  let source = parseSource(args, io)
   if (typeof source === 'number') return source
+
+  const bindingArg = flagValue(args, '--binding')
+  if (bindingArg !== undefined) {
+    if (!isBinding(bindingArg)) {
+      io.err(
+        `tonex: unknown binding "${bindingArg}"\n  one of: ${Object.keys(SHADCN_BINDING_PRESETS).join(', ')}\n`,
+      )
+      return USAGE
+    }
+    source = {
+      ...source,
+      shadcnRoleBindings: SHADCN_BINDING_PRESETS[bindingArg].shadcnRoleBindings,
+    }
+  }
 
   const targetArg = flagValue(args, '--to')
   if (targetArg !== undefined && !isTarget(targetArg)) {
@@ -49,7 +72,13 @@ export function generate(argv: readonly string[], io: Io): number {
     io.err(`tonex: unknown format "${formatArg}"\n  one of: ${COLOR_FORMATS.join(', ')}\n`)
     return USAGE
   }
-  const exportOptions: ExportOptions = formatArg ? { colorFormat: formatArg } : {}
+  // why: --extended is core's `includeExtended` tier knob surfaced as a flag — it
+  // widens the emitted roster from core (the sufficient baseline) to core+extended.
+  // colors/yaml/json honor it; shadcn's roster is binding-fixed (the note below).
+  const exportOptions: ExportOptions = {
+    ...(formatArg ? { colorFormat: formatArg } : {}),
+    ...(hasFlag(args, '--extended') ? { includeExtended: true } : {}),
+  }
 
   const bundle = buildContrastBundle(source)
 
@@ -70,6 +99,12 @@ export function generate(argv: readonly string[], io: Io): number {
 
   if (flagValue(args, '--mode') !== undefined) {
     io.err(`tonex: note — --mode is ignored for ${target} (it emits both modes)\n`)
+  }
+  if (bindingArg !== undefined && target !== 'shadcn') {
+    io.err(`tonex: note — --binding is only consumed by --to shadcn\n`)
+  }
+  if (hasFlag(args, '--extended') && target === 'shadcn') {
+    io.err(`tonex: note — --extended is ignored for shadcn (its roster is fixed by the bindings)\n`)
   }
   // why: colors is tonex's canonical colors.json (recipe header + both-mode role
   // values, ADR-0039 Decision 7); json is the Material Theme JSON reshape (a

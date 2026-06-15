@@ -6,11 +6,13 @@
 // (clean) / 2 (bad call) — never 1. The CLI is the boundary that catches core's
 // domain throws (unknown token / invalid mode / no-axis request) and maps them to
 // exit 2; it does NOT re-validate the token domain (surface, don't reimplement).
+import { argbFromHex, hexString, oklchString } from '@tonex/color-utils'
+import { type ColorFormat } from '@tonex/core'
 import { adjustTokens, type AdjustRequest, type AdjustResult } from '@tonex/core/adjust'
-import { flagValue, hasFlag, parseArgs } from '../args'
+import { flagValue, hasFlag, parseArgs, type ParsedArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
-import { ADJUST_FLAGS } from '../spec'
+import { ADJUST_FLAGS, isColorFormat } from '../spec'
 
 // why: the batch surface mirrors core's `adjustTokens` shape and the existing
 // `--pairs` JSON precedent — the caller is an agent that emits JSON, not a human
@@ -44,13 +46,28 @@ export function adjust(argv: readonly string[], io: Io): number {
     return USAGE
   }
 
+  const fmt = formatOf(args, io)
+  if (typeof fmt === 'number') return fmt
+
   if (hasFlag(args, '--json')) {
-    io.out(`${JSON.stringify({ shifts: results.map(leanRow) }, null, 2)}\n`)
+    io.out(`${JSON.stringify({ shifts: results.map((r) => leanRow(r, fmt)) }, null, 2)}\n`)
     return OK
   }
 
-  io.out(`${results.map(line).join('\n')}\n`)
+  io.out(`${results.map((r) => line(r, fmt)).join('\n')}\n`)
   return OK
+}
+
+// why: --format scopes the color encoding for before/after values — oklch (default)
+// or hex. Matches generate and check so a recipe runs through one encoding consistently.
+function formatOf(args: ParsedArgs, io: Io): ColorFormat | number {
+  const raw = flagValue(args, '--format')
+  if (raw === undefined) return 'oklch'
+  if (!isColorFormat(raw)) {
+    io.err(`tonex: unknown format "${raw}"\n  one of: oklch, hex\n`)
+    return USAGE
+  }
+  return raw
 }
 
 // why: the --shifts reader — JSON parse + non-empty ARRAY shape, then a per-ENTRY
@@ -118,8 +135,11 @@ function parseShifts(raw: string | undefined, io: Io): AdjustRequest[] | number 
 // why: one shift as a scannable line — mode, token, before → after, and the
 // requested vs ACHIEVED delta side by side (so a gamut-clamped divergence is
 // visible in the numbers, no separate warning needed). Signed, 1-decimal deltas.
-function line(r: AdjustResult): string {
-  return `${r.mode.padEnd(5)} ${r.token}  ${r.before} → ${r.after}   req ${delta(r.requested)}   got ${delta(r.achieved)}`
+function line(r: AdjustResult, format: ColorFormat): string {
+  const encode = format === 'oklch' ? oklchString : hexString
+  const before = encode(argbFromHex(r.before))
+  const after = encode(argbFromHex(r.after))
+  return `${r.mode.padEnd(5)} ${r.token}  ${before} → ${after}   req ${delta(r.requested)}   got ${delta(r.achieved)}`
 }
 
 function delta(d: { dTone: number; dChroma: number }): string {
@@ -131,15 +151,16 @@ function signed(n: number): string {
   return v >= 0 ? `+${v}` : `${v}`
 }
 
-// why: the lean --json row — before/after hex + requested verbatim (the exact ask),
-// achieved rounded for readability (the honest gamut-clamped truth). Mirrors
-// `check --json`'s round2-for-display shape.
-function leanRow(r: AdjustResult) {
+// why: the lean --json row — before/after encoded per --format + requested verbatim
+// (the exact ask), achieved rounded for readability (the honest gamut-clamped truth).
+// Mirrors `check --json`'s round2-for-display shape.
+function leanRow(r: AdjustResult, format: ColorFormat) {
+  const encode = format === 'oklch' ? oklchString : hexString
   return {
     mode: r.mode,
     token: r.token,
-    before: r.before,
-    after: r.after,
+    before: encode(argbFromHex(r.before)),
+    after: encode(argbFromHex(r.after)),
     requested: r.requested,
     achieved: { dTone: round2(r.achieved.dTone), dChroma: round2(r.achieved.dChroma) },
   }

@@ -4,8 +4,8 @@
 // hexes, `--pairs`) score raw via @tonex/color-utils; theme-AWARE (`--seed`,
 // `--find-contrast`) derive then run @tonex/core/audit — the engine owns that
 // scorer (the CLI never re-scores). The present flags pick the form.
-import { argbFromHex, contrastRatio, isValidHex } from '@tonex/color-utils'
-import { deriveTheme, MODES, type Mode } from '@tonex/core'
+import { argbFromHex, contrastRatio, hexString, isValidHex, oklchString } from '@tonex/color-utils'
+import { type ColorFormat, deriveTheme, MODES, type Mode } from '@tonex/core'
 import {
   type AuditThemeResult,
   auditPairs,
@@ -20,7 +20,7 @@ import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
 import { HELP } from '../help'
 import { GATE, type Io, OK, USAGE } from '../io'
 import { parseSource, uniform } from '../source'
-import { CHECK_FLAGS, isMode } from '../spec'
+import { CHECK_FLAGS, isColorFormat, isMode } from '../spec'
 
 // why: `check` is the contrast GATE, overloaded across forms that share one
 // exit-code contract (0 = clears the requested level, 1 = a TEXT pair fails). The
@@ -148,17 +148,32 @@ function checkTheme(args: ParsedArgs, io: Io): number {
   if (typeof mode === 'number') return mode
 
   const level = levelOf(args)
+  const fmt = formatOf(args, io)
+  if (typeof fmt === 'number') return fmt
   const result = scopeAudit(auditTheme(deriveTheme(source), { level }), mode)
 
   if (hasFlag(args, '--json')) {
-    io.out(`${JSON.stringify({ mode: mode ?? 'both', ...leanReport(result) }, null, 2)}\n`)
+    io.out(`${JSON.stringify({ mode: mode ?? 'both', ...leanReport(result, fmt) }, null, 2)}\n`)
     return result.ok ? OK : GATE
   }
 
   const LEVEL = level.toUpperCase()
   const scope = mode ? ` (${mode} only)` : ''
   if (result.ok) {
-    io.out(`PASS — ${LEVEL} contrast${scope}\n`)
+    // why: a silent PASS leaves the agent no trace it gated — so the substantive
+    // count goes on the line (the agent cites a number, not a bare verdict, which
+    // makes a later "I checked" claim self-consistent). summary is the BOTH-modes
+    // tally (scopeAudit spreads it through unchanged), so the count is only truthful
+    // unscoped; when --mode narrows the audit we keep the scope tag and drop the
+    // number rather than report a both-mode count under a one-mode label.
+    const cleared = mode === undefined ? ` — ${result.summary.pass} pairs clear` : ''
+    let out = `PASS — ${LEVEL} contrast${scope}${cleared}\n`
+    // warnings ARE scope-correct (scopeAudit filters them), so a passing theme that
+    // still carries non-text warnings says so — the PASS isn't "everything's clean".
+    if (result.warnings.length > 0) {
+      out += `  (+${result.warnings.length} non-text warning(s) — advisory, see --json)\n`
+    }
+    io.out(out)
     return OK
   }
 
@@ -306,6 +321,8 @@ function checkNamedPairs(args: ParsedArgs, io: Io): number {
   }
 
   const level = levelOf(args)
+  const fmt = formatOf(args, io)
+  if (typeof fmt === 'number') return fmt
   // why: auditPairs scores BOTH modes; a named pair fails if it fails in either
   // (unless --mode scopes the verdict to one). 'fail' ⇔ a failing TEXT pair, so
   // ok ⇔ every listed pair is legible in the audited mode(s).
@@ -317,7 +334,7 @@ function checkNamedPairs(args: ParsedArgs, io: Io): number {
   const scope = mode ? ` (${mode} only)` : ''
   if (hasFlag(args, '--json')) {
     io.out(
-      `${JSON.stringify({ mode: mode ?? 'both', ok, level, results: results.map(leanRow) }, null, 2)}\n`,
+      `${JSON.stringify({ mode: mode ?? 'both', ok, level, results: results.map((r) => leanRow(r, fmt)) }, null, 2)}\n`,
     )
     return ok ? OK : GATE
   }
@@ -418,26 +435,40 @@ function failureLine(p: EvaluatedAuditPair): string {
   return `  ${p.mode.padEnd(5)} ${p.pair.fg} on ${p.pair.bg} — ${p.ratio.toFixed(2)}:1 (needs ${p.effectiveThreshold})`
 }
 
+// why: --format scopes the color encoding for the JSON rows — oklch (default) or
+// hex. Validated here so check's JSON output follows the same contract as generate.
+// Text output (token names + ratio) is always hex-free and unaffected.
+function formatOf(args: ParsedArgs, io: Io): ColorFormat | number {
+  const raw = flagValue(args, '--format')
+  if (raw === undefined) return 'oklch'
+  if (!isColorFormat(raw)) {
+    io.err(`tonex: unknown format "${raw}"\n  one of: oklch, hex\n`)
+    return USAGE
+  }
+  return raw
+}
+
 // why: the lean --json report — ok/level plus flat, self-contained offender rows.
 // An agent acts on what FAILS, not on a tally. failures block (text); warnings are
 // advisory (non-text).
-function leanReport(result: AuditThemeResult) {
+function leanReport(result: AuditThemeResult, format: ColorFormat) {
   return {
     ok: result.ok,
     level: result.level,
-    failures: result.failures.map(leanRow),
-    warnings: result.warnings.map(leanRow),
+    failures: result.failures.map((p) => leanRow(p, format)),
+    warnings: result.warnings.map((p) => leanRow(p, format)),
   }
 }
 
-function leanRow(p: EvaluatedAuditPair) {
+function leanRow(p: EvaluatedAuditPair, format: ColorFormat) {
+  const encode = format === 'oklch' ? oklchString : hexString
   return {
     mode: p.mode,
     layer: p.pair.layer,
     fg: p.pair.fg,
     bg: p.pair.bg,
-    fgHex: p.fgHex,
-    bgHex: p.bgHex,
+    fgColor: encode(p.fgArgb),
+    bgColor: encode(p.bgArgb),
     ratio: round2(p.ratio),
     threshold: p.effectiveThreshold,
   }

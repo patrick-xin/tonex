@@ -1,6 +1,6 @@
 # Target: Material Theme Builder JSON
 
-`tonex generate --seed <hex> --to json` authors the **Material Theme Builder (MTB) export shape** — the JSON that Figma's Material Theme Builder plugin and MTB-compatible tools import:
+`tonex generate --seed <hex> --to json` authors the **Material Theme Builder export shape** — the JSON that Figma's Material Theme Builder plugin and MTB-compatible tools import:
 
 ```
 tonex generate --seed '#3b82f6' --to json

@@ -37,13 +37,21 @@ commands:
   describe
       Print the machine-readable surface (commands, flags, contrast policy).
 
+  --seed       a 6-digit hex (#3b82f6) or a canonical oklch(L C H) brand color.
   --variant    one of: ${Object.keys(variants).join(', ')} (default: ${DEFAULT_VARIANT}).
   --to         output target (default shadcn). colors = the canonical colors.json
                (recipe header + both-mode role values, the artifact other tools
                project from); shadcn = oklch :root/.dark block;
                yaml = single-mode colors: block for a design.md;
                json = Material Theme JSON (a www-shaped export, reused as-is for now).
+  --binding    shadcn role→md-token routing preset (--to shadcn only).
+               one of: default, clean, mixed, layered, seamless (default: default).
+  --extended   widen the roster from core (28 roles, the sufficient baseline) to
+               core + extended (50). Reach for it only when core doesn't cover the
+               target's slots. colors/yaml/json honor it; shadcn is unaffected.
   --tint / --desaturate  surface-treatment strength 0..1 (mutually exclusive).
+  --tint-palette  neutral palette the tint algo repaints surfaces with (default zinc).
+               one of: slate, gray, zinc, neutral, stone, taupe, mauve, mist, olive.
   --aaa        raise the WCAG bar to AAA (default AA). --large uses large-text thresholds.
   --contrast   MCU palette contrast level, 0..1 (default 0).
   --mode       light|dark. generate: which mode yaml emits (default light;
