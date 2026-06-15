@@ -4,6 +4,16 @@ Edit one source colour, export coherent themes for both **Material 3** and **sha
 
 See [`docs/vision.md`](./docs/vision.md) for what the project is and who it's for.
 
+## Use it with an AI agent
+
+Install the tonex skill, then just describe the theme you want — the agent drives the `tonex` CLI from one brand color and never hand-picks a hex:
+
+```bash
+npx skills add patrick-xin/tonex
+```
+
+In **Claude Code** or **Cursor**, install the `tonex` plugin from the marketplace instead — the skill auto-loads from [`skills/tonex/`](./skills/tonex/). The skill assumes the `tonex` CLI is on your `PATH`.
+
 ## Stack
 
 - `@tonex/core` — engine. Source store (zustand) → `deriveTheme` → `applyDom` renderer + `exportCss` exporter. Pure colour math is grounded in [Material Color Utilities](https://github.com/material-foundation/material-color-utilities) (vendored as `@tonex/mcu`).
