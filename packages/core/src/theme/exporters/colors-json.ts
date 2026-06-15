@@ -1,7 +1,12 @@
 import type { DerivedTheme, TokenMap } from '../derive'
 import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
-import { MD_TOKEN_NAMES, type PortableTheme, type SurfaceAlgo } from '../schema'
+import {
+  MD_CORE_TOKEN_NAMES,
+  MD_TOKEN_NAMES,
+  type PortableTheme,
+  type SurfaceAlgo,
+} from '../schema'
 import { selectSeedHex } from '../seed'
 import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 
@@ -14,9 +19,11 @@ import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 //   - header = the full recipe (seed + variant + contrast + surface + the file's
 //     own encoding) → the values are reproducible from the header ALONE, so the
 //     file may be regenerated or discarded freely (the Decision-7 consequence).
-//   - complete roster by default — core + extended (MD_TOKEN_NAMES), never the
-//     lean core-only the paste-targets default to: a lossy canonical would force
-//     downstream re-derivation when the skill projects an extended role.
+//   - core roster by default, extended opt-in via `includeExtended` (the same
+//     tier knob the paste-targets honor). The roster is a CAPACITY ladder, not a
+//     taxonomy: core (28) is the sufficient baseline most projects need; extended
+//     (22) adds more roles when core doesn't cover the slots. The canonical
+//     default stays lean so an agent maps against the set it actually needs.
 //   - both modes, mode-major, kebab role keys (`--color-` stripped) so a
 //     design.md `colors:` projection is a pure key pass-through.
 // Same sink rules as siblings: ADR-0017 (reshape what deriveTheme returned, never
@@ -58,16 +65,24 @@ function projectColor(argb: number, fmt: ColorFormat): string {
 }
 
 // why: the flat role→value map for one mode — merge core + extended (they
-// partition MD_TOKEN_NAMES disjointly) into one lookup and iterate the explicit
-// roster so key order is canonical and a missing token is visibly skipped, never
-// silently defaulted. Roster-only (no custom slugs, no chart): every emitted key
-// is a role the header recipe re-derives.
-function buildMode(theme: DerivedTheme, mode: Mode, fmt: ColorFormat): Record<string, string> {
+// partition MD_TOKEN_NAMES disjointly) into one lookup and iterate the requested
+// ROSTER so key order is canonical and a missing token is visibly skipped, never
+// silently defaulted. `includeExtended` selects the roster tier (core default /
+// full opt-in), mirroring design-md.ts and json.ts — the merged lookup always
+// holds both tiers, so the roster choice is purely which keys to emit. Roster-only
+// (no custom slugs, no chart): every emitted key is a role the header re-derives.
+function buildMode(
+  theme: DerivedTheme,
+  mode: Mode,
+  fmt: ColorFormat,
+  includeExtended: boolean,
+): Record<string, string> {
   const core = mode === 'light' ? theme.md.light : theme.md.dark
   const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
   const lookup: TokenMap = { ...core, ...extended }
+  const roster = includeExtended ? MD_TOKEN_NAMES : MD_CORE_TOKEN_NAMES
   const out: Record<string, string> = {}
-  for (const name of MD_TOKEN_NAMES) {
+  for (const name of roster) {
     const argb = lookup[name]
     if (argb === undefined) continue
     out[roleKey(name)] = projectColor(argb, fmt)
@@ -90,6 +105,7 @@ export function buildColorsJson(
   options: ExportOptions = {},
 ): ColorsJson {
   const fmt: ColorFormat = options.colorFormat ?? 'oklch'
+  const includeExtended = options.includeExtended ?? false
   const theme = bundle.default
   return {
     seed: selectSeedHex(source),
@@ -97,8 +113,8 @@ export function buildColorsJson(
     contrast: source.contrastLevel.light,
     surface: { algo: source.surfaceAlgo, level: surfaceLevel(source) },
     format: fmt,
-    light: buildMode(theme, 'light', fmt),
-    dark: buildMode(theme, 'dark', fmt),
+    light: buildMode(theme, 'light', fmt, includeExtended),
+    dark: buildMode(theme, 'dark', fmt, includeExtended),
   }
 }
 

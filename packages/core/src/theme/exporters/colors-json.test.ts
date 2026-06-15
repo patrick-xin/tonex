@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
-import { DEFAULT_INPUTS, MD_TOKEN_NAMES, type PortableTheme } from '../schema'
+import { DEFAULT_INPUTS, MD_CORE_TOKEN_NAMES, MD_TOKEN_NAMES, type PortableTheme } from '../schema'
 import { selectSeedHex } from '../seed'
 import type { ContrastBundle } from './bundle'
 import { buildColorsJson, exportColorsJson } from './colors-json'
@@ -13,9 +13,11 @@ import { buildColorsJson, exportColorsJson } from './colors-json'
 //   1. header = the full recipe (seed + variant + contrast + surface + the file's
 //      own encoding) so the values are reproducible from the header ALONE — the
 //      Decision-7 consequence ("always reproducible from its recipe").
-//   2. complete roster by default — core + extended (MD_TOKEN_NAMES), not the
-//      lean core-only the paste-targets default to: this is the source the skill
-//      projects from, so a lossy canonical would force downstream re-derivation.
+//   2. core roster by default, extended opt-in via `includeExtended` (the same
+//      tier knob the paste-targets honor). The roster is a CAPACITY ladder, not a
+//      taxonomy: core (28) is the sufficient baseline most projects need; extended
+//      (22) is more roles when core doesn't cover the slots. An agent widens only
+//      when it must, so the canonical default stays lean.
 //   3. both modes co-emitted, mode-major { light, dark }, keyed by kebab role
 //      (`--color-` stripped) so a design.md `colors:` projection is a pure key
 //      pass-through.
@@ -23,7 +25,8 @@ import { buildColorsJson, exportColorsJson } from './colors-json'
 // recompute), ADR-0021 c.1 (argb → one encoding at the seam, selected by
 // colorFormat).
 
-const ROLE_KEYS = MD_TOKEN_NAMES.map((n) => n.replace(/^--color-/, ''))
+const CORE_KEYS = MD_CORE_TOKEN_NAMES.map((n) => n.replace(/^--color-/, ''))
+const FULL_KEYS = MD_TOKEN_NAMES.map((n) => n.replace(/^--color-/, ''))
 const OKLCH = /^oklch\(/
 const HEX = /^#[0-9a-f]{6}$/
 
@@ -62,18 +65,27 @@ describe('buildColorsJson — canonical recipe + both-mode role values', () => {
     })
   })
 
-  describe('values — complete roster, both modes, mode-major', () => {
-    it('co-emits light and dark, each keyed by the full roster (core + extended) in order', () => {
+  describe('values — core by default, extended opt-in, both modes, mode-major', () => {
+    it('co-emits light and dark, each keyed by the core roster in order (the lean default)', () => {
       const out = buildColorsJson(source, bundle, {})
-      expect(Object.keys(out.light)).toEqual(ROLE_KEYS)
-      expect(Object.keys(out.dark)).toEqual(ROLE_KEYS)
+      expect(Object.keys(out.light)).toEqual(CORE_KEYS)
+      expect(Object.keys(out.dark)).toEqual(CORE_KEYS)
     })
 
-    it('carries extended roles, not just core — the canonical artifact is complete', () => {
+    it('omits extended roles by default — core is the sufficient baseline', () => {
       const { light } = buildColorsJson(source, bundle, {})
-      expect(light).toHaveProperty('primary-fixed-dim')
-      expect(light).toHaveProperty('inverse-surface')
-      expect(light).toHaveProperty('shadow')
+      expect(light).not.toHaveProperty('primary-fixed-dim')
+      expect(light).not.toHaveProperty('inverse-surface')
+      expect(light).not.toHaveProperty('shadow')
+    })
+
+    it('widens to the full roster (core + extended) when includeExtended is set', () => {
+      const out = buildColorsJson(source, bundle, { includeExtended: true })
+      expect(Object.keys(out.light)).toEqual(FULL_KEYS)
+      expect(Object.keys(out.dark)).toEqual(FULL_KEYS)
+      expect(out.light).toHaveProperty('primary-fixed-dim')
+      expect(out.light).toHaveProperty('inverse-surface')
+      expect(out.light).toHaveProperty('shadow')
     })
 
     it('co-derives modes that differ (light ≠ dark)', () => {
@@ -84,7 +96,7 @@ describe('buildColorsJson — canonical recipe + both-mode role values', () => {
     it('omits chart keys and custom slugs — roster only, so every value re-derives from the header', () => {
       const { light } = buildColorsJson(source, bundle, {})
       expect(light).not.toHaveProperty('chart-1')
-      expect(Object.keys(light)).toEqual(ROLE_KEYS)
+      expect(Object.keys(light)).toEqual(CORE_KEYS)
     })
   })
 
