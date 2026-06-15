@@ -1,6 +1,22 @@
 ---
 title: Skills
-description: Skills
+description: How an agent uses Tonex to apply your color system anywhere.
 ---
 
-Placeholder content.
+The skill teaches an agent how to use Tonex: when to call it, which targets it exports directly, and how to map the semantic source onto tools it doesn't export natively.
+
+## What it does
+
+Working from your system, the skill has the agent:
+
+- Run `npx tonex` for the generation rather than guessing colors.
+- Use a native target when one exists, for a deterministic result.
+- For a tool without a native exporter, pull a [recipe](/docs/cli/other-tools) and apply it to the [semantic source](/docs/cli/targets-formats).
+
+## Discipline
+
+The skill also sets rules that keep a remap faithful: read colors from the source instead of inventing them, and keep usage balanced so one color doesn't take over. The goal is that the same identity, mapped into a new tool, still reads as the same brand.
+
+## Why it matters
+
+As agents generate more of what a product ships — its site, its slides, its screens — each generation is another chance to drift. The skill points the agent at one source of truth and a fixed way to apply it, so more surfaces can be produced without the brand coming apart.

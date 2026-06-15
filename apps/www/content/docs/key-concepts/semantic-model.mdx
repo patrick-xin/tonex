@@ -1,0 +1,40 @@
+---
+title: Semantic Color Model
+description: Colors named by role, and the role set Tonex generates.
+---
+
+Tonex names colors by their job, not their appearance. A color is `primary` or `surface` or `error` because of the role it plays, and each role has a defined relationship to the others. This is the model the whole system rests on. It follows Material Design 3, and it's what lets one seed map cleanly into any tool that shares the same roles.
+
+## Why roles instead of names
+
+A fixed color like "blue 600" only means something in one palette. A role like `primary` means the same thing everywhere — the main accent — whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, or on a slide and still be the same identity. Roles are the common language; the [semantic source](/docs/cli/targets-formats) is the contract written in it.
+
+## The core roles
+
+| Role | Job |
+|------|-----|
+| `primary` | The main brand and accent color |
+| `secondary` | The supporting accent |
+| `tertiary` | A third accent for contrast and range |
+| `surface` | The neutral backgrounds behind content |
+| `error` | Error states and destructive actions |
+| `outline` | Borders and dividers |
+
+## On colors
+
+Every colored area needs readable content on top of it. For each role there's an `on-` partner — `on-primary`, `on-surface`, and so on — that's built to read against it. Tonex derives the pair together and checks the contrast, so the text on a color is readable by construction. See [HCT & contrast](/docs/key-concepts/hct).
+
+## Surfaces and elevation
+
+Surfaces come as a small range of containers at increasing separation — a base surface, then container levels — so you can show depth and grouping through subtle steps rather than borders alone. Each derives from the same neutral and stays in order by contrast.
+
+## Inverse and effects
+
+A few roles exist for specific needs:
+
+- **Inverse** surfaces and their on colors, for elements like tooltips and snackbars that stand out by flipping light and dark.
+- **Scrim** and **shadow**, the colors behind modals and under raised elements.
+
+## In your tools
+
+These roles are the canonical set. When Tonex exports to a specific tool, each role maps to that tool's own tokens. For shadcn, see [Role bindings](/docs/web-app/shadcn/role-bindings).

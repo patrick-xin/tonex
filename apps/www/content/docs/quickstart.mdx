@@ -1,0 +1,38 @@
+---
+title: Quickstart
+description: Generate your first color system in under a minute, from the CLI or the web app.
+---
+
+You give Tonex one color. It returns a complete, accessible color system built around it. There are two ways in: a one-line command, or the web app.
+
+## From the CLI
+
+Generate a shadcn theme from a single seed and write it straight to your stylesheet:
+
+```bash
+npx tonex generate --seed "#6A9CFF" > globals.css
+```
+
+`generate` defaults to the shadcn target, so that one command writes a paste-ready `:root`/`.dark` block. The same seed and flags produce the same `globals.css` every time — no agent, no network call. Paste the file into a shadcn project and the theme is live.
+
+Change the character without changing the seed by adding knobs:
+
+```bash
+npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+```
+
+See [Commands](/docs/cli/commands) for the full flag list.
+
+## From the web app
+
+1. Set a seed: type a hex value, paste OKLCH or HCT, or drop an image to pull its main color.
+2. Adjust the variant, contrast, and surfaces while previewing on real components.
+3. Open **Export** and copy the tokens. What you see in the preview is what you paste.
+
+The web app and the CLI share one engine. A seed produces the same system in either.
+
+## Next
+
+- [How Tonex thinks](/docs/how-tonex-thinks) — the model behind the output.
+- [Web app](/docs/web-app/seed) — every control, in order.
+- [CLI](/docs/cli/introduction) — commands, targets, and formats.

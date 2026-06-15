@@ -1,4 +1,4 @@
 {
   "title": "Web App",
-  "pages": ["seed", "brand-color", "export", "shadcn"]
+  "pages": ["light-dark", "seed", "overrides", "surfaces", "charts", "shadcn", "export"]
 }

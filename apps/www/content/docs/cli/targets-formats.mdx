@@ -1,0 +1,28 @@
+---
+title: Targets & Formats
+description: Two independent choices on generate — which document to emit, and how colors are encoded.
+---
+
+`generate` output is controlled by two independent flags. **`--to`** is which document you want. **`--format`** is how colors inside it are encoded. They don't overlap, so you set them separately.
+
+## Target
+
+`--to` chooses the output document (default `shadcn`):
+
+| Target | Output |
+|--------|--------|
+| `shadcn` | A paste-ready shadcn `:root`/`.dark` block, both modes. The default. |
+| `yaml` | A single-mode design.md `colors:` block. |
+| `json` | A Material Theme JSON export. |
+
+`shadcn` and `json` co-emit both light and dark. `yaml` has no light/dark axis, so it alone reads `--mode` to pick which projection to emit (default `light`).
+
+## Format
+
+`--format` chooses the color encoding for `shadcn` and `json` output: `oklch` (default) or `hex`. `yaml` is always hex and ignores this flag.
+
+Adding a format in the engine surfaces it here automatically — the CLI reads the format list from `@tonex/core` rather than re-listing it.
+
+## The design.md target
+
+`--to yaml` emits a [design.md](https://github.com/google/design.md) `colors:` block. Tonex exports `shadcn` and `json` natively; for any tool it doesn't export, the design.md output is the semantic contract an agent maps from — the roles (`primary`, `on-surface`, and so on) mean the same thing wherever they land. See [How Tonex thinks](/docs/how-tonex-thinks#the-semantic-source-is-the-contract) and the [skill](/docs/skills) that applies a consistent mapping.

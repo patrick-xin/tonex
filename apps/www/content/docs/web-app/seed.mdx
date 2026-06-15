@@ -1,6 +1,32 @@
 ---
 title: Seed Color
-description: Installation tonex cli
+description: The one input, your brand color and the formats you can give it in.
 ---
 
-Placeholder content.
+The seed is the single color the whole system is built from. It's your brand color, and the engine keeps it as-is rather than shifting it.
+
+## Setting a seed
+
+You can set the seed four ways:
+
+- **Hex** — type or paste a value like `#6A9CFF`.
+- **OKLCH** — paste an OKLCH color; Supported format: `oklch(0.7 0.1 327)`.
+- **HCT** — paste a hue–chroma–tone value.
+- **Image** — drop an image and Tonex extracts its main color as the seed.
+
+Whichever you use, the seed becomes the anchor the rest of the palette is derived from.
+
+## Seed lock
+
+Lock the seed to keep it fixed while you change everything else. With the seed locked, adjusting the variant, contrast, or surfaces reshapes the system around the same anchor color — your brand color stays exactly what you set.
+
+## Tailwind color-picker input
+
+The seed input can show a Tailwind color picker, so you can pick from the Tailwind palette instead of entering a raw value. It's on by default; toggle it in **Settings**. See [Limitations](/docs/reference/limitations) for the edge cases of picker input.
+
+## What happens next
+
+Once a seed is set, the engine derives the full role set. From here you shape the result:
+
+- [Overrides](/docs/web-app/overrides) — adjust a single family or add your own colors.
+- [Export](/docs/web-app/export) — copy the tokens out.

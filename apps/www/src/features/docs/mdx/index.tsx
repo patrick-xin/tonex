@@ -24,6 +24,22 @@ export const mdxComponents = {
       </pre>
     )
   },
+  code: ({ className, children, ...props }: React.ComponentProps<'code'>) => {
+    if (typeof children === 'string') {
+      return (
+        <code
+          className={cn(
+            'not-prose bg-secondary-container text-on-secondary-container rounded-sm text-sm px-1',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </code>
+      )
+    }
+    return <code {...props}>{children}</code>
+  },
   figure: CodeFigure,
   figcaption: ({ className, children, ...props }: React.ComponentProps<'figcaption'>) => {
     return (

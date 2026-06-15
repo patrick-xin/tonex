@@ -1,18 +1,26 @@
 ---
 title: Installation
-description: Installation tonex cli
+description: Run Tonex with npx, or add the core package to your project.
 ---
 
+The CLI needs no install. Run it with `npx`:
+
+```bash
+npx tonex generate --seed "#6A9CFF" > globals.css
+```
+
+`npx` fetches and runs the latest version, which is convenient for one-off generation and for agents.
+
+## Adding it to a project
+
+To pin a version or call the engine from your own code, add the core package:
 
 ```package-install
-npx tonex
+npm install @tonex/core
 ```
 
-```javascript title="index.js" showLineNumbers {2,4}
-function fibonacci(n) {
-  if (n <= 1) return n
-  return fibonacci(n - 1) + fibonacci(n - 2)
-}
+`@tonex/core` is the engine the CLI and the web app both share. It's open source, so you can build on it directly.
 
-console.log(fibonacci(10))
-```
+## Requirements
+
+Requires a current Node.js runtime.

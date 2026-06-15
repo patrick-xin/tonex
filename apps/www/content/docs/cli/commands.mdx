@@ -1,6 +1,95 @@
 ---
 title: Commands
-description: Commands
+description: generate, check, adjust, and describe — the full command surface.
 ---
 
-Placeholder content.
+Tonex is a subcommand CLI:
+
+```bash
+npx tonex <command> [options]
+```
+
+The commands are `generate`, `check`, `adjust`, and `describe`. Flags use the `--flag value` form rather than `key=value`, which is more predictable for agents. Run `tonex --help` for the same reference in your terminal, or `tonex describe` for it as JSON.
+
+## `generate`
+
+Derive a theme from a seed and print it.
+
+```bash
+npx tonex generate --seed "#6A9CFF" [options] > globals.css
+```
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--seed` | a hex color, e.g. `"#6A9CFF"` | required | The source color. |
+| `--variant` | `cmf`, `tonalSpot`, `neutral`, `fidelity`, `content`, `vibrant`, `expressive`, `rainbow`, `fruitSalad`, `monochrome` | `cmf` | The palette strategy. See [Variants & contrast](/docs/key-concepts/variants-contrast). |
+| `--to` | `shadcn`, `yaml`, `json` | `shadcn` | The output target. See [Targets & formats](/docs/cli/targets-formats). |
+| `--format` | `oklch`, `hex` | `oklch` | Color encoding for `shadcn`/`json` output. `yaml` is always hex. |
+| `--mode` | `light`, `dark` | `light` | Which mode `yaml` emits. `shadcn` and `json` co-emit both modes and ignore this. |
+| `--contrast` | `0` to `1` | `0` | MCU palette contrast level — the palette-layer remedy for raising separation. |
+| `--tint` | `0` to `1` | `0` | Surface tint strength. `0` is max neutral. Exclusive with `--desaturate`. |
+| `--desaturate` | `0` to `1` | `0` | Surface desaturate strength. `0` is a no-op. Exclusive with `--tint`. |
+
+```bash
+# A shadcn theme (the default target), straight to a stylesheet
+npx tonex generate --seed "#6A9CFF" > globals.css
+
+# With knobs
+npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+
+# A design.md colors: block, dark mode, as YAML
+npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
+
+# Material Theme JSON, hex-encoded
+npx tonex generate --seed "#6A9CFF" --to json --format hex
+```
+
+## `check`
+
+Audit WCAG contrast. Exit `0` clears the level; exit `1` means a text pair fails. Add `--json` to any form for machine-readable output, `--aaa` to raise the bar from AA to AAA, and `--large` (on the ad-hoc and pair-batch forms) to use large-text thresholds.
+
+```bash
+# Gate a derived theme (both modes unless --mode scopes to one)
+npx tonex check --seed "#6A9CFF" [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
+
+# Find the minimum --contrast that clears the level, in one call
+npx tonex check --seed "#6A9CFF" --find-contrast [--variant <name>] [--mode light|dark] [--aaa] [--json]
+
+# Verify one ad-hoc fg/bg hex pairing (theme-free)
+npx tonex check "#1a1a1a" "#ffffff" [--aaa] [--large] [--json]
+
+# Batch-verify a JSON array of [fg, bg] hex pairs (theme-free)
+npx tonex check --pairs '[["#1a1a1a","#ffffff"],["#888","#fff"]]' [--aaa] [--large] [--json]
+
+# Batch-verify [fg, bg] token-name pairs against the derived theme
+npx tonex check --seed "#6A9CFF" --pairs '[["on-surface","surface"]]' [--variant <name>] [--mode light|dark] [--aaa] [--json]
+```
+
+`--find-contrast` exits `1` if even `--contrast 1` cannot reach the level (some pairs are structurally unreachable). The token-name form exits `2` on an unknown token name, with a did-you-mean.
+
+## `adjust`
+
+Shift named MD tokens by a relative ±HCT delta and print before/after facts plus the gamut-clamped achieved delta. Exit `0` on a clean shift, `2` on a bad token name or malformed `--shifts`. It never gates contrast — run `check` for that.
+
+```bash
+npx tonex adjust --seed "#6A9CFF" \
+  --shifts '[{"mode":"light","token":"surface","dTone":-4,"dChroma":2}]' [--json]
+```
+
+`--shifts` takes a JSON array of `{mode, token, dTone?, dChroma?}` entries, each with at least one axis. `adjust` also accepts the shared seed knobs (`--variant`, `--contrast`, `--tint`/`--desaturate`); the per-shift `mode` lives inside each entry, so there is no `--mode` flag.
+
+## `describe`
+
+Print the machine-readable surface — every command and flag (from the same specs the parser validates against), the contrast verdict policy and thresholds, and the exit-code taxonomy.
+
+```bash
+npx tonex describe
+```
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Clean — the gate passed, or output was produced. |
+| `1` | Contrast gate failure — the artifact is wrong; apply a color remedy (raise `--contrast`, re-pair tokens). |
+| `2` | Usage or input error — the call is wrong; fix the flags or inputs. |

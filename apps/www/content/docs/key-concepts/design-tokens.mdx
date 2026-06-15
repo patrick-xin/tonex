@@ -1,4 +1,26 @@
 ---
 title: Design Tokens
-description: Design Tokens
+description: What Tonex outputs, how the tokens are named, and what's in the default set.
 ---
+
+A design token is a named color you reference instead of a raw value — `--color-primary` rather than a hex literal. Tokens are what Tonex outputs, and naming colors this way is what lets the system change underneath your code without your markup changing.
+
+## Naming
+
+Tokens are named for their [role](/docs/key-concepts/semantic-model): `primary`, `on-primary`, `surface`, `surface-container`, `error`, and so on. The name says what the color is for, so the same token means the same thing across modes and across tools.
+
+## What's in the set
+
+The default export is the set most projects need and nothing more: the **core roles**, for both the Material layer and shadcn, in light and dark.
+
+You can opt into more when you need it:
+
+- The **tonal palette** — every tone of every family, not only the roles in use.
+- **Chart** tokens — the data visualization series.
+- **Contrast variants** — higher-contrast values of the tokens.
+
+Keeping the default small means less to carry in your CSS; the extras are there when a project calls for them. See [Export](/docs/web-app/export).
+
+## Format
+
+Tokens export as `oklch` or `hex`, your choice. The names don't change with the format, only the values. See [HCT](/docs/key-concepts/hct) for how the two color spaces relate.

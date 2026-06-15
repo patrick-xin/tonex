@@ -1,6 +1,20 @@
 ---
 title: Role Bindings
-description: Role Bindings.
+description: Point a shadcn role at a different generated color, and keep it automatic.
 ---
 
-Placeholder content.
+shadcn has a set of roles — `--primary`, `--card`, `--popover`, `--border`, and so on. A binding decides which of Tonex's generated colors a role points at. Because it points at a generated color rather than a fixed value, a bound role stays automatic: change the seed, variant, or contrast and the role updates with the system.
+
+## Changing a binding
+
+Each role has a binding you can repoint. If the default mapping doesn't fit your visual hierarchy — say you want `--popover` on a different surface than `--card` — rebind it to the generated color you'd rather it track. It keeps updating from there.
+
+Bindings are **per mode**, so light and dark can point the same role at different colors.
+
+## Bindings vs overrides
+
+A binding is symbolic: the role tracks a generated color. A [role override](/docs/web-app/shadcn/role-overrides) is literal: the role is pinned to an exact value and stops tracking. An override beats a binding. Use a binding when you want a mapping that's different but still automatic, and an override when you need one exact color.
+
+## Defaults
+
+A role's starting binding comes from the active [preset](/docs/web-app/shadcn/presets).

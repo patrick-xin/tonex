@@ -1,0 +1,54 @@
+---
+title: How Tonex Thinks
+description: The model behind the output. One seed, a system of semantic roles, and an order that decides what wins.
+---
+
+Tonex takes one color and derives a full system from it. Understanding four things — the seed, the roles, the generative space, and the override order — explains everything the editor and the CLI do.
+
+## The seed is your color, kept as-is
+
+You give Tonex a single seed: your brand color. The engine builds the system around it rather than replacing it. The seed sets the tone and hue the rest of the palette answers to.
+
+You provide one color. You don't hand-pick the other tokens and hope they cohere — the engine derives them.
+
+## The output is roles, not swatches
+
+Tonex doesn't return a list of colors. It returns **semantic roles** — colors named by their job, not their appearance:
+
+| Role | Job |
+|------|-----|
+| `primary` | The main brand and accent color |
+| `surface` | The neutral backgrounds behind your content |
+| `on-surface` | Text and icons that sit on a surface |
+| `error` | Error states and destructive actions |
+
+Every role has a defined relationship to the others. `on-surface` is readable on `surface` because the engine builds the pair together, not because you matched them by eye. Because the roles describe intent rather than a specific hue, the same system can be expressed in any tool that has the same intents. See [Semantic color model](/docs/key-concepts/semantic-model) for the full set.
+
+## Your identity is a point in a continuous space
+
+The system is generative, not a preset. Two things follow from that:
+
+- Change a single hex digit in the seed, and you get a different but still-coherent system.
+- Keep the seed and turn a knob — variant, contrast, surface — and you get a different system again.
+
+Your identity is a unique point in a continuous space, not a theme everyone else can also pick. That continuity is also the safety net: when you adjust one color by hand, the engine re-balances the rest so the set stays coherent.
+
+## An order decides what wins
+
+You can shape the system at several stages. Later stages override earlier ones:
+
+1. **Seed** — the input color.
+2. **Engine** — variant, contrast, and the optional second source set the overall palette. See [Variants & contrast](/docs/key-concepts/variants-contrast).
+3. **Overrides** — adjust one color family, or add your own named colors. See [Overrides](/docs/web-app/overrides).
+4. **Surfaces** — tint or desaturate the neutral backgrounds. See [Surfaces](/docs/web-app/surfaces).
+5. **shadcn bindings and pins** — point a role at a different color, or pin it to an exact value. A pin beats a binding. See [Role bindings](/docs/web-app/shadcn/role-bindings).
+
+When two stages touch the same color, the later one wins. This is what lets you make a precise change in one place without it rippling everywhere else.
+
+## Contrast is checked as you build
+
+Every foreground/background pair is contrast-audited while you work, against WCAG thresholds. What passes in the preview is what you ship — readability isn't a separate step you run at the end. See [HCT & contrast](/docs/key-concepts/hct).
+
+## The semantic source is the contract
+
+The roles are tool-agnostic. `primary` and `on-surface` mean the same thing whether the target is shadcn, Tailwind, or a slide. Tonex exports this semantic source; from there the last step maps it into whatever token system a given tool uses — directly for known targets, or through an agent for the long tail. The source is the contract; the mapping is the last mile. See [Targets & formats](/docs/cli/targets-formats).

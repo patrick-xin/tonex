@@ -90,7 +90,8 @@ function CollapsibleFolderItem({ node, depth }: { node: PageTree.Folder; depth: 
           buttonStyles({
             variant: 'ghost',
             size: 'sm',
-            className: 'group w-full justify-between items-center text-on-surface-variant',
+            className:
+              'group w-full justify-between items-center text-on-surface-variant capitalize',
           }),
         )}
       >

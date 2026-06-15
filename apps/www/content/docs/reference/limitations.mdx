@@ -1,0 +1,22 @@
+---
+title: Limitations
+description: Edge cases and current constraints worth knowing.
+---
+
+A few things behave in ways worth knowing up front.
+
+## Near grey seeds
+
+A seed with almost no color has little hue to work with. Controls that act on hue have nothing to adjust and may turn off — there's no hue in a grey to shift. The system still generates; it just works from tone alone. Charts handle this by falling back to a set hue so the series still has color.
+
+## Tailwind color picker
+
+The Tailwind color picker offers the colors in Tailwind's default palette, not arbitrary values. For an exact brand color that isn't in that palette, enter it as hex or OKLCH instead. The picker is a shortcut for the common case, not a replacement for direct input.
+
+## CMF and tertiary
+
+Under the CMF variant, the tertiary [palette override](/docs/web-app/overrides) is disabled, because tertiary is driven by the second source color. Steer tertiary through the second source while CMF is active.
+
+## Saving
+
+Tonex doesn't store your theme to an account yet. Export the tokens to keep your work, and re-seed to pick it back up.

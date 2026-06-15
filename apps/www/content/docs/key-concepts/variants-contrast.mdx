@@ -1,0 +1,35 @@
+---
+title: Variants & Contrast
+description: Set the palette's character and its contrast from the same seed.
+---
+
+The seed fixes your color. The variant and contrast controls decide how the system built around it feels — its character and its readability — without changing the seed.
+
+## Variant
+
+A variant is a strategy for deriving the palette. The same seed under a different variant produces a different but still-coherent system, so you pick a character, not just a hue.
+
+The variants are grouped by how far they move from the seed:
+
+- **Standard** — source-faithful schemes that stay close to your seed. Tonal Spot is the classic default.
+- **Expressive** — high-chroma schemes that push away from the seed for more color. Vibrant and Expressive live here.
+- **Subdued** — restrained, low-chroma schemes. Monochrome lives here.
+- **CMF** — the spec scheme, which takes a second source color. See below.
+
+Switching variants keeps your seed and rebuilds everything else.
+
+## Contrast
+
+The contrast level sets how strongly text and `on-` colors separate from the surfaces behind them. Raise it and the `on-` pairs shift to hold a larger contrast margin; lower it and they relax toward the baseline.
+
+Contrast is **per mode** — light and dark each carry their own level — so you can push dark mode harder without touching light. The control lives in **Settings**.
+
+## CMF and a second source
+
+The **CMF** variant accepts a second source color in addition to the seed. The second color drives the tertiary family and shifts the error hue, so you can steer those parts of the system with a color of your choice rather than letting them derive from the seed alone. Without a second source, CMF behaves like a seed-only scheme.
+
+Because tertiary comes from the second source under CMF, the tertiary [palette override](/docs/web-app/overrides) is turned off while CMF is active.
+
+## What's shared, what's per mode
+
+The variant and the second source are **shared** across light and dark — both modes are built from the same choice. Contrast is **per mode**. See [Light & dark](/docs/web-app/light-dark) for the full split.

@@ -1,6 +1,28 @@
 ---
 title: Export
-description: Export
+description: Copy out exactly what you see, in the format and scope you choose.
 ---
 
-Placeholder content.
+Export turns the system you built into tokens you can paste into your project. What you see in the preview is what you get — there's no separate render step that might drift.
+
+## What exports
+
+The core tokens always export: the standard semantic roles for both the Material layer and shadcn, in both modes. That's the minimum coherent set most projects need.
+
+Three toggles add more when you want it:
+
+- **Tonal palette** — the full range of tones for every family, not just the roles in use.
+- **Charts** — the data visualization color series.
+- **Contrast variants** — the higher-contrast token values.
+
+## Format
+
+Choose the color format for the output: `oklch` or `hex`. The token names are the same either way.
+
+## shadcn theme presets
+
+Alongside Export, the **theme presets** item gives you ready-made shadcn theme starting points. These are distinct from the [binding presets](/docs/web-app/shadcn/presets), which set how roles map rather than producing an export.
+
+## Brand color pair
+
+**Settings** includes a separate export for your brand color pair, for when you need just the seed and its companion rather than the whole system.

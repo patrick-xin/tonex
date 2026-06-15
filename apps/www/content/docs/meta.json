@@ -1,6 +1,10 @@
 {
   "pages": [
+    "---Get Started---",
     "introduction",
+    "quickstart",
+    "how-tonex-thinks",
+    "---Concepts---",
     "key-concepts",
     "---Web App---",
     "web-app",
@@ -8,6 +12,8 @@
     "cli",
     "---Skills---",
     "skills",
+    "---Reference---",
+    "reference",
     "about"
   ]
 }

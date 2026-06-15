@@ -1,0 +1,14 @@
+---
+title: Mapping to Other Tools
+description: How tools without a native exporter get a consistent mapping.
+---
+
+`generate` exports `shadcn` and `json` natively — a deterministic file, no agent. For any other tool, the [design.md `colors:` block](/docs/cli/targets-formats) (`--to yaml`) is the semantic contract an agent maps onto that tool's token system.
+
+## Recipes
+
+A recipe is a mapping from Tonex's semantic roles to a particular tool's token system. The [skill](/docs/skills) applies a known mapping instead of improvising one, so results for the same tool stay consistent from one run to the next.
+
+## Discipline
+
+The point of mapping from the contract — rather than from the colors an agent might guess — is faithfulness. Roles like `primary` and `on-surface` mean the same thing wherever they land, and the source is the reference for checking that a mapped result still reads as the same brand. See [How Tonex thinks](/docs/how-tonex-thinks#the-semantic-source-is-the-contract).

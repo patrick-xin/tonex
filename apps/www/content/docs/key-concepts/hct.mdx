@@ -1,4 +1,27 @@
 ---
 title: HCT
-description: HCT
+description: The color space Tonex works in, and how tone drives contrast.
 ---
+
+HCT is the color space Tonex works in. It stands for **Hue**, **Chroma**, and **Tone**, and it comes from Material Design 3. Its advantage is that tone is built to match how people perceive lightness, which makes contrast something you can compute reliably rather than judge by eye.
+
+## The three axes
+
+- **Hue** — which color it is, around the circle from red through blue and back.
+- **Chroma** — how colorful it is, from grey at zero to fully saturated.
+- **Tone** — how light or dark it is, from black at 0 to white at 100.
+
+## Why tone matters for contrast
+
+Contrast between two colors is mostly a question of how far apart their tones are. Because HCT tone tracks perceived lightness, the engine can place an `on-` color at a tone that holds a target contrast against its background, across any hue. This is why readability holds as you change colors: the relationship is set in tone, not guessed.
+
+Contrast checks measure each pair against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements.
+
+## Where you meet it
+
+- The seed accepts an HCT value, alongside hex and OKLCH. See [Seed color](/docs/web-app/seed).
+- The [contrast](/docs/key-concepts/variants-contrast#contrast) control adjusts how far `on-` tones move to hold their margins.
+
+## HCT and OKLCH
+
+You'll also see OKLCH, a perceptual color space used in CSS. Tonex can take a seed in either, and exports values in OKLCH or hex. HCT is how the engine reasons about tone internally; OKLCH is a common way to write the result down. See [Design tokens](/docs/key-concepts/design-tokens).
