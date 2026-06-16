@@ -46,6 +46,8 @@ commands:
                json = Material Theme JSON (a www-shaped export, reused as-is for now).
   --binding    shadcn role→md-token routing preset (--to shadcn only).
                one of: default, clean, mixed, layered, seamless (default: default).
+  --soft-borders  soften --border/--input/--sidebar-border to --color-outline-variant
+               for faint, shadcn-style borders (--to shadcn only).
   --extended   widen the roster from core (28 roles, the sufficient baseline) to
                core + extended (50). Reach for it only when core doesn't cover the
                target's slots. colors/yaml/json honor it; shadcn is unaffected.

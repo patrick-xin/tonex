@@ -14,7 +14,7 @@ import {
   MODES,
   type Mode,
 } from '@tonex/core'
-import { SHADCN_BINDING_PRESETS } from '@tonex/core/schema'
+import { SHADCN_BINDING_PRESETS, withSoftEdges } from '@tonex/core/schema'
 import { flagValue, hasFlag, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
@@ -54,6 +54,15 @@ export function generate(argv: readonly string[], io: Io): number {
       ...source,
       shadcnRoleBindings: SHADCN_BINDING_PRESETS[bindingArg].shadcnRoleBindings,
     }
+  }
+
+  // why: --soft-borders layers ON TOP of the binding/default map above — it
+  // re-asserts the soft edge token onto the three edge roles in both modes, so it
+  // must win regardless of what the binding set. Order matters: binding first, then
+  // soft-edges. Consumed identically to --binding (shadcn-only; noted below).
+  const softBorders = hasFlag(args, '--soft-borders')
+  if (softBorders) {
+    source = { ...source, shadcnRoleBindings: withSoftEdges(source.shadcnRoleBindings) }
   }
 
   const targetArg = flagValue(args, '--to')
@@ -102,6 +111,9 @@ export function generate(argv: readonly string[], io: Io): number {
   }
   if (bindingArg !== undefined && target !== 'shadcn') {
     io.err(`tonex: note — --binding is only consumed by --to shadcn\n`)
+  }
+  if (softBorders && target !== 'shadcn') {
+    io.err(`tonex: note — --soft-borders is only consumed by --to shadcn\n`)
   }
   if (hasFlag(args, '--extended') && target === 'shadcn') {
     io.err(`tonex: note — --extended is ignored for shadcn (its roster is fixed by the bindings)\n`)

@@ -103,6 +103,16 @@ const binding: FlagSpec = {
   default: 'default',
   description: 'shadcn role→md-token routing preset (only consumed by --to shadcn)',
 }
+// why: re-asserts the soft edge token onto the three shadcn edge roles in both
+// modes, layered ON TOP of whatever --binding/default map is in play (core's
+// withSoftEdges, ADR-0035). Consumed identically to --binding — only by --to
+// shadcn, noted-and-ignored for other targets — so the two stay consistent.
+const softBorders: FlagSpec = {
+  name: '--soft-borders',
+  type: 'boolean',
+  description:
+    'soften the shadcn edge roles (--border/--input/--sidebar-border) to --color-outline-variant for faint, shadcn-style borders (only consumed by --to shadcn)',
+}
 const tint: FlagSpec = {
   name: '--tint',
   type: 'unit',
@@ -165,6 +175,7 @@ export const GENERATE_FLAGS = [
   variant,
   to,
   binding,
+  softBorders,
   mode,
   format,
   extended,

@@ -128,6 +128,44 @@ describe('tonex generate', () => {
     )
   })
 
+  // why: --soft-borders re-asserts the soft edge token onto the three shadcn edge
+  // roles (--border/--input/--sidebar-border) in both modes, layered on top of the
+  // binding/default map. Consumed identically to --binding: only by --to shadcn,
+  // noted-and-ignored elsewhere. Asserts the three edge values all changed together
+  // (the borders softened) without hardcoding the oklch — core owns withSoftEdges.
+  it('--soft-borders softens the three shadcn edge roles; cross-refs --color-outline-variant', () => {
+    const edge = (out: string, token: string) =>
+      out.match(new RegExp(`${token}:\\s*([^;]+);`))?.[1].trim()
+    const EDGES = ['--border', '--input', '--sidebar-border'] as const
+
+    const hard = capture(['generate', '--seed', SEED, '--to', 'shadcn'])
+    const soft = capture(['generate', '--seed', SEED, '--to', 'shadcn', '--soft-borders'])
+    expect(soft.code).toBe(OK)
+    for (const token of EDGES) {
+      const hardVal = edge(hard.out, token)
+      const softVal = edge(soft.out, token)
+      expect(hardVal).toBeTruthy()
+      expect(softVal).toBeTruthy()
+      expect(softVal).not.toBe(hardVal) // each edge actually softened
+    }
+    // soft maps every edge to --color-outline-variant, so all three now share a value
+    const softValues = EDGES.map((t) => edge(soft.out, t))
+    expect(new Set(softValues).size).toBe(1)
+    // cross-ref: that shared value IS the outline-variant role from --to colors
+    const colors = JSON.parse(capture(['generate', '--seed', SEED, '--to', 'colors']).out)
+    expect(softValues[0]).toBe(colors.light['outline-variant'])
+  })
+
+  // why: --soft-borders is generate-only and shadcn-only — on a non-shadcn target it
+  // is noted-and-ignored on stderr without crashing, mirroring --binding exactly. (Use
+  // --to json, not yaml: the yaml branch returns before the note for BOTH flags — a
+  // pre-existing --binding quirk this flag deliberately matches rather than fixes.)
+  it('--soft-borders on a non-shadcn target is noted on stderr, exit 0 (like --binding)', () => {
+    const r = capture(['generate', '--seed', SEED, '--to', 'json', '--soft-borders'])
+    expect(r.code).toBe(OK)
+    expect(r.err).toContain('--soft-borders is only consumed by --to shadcn')
+  })
+
   // why: --tint-palette selects which Tailwind neutral the tint algo repaints surfaces
   // with — zinc and slate differ in hue so tint=0 (pure neutral) produces distinct
   // surface ramps. An unknown palette name is a usage error, not a silent zinc fallback.
