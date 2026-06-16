@@ -88,6 +88,29 @@ describe('adjustTokens', () => {
     ).toThrow()
   })
 
+  it('names the bound md token when a shadcn role is fed (copy/paste from generate --to shadcn)', () => {
+    // why: AC — an agent that copies a role out of `generate --to shadcn` and
+    // feeds it to adjust gets told it's a shadcn role and pointed at the md token
+    // it binds to under DEFAULT_SHADCN_ROLE_BINDINGS (--primary → --color-primary).
+    expect(() =>
+      adjustTokens(DEFAULT_INPUTS, [
+        // @ts-expect-error — a shadcn role is out-of-domain for adjust by design
+        { mode: 'light', token: '--primary', dTone: 1 },
+      ]),
+    ).toThrow(/--primary is a shadcn role.*--color-primary/)
+  })
+
+  it('suggests an md token (never a shadcn role) on a typo', () => {
+    // why: AC — the did-you-mean for a genuine typo ranges over the md vocabulary
+    // ONLY; adjust takes md tokens, so suggesting a shadcn role would be wrong.
+    expect(() =>
+      adjustTokens(DEFAULT_INPUTS, [
+        // @ts-expect-error — deliberate typo to exercise the did-you-mean
+        { mode: 'light', token: '--color-primry', dTone: 1 },
+      ]),
+    ).toThrow(/did you mean --color-primary/)
+  })
+
   it('throws on an invalid mode', () => {
     // why: AC — invalid mode is an input error.
     expect(() =>

@@ -1,7 +1,15 @@
 import { hexFromArgb } from '@tonex/mcu'
 import { deriveTheme } from '../derive'
+import { nearestName } from '../edit-distance'
 import { MODES, type Mode } from '../mode'
-import { MD_EXTENDED_TOKEN_NAMES, MD_TOKEN_NAMES, type MdTokenName, type PortableTheme } from '../schema'
+import {
+  DEFAULT_SHADCN_ROLE_BINDINGS,
+  MD_EXTENDED_TOKEN_NAMES,
+  MD_TOKEN_NAMES,
+  type MdTokenName,
+  type PortableTheme,
+  SHADCN_ROLE_NAMES,
+} from '../schema'
 import { shiftHct } from './shift-hct'
 
 // why: an adjust request names a (mode, token) target and a relative ±HCT delta
@@ -38,6 +46,30 @@ export interface AdjustResult {
 const MD_TOKEN_SET: ReadonlySet<string> = new Set(MD_TOKEN_NAMES)
 const MD_EXTENDED_SET: ReadonlySet<string> = new Set(MD_EXTENDED_TOKEN_NAMES)
 const MODE_SET: ReadonlySet<string> = new Set(MODES)
+// why: shadcn ROLES are out-of-domain for adjust (it operates on md tokens), but
+// they are the single most likely wrong input — an agent copies `--primary` out
+// of `generate --to shadcn` output. Detect them so the rejection can point at the
+// md token they BIND to instead of a bare "unknown token".
+const SHADCN_ROLE_SET: ReadonlySet<string> = new Set(SHADCN_ROLE_NAMES)
+
+// why: the rejection message for an out-of-domain token. Two branches:
+// (1) a KNOWN shadcn role → say so and name the md token it binds to under the
+//     default bindings (light map is the canonical reference), the token the
+//     agent should have adjusted.
+// (2) a genuine typo → a did-you-mean over the md vocabulary ONLY (adjust never
+//     accepts shadcn roles, so suggesting one would be a wrong recovery path —
+//     this is why we can't reuse pairs.ts's ALL_NAMES-spanning suggester).
+function unknownTokenError(token: string): string {
+  if (SHADCN_ROLE_SET.has(token)) {
+    const bound =
+      DEFAULT_SHADCN_ROLE_BINDINGS.light[token as keyof typeof DEFAULT_SHADCN_ROLE_BINDINGS.light]
+    return `[adjustTokens] ${token} is a shadcn role; adjust takes md tokens — did you mean ${bound}?`
+  }
+  const best = nearestName(token, MD_TOKEN_NAMES)
+  return best
+    ? `[adjustTokens] unknown token: ${token} — did you mean ${best}?`
+    : `[adjustTokens] unknown token: ${token}`
+}
 
 // why: relative ±HCT token adjustment, source-aware (#198). Derives the theme
 // ONCE, then resolves each request against that single derived theme. Because
@@ -60,7 +92,7 @@ export function adjustTokens(
       throw new Error(`[adjustTokens] unknown mode: ${req.mode}`)
     }
     if (!MD_TOKEN_SET.has(req.token)) {
-      throw new Error(`[adjustTokens] unknown token: ${req.token}`)
+      throw new Error(unknownTokenError(req.token))
     }
     if (req.dTone === undefined && req.dChroma === undefined) {
       throw new Error(

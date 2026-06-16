@@ -368,6 +368,21 @@ describe('tonex adjust', () => {
     expect(r.code).toBe(USAGE) // core's throw mapped to 2, not GATE
   })
 
+  it('a shadcn role pasted from `generate --to shadcn` points at the md token to use (exit 2)', () => {
+    // why: an agent copies --primary out of shadcn output → adjust must name the
+    // bound md token (--color-primary) and still exit 2, not throw a bare unknown.
+    const r = capture([
+      'adjust',
+      '--seed',
+      SEED,
+      '--shifts',
+      JSON.stringify([{ mode: 'light', token: '--primary', dTone: 5 }]),
+    ])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toContain('--primary is a shadcn role')
+    expect(r.err).toContain('--color-primary') // the md token it binds to
+  })
+
   it('bad calls are usage errors (exit 2): missing seed, bad --shifts JSON, no axis', () => {
     expect(capture(['adjust', '--shifts', SHIFT]).code).toBe(USAGE) // missing --seed
     expect(capture(['adjust', '--seed', SEED]).code).toBe(USAGE) // missing --shifts

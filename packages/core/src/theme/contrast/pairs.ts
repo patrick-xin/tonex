@@ -5,6 +5,7 @@ import {
   type ShadcnChartTokenName,
 } from '../../chart/schema'
 import { type CustomColorEntry, slugifyCustomColorName } from '../custom-color/entry'
+import { nearestName } from '../edit-distance'
 import { MD_TOKEN_NAMES, type MdTokenName, SHADCN_ROLE_NAMES, type ShadcnRoleName } from '../schema'
 
 // why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
@@ -803,33 +804,11 @@ function isChartToken(name: string): boolean {
 
 // why: a did-you-mean over core's whole token vocabulary — core owns the names,
 // so the nearest-match suggestion is a domain query, not CLI presentation (the
-// CLI just prints this). Same edit-distance cap (< 3) the flag parser uses, so
-// an unrelated token is never suggested.
+// CLI just prints this). `nearestName` ranges over BOTH namespaces here because
+// `--pairs` accepts md AND shadcn tokens (unlike adjust, which is md-only).
 function unknownTokenError(token: string): string {
-  let best: string | undefined
-  let bestDist = 3
-  for (const name of ALL_NAMES) {
-    const d = editDistance(token, name)
-    if (d < bestDist) {
-      bestDist = d
-      best = name
-    }
-  }
+  const best = nearestName(token, ALL_NAMES)
   return best
     ? `"${token}" is not a known token (did you mean "${best}"?)`
     : `"${token}" is not a known token`
-}
-
-function editDistance(a: string, b: string): number {
-  const row = Array.from({ length: b.length + 1 }, (_, i) => i)
-  for (let i = 1; i <= a.length; i++) {
-    let prev = row[0]
-    row[0] = i
-    for (let j = 1; j <= b.length; j++) {
-      const tmp = row[j]
-      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1))
-      prev = tmp
-    }
-  }
-  return row[b.length]
 }
