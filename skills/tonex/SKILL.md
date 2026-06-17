@@ -55,6 +55,17 @@ Use the exact same recipe as step 2 — same `--seed`, `--variant`, `--contrast`
 
 **Side path — nudge one token without re-seeding:** `tonex adjust --shifts '…'` (never gates contrast) → re-run step 2. Detail in [REFERENCE.md](REFERENCE.md#adjusting-one-token).
 
+### 4. Offer the dials
+
+The defaults ship a complete, contrast-safe theme — but they *are* defaults (`cmf`, AA, no surface treatment, crisp borders). The user can't ask for a knob they don't know exists, so once the first theme is on the table, tell them what they can turn — in plain outcome terms, not flag names, and without waiting to be asked:
+
+- **Mood** — how vivid or restrained the whole palette feels → [§ Choosing a variant](REFERENCE.md#choosing-a-variant)
+- **Surface tint** — backgrounds that carry the brand hue vs. stay neutral grey → [§ Surface knobs](REFERENCE.md#surface-knobs-tint-and-desaturate)
+- **Contrast** — standard AA vs. stricter AAA (`--aaa`)
+- **Borders** — crisp vs. faint, shadcn-style (`--soft-borders`)
+
+Read those two REFERENCE sections *at this moment* — this is the one point in the workflow they pay off, and it's how you offer the live menu instead of reciting a list that rots. Each dial is a one-word change to the recipe: offer to re-generate with any, then re-gate (step 2) and re-deliver. The full menu with every flag and default is `tonex describe`.
+
 ## Token naming differs by surface — the #1 trap
 
 The same underlying token has a different name per command:
@@ -85,4 +96,4 @@ Before you call the theme done, confirm:
 
 - Variant groups, surface knobs (`--tint` / `--desaturate`), reading oklch values → [REFERENCE.md](REFERENCE.md#choosing-a-variant)
 - Authoring into a target with no built-in projection, contrast policy, exit-code playbook → [REFERENCE.md](REFERENCE.md)
-- **The full option menu + exact flag contract → `tonex describe`** — every variant, binding, target, and flag with its default, machine-readable. It is the authoritative surface: if any prose in this skill disagrees with it, `describe` wins. Run it when the user wants to explore the options tonex offers (don't invent choices or stay silent on them), or to drive tonex with no skill loaded.
+- **The full option menu + exact flag contract → `tonex describe`** — every variant, binding, target, and flag with its default, machine-readable. It is the authoritative surface: if any prose in this skill disagrees with it, `describe` wins. Surface the options *proactively* (step 4) — don't wait to be asked, don't invent choices, don't stay silent on them; run `describe` to ground the menu in the live contract, or to drive tonex with no skill loaded.
