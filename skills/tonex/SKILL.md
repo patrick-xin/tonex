@@ -1,11 +1,11 @@
 ---
 name: tonex
-description: Use when theming an app or design system from a brand color, building a light+dark token system, or whenever WCAG contrast must hold across both modes — anytime you would otherwise hand-pick hex values.
+description: Use any time you need a color palette or theme — coherent colors that stay legible in light and dark. tonex is the color-system layer beneath whatever you're building: give it one starting color, or let it suggest one, and it returns a complete, WCAG-contrast-guaranteed palette — as portable tokens, or pre-bound for shadcn/Tailwind, design.md, or Material. Whatever renders color — an app, deck, email, chart, or another tool you're driving — reach for tonex rather than hand-picking hex.
 ---
 
 # tonex
 
-Builds a complete light+dark color system from one seed hex using Google's Material Color Utilities (MCU). You fill the project's color layer from the seed and own nothing else — not components, not spacing, not the rest of a design file.
+Builds a complete light+dark color system from one seed color using Google's Material Color Utilities (MCU). You fill the color layer of whatever you're building — an app, a deck, a design file, anything — and own nothing else: not components, not spacing, not copy.
 
 tonex gives you two guarantees over a set of **roles** (primary, on-primary, surface, …): the values clear **WCAG contrast**, and the whole system is **reproducible from one recipe** (the seed + a few knobs). What it does *not* decide is **binding** — how those roles land on your target's slots. That's yours. For common targets (shadcn, design.md, Material JSON) the binding is pre-baked as a `--to` convenience; for anything else you map roles→slots yourself and verify each pairing with `check --pairs`. The contrast guarantee covers tonex's own pairings — your custom bindings are only as safe as the `check --pairs` you run on them.
 
@@ -19,9 +19,9 @@ Read how the project handles color today — stylesheets, token files, any brand
 - **Mode** — does the target carry both light and dark, or one? → determines `--mode`.
 - **Brand signal** — an existing color in the codebase, logo, or asset file.
 
-The seed is one brand hex, the single irreplaceable input. It may be in the request, in the code, or in a brand asset. If not:
+The seed is one color — the single irreplaceable input. It's often a brand color, but any starting hue works and it doesn't matter where it came from. It may be in the request, in the code, or in a brand asset. If not:
 
-- Talk about the product, its audience, and the feeling they want.
+- Talk about what's being built, its audience, and the feeling they want.
 - Propose a candidate in plain terms: "For a calm, trustworthy SaaS I'd lean toward a mid-blue — does #3b82f6 feel right, or would you like something warmer?"
 - Get confirmation before proceeding.
 
@@ -43,7 +43,7 @@ tonex check --seed '<hex>' [--aaa] [--mode light|dark]
 
 Use the exact same recipe as step 2 — same `--seed`, `--variant`, `--contrast`, surface knob if any. Same recipe is what ensures the delivered theme matches the one that passed.
 
-**The general model — tonex emits roles, you bind them.** `--to colors` prints the full role set, both modes. Map each role onto the target's slot by *intent*, then verify every pairing with `check --pairs`. This is the path for any target without a built-in projection — [REFERENCE.md § authoring into a target with no built-in projection](REFERENCE.md#authoring-into-a-target-with-no-built-in-projection) is the mapping cookbook; **read it first**. The role set is **core (28) by default**; if the target has slots core doesn't cover (inverted surfaces, scrims, mode-fixed tones), tell the user `--extended` is available and let them opt in — you know what the project needs, so don't dump 50 roles by default.
+**The general model — tonex emits roles, you bind them.** `--to colors` prints the full role set, both modes. Map each role onto the target's slot by *intent*, then verify every pairing with `check --pairs`. The role *names* are a suggested default, not a contract: binding the generated `secondary` as your UI's primary, or `tertiary` as an accent, is fair game. The contrast guarantee follows the *pairing you check*, not the name you keep — so remap freely, then prove it. This is the path for any target without a built-in projection — [REFERENCE.md § authoring into a target with no built-in projection](REFERENCE.md#authoring-into-a-target-with-no-built-in-projection) is the mapping cookbook; **read it first**. The role set is **core (28) by default**; if the target has slots core doesn't cover (inverted surfaces, scrims, mode-fixed tones), tell the user `--extended` is available and let them opt in — you know what the project needs, so don't dump 50 roles by default.
 
 **The conveniences — built-in `--to` targets pre-bake the binding** for common ecosystems. When your target is one of these, use it, but open its reference first; it carries the paste pattern and the per-target gotchas, so don't guess the mapping.
 

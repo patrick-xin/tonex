@@ -20,7 +20,7 @@ tonex generate --seed '#3b82f6' --to colors
 }
 ```
 
-`--to colors` prints the **full role set, both modes** — the thing you read while binding roles→slots onto a target with no built-in projection. It is a **throwaway rendering, not a manifest**: nothing in the toolchain reads it back, so don't commit it or treat it as a source of truth. The durable source of truth is the **recipe** (the `generate` command), and it travels with the *delivered* file (see each target's reference), never in a separate `colors.json`.
+`--to colors` prints the **full role set, both modes** — the universal output. This raw palette is what *any* color surface consumes: a shadcn app, a deck, an email, a chart, a foreign tool's theme. The `--to shadcn|yaml|json` formats are not the boundary of what tonex can color — they're conveniences that pre-bind this same role set for popular consumers. For everything else you read `--to colors` and bind roles→slots yourself. It is a **throwaway rendering, not a manifest**: nothing in the toolchain reads it back, so don't commit it or treat it as a source of truth. The durable source of truth is the **recipe** (the `generate` command), and it travels with the *delivered* file (see each target's reference), never in a separate `colors.json`.
 
 - **Body re-derives from the header.** Every value under `light`/`dark` comes from the header inputs. If you do keep this around while mapping, never hand-edit a value into the body — the next regenerate discards it.
 - **Both modes, always.** Unlike `--to yaml`, this rendering is not single-mode; `--mode` is ignored.
@@ -112,7 +112,7 @@ The same MD3 token wears a different name per command. Pick the name that matche
 
 Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
 
-1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from the `--to colors` output.
+1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from the `--to colors` output. This name→intent match is the *default*, not a rule: if you'd rather drive the UI from the generated `secondary` or `tertiary`, do it — the names don't bind you. What you can't skip is step 3: the guarantee covers the pairing you check, whatever roles it's between.
 2. **The tone is already fixed.** You don't choose lightness — the token's value already carries the contrast tonex guaranteed against its paired surface. Don't re-pick it.
 3. **Verify every pairing you assert.** A foreign target fuses what MD3 splits — one `--ink` slot may be text *and* border *and* icon over several backgrounds. That slot's value must satisfy the **union** of contrast constraints across *every* background it touches. After mapping, gate it:
    ```
