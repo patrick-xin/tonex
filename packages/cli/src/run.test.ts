@@ -43,6 +43,44 @@ describe('tonex generate', () => {
     expect(mono.out).not.toBe(cmf.out)
   })
 
+  // why: cmf is the only MCU variant that reads a SECOND source color — it rebuilds
+  // the TERTIARY palette from the second color's hue+chroma, leaving primary/secondary
+  // untouched (the engine contract; the error-hue shift is bucket-sensitive and pinned
+  // in core's derive.test.ts, not re-asserted here). The CLI surfaces it as
+  // --second-color (core's cmfSecondSourceHex) through the same color firewall as
+  // --seed, and pins it into the recipe so the theme re-derives exactly.
+  it('--second-color reshapes the cmf tertiary palette only (not primary/secondary); pins into the recipe', () => {
+    const base = JSON.parse(capture(['generate', '--seed', SEED, '--to', 'colors']).out)
+    const r = capture(['generate', '--seed', SEED, '--to', 'colors', '--second-color', '#ff8800'])
+    expect(r.code).toBe(OK)
+    const second = JSON.parse(r.out)
+    expect(second.light.tertiary).not.toBe(base.light.tertiary)
+    expect(second.light.primary).toBe(base.light.primary)
+    expect(second.light.secondary).toBe(base.light.secondary)
+    // the recipe pins the second source so a later regenerate re-derives it
+    const recipe = capture(['generate', '--seed', SEED, '--second-color', '#ff8800']).out
+    expect(recipe).toContain("--second-color '#ff8800'")
+  })
+
+  // why: --second-color is a no-op on any non-cmf variant (other strategies ignore the
+  // param). The CLI rejects it loudly (exit 2) rather than silently doing nothing — a
+  // flag that runs the default theme unchanged is exactly the --varinat trap. A
+  // malformed color is the same usage error as a bad --seed (shared color firewall).
+  it('--second-color on a non-cmf variant is a usage error (exit 2), not a silent no-op', () => {
+    const r = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--variant',
+      'vibrant',
+      '--second-color',
+      '#ff8800',
+    ])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toMatch(/CMF/i)
+    expect(capture(['generate', '--seed', SEED, '--second-color', 'nope']).code).toBe(USAGE)
+  })
+
   it('--to json emits a parseable document; --to yaml a single-mode colors: block', () => {
     const json = capture(['generate', '--seed', SEED, '--to', 'json'])
     expect(json.code).toBe(OK)

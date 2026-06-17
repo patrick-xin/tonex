@@ -42,6 +42,9 @@ import {
 // soft-borders shape the shadcn slots.
 function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs): string {
   const parts = [`tonex generate --seed '${source.seed.exactHex}'`, `--variant ${source.variant}`]
+  if (source.cmfSecondSourceHex !== null) {
+    parts.push(`--second-color '${source.cmfSecondSourceHex}'`)
+  }
   if (source.contrastLevel.light > 0) parts.push(`--contrast ${source.contrastLevel.light}`)
   if (source.surfaceAlgo === 'tint') {
     parts.push(

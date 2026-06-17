@@ -48,6 +48,19 @@ tonex generate --seed '#3b82f6' --variant vibrant --to colors
 
 Switch groups only on explicit user intent — "more vivid" → `expressive`, "muted/calm" → `subdued`. Absent that, `cmf`.
 
+### A second source color (`--second-color`, cmf only)
+
+`cmf` is the only variant that reads a **second** source color. Pass a second brand hex (or oklch) and MCU rebuilds the **tertiary** palette from its hue+chroma and shifts the **error** hue — `primary` and `secondary` stay derived from `--seed`. Reach for it when the brand has two colors and you want the second to drive the tertiary accent:
+
+```
+tonex generate --seed '#3b82f6' --second-color '#ff8800' --to colors
+# tertiary now derives from the orange; primary/secondary unchanged
+```
+
+- **It is not the MD3 `secondary` role.** That role stays a tonal sibling of the seed; `--second-color` only touches `tertiary` + `error`. Don't reach for it expecting a second *primary*.
+- **cmf only.** On any other variant it's a usage error (exit 2), not a silent no-op — the other schemes ignore a second source, so tonex refuses rather than derive a theme that quietly ignored your flag.
+- It accepts the same input as `--seed` (hex or canonical oklch) and rides in the recipe, so a second-source theme reproduces exactly.
+
 ## Surface knobs: tint and desaturate
 
 Both make a too-tinted background less colorful, but they are **not inverses** — opposite zero-points, different mechanisms. Reach for one only when the default surface carries too much of the seed's hue:

@@ -5,7 +5,11 @@
 import { hexFromColorInput } from '@tonex/color-utils'
 import { hctFromHex } from '@tonex/core'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
-import { DEFAULT_INPUTS, type PortableTheme } from '@tonex/core/schema'
+import {
+  cmfSecondSourceDisabledReason,
+  DEFAULT_INPUTS,
+  type PortableTheme,
+} from '@tonex/core/schema'
 import { DEFAULT_VARIANT, type VariantName, variants } from '@tonex/core/variants'
 import { flagValue, type ParsedArgs } from './args'
 import { HELP } from './help'
@@ -46,6 +50,30 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   }
   const variant = (variantArg ?? DEFAULT_VARIANT) as VariantName
 
+  // why: --second-color surfaces core's cmfSecondSourceHex — the second source the
+  // CMF scheme reads to rebuild the tertiary palette + shift the error hue. Same
+  // color firewall as --seed (hex or oklch → projected sRGB). Gated by core's
+  // cmfSecondSourceDisabledReason (single source of the "cmf only" rule, surfaced
+  // not reimplemented): a value on a non-cmf variant would be a silent no-op, so we
+  // reject it loudly as a usage error rather than derive a theme unchanged by it.
+  const secondColorArg = flagValue(args, '--second-color')
+  let cmfSecondSourceHex: string | null = null
+  if (secondColorArg !== undefined) {
+    const second = hexFromColorInput(secondColorArg)
+    if (second === null) {
+      io.err(
+        `tonex: invalid --second-color "${secondColorArg}" — use a 6-digit hex (#ff8800) or a canonical oklch(L C H)\n`,
+      )
+      return USAGE
+    }
+    const disabled = cmfSecondSourceDisabledReason({ ...DEFAULT_INPUTS, variant })
+    if (disabled !== null) {
+      io.err(`tonex: ${disabled} (current variant: ${variant})\n`)
+      return USAGE
+    }
+    cmfSecondSourceHex = second
+  }
+
   // why: --contrast surfaces MCU's existing contrastLevel input — the palette-layer
   // remedy when re-mapping tokens can't reach AAA. One scalar applied uniformly to
   // both modes; the schema bounds it [0,1], so we reject out-of-range rather than
@@ -72,7 +100,10 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     io.err(`tonex: --tint and --desaturate are mutually exclusive (surface uses one algo)\n`)
     return USAGE
   }
-  if (paletteArg !== undefined && !(NEUTRAL_PALETTE_NAMES as readonly string[]).includes(paletteArg)) {
+  if (
+    paletteArg !== undefined &&
+    !(NEUTRAL_PALETTE_NAMES as readonly string[]).includes(paletteArg)
+  ) {
     io.err(
       `tonex: unknown tint palette "${paletteArg}"\n  one of: ${NEUTRAL_PALETTE_NAMES.join(', ')}\n`,
     )
@@ -105,6 +136,7 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   return {
     ...DEFAULT_INPUTS,
     variant,
+    cmfSecondSourceHex,
     contrastLevel,
     ...surface,
     seed: { ...hctFromHex(seed), exactHex: seed },
