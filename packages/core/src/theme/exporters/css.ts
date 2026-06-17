@@ -245,6 +245,13 @@ function mdUtilityNames(theme: DerivedTheme, opts: ResolvedOptions): string[] {
   return Array.from(set)
 }
 
+// why: render the opaque provenance recipe as a leading block comment (ADR-0039
+// Decision 7). Same `/* */` shape native-css.ts uses; empty when absent so the
+// default output stays byte-identical (drift-guard).
+function provenanceBanner(provenance: string | undefined): string {
+  return provenance ? `/* ${provenance} */\n\n` : ''
+}
+
 export function exportCss(
   bundle: ContrastBundle,
   layer: ExportLayer,
@@ -252,6 +259,7 @@ export function exportCss(
 ): string {
   const opts = resolveOptions(options)
   const tiers = tiersOf(bundle)
+  const banner = provenanceBanner(options.provenance)
 
   if (layer === 'md') {
     const tokens = mdUtilityNames(bundle.default, opts)
@@ -273,7 +281,7 @@ export function exportCss(
         '',
       )
     }
-    return lines.join('\n')
+    return banner + lines.join('\n')
   }
 
   // shadcn: paste-ready :root + .dark, no contrast tiers (shadcn audience
@@ -316,9 +324,7 @@ export function exportCss(
     // why: bootstrap :root carries shadcn's static --radius as its first decl
     // (shadcn components reference it); inject after the opening brace. The
     // default path leaves :root color-only.
-    opts.includeHeader
-      ? lightBlock.replace('{\n', `{\n  ${SHADCN_RADIUS_ROOT}\n`)
-      : lightBlock,
+    opts.includeHeader ? lightBlock.replace('{\n', `{\n  ${SHADCN_RADIUS_ROOT}\n`) : lightBlock,
     '',
     block(
       SHADCN_SELECTOR.dark,
@@ -343,5 +349,5 @@ export function exportCss(
       '',
     )
   }
-  return parts.join('\n')
+  return banner + parts.join('\n')
 }

@@ -71,6 +71,15 @@ export interface ExportOptions {
   // bare `--color-*` names. Only the native-CSS path reads it; the Tailwind /
   // shadcn / JSON / Dart paths ignore it.
   mdSysPrefix?: boolean
+  // why: an opaque provenance string the producer wants recorded INSIDE the
+  // delivered projection — the durable artifact (ADR-0039 Decision 7, amendment
+  // 2026-06-17). For the CLI it is the runnable recipe that reproduces this
+  // exact theme; another consumer could pass a plain banner. Core only RENDERS
+  // it in each format's native syntax — a leading `/* */` (css, native-css),
+  // `#` (design.md) or `//` (dart) comment, or the `description` field where
+  // comments are illegal (json) — it never builds or interprets the string.
+  // Omitted → output is byte-identical to before (the drift-guard baseline).
+  provenance?: string
 }
 
 // why: tier values come from the unified derive cache (issue #20). Each

@@ -17,6 +17,7 @@ tonex generate --seed '#3b82f6' --to yaml --mode light
 ```
 
 ```yaml
+# tonex generate --seed '#3b82f6' --variant cmf --to yaml --mode light
 colors:
   primary: "#005bc4"
   on-primary: "#f9f8ff"
@@ -31,7 +32,7 @@ colors:
 
 - **Single mode.** DESIGN.md has no light/dark axis, so pick one — `--mode light` or `--mode dark` (defaults to `light` if omitted). Emit each mode separately if the project keeps two files.
 - **Hex only.** The format's Color type is sRGB hex, so `--format` is ignored — values are always quoted lowercase `#rrggbb` (a bare `#…` would be a YAML comment).
-- **Bare block.** Output is just `colors:` with no `---` fences — paste it over the existing `colors:` block.
+- **Bare block + recipe.** Output is the `colors:` block (no `---` fences), led by a `# tonex generate …` YAML comment — the runnable recipe that reproduces it. Paste the whole thing over the existing `colors:` block; the `#` line is a valid YAML comment that travels with it and is how the next agent regenerates this mode.
 
 ## Gating it — `tonex check` is the contrast authority, not `design.md lint`
 

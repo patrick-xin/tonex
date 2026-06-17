@@ -7,6 +7,8 @@ description: Use when theming an app or design system from a brand color, buildi
 
 Builds a complete light+dark color system from one seed hex using Google's Material Color Utilities (MCU). You fill the project's color layer from the seed and own nothing else — not components, not spacing, not the rest of a design file.
 
+tonex gives you two guarantees over a set of **roles** (primary, on-primary, surface, …): the values clear **WCAG contrast**, and the whole system is **reproducible from one recipe** (the seed + a few knobs). What it does *not* decide is **binding** — how those roles land on your target's slots. That's yours. For common targets (shadcn, design.md, Material JSON) the binding is pre-baked as a `--to` convenience; for anything else you map roles→slots yourself and verify each pairing with `check --pairs`. The contrast guarantee covers tonex's own pairings — your custom bindings are only as safe as the `check --pairs` you run on them.
+
 ## Workflow
 
 ### 1. Understand the project and find the seed
@@ -37,16 +39,19 @@ tonex check --seed '<hex>' [--aaa] [--mode light|dark]
   Adopt the `--contrast` level it reports. Re-check. If `UNREACHABLE`, settle at AA.
 - Exit `2` → bad call; fix the flags and re-run.
 
-### 3. Generate
+### 3. Generate and bind
 
 Use the exact same recipe as step 2 — same `--seed`, `--variant`, `--contrast`, surface knob if any. Same recipe is what ensures the delivered theme matches the one that passed.
 
-**Open your target's recipe before you generate — it carries the paste pattern and the per-target gotchas. Don't guess the mapping.**
+**The general model — tonex emits roles, you bind them.** `--to colors` prints the full role set, both modes. Map each role onto the target's slot by *intent*, then verify every pairing with `check --pairs`. This is the path for any target without a built-in projection — [REFERENCE.md § authoring into a target with no built-in projection](REFERENCE.md#authoring-into-a-target-with-no-built-in-projection) is the mapping cookbook; **read it first**. The role set is **core (28) by default**; if the target has slots core doesn't cover (inverted surfaces, scrims, mode-fixed tones), tell the user `--extended` is available and let them opt in — you know what the project needs, so don't dump 50 roles by default.
+
+**The conveniences — built-in `--to` targets pre-bake the binding** for common ecosystems. When your target is one of these, use it, but open its reference first; it carries the paste pattern and the per-target gotchas, so don't guess the mapping.
 
 - shadcn / Tailwind → open [references/shadcn.md](references/shadcn.md), then `--to shadcn` → paste into `globals.css`
 - design.md → open [references/design-md.md](references/design-md.md), then `--to yaml --mode <light|dark>`
 - Material Theme Builder JSON → open [references/json.md](references/json.md), then `--to json`
-- No built-in target → [REFERENCE.md § authoring into a target with no built-in projection](REFERENCE.md#authoring-into-a-target-with-no-built-in-projection) is the mapping cookbook — **read it first**, then `--to colors`, map its token keys to the target's slots, and verify every pairing with `check --pairs`
+
+**Deliver the recipe with the colors.** Whatever target you write into, the delivered file must carry its recipe — the exact `generate` command — so a later agent can reproduce or extend it without hunting for flags lost to context. The recipe is the durable source of truth; there is no separate `colors.json` to commit (`--to colors` is a throwaway you read while mapping, not a manifest anything reads back).
 
 **Side path — nudge one token without re-seeding:** `tonex adjust --shifts '…'` (never gates contrast) → re-run step 2. Detail in [REFERENCE.md](REFERENCE.md#adjusting-one-token).
 
@@ -73,6 +78,8 @@ Before you call the theme done, confirm:
 - [ ] `check` ran on the final recipe and you saw its `PASS` line — cite the cleared-pair count.
 - [ ] `generate` used the **same** recipe `check` passed — same `--seed`, `--variant`, `--contrast`, surface knob.
 - [ ] every hex/oklch in the delivered files came from one tonex run; none were hand-typed.
+- [ ] for a custom (non-built-in) binding, `check --pairs` cleared every role→slot pairing you asserted.
+- [ ] the delivered file carries its recipe (the exact `generate` command) so the next agent can reproduce it.
 
 ## More
 

@@ -95,5 +95,14 @@ export function exportDesignMd(
 ): string {
   const colors = buildDesignMdColors(bundle, mode, options)
   const lines = Object.entries(colors).map(([key, hex]) => `  ${key}: "${hex}"`)
-  return `colors:\n${lines.join('\n')}\n`
+  // why: the recipe rides as a leading YAML `#` comment above colors: — valid
+  // YAML, travels with the paste (ADR-0039 Decision 7). Each line is prefixed so
+  // a multi-line recipe stays a comment; empty when absent (block unchanged).
+  const banner = options.provenance
+    ? `${options.provenance
+        .split('\n')
+        .map((line) => `# ${line}`)
+        .join('\n')}\n`
+    : ''
+  return `${banner}colors:\n${lines.join('\n')}\n`
 }

@@ -1,8 +1,10 @@
 // why: `generate` derives the theme and prints it for one output target — the
-// canonical colors.json, the shadcn :root/.dark block, the single-mode design.md
-// `colors:` yaml, or the Material Theme JSON. It surfaces core's knobs
+// transient `--to colors` role set, the shadcn :root/.dark block, the single-mode
+// design.md `colors:` yaml, or the Material Theme JSON. It surfaces core's knobs
 // (`--to`/`--format`/`--mode`) as flags and projects core's values; it owns no
-// color logic of its own.
+// color logic of its own. Each DELIVERED projection (shadcn / yaml / json — not
+// the transient colors read) carries its runnable recipe, the durable artifact
+// (ADR-0039 Decision 7, amendment 2026-06-17).
 import {
   buildContrastBundle,
   COLOR_FORMATS,
@@ -14,8 +16,8 @@ import {
   MODES,
   type Mode,
 } from '@tonex/core'
-import { SHADCN_BINDING_PRESETS, withSoftEdges } from '@tonex/core/schema'
-import { flagValue, hasFlag, parseArgs } from '../args'
+import { type PortableTheme, SHADCN_BINDING_PRESETS, withSoftEdges } from '@tonex/core/schema'
+import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
 import {
@@ -27,6 +29,38 @@ import {
   TARGETS,
   type Target,
 } from '../spec'
+
+// why: the recipe — the runnable command that reproduces THIS projection,
+// embedded in the delivered file as the durable artifact (ADR-0039 Decision 7,
+// amendment 2026-06-17). Built from RESOLVED values (`source` carries
+// variant/contrast/surface after parseSource applied the defaults), never the
+// raw typed flags, so a later default change can't silently re-derive a different
+// theme. The seed is the projected `exactHex` (shell-safe, single-quoted —
+// never a raw oklch the user may have pasted). Mirrors www's formatHeader policy:
+// --variant always (the signature knob), contrast/surface only when applied.
+// --format and (yaml's) --mode are emitted when they shape the bytes; binding /
+// soft-borders shape the shadcn slots.
+function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs): string {
+  const parts = [`tonex generate --seed '${source.seed.exactHex}'`, `--variant ${source.variant}`]
+  if (source.contrastLevel.light > 0) parts.push(`--contrast ${source.contrastLevel.light}`)
+  if (source.surfaceAlgo === 'tint') {
+    parts.push(
+      `--tint ${source.surfaceTintLevel.light}`,
+      `--tint-palette ${source.surfacePaletteName}`,
+    )
+  } else if (source.surfaceDesaturateLevel.light > 0) {
+    parts.push(`--desaturate ${source.surfaceDesaturateLevel.light}`)
+  }
+  if (hasFlag(args, '--extended')) parts.push('--extended')
+  const fmt = flagValue(args, '--format')
+  if (fmt !== undefined) parts.push(`--format ${fmt}`)
+  const binding = flagValue(args, '--binding')
+  if (binding !== undefined) parts.push(`--binding ${binding}`)
+  if (hasFlag(args, '--soft-borders')) parts.push('--soft-borders')
+  parts.push(`--to ${target}`)
+  if (target === 'yaml') parts.push(`--mode ${flagValue(args, '--mode') ?? 'light'}`)
+  return parts.join(' ')
+}
 
 // why: `generate` derives the theme and prints it for one output target — the
 // shadcn :root/.dark block or the single-mode design.md `colors:` yaml.
@@ -102,7 +136,12 @@ export function generate(argv: readonly string[], io: Io): number {
       io.err(`tonex: unknown mode "${modeArg}"\n  one of: ${MODES.join(', ')}\n`)
       return USAGE
     }
-    io.out(exportDesignMd(bundle, (modeArg ?? 'light') as Mode))
+    io.out(
+      exportDesignMd(bundle, (modeArg ?? 'light') as Mode, {
+        ...exportOptions,
+        provenance: recipeCommand(source, 'yaml', args),
+      }),
+    )
     return OK
   }
 
@@ -118,16 +157,19 @@ export function generate(argv: readonly string[], io: Io): number {
   if (hasFlag(args, '--extended') && target === 'shadcn') {
     io.err(`tonex: note — --extended is ignored for shadcn (its roster is fixed by the bindings)\n`)
   }
-  // why: colors is tonex's canonical colors.json (recipe header + both-mode role
-  // values, ADR-0039 Decision 7); json is the Material Theme JSON reshape (a
-  // www-oriented export reused as-is for this phase, its shape will likely change
-  // for the agent fill path); shadcn is the paste-ready oklch :root/.dark block.
+  // why: colors is the transient `--to colors` role set the agent READS while
+  // mapping roles→slots — not a delivered file, so it carries no embedded recipe
+  // (its own structured header is its provenance). json is the Material Theme JSON
+  // reshape (recipe rides in `description`); shadcn is the paste-ready oklch
+  // :root/.dark block (recipe rides in a leading /* */). The recipe is the durable
+  // artifact every delivered projection carries (ADR-0039 Decision 7).
+  const provenance = recipeCommand(source, target, args)
   io.out(
     target === 'colors'
       ? exportColorsJson(source, bundle, exportOptions)
       : target === 'json'
-        ? exportJson(source, bundle, exportOptions)
-        : exportCss(bundle, 'shadcn', exportOptions),
+        ? exportJson(source, bundle, { ...exportOptions, provenance })
+        : exportCss(bundle, 'shadcn', { ...exportOptions, provenance }),
   )
   return OK
 }

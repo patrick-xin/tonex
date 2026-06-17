@@ -12,13 +12,14 @@ import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from '@tonex/cor
 import { DEFAULT_VARIANT, VARIANT_GROUPS_ORDERED, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
 
-// why: the output TARGET — which document `generate` prints. `colors` is tonex's
-// OWN canonical colors.json (recipe header + both-mode role values, ADR-0039
-// Decision 7 — the artifact the skill projects FROM); the rest are projections of
-// it into a foreign vocabulary: `shadcn` the paste-ready :root/.dark block (oklch,
-// both modes), `yaml` the single-mode design.md `colors:` block (hex), `json` the
-// Material Theme JSON reshape (a www-shaped export reused as-is for this phase).
-// Named by DESTINATION, never by encoding.
+// why: the output TARGET — which document `generate` prints. `colors` is the
+// transient role rendering an agent READS while mapping roles→slots (recipe
+// header + both-mode role values, ADR-0039 Decision 7, amendment 2026-06-17 — a
+// transient read, not a committed manifest); the rest are DELIVERED projections
+// into a vocabulary, each carrying its runnable recipe: `shadcn` the paste-ready
+// :root/.dark block (oklch, both modes), `yaml` the single-mode design.md
+// `colors:` block (hex), `json` the Material Theme JSON reshape (a www-shaped
+// export reused as-is for this phase). Named by DESTINATION, never by encoding.
 export const TARGETS = ['colors', 'shadcn', 'yaml', 'json'] as const
 export type Target = (typeof TARGETS)[number]
 
@@ -41,7 +42,7 @@ const to: FlagSpec = {
   values: TARGETS,
   default: 'shadcn',
   description:
-    'output target: colors (canonical colors.json), shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON',
+    'output target: colors (the role set to read while binding), shadcn :root/.dark block, design.md colors: block (yaml), or Material Theme JSON',
 }
 const mode: FlagSpec = {
   name: '--mode',
@@ -261,7 +262,7 @@ export function describePayload() {
     commands: {
       generate: {
         summary:
-          'Derive a theme from a seed hex and print it for one --to target: the canonical colors.json (recipe header + both-mode role values), the shadcn :root/.dark block, a design.md colors: block, or Material Theme JSON.',
+          'Derive a theme from a seed hex and print it for one --to target: colors (the role set to read while binding roles→slots), the shadcn :root/.dark block, a design.md colors: block, or Material Theme JSON. Each delivered target (shadcn/yaml/json) embeds its runnable recipe so the theme is reproducible.',
         flags: GENERATE_FLAGS.map(flagInfo),
       },
       check: {

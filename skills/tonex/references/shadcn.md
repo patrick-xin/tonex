@@ -7,6 +7,8 @@ tonex generate --seed '#3b82f6' --to shadcn
 ```
 
 ```css
+/* tonex generate --seed '#3b82f6' --variant cmf --to shadcn */
+
 :root {
   --background: oklch(0.9838 0.0079 286.25);
   --foreground: oklch(0.3184 0.0479 264.22);
@@ -29,6 +31,7 @@ tonex generate --seed '#3b82f6' --to shadcn
 ```
 
 - **Both modes, one call.** The output carries `:root` (light) *and* `.dark` (dark); `--mode` is a no-op here. Paste the whole block into `globals.css`.
+- **Leading recipe comment is the durable artifact.** The `/* tonex generate … */` line is the runnable command that reproduces this exact block (resolved knobs, so a later default change can't drift it). Keep it — it's how the next agent regenerates or extends the theme. There's no separate `colors.json` to commit.
 - **shadcn names, not MD3 names.** This renames the underlying MD3 tokens into shadcn's vocabulary — `on-primary` → `--primary-foreground`, `surface` → `--background`, plus shadcn-only slots (`--card`, `--muted`, `--accent`, `--destructive`). These names **do not round-trip** back to `--color-*`. To later `adjust` or `check --pairs` a token, drive it from the MD3 name (`--color-on-primary`), not from this output — see the map in [../REFERENCE.md](../REFERENCE.md#token-naming-across-surfaces).
 - **Encoding.** Defaults to oklch (shadcn v4's native form). `--format hex` for sRGB hex instead.
 

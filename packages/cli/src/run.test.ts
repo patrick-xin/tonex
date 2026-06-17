@@ -50,8 +50,50 @@ describe('tonex generate', () => {
 
     const yaml = capture(['generate', '--seed', SEED, '--to', 'yaml'])
     expect(yaml.code).toBe(OK)
-    expect(yaml.out.startsWith('colors:')).toBe(true)
+    expect(yaml.out).toContain('colors:')
     expect(yaml.out).not.toContain('.dark') // single-mode, not the dual css block
+  })
+
+  // why: the durable artifact (ADR-0039 Decision 7, amendment 2026-06-17) — the
+  // runnable recipe rides INSIDE each delivered projection so a later agent
+  // regenerates from the colors with nothing else to read. It is built from
+  // RESOLVED values (--variant cmf appears though it was never typed) so a later
+  // default change can't silently re-derive a different theme. --to colors is the
+  // transient role read, not a delivered file, so it carries no recipe comment.
+  it('embeds the runnable recipe in delivered targets (resolved knobs), not in --to colors', () => {
+    const shadcn = capture(['generate', '--seed', SEED]).out
+    expect(shadcn.startsWith('/* tonex generate ')).toBe(true)
+    expect(shadcn).toContain(`--seed '${SEED}'`)
+    expect(shadcn).toContain('--variant cmf') // resolved default, pinned against drift
+    expect(shadcn).toContain('--to shadcn')
+
+    const yaml = capture(['generate', '--seed', SEED, '--to', 'yaml', '--mode', 'dark']).out
+    expect(yaml.startsWith('# tonex generate ')).toBe(true)
+    expect(yaml).toContain('--to yaml --mode dark') // single-mode reproducibility
+
+    const json = JSON.parse(capture(['generate', '--seed', SEED, '--to', 'json']).out)
+    expect(json.description).toContain('tonex generate')
+    expect(json.description).toContain('--to json')
+
+    const colors = capture(['generate', '--seed', SEED, '--to', 'colors']).out
+    expect(colors.startsWith('/*')).toBe(false)
+    expect(colors.startsWith('#')).toBe(false)
+  })
+
+  it('the recipe pins applied surface knobs (tint + palette) so it re-derives exactly', () => {
+    const out = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--to',
+      'shadcn',
+      '--tint',
+      '0.4',
+      '--tint-palette',
+      'slate',
+    ]).out
+    expect(out).toContain('--tint 0.4')
+    expect(out).toContain('--tint-palette slate')
   })
 
   it('--to colors emits the canonical colors.json: recipe header + both-mode role values; --format sets the encoding', () => {

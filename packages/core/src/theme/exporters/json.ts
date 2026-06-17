@@ -217,13 +217,19 @@ function seedHex(source: PortableTheme): string {
   return (source.seed.exactHex ?? hexFromHct(source.seed)).toUpperCase()
 }
 
-// why: provenance trail. `TYPE: CUSTOM` is MTB's marker for a hand-seeded theme;
-// the tonex stamp that follows lets an operator read back where and when a file
-// came from. Format pinned by the Red test (#85). Date is UTC yyyy-mm-dd
-// (sortable, locale-free), captured at build time.
-function provenance(source: PortableTheme, seed: string): string {
-  const date = new Date().toISOString().slice(0, 10)
-  return `TYPE: CUSTOM\nTonex export ${date} · seed ${seed} · variant ${source.variant}`
+// why: provenance trail. `TYPE: CUSTOM` is MTB's marker for a hand-seeded theme
+// (always kept so MTB recognizes the import); the trailing line is the
+// provenance itself. JSON has no comment syntax, so this `description` field is
+// where ExportOptions.provenance lands (ADR-0039 Decision 7, amendment
+// 2026-06-17) — a caller-supplied recipe (the CLI's runnable regenerate command)
+// when given, which also keeps the JSON DETERMINISTIC since no date is stamped on
+// that path. Absent it, the default tonex stamp: UTC yyyy-mm-dd (sortable,
+// locale-free) + seed + variant. Default format pinned by the Red test (#85).
+function provenance(source: PortableTheme, seed: string, override?: string): string {
+  const trail =
+    override ??
+    `Tonex export ${new Date().toISOString().slice(0, 10)} · seed ${seed} · variant ${source.variant}`
+  return `TYPE: CUSTOM\n${trail}`
 }
 
 export function buildMaterialThemeJson(
@@ -236,7 +242,7 @@ export function buildMaterialThemeJson(
   const seed = seedHex(source)
 
   const json: MaterialThemeJson = {
-    description: provenance(source, seed),
+    description: provenance(source, seed, options.provenance),
     seed,
     coreColors: { primary: seed },
     extendedColors: buildExtendedColors(source),

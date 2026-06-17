@@ -2,7 +2,7 @@
 
 Companion to [SKILL.md](SKILL.md). The authoritative flag contract is always `tonex describe`; this file is the judgment the contract can't encode.
 
-## The `colors.json` artifact
+## The role set (`--to colors`)
 
 ```
 tonex generate --seed '#3b82f6' --to colors
@@ -10,20 +10,22 @@ tonex generate --seed '#3b82f6' --to colors
 
 ```jsonc
 {
-  "seed": "#3b82f6",            // the recipe — the irreplaceable input
+  "seed": "#3b82f6",
   "variant": "cmf",
   "contrast": 0,
   "surface": { "algo": "desaturate", "level": 0 },
-  "format": "oklch",           // the file declares its own encoding
+  "format": "oklch",           // the rendering declares its own encoding
   "light": { "primary": "oklch(0.492 0.18 257.73)", "on-primary": "…", /* 28 core roles */ },
   "dark":  { "primary": "…", /* same 28 roles */ }
 }
 ```
 
-- **Header = recipe, body = cache.** The header is the few inputs that can't be recovered; every value under `light`/`dark` re-derives from it. Change the header → regenerate. Never hand-edit a value into the body — that creates a second source of truth the next regenerate silently discards.
-- **Both modes, always.** Unlike `--to yaml`, this artifact is not single-mode; `--mode` is ignored.
-- **Core roster by default; `--extended` widens it.** The roster is a *capacity ladder*, not a taxonomy. The default 28 **core** roles (the accents, their containers, the full `surface-container-*` family, outlines) are the sufficient baseline for most projects. `--extended` adds the 22 **extended** roles (`*-fixed`, `*-dim`, `inverse-*`, `surface-tint`, `shadow`, `scrim`) — reach for it only when a target has slots core doesn't cover (inverted surfaces, modal scrims, tones that hold across modes). The question is "does core cover this project's slots?", not "is this a Material feature?". (A further rung — raw palette tones 0..100 — isn't exposed yet.)
-- **One encoding per file**, chosen by `--format oklch|hex`. To re-encode, re-run with the other format — don't convert values yourself.
+`--to colors` prints the **full role set, both modes** — the thing you read while binding roles→slots onto a target with no built-in projection. It is a **throwaway rendering, not a manifest**: nothing in the toolchain reads it back, so don't commit it or treat it as a source of truth. The durable source of truth is the **recipe** (the `generate` command), and it travels with the *delivered* file (see each target's reference), never in a separate `colors.json`.
+
+- **Body re-derives from the header.** Every value under `light`/`dark` comes from the header inputs. If you do keep this around while mapping, never hand-edit a value into the body — the next regenerate discards it.
+- **Both modes, always.** Unlike `--to yaml`, this rendering is not single-mode; `--mode` is ignored.
+- **Core roster by default; `--extended` widens it.** The roster is a *capacity ladder*, not a taxonomy. The default 28 **core** roles (the accents, their containers, the full `surface-container-*` family, outlines) are the sufficient baseline for most projects. `--extended` adds the 22 **extended** roles (`*-fixed`, `*-dim`, `inverse-*`, `surface-tint`, `shadow`, `scrim`) — reach for it only when a target has slots core doesn't cover (inverted surfaces, modal scrims, tones that hold across modes). The question is "does core cover this project's slots?", not "is this a Material feature?". You know the project, so tell the user `--extended` exists and let them opt in rather than defaulting to the wider set. (A further rung — raw palette tones 0..100 — isn't exposed yet.)
+- **One encoding per rendering**, chosen by `--format oklch|hex`. To re-encode, re-run with the other format — don't convert values yourself.
 
 ## Choosing a variant
 
@@ -97,7 +99,7 @@ The same MD3 token wears a different name per command. Pick the name that matche
 
 Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
 
-1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from `colors.json`.
+1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from the `--to colors` output.
 2. **The tone is already fixed.** You don't choose lightness — the token's value already carries the contrast tonex guaranteed against its paired surface. Don't re-pick it.
 3. **Verify every pairing you assert.** A foreign target fuses what MD3 splits — one `--ink` slot may be text *and* border *and* icon over several backgrounds. That slot's value must satisfy the **union** of contrast constraints across *every* background it touches. After mapping, gate it:
    ```
@@ -106,6 +108,8 @@ Treat the target's color surface as a **slot manifest**: a list of `{ slot, inte
    Exit `1` enumerates the failing pairs; pick a higher-contrast token for that slot, or raise `--contrast`, and re-check.
 
 The cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part. When in doubt, map a fused slot to the token that satisfies its *strictest* use, then prove it with `check --pairs`.
+
+Finally, **record the recipe** — the exact `generate` command — in the file you write (a comment header). The recipe reproduces the role *values*; the mapping you just made is reproduced by the slots in the file itself. A later agent re-runs the recipe and re-applies the same mapping; without the recipe in the file, your binding is unrecoverable once the conversation is gone.
 
 ## Contrast policy (what `check` blocks vs. warns)
 

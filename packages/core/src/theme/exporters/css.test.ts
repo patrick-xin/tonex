@@ -559,3 +559,24 @@ describe('exportCss filter combinations (ADR-0021 commitment 6)', () => {
     })
   })
 })
+
+// why: the durable artifact (ADR-0039 Decision 7, amendment 2026-06-17) — the
+// recipe rides INSIDE each delivered projection. exportCss renders the opaque
+// ExportOptions.provenance string as a leading /* */ comment; the consumer (the
+// CLI) builds the runnable command. Absent the option, output is byte-identical
+// to before (the drift-guard baseline must not move).
+describe('exportCss — provenance recipe', () => {
+  const bundle = { default: deriveTheme(DEFAULT_INPUTS) }
+  const recipe = "tonex generate --seed '#3b82f6' --variant cmf --to shadcn"
+
+  it('prepends the recipe as a leading /* */ comment, body intact below', () => {
+    const out = exportCss(bundle, 'shadcn', { provenance: recipe })
+    expect(out.startsWith(`/* ${recipe} */`)).toBe(true)
+    expect(out).toContain(':root {')
+  })
+
+  it('emits no comment banner when provenance is absent', () => {
+    expect(exportCss(bundle, 'shadcn', {}).startsWith('/*')).toBe(false)
+    expect(exportCss(bundle, 'md', {}).startsWith('/*')).toBe(false)
+  })
+})

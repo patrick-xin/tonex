@@ -10,20 +10,23 @@ import {
 import { selectSeedHex } from '../seed'
 import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 
-// why: the canonical `colors.json` artifact (ADR-0039 Decision 7) — tonex's OWN
-// color record, the one the skill projects FROM, distinct from the foreign
-// projection sinks (design-md.ts, json.ts) which reshape this same theme INTO a
-// competitor's vocabulary. Decision 7 makes it recipe-canonical and value-
-// disposable: a header that re-derives the values + a flat per-role value map,
-// both modes. So it diverges from the foreign sinks on three axes by design:
-//   - header = the full recipe (seed + variant + contrast + surface + the file's
-//     own encoding) → the values are reproducible from the header ALONE, so the
-//     file may be regenerated or discarded freely (the Decision-7 consequence).
+// why: the `--to colors` role rendering — tonex's full role set, both modes, that
+// an agent READS while mapping roles→slots onto a target with no built-in
+// projection. Per ADR-0039 Decision 7 (amendment 2026-06-17) this is a TRANSIENT
+// rendering, NOT a manifest: nothing in the toolchain reads it back, so it is
+// never committed or treated as a source of truth. The durable artifact is the
+// recipe embedded in each DELIVERED file (the foreign sinks below carry it via
+// ExportOptions.provenance); this rendering instead carries a structured header
+// that re-derives its own values, so it may be regenerated or discarded freely.
+// It still diverges from the foreign projection sinks (design-md.ts, json.ts,
+// which reshape this same theme INTO a competitor's vocabulary) on three axes:
+//   - header = the derivation knobs (seed + variant + contrast + surface + the
+//     file's own encoding) → the values are reproducible from the header ALONE.
 //   - core roster by default, extended opt-in via `includeExtended` (the same
 //     tier knob the paste-targets honor). The roster is a CAPACITY ladder, not a
 //     taxonomy: core (28) is the sufficient baseline most projects need; extended
-//     (22) adds more roles when core doesn't cover the slots. The canonical
-//     default stays lean so an agent maps against the set it actually needs.
+//     (22) adds more roles when core doesn't cover the slots. The default stays
+//     lean so an agent maps against the set it actually needs.
 //   - both modes, mode-major, kebab role keys (`--color-` stripped) so a
 //     design.md `colors:` projection is a pure key pass-through.
 // Same sink rules as siblings: ADR-0017 (reshape what deriveTheme returned, never

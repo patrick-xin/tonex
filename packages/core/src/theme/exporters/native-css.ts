@@ -93,6 +93,9 @@ function tierDeclarations(theme: DerivedTheme, opts: ResolvedOptions): string[] 
 
 export function exportNativeCss(bundle: ContrastBundle, options: ExportOptions = {}): string {
   const opts = resolveOptions(options)
+  // why: render the opaque provenance recipe as a leading /* */ comment (ADR-0039
+  // Decision 7), matching css.ts; empty when absent so output stays byte-identical.
+  const banner = options.provenance ? `/* ${options.provenance} */\n\n` : ''
   const blocks: string[] = []
 
   const rootLines = ['  color-scheme: light dark;', ...tierDeclarations(bundle.default, opts)]
@@ -111,5 +114,5 @@ export function exportNativeCss(bundle: ContrastBundle, options: ExportOptions =
     blocks.push(`${CONTRAST_TIER_CLASS[tier]} {\n${tierDeclarations(theme, opts).join('\n')}\n}`)
   }
 
-  return `${blocks.join('\n\n')}\n`
+  return `${banner}${blocks.join('\n\n')}\n`
 }

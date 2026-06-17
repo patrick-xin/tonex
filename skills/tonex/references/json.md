@@ -8,7 +8,7 @@ tonex generate --seed '#3b82f6' --to json
 
 ```json
 {
-    "description": "TYPE: CUSTOM\nTonex export … · seed #3B82F6 · variant cmf",
+    "description": "TYPE: CUSTOM\ntonex generate --seed '#3b82f6' --variant cmf --to json",
     "seed": "#3B82F6",
     "coreColors": { "primary": "#3B82F6" },
     "extendedColors": [],
@@ -23,7 +23,8 @@ tonex generate --seed '#3b82f6' --to json
 }
 ```
 
-- **When to use it.** Importing into Figma's Material Theme Builder, or any tool that already speaks MTB's schema. For a target you control, prefer the canonical `--to colors` artifact — `--to json` matches a *foreign* schema, not tonex's.
-- **camelCase, foreign names.** Tokens are camelCased (`onPrimary`, `primaryContainer`) to match MTB — these names **do not** map back to `--color-*`. Don't drive `adjust` / `check --pairs` from them; use the canonical `colors.json` and the MD3 names instead.
+- **When to use it.** Importing into Figma's Material Theme Builder, or any tool that already speaks MTB's schema. For a target you control, prefer the `--to colors` role set — `--to json` matches a *foreign* schema, not tonex's.
+- **camelCase, foreign names.** Tokens are camelCased (`onPrimary`, `primaryContainer`) to match MTB — these names **do not** map back to `--color-*`. Don't drive `adjust` / `check --pairs` from them; use the `--to colors` role names (the MD3 `--color-*` form) instead.
 - **Both modes, one call.** `schemes.light` and `schemes.dark` are both present; `--mode` is a no-op.
 - **Encoding.** `--format oklch` (default) or `--format hex`.
+- **Recipe rides in `description`.** JSON has no comment syntax, so the runnable recipe lands in the MTB-native `description` field (after the `TYPE: CUSTOM` marker). It's the durable artifact — keep it; it reproduces this export.
