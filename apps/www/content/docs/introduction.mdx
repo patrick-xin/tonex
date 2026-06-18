@@ -3,6 +3,8 @@ title: Introduction
 description: Tonex turns one brand color into a complete, accessible color system that is yours alone.
 ---
 
+import { PlayIcon, DiamondIcon, ScaleIcon } from "lucide-react";
+
 ## The problem
 
 Doing color well by hand is risky. Get one token wrong and the whole interface feels off, or fails contrast. So most products retreat to whatever feels safe, and everything converges on the same near-neutral look. Being distinct feels dangerous, so almost no one is.
@@ -22,6 +24,18 @@ Both share one engine, so a seed produces the same system in either.
 
 ## Start here
 
-- [Quickstart](/docs/quickstart) — your first system in under a minute.
-- [How Tonex thinks](/docs/how-tonex-thinks) — the model behind the output.
-- [Semantic color model](/docs/key-concepts/semantic-model) — roles, HCT, and tokens.
+
+<div className="flex flex-col md:flex-row gap-4 md:justify-between">
+  <DocCard 
+    title="Quickstart" 
+    icon={<PlayIcon className="size-4"/>} 
+    description="Your first color palette in under a minute." 
+    href="/docs/quickstart"
+  />
+  <DocCard 
+    title="How Tonex thinks" 
+    icon={<DiamondIcon className="size-4"/>} 
+    description="The model behind the output."
+    href="/docs/how-tonex-thinks"
+  />
+</div>

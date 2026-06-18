@@ -3,10 +3,6 @@ title: Troubleshooting
 description: Common questions and how to resolve them.
 ---
 
-## My export doesn't match the preview
-
-It should — the export is the preview's exact tokens. If they differ, you're likely looking at a different mode than you exported, or you have a [role override](/docs/web-app/shadcn/role-overrides) pinned in one mode but not the other. Check the active mode and any pinned roles.
-
 ## A color I changed snapped back
 
 A [binding](/docs/web-app/shadcn/role-bindings) tracks the system, so it moves when the seed, variant, or contrast changes. If you need a color to stay put, [pin it with an override](/docs/web-app/shadcn/role-overrides) instead.
@@ -21,4 +17,4 @@ Your seed is close to grey, so there's no hue to adjust. See [Limitations](/docs
 
 ## A contrast pair is flagged
 
-Tonex reports contrast but doesn't force it — a flag is information, not a block. Raise the [contrast](/docs/key-concepts/variants-contrast#contrast) level, or pin the affected role to a value that passes.
+Tonex reports contrast but doesn't force it — a flag is information, not a block. Raise the [contrast](/docs/key-concepts/contrast) level, or pin the affected role to a value that passes.

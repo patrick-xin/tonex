@@ -7,20 +7,20 @@ HCT is the color space Tonex works in. It stands for **Hue**, **Chroma**, and **
 
 ## The three axes
 
-- **Hue** — which color it is, around the circle from red through blue and back.
-- **Chroma** — how colorful it is, from grey at zero to fully saturated.
+- **Hue** — which color it is, around the circle from red through blue and back. Near-grey colors have no hue to adjust; add a little chroma to bring it back.
+- **Chroma** — how colorful it is, from grey at zero to fully saturated. At some hues and tones a color can't get any more vivid, so chroma stops before the end of its range.
 - **Tone** — how light or dark it is, from black at 0 to white at 100.
 
 ## Why tone matters for contrast
 
 Contrast between two colors is mostly a question of how far apart their tones are. Because HCT tone tracks perceived lightness, the engine can place an `on-` color at a tone that holds a target contrast against its background, across any hue. This is why readability holds as you change colors: the relationship is set in tone, not guessed.
 
-Contrast checks measure each pair against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements.
+Contrast checks measure each pair against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements. See [Contrast](/docs/key-concepts/contrast) for the full audit, levels, and thresholds.
 
 ## Where you meet it
 
 - The seed accepts an HCT value, alongside hex and OKLCH. See [Seed color](/docs/web-app/seed).
-- The [contrast](/docs/key-concepts/variants-contrast#contrast) control adjusts how far `on-` tones move to hold their margins.
+- The [contrast](/docs/key-concepts/contrast) control adjusts how far `on-` tones move to hold their margins.
 
 ## HCT and OKLCH
 

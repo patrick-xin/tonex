@@ -1,4 +1,13 @@
 {
   "title": "Web App",
-  "pages": ["light-dark", "seed", "overrides", "surfaces", "charts", "shadcn", "export"]
+  "pages": [
+    "light-dark",
+    "seed",
+    "overrides",
+    "surfaces",
+    "charts",
+    "shadcn",
+    "export",
+    "shortcuts"
+  ]
 }

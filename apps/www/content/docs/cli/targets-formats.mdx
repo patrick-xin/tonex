@@ -7,22 +7,43 @@ description: Two independent choices on generate — which document to emit, and
 
 ## Target
 
-`--to` chooses the output document (default `shadcn`):
+`--to` chooses the output document. The default is `shadcn`.
 
 | Target | Output |
 |--------|--------|
+| `colors` | The raw role set, both modes. Agents read this while mapping roles to another tool's slots. |
 | `shadcn` | A paste-ready shadcn `:root`/`.dark` block, both modes. The default. |
-| `yaml` | A single-mode design.md `colors:` block. |
+| `yaml` | A single-mode DESIGN.md `colors:` block. |
 | `json` | A Material Theme JSON export. |
 
-`shadcn` and `json` co-emit both light and dark. `yaml` has no light/dark axis, so it alone reads `--mode` to pick which projection to emit (default `light`).
+`colors`, `shadcn`, and `json` co-emit both light and dark. `yaml` alone reads `--mode` to pick which projection to emit. The default mode is `light`.
+
+```bash
+npx tonex generate --seed "#6A9CFF" --to colors
+npx tonex generate --seed "#6A9CFF" --to shadcn --format hex
+npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
+npx tonex generate --seed "#6A9CFF" --to json
+```
 
 ## Format
 
-`--format` chooses the color encoding for `shadcn` and `json` output: `oklch` (default) or `hex`. `yaml` is always hex and ignores this flag.
+`--format` chooses the color encoding for `colors`, `shadcn`, and `json` output: `oklch` by default, or `hex`. `yaml` is always hex and ignores this flag.
 
 Adding a format in the engine surfaces it here automatically — the CLI reads the format list from `@tonex/core` rather than re-listing it.
 
-## The design.md target
+## Recipe embedding
 
-`--to yaml` emits a [design.md](https://github.com/google/design.md) `colors:` block. Tonex exports `shadcn` and `json` natively; for any tool it doesn't export, the design.md output is the semantic contract an agent maps from — the roles (`primary`, `on-surface`, and so on) mean the same thing wherever they land. See [How Tonex thinks](/docs/how-tonex-thinks#the-semantic-source-is-the-contract) and the [skill](/docs/skills) that applies a consistent mapping.
+Delivered projections carry the command that made them:
+
+| Target | Recipe location |
+|--------|-----------------|
+| `shadcn` | A leading `/* tonex generate ... */` comment. |
+| `yaml` | A leading `# tonex generate ...` comment. |
+| `json` | The command in the `description` field. |
+| `colors` | Structured recipe metadata for transient agent reads. |
+
+## The role-set targets
+
+`--to colors` emits the raw Tonex role set. Use it when a tool has no native exporter: read the roles, map each role by intent, then verify the pairings with `tonex check`.
+
+`--to yaml` emits a [DESIGN.md](https://github.com/google-labs-code/design.md) `colors:` block. It is the portable semantic contract for tools that can consume DESIGN.md. Tonex exports `shadcn` and `json` natively; for other tools, the roles (`primary`, `on-surface`, and so on) mean the same thing wherever they land. See [How Tonex thinks](/docs/key-concepts/how-tonex-thinks#the-semantic-source-is-the-contract) and the [skill](/docs/skills) that applies a consistent mapping.

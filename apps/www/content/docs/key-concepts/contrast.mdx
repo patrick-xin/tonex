@@ -1,0 +1,38 @@
+---
+title: Contrast
+description: Tune how strongly colors separate, and audit the result against WCAG.
+---
+
+Contrast is what keeps the system readable. Tonex gives you a control to set it and an audit to check it, both working from the same seed and variant without changing them.
+
+## Contrast level
+
+The contrast level sets how strongly text and `on-` colors separate from the surfaces behind them. Raise it and the `on-` pairs shift to hold a larger contrast margin; lower it and they relax toward the baseline.
+
+Contrast is **per mode** — light and dark each carry their own level — so you can push dark mode harder without touching light. The control lives in **Settings**.
+
+## Contrast audit
+
+Press `A` to open the contrast audit — a WCAG check of the current theme. It reads the **active mode** only, so check light and dark separately. The audit is scoped to the layer you're on: the MD route audits MD pairs, the shadcn route audits shadcn pairs.
+
+Each pair is checked against a WCAG threshold and labelled:
+
+- **Pass** — readable, good contrast.
+- **Hard to read** — text is too faint against its background.
+- **Faint** — a border, icon, or fill is low-contrast; fine for some uses.
+- **Decorative** — purely visual, no contrast needed, so it's exempt.
+
+### Thresholds
+
+Pairs split into **text** and **UI** (non-text) by how they're used, and each has its own threshold. Toggle the target level between **AA** and **AAA**:
+
+| Intent | AA | AAA |
+| --- | --- | --- |
+| Text | 4.5:1 | 7:1 |
+| UI / non-text | 3:1 | 4.5:1 |
+
+Text follows WCAG 1.4.3; UI elements and non-text follow WCAG 1.4.11. Filter the table by **Text** or **UI** to focus on one kind.
+
+## It reports, it doesn't block
+
+A flag in the audit is information, not a block — Tonex reports contrast but never forces it. To resolve one, raise the contrast level or pin the affected role to a value that passes. See [Troubleshooting](/docs/reference/troubleshooting).

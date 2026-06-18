@@ -7,7 +7,7 @@ Tonex names colors by their job, not their appearance. A color is `primary` or `
 
 ## Why roles instead of names
 
-A fixed color like "blue 600" only means something in one palette. A role like `primary` means the same thing everywhere — the main accent — whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, or on a slide and still be the same identity. Roles are the common language; the [semantic source](/docs/cli/targets-formats) is the contract written in it.
+A fixed color like "blue 600" only means something in one palette. A role like `primary` means the same thing everywhere — the main accent — whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, or on a slide and still be the same identity. Roles are the common language; the [semantic source](/docs/how-tonex-thinks#the-semantic-source-is-the-contract) is the contract written in it.
 
 ## The core roles
 
@@ -22,7 +22,7 @@ A fixed color like "blue 600" only means something in one palette. A role like `
 
 ## On colors
 
-Every colored area needs readable content on top of it. For each role there's an `on-` partner — `on-primary`, `on-surface`, and so on — that's built to read against it. Tonex derives the pair together and checks the contrast, so the text on a color is readable by construction. See [HCT & contrast](/docs/key-concepts/hct).
+Every colored area needs readable content on top of it. For each role there's an `on-` partner — `on-primary`, `on-surface`, and so on — that's built to read against it. Tonex derives the pair together and checks the contrast, so the text on a color is readable by construction. See [HCT](/docs/key-concepts/hct) for how tone makes that reliable, and [Contrast](/docs/key-concepts/contrast) for the audit.
 
 ## Surfaces and elevation
 

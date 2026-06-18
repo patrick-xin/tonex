@@ -5,9 +5,12 @@ description: Five binding presets, each a different surface style for shadcn.
 
 A binding preset is a starting set of [role bindings](/docs/web-app/shadcn/role-bindings) — a decision about which generated color each shadcn role points at. Tonex ships five, each giving the interface a different surface style. Picking one sets the defaults; you can still adjust any binding afterward.
 
-The presets differ mainly in how surfaces relate to each other. For example:
+The presets differ mainly in how surfaces relate to each other:
 
-- **Clean** — cards sit on the same color as the background, for a level, minimal look.
-- **Layered** — popovers and raised elements bind to a lower container surface, so they read as lifted off the page.
+- **Default** — a balanced, neutral surface mapping to start from.
+- **Clean** — card, popover, and background share one layer, for a level, minimal look.
+- **Mixed** — mode-aware: light and dark route to different layers.
+- **Layered** — stacked depth: each surface sits on its own elevation tier.
+- **Seamless** — subtle depth: cards lift gently while popovers blend into the page.
 
 Choose the preset that matches the depth and separation you want, then fine-tune individual roles from there.

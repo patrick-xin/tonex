@@ -9,15 +9,18 @@ Export turns the system you built into tokens you can paste into your project. W
 
 The core tokens always export: the standard semantic roles for both the Material layer and shadcn, in both modes. That's the minimum coherent set most projects need.
 
-Three toggles add more when you want it:
+Toggles add more when you want it (which ones are available depends on the output format):
 
-- **Tonal palette** — the full range of tones for every family, not just the roles in use.
-- **Charts** — the data visualization color series.
-- **Contrast variants** — the higher-contrast token values.
+- **Extended roles** — surface tints and fixed color roles beyond the core set.
+- **Tonal palettes** — the full 0–100 tone ramp for every key color, not just the roles in use.
+- **Chart colors** — the data visualization color series.
+- **Contrast tiers** — the medium and high-contrast variants alongside the default.
 
-## Format
+## Output format
 
-Choose the color format for the output: `oklch` or `hex`. The token names are the same either way.
+Pick the format you export to. The Material layer offers Tailwind, CSS, JSON, Dart, and Design.md; the shadcn layer exports a shadcn theme.
+
+For the CSS-based formats you also choose the color format — `oklch` or `hex` — and the token names are the same either way. Design.md is hex-only and exports a single mode, which you choose in the dialog.
 
 ## shadcn theme presets
 

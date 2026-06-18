@@ -5,23 +5,20 @@ description: Both modes are built at once; you edit one at a time.
 
 Tonex builds light and dark together from the same source. You edit one mode at a time, and the engine keeps the other coherent. Toggle the active mode with `D`.
 
-## Shared across modes
+Some settings apply to both modes at once; others only to the mode you're editing.
 
-These choices apply to both modes at once:
+| Setting | Scope |
+| --- | --- |
+| Seed color | Shared |
+| Scheme variant | Shared |
+| Custom colors | Shared |
+| Palette overrides | Shared |
+| CMF second source | Shared |
+| Chart settings | Shared |
+| Contrast level | Per-mode |
+| Surface adjustment (Tint / Desaturate) | Per-mode |
+| Tint text accent | Per-mode |
+| Role bindings | Per-mode |
+| Color overrides | Per-mode |
 
-- The **seed**
-- The **variant** and the CMF second source
-- **Palette overrides** and **custom colors**
-- **Chart** settings
-
-Change any of these and both modes update together.
-
-## Per mode
-
-These are set independently for light and dark:
-
-- **Contrast** level
-- **Surface** adjustment, including the tint text accent
-- **Role bindings** and **role overrides** for shadcn
-
-This split lets you push contrast harder in dark mode, or tint dark surfaces more than light ones, without disturbing the other mode.
+Change a **shared** setting and both modes update together. The **per-mode** split lets you push contrast harder in dark mode, or tint dark surfaces more than light ones, without disturbing the other mode.

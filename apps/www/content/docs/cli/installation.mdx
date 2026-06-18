@@ -1,25 +1,52 @@
 ---
 title: Installation
-description: Run Tonex with npx, or add the core package to your project.
+description: Run the Tonex CLI with npx, install it globally, or add the Tonex skill for agent-led theme work.
 ---
 
-The CLI needs no install. Run it with `npx`:
+The CLI is a single zero-dependency bundle. For one-off generation or agent runs, use `npx`:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" > globals.css
+npx tonex@latest generate --seed "#6A9CFF" > globals.css
 ```
 
-`npx` fetches and runs the latest version, which is convenient for one-off generation and for agents.
+That form needs no global install. Replace `generate ...` with any command:
 
-## Adding it to a project
-
-To pin a version or call the engine from your own code, add the core package:
-
-```package-install
-npm install @tonex/core
+```bash
+npx tonex@latest <command> [options]
 ```
 
-`@tonex/core` is the engine the CLI and the web app both share. It's open source, so you can build on it directly.
+## Optional global install
+
+If you want a shorter command, install it globally:
+
+```bash
+npm i -g tonex
+```
+
+Then run:
+
+```bash
+tonex <command> [options]
+```
+
+## Verify the CLI
+
+Use `--help` for human-readable usage, or `describe` for the machine-readable contract that agents should read first:
+
+```bash
+tonex --help
+tonex describe
+```
+
+## Install the agent skill
+
+The CLI is the engine. The `tonex` skill carries the judgment for mapping roles, choosing remedies, and using the contrast gate correctly.
+
+```bash
+npx skills add patrick-xin/tonex --skill tonex
+```
+
+Do not use `--all`; this repository also contains internal maintainer skills. Scope the install to `--skill tonex`.
 
 ## Requirements
 

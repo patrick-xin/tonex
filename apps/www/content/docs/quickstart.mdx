@@ -3,36 +3,95 @@ title: Quickstart
 description: Generate your first color system in under a minute, from the CLI or the web app.
 ---
 
-You give Tonex one color. It returns a complete, accessible color system built around it. There are two ways in: a one-line command, or the web app.
+Give Tonex one color and it returns a complete, accessible color system built around it. You can run it two ways — a one-line command or the web app — and export to whatever your project speaks: shadcn theme, DESIGN.md block, Tailwind, CSS, Material Theme JSON, or Dart.
+
+import { TonexLogoDuo } from '@/components/icons/logo';
+import { PanelsTopLeftIcon, SquareTerminalIcon, BotIcon } from "lucide-react";
 
 ## From the CLI
 
-Generate a shadcn theme from a single seed and write it straight to your stylesheet:
+`generate` derives a theme from a seed and prints it. No install, no config, no account — just `npx`:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" > globals.css
+npx tonex generate --seed "#6A9CFF"
 ```
 
-`generate` defaults to the shadcn target, so that one command writes a paste-ready `:root`/`.dark` block. The same seed and flags produce the same `globals.css` every time — no agent, no network call. Paste the file into a shadcn project and the theme is live.
-
-Change the character without changing the seed by adding knobs:
+The same seed and flags produce the same output every time — no agent, no network call. Change the palette's character without touching the seed by adding knobs:
 
 ```bash
 npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
 ```
 
-See [Commands](/docs/cli/commands) for the full flag list.
+Pick your output with `--to`. See [Commands](/docs/cli/commands) for the full flag list and [Targets & formats](/docs/cli/targets-formats) for every target.
+
+### Shadcn
+
+The default target. Writes a paste-ready `:root`/`.dark` block — both light and dark modes — straight to your stylesheet:
+
+```bash
+npx tonex generate --seed "#6A9CFF" > globals.css
+```
+
+Paste it into a shadcn (Tailwind) project and the theme is live.
+
+### DESIGN.md
+
+A single-mode [DESIGN.md](https://github.com/google-labs-code/design.md) `colors:` block — the semantic contract an agent maps into any tool that isn't shadcn:
+
+```bash
+npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
+```
+
+### Material Theme JSON
+
+A Material Theme export, with colors encoded as hex:
+
+```bash
+npx tonex generate --seed "#6A9CFF" --to json --format hex
+```
 
 ## From the web app
 
-1. Set a seed: type a hex value, paste OKLCH or HCT, or drop an image to pull its main color.
-2. Adjust the variant, contrast, and surfaces while previewing on real components.
-3. Open **Export** and copy the tokens. What you see in the preview is what you paste.
+Open the editor:
 
-The web app and the CLI share one engine. A seed produces the same system in either.
+<Steps>
+  <Step title="Set a seed">
+    Type a hex value, paste OKLCH or adjust HCT slider, or drop an image to pull its main color.
+  </Step>
+  <Step title="Tweak it">
+    Adjust the variant, contrast, and surfaces while previewing on real components.
+  </Step>
+   <Step title="Export">
+    Export with <Kbd>E</Kbd>, pick your format, and copy the tokens out
+  </Step>
+</Steps>  
 
-## Next
 
-- [How Tonex thinks](/docs/how-tonex-thinks) — the model behind the output.
-- [Web app](/docs/web-app/seed) — every control, in order.
-- [CLI](/docs/cli/introduction) — commands, targets, and formats.
+What you see in the preview is exactly what you paste — readability is checked as you build, not bolted on at the end. The web app and the CLI share one engine, so a seed produces the same system in either.
+
+## Ready to Start?
+
+<div className="flex flex-col md:flex-row gap-4 md:justify-between">
+  <DocCard 
+    title="Web app" 
+    icon={<PanelsTopLeftIcon className="size-4"/>} 
+    description="Every control, in order. Preivew with swatches, customize every color." 
+    href="/docs/web-app/light-dark"
+  />
+  <DocCard 
+    title="CLI" 
+    icon={<SquareTerminalIcon className="size-4"/>} 
+    description="Commands, targets, and formats."
+    href="/docs/cli/introduction"
+  />
+</div>
+
+<div className="mt-4">
+  <DocCard 
+    title="Agent skill" 
+    icon={<BotIcon className="size-4"/>}
+    description="Let an agent generate and apply themes for you."
+    href="/docs/philosophies"
+  />
+</div>
+

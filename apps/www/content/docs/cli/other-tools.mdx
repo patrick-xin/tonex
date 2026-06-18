@@ -3,12 +3,44 @@ title: Mapping to Other Tools
 description: How tools without a native exporter get a consistent mapping.
 ---
 
-`generate` exports `shadcn` and `json` natively — a deterministic file, no agent. For any other tool, the [design.md `colors:` block](/docs/cli/targets-formats) (`--to yaml`) is the semantic contract an agent maps onto that tool's token system.
+Tonex exports `shadcn` and `json` natively. For every other tool, use Tonex as the semantic source: generate a read target, map roles by intent, then prove the final pairings with `check`.
 
-## Recipes
+## Choose a read target
 
-A recipe is a mapping from Tonex's semantic roles to a particular tool's token system. The [skill](/docs/skills) applies a known mapping instead of improvising one, so results for the same tool stay consistent from one run to the next.
+| Target | Use when |
+| --- | --- |
+| `--to colors` | An agent or script needs the raw role set for custom mapping. |
+| `--to yaml` | The target tool can consume a DESIGN.md `colors:` block, or you want a portable semantic contract. |
+
+```bash
+npx tonex generate --seed "#6A9CFF" --to colors
+npx tonex generate --seed "#6A9CFF" --to yaml
+```
+
+## Map by intent
+
+Role names are a starting point, not a binding rule. Map each Tonex role to the target tool slot that preserves the same visual job.
+
+For example, another tool might call its main action color `brand`, `accent`, or `button`. Bind Tonex `primary` there if that slot is the product's primary action. Binding `secondary` to another tool's primary-looking slot can also be correct if it preserves the intended hierarchy.
+
+## Verify the mapped pairs
+
+After mapping, check the pairs the target UI will actually render:
+
+```bash
+npx tonex check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]'
+```
+
+Token-name pairs use the CSS variable form with a `--color-` prefix:
+
+| Tonex role | Pair-check token |
+| --- | --- |
+| `primary` | `--color-primary` |
+| `on-surface` | `--color-on-surface` |
+| `surface` | `--color-surface` |
+
+The contrast guarantee follows the pairing you check, not the name you keep in the target tool.
 
 ## Discipline
 
-The point of mapping from the contract — rather than from the colors an agent might guess — is faithfulness. Roles like `primary` and `on-surface` mean the same thing wherever they land, and the source is the reference for checking that a mapped result still reads as the same brand. See [How Tonex thinks](/docs/how-tonex-thinks#the-semantic-source-is-the-contract).
+Do not invent colors during the mapping step. If a mapped tool needs a different hierarchy, remap Tonex roles first; if a checked pair fails, use a Tonex remedy such as `--contrast` or choose a different pairing. See [How Tonex thinks](/docs/key-concepts/how-tonex-thinks#the-semantic-source-is-the-contract).
