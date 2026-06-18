@@ -1,11 +1,11 @@
 ---
 name: slice
-description: Apply tonex's build method — vertical slices with a one-sentence promise, two-adapters = real seam, Red-Green-Refactor, blueprint slices — when planning, decomposing, deciding "what should I build next?", or judging whether an abstraction is earned. Use at the start of any design/phasing task, especially file-free planning, or whenever invoked via /slice. The method docs are real but filed under session-flow's weak "read when relevant" gate that planning tasks (no files touched → no nested-CLAUDE.md delivery) systematically miss; this injects them on demand.
+description: Apply tonex's build method — vertical slices with a one-sentence promise, two-adapters = real seam, Red-Green-Refactor, blueprint slices — when planning, decomposing, deciding "what should I build next?", or judging whether an abstraction is earned. Use at the start of any design/phasing task, especially file-free planning, or whenever invoked via /slice. The method docs are real but filed under session-flow's weak "read when relevant" gate that planning tasks (no files touched → no nested-AGENTS.md delivery) systematically miss; this injects them on demand.
 ---
 
 # Slice
 
-The build method for turning a decision into shipped work: **vertical slices, test-first, abstractions only when earned.** Invoke before any planning, decomposition, "what next", or abstraction-design task — the kind that touches no files, so the nested-`CLAUDE.md` "rules arrive with the code" delivery never fires and the method sits behind session-flow's weakest gate ("read when relevant").
+The build method for turning a decision into shipped work: **vertical slices, test-first, abstractions only when earned.** Invoke before any planning, decomposition, "what next", or abstraction-design task — the kind that touches no files, so the nested-`AGENTS.md` "rules arrive with the code" delivery never fires and the method sits behind session-flow's weakest gate ("read when relevant").
 
 This skill owns the *operating procedure*; the *policy* lives in docs. Don't restate the rules — read them:
 - Slice discipline + the **"two-adapters = real seam"** rule → `docs/agents/slice-strategy.md`.

@@ -4,13 +4,13 @@
 
 - **`// why:` only at non-obvious choices.** Record the constraint or invariant that drove the choice, or the ADR number when an architectural rule applies here. Never restate what the code already says. An external-clock reason (launch, dependency bump, policy) goes in an ADR and the comment cites the number; a bare `// for now` is either load-bearing (→ ADR) or disposable (→ delete). Applies to app UI files, not just the engine.
 
-- **`CLAUDE.md` is the static minimum.** Put a constraint there only if it has no in-code home (e.g. "no backend ever"); anything with a code site lives at that site. Keep each `CLAUDE.md` under ~15 lines.
+- **`AGENTS.md` is the static minimum.** Put a constraint there only if it has no in-code home (e.g. "no backend ever"); anything with a code site lives at that site. Keep each `AGENTS.md` under ~15 lines. (`CLAUDE.md` is just `@AGENTS.md` — a re-export shim, not a place for rules.)
 
 - **Corrections commit to code.** A correction survives only as a refactor, `// why:`, fixture, ADR, or an entry in this doc — one left in conversation evaporates at the session boundary.
 
 - **Name domain concepts with the glossary's term.** In any output that names a concept — issue title, refactor proposal, hypothesis, test name — use the per-layer glossary's term (`packages/core/docs/glossary.md`, `apps/www/docs/glossary.md`); don't drift to synonyms it avoids. A concept missing from the glossary is a signal: either you're inventing language the project doesn't use (reconsider), or it's a real gap (note it).
 
-- **Capture a changed decision as an issue, not an in-place doc edit.** When a decision refines or contradicts a rule a *living* doc already states, file an issue via `/to-issues` first — it's the dated record of what changed and why; the doc edit follows. A net-new rule with no prior conflict is written straight to its home (a `rules/` shard, a feature `CLAUDE.md`, or here); a decision big enough for an ADR is written as an ADR directly (an append-amendment if it refines one) — ADRs have no in-place-overwrite failure mode. When unsure, file the issue.
+- **Capture a changed decision as an issue, not an in-place doc edit.** When a decision refines or contradicts a rule a *living* doc already states, file an issue via `/to-issues` first — it's the dated record of what changed and why; the doc edit follows. A net-new rule with no prior conflict is written straight to its home (a `rules/` shard, a feature `AGENTS.md`, or here); a decision big enough for an ADR is written as an ADR directly (an append-amendment if it refines one) — ADRs have no in-place-overwrite failure mode. When unsure, file the issue.
 
 - **Surface skill moments; don't auto-run them.** `/to-prd`, `/to-issues`, `/triage`, and the `sweep` skill are user-invoked. When a moment calls for one, offer it ("this looks like a `/to-issues` moment — want me to draft the body?"). PRDs publish to the tracker as issues (problem / solution / user-stories / implementation-decisions), not as `docs/prd/` files.
 

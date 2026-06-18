@@ -51,7 +51,7 @@ Even when the user asks to save:
 - File paths or project structure (derive from `ls`/`tree`).
 - Git history / who-changed-what (derive from `git log`).
 - Debugging fix recipes (the fix is in the code; the commit message has the context).
-- Anything already documented in `CLAUDE.md` or `docs/agents/`.
+- Anything already documented in `AGENTS.md` or `docs/agents/`.
 - Ephemeral conversation state, in-progress task details.
 
 If the user explicitly asks to save activity logs or PR lists, ask what was *surprising* or *non-obvious* about them — that is the part worth keeping.

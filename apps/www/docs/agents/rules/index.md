@@ -15,6 +15,6 @@ Rules are split per surface so you load only what your task touches. **Read the 
 | user guidance — tours, help dialog, inline cues | [guidance.md](guidance.md) |
 | tests (`*.test.ts`) | [testing.md](testing.md) |
 
-Engine rules: `packages/core/CLAUDE.md`. Public API by subpath: `packages/core/docs/agents/api/core-surface.md`.
+Engine rules: `packages/core/AGENTS.md`. Public API by subpath: `packages/core/docs/agents/api/core-surface.md`.
 
 **Adding rules:** put the rule in the shard for its surface (new surface → new shard + a row above). One imperative per bullet, ending `_(ADR-NNNN)_`. Definitions go in `../../glossary.md`, the *why* in the ADR — don't restate either here.

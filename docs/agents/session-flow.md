@@ -3,8 +3,8 @@
 Reading order when an agent starts work here. Designed so the user doesn't recite a manifest each session, and so the rules arrive *with the code* rather than as an upfront pile.
 
 ## Auto-loaded
-- `CLAUDE.md` (repo root) — entry pointer.
-- **Nested `CLAUDE.md`** — the working rules for a subtree load when you touch it; you don't fetch these, they come with the files. **The invariant: every package carrying authored, non-vendored code carries a `CLAUDE.md`** (so the convention tracks the package topology instead of freezing to whatever existed when it was written). Deep surfaces dispatch onward to a `rules/` tree — `packages/core/CLAUDE.md` (engine, schema, sinks, seed), `apps/www/CLAUDE.md` (app structure, state, components). Thin packages are a single file: the **consumers** `packages/cli` + `packages/core-react` (consume `@tonex/core`, never re-implement it) and the **boundary** `packages/color-utils` (the culori firewall). Exempt: vendored code (`packages/mcu`, graduating back to an npm dep) and config (`packages/typescript-config`). New package with authored code → it gets a `CLAUDE.md`.
+- `CLAUDE.md` (repo root) — entry pointer; it imports the sibling `AGENTS.md`.
+- **Nested `AGENTS.md`** — the working rules for a subtree load when you touch it; you don't fetch these, they come with the files. Each dir pairs an `AGENTS.md` (the tool-agnostic rules home) with a `CLAUDE.md` that's a one-line `@AGENTS.md` import — the Claude-Code-specific shim that auto-loads the rules (that's why there are two files). **The invariant: every package carrying authored, non-vendored code carries an `AGENTS.md`** (so the convention tracks the package topology instead of freezing to whatever existed when it was written). Deep surfaces dispatch onward to a `rules/` tree — `packages/core/AGENTS.md` (engine, schema, sinks, seed), `apps/www/AGENTS.md` (app structure, state, components). Thin packages are a single file: the **consumers** `packages/cli` + `packages/core-react` (consume `@tonex/core`, never re-implement it) and the **boundary** `packages/color-utils` (the culori firewall). Exempt: vendored code (`packages/mcu`, graduating back to an npm dep) and config (`packages/typescript-config`). New package with authored code → it gets an `AGENTS.md` (with a `CLAUDE.md` that imports it).
 - (Claude Code main agents only) machine-local memory at `~/.claude/projects/<repo>/memory/`.
 - `SessionStart` hook output — branch, recent commits, uncommitted state.
 
@@ -27,7 +27,7 @@ Docs live per layer, adr are cited by number.
 3. **`docs/agents/working-style.md`** — collaboration norms.
 4. **Active issue / PRD** in the tracker — what you're building.
 
-Recent commits are already in the `SessionStart` output above — glance there for where the code actually is, no separate `git log` needed. When you open files under `packages/core/` or `apps/www/`, that subtree's `CLAUDE.md` arrives automatically — the working rules come with the code.
+Recent commits are already in the `SessionStart` output above — glance there for where the code actually is, no separate `git log` needed. When you open files under `packages/core/` or `apps/www/`, that subtree's `CLAUDE.md` arrives automatically and imports its `AGENTS.md` — the working rules come with the code.
 
 ## Read when relevant
 
