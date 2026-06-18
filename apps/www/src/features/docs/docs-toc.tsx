@@ -1,5 +1,6 @@
 'use client'
 
+import { ListBulletsIcon } from '@phosphor-icons/react'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { useEffect, useState } from 'react'
 import { cn } from 'tailwind-variants'
@@ -19,60 +20,66 @@ export function DocsToc({ items, className }: TOCMinimapProps) {
   }
 
   return (
-    <nav aria-label="Table of contents" className={cn('w-fit', className)}>
-      <PreviewCard>
-        <PreviewCardTrigger
-          delay={100}
-          render={
-            <div className="flex max-h-[50dvh] flex-col gap-3 overflow-y-scroll py-4 pl-8 opacity-100 data-popup-open:opacity-0 transition-opacity duration-200">
-              {items.map((item) => (
-                <div
-                  key={item.url}
-                  data-depth={item.depth}
-                  data-active={item.url === `#${activeHeading}` || undefined}
-                  className={cn(
-                    'h-0.5 w-8 shrink-0 rounded-xs transition-[background-color] duration-200 bg-outline-variant',
-                    'data-[depth=3]:ml-2 data-[depth=3]:w-6',
-                    'data-[depth=4]:ml-4 data-[depth=4]:w-4',
-                    'data-active:bg-primary',
-                  )}
-                />
-              ))}
-            </div>
-          }
-        />
-        <PreviewCardContent
-          className="w-56 overflow-hidden surface-popup-blur!"
-          align="start"
-          alignOffset={0}
-          side="left"
-          sideOffset={-60}
-        >
-          <div className="flex max-h-[50dvh] overflow-y-auto overscroll-contain">
-            <ul className="flex size-full flex-col text-sm">
-              {items.map((item) => (
-                <li key={item.url} className="flex py-1">
-                  <a
-                    href={item.url}
+    <aside className="flex flex-col items-end w-fit">
+      <div className="text-xs text-on-surface-variant font-medium flex items-center gap-1 ml-auto">
+        <ListBulletsIcon className="size-4" />
+        On this page
+      </div>
+      <nav aria-label="Table of contents" className={cn('w-fit', className)}>
+        <PreviewCard>
+          <PreviewCardTrigger
+            delay={100}
+            render={
+              <div className="flex max-h-[50dvh] flex-col gap-3 overflow-y-scroll py-4 pl-8 opacity-100 data-popup-open:opacity-0 transition-opacity duration-200">
+                {items.map((item) => (
+                  <div
+                    key={item.url}
                     data-depth={item.depth}
                     data-active={item.url === `#${activeHeading}` || undefined}
                     className={cn(
-                      'line-clamp-2 w-full transition-[color] duration-200',
-                      'text-on-surface-variant hover:text-on-surface',
-                      'data-[depth=3]:pl-4 data-[depth=4]:pl-6',
-                      'data-active:text-primary',
+                      'h-0.5 w-8 shrink-0 rounded-xs transition-[background-color] duration-200 bg-outline-variant',
+                      'data-[depth=3]:ml-2 data-[depth=3]:w-6',
+                      'data-[depth=4]:ml-4 data-[depth=4]:w-4',
+                      'data-active:bg-primary',
                     )}
-                    onClick={handleItemClick}
-                  >
-                    {item.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </PreviewCardContent>
-      </PreviewCard>
-    </nav>
+                  />
+                ))}
+              </div>
+            }
+          />
+          <PreviewCardContent
+            className="w-56 overflow-hidden surface-popup-blur!"
+            align="start"
+            alignOffset={2}
+            side="left"
+            sideOffset={-64}
+          >
+            <div className="flex max-h-[50dvh] overflow-y-auto overscroll-contain">
+              <ul className="flex size-full flex-col text-sm">
+                {items.map((item) => (
+                  <li key={item.url} className="flex py-1">
+                    <a
+                      href={item.url}
+                      data-depth={item.depth}
+                      data-active={item.url === `#${activeHeading}` || undefined}
+                      className={cn(
+                        'line-clamp-2 w-full transition-[color] duration-200',
+                        'text-on-surface-variant hover:text-on-surface',
+                        'data-[depth=3]:pl-4 data-[depth=4]:pl-6',
+                        'data-active:text-primary',
+                      )}
+                      onClick={handleItemClick}
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </PreviewCardContent>
+        </PreviewCard>
+      </nav>
+    </aside>
   )
 }
 

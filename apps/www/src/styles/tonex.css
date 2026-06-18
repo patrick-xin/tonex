@@ -1,5 +1,4 @@
 @theme inline {
-  --radius: 0.8rem;
   /* Chrome (Plex Sans) is the default UI/body sans; Mono (Plex Mono) the
      universal code/numerals face. Loaded in app/layout.tsx. The .shadcn scope
      re-points --font-chrome at Geist (globals.css) for the preview. */

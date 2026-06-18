@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function BlocksPage() {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <BlocksDemo />
     </div>
   )

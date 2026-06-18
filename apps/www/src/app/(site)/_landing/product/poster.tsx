@@ -104,7 +104,7 @@ const CARDS: CardDef[] = [
     render: () => (
       <>
         <div className="flex items-start justify-between">
-          <span className="text-3xl font-medium leading-none tracking-tight text-current/60 sm:text-4xl">
+          <span className="text-3xl font-medium leading-none tracking-tight sm:text-4xl">
             {BRAND.pct}
           </span>
           <div className="flex gap-1.5">

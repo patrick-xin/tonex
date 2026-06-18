@@ -1,5 +1,5 @@
 import { GithubLogoIcon, XLogoIcon } from '@phosphor-icons/react'
-import { Info, LandPlot } from 'lucide-react'
+import { BookIcon, Info, LandPlot } from 'lucide-react'
 import { TonexLogo } from '@/components/icons/logo'
 import { MdIcon } from '@/components/icons/md'
 import { ShadcnIcon } from '@/components/icons/shadcn'
@@ -14,6 +14,7 @@ const NAV_ICONS: Record<string, Item['icon']> = {
   home: TonexLogo,
   'material-theme': MdIcon,
   shadcn: ShadcnIcon,
+  docs: BookIcon,
   about: Info,
   roadmap: LandPlot,
 }

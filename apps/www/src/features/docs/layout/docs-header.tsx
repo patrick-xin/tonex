@@ -5,7 +5,7 @@ import { ThemeModeToggle } from '@/components/shared/theme-mode-toggle'
 
 export const DocsHeader = () => {
   return (
-    <header className="h-full flex items-center justify-between px-4 sm:px-8 bg-surface-container-low">
+    <header className="h-full flex items-center justify-between px-4 sm:px-6 bg-surface-container-low">
       <SiteLogo />
       <div className="flex items-center gap-4 h-full">
         <div className="hidden md:block">

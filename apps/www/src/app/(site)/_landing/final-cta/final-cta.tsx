@@ -1,6 +1,7 @@
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { SectionContent, SectionHeader } from '../section-header'
 import { ShaderDots } from '../shader-dot'
-import { SubscribeSection } from '../subscribe-section'
 
 export function FinalCta() {
   return (
@@ -10,11 +11,21 @@ export function FinalCta() {
         <SectionHeader
           heading="Your colors, reimagined."
           headingClassName="font-display"
-          description="Get product updates."
+          description="No signup, open source"
         />
         <SectionContent>
-          <div className="w-full max-w-xs mx-auto">
-            <SubscribeSection />
+          <div className="w-full flex justify-center gap-4 mx-auto">
+            <Button size="lg" nativeButton={false} render={<Link href="/theme" />}>
+              Start now
+            </Button>
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/docs/introduction" />}
+              variant="ghost"
+            >
+              Read docs
+            </Button>
           </div>
         </SectionContent>
       </div>

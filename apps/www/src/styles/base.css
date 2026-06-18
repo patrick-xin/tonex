@@ -84,3 +84,16 @@
     }
   }
 }
+
+@utility step {
+  counter-increment: step;
+
+  &:before {
+    @apply hidden bg-surface-container-low absolute -mt-2 -ml-13 lg:inline-flex size-10 items-center justify-center rounded-full border border-outline-variant text-center -indent-px font-mono text-xs font-medium text-on-surface-variant;
+    content: counter(step);
+  }
+
+  &:first-child:last-child:before {
+    @apply hidden;
+  }
+}

@@ -48,9 +48,9 @@ export default async function DocsPage({ params }: { params: Promise<{ slug: str
     <div className="flex items-start">
       <div className="flex-1 min-w-0">
         <div className="min-w-0 px-4 py-8">
-          <div className="prose prose-tonex 2xl:prose-lg mx-auto min-w-0 w-full">
+          <div className="prose prose-tonex 2xl:prose-lg mx-auto min-w-0 w-full prose-h2:scroll-mt-6 prose-h3:scroll-mt-6">
             <div className="border-b border-outline-variant">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:justify-between sm:items-center">
                 <h1 className="not-prose text-3xl xl:text-4xl font-bold">{doc.title}</h1>
                 <div className="flex items-center gap-2">
                   <DocsActions slug={slug} url={page.url} />
