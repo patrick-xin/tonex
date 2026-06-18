@@ -405,6 +405,33 @@ describe('tonex check — pair oracle', () => {
     expect(capture(['check', '#000000', 'not-a-hex']).code).toBe(USAGE)
     expect(capture(['check', '--pairs', '[["#000000","nope"]]']).code).toBe(USAGE)
   })
+
+  // why: the operands accept the SAME color contract as --seed — a 6-digit hex OR a
+  // canonical oklch(L C H) — so an agent can paste a shadcn/tweakcn color (oklch is
+  // shadcn v4's native form) straight into the oracle without hand-converting. The
+  // echoed color is the PROJECTED hex (the gamut-mapped sRGB actually scored), not the
+  // raw oklch — the seed precedent: an out-of-gamut oklch is mapped before scoring, so
+  // the verdict and the reported color are the same one.
+  it('accepts canonical oklch operands like hex — same verdict as its projected hex', () => {
+    const fg = 'oklch(0 0 0)' // ≈ black
+    const bg = 'oklch(1 0 0)' // ≈ white
+    const fgHex = hexFromColorInput(fg)
+    const bgHex = hexFromColorInput(bg)
+    expect(fgHex).not.toBeNull()
+    const viaOklch = capture(['check', fg, bg])
+    const viaHex = capture(['check', fgHex as string, bgHex as string])
+    expect(viaOklch.code).toBe(OK)
+    expect(viaOklch.out).toBe(viaHex.out) // identical verdict AND echoed (projected) color
+  })
+
+  it('--pairs accepts oklch entries too — a clean pair clears, a low-contrast one gates', () => {
+    expect(
+      capture(['check', '--pairs', JSON.stringify([['oklch(0 0 0)', 'oklch(1 0 0)']])]).code,
+    ).toBe(OK)
+    expect(
+      capture(['check', '--pairs', JSON.stringify([['oklch(0.75 0 0)', 'oklch(1 0 0)']])]).code,
+    ).toBe(GATE) // a light-grey-on-white pairing still fails the gate
+  })
 })
 
 // why: with --seed, --pairs entries are token NAMES the agent copied from
@@ -446,6 +473,34 @@ describe('tonex check — token-name pairs (theme-aware --pairs)', () => {
     expect(r.err).toContain('did you mean')
     expect(r.err).toContain('"--foreground"') // the suggested token
   })
+
+  it('accepts bare md role names (the --to colors form) and never echoes the internal --color- id', () => {
+    const r = capture([
+      'check',
+      '--seed',
+      SEED,
+      '--pairs',
+      JSON.stringify([['on-surface', 'surface']]),
+      '--json',
+    ])
+    expect(r.code).toBe(OK)
+    const report = JSON.parse(r.out)
+    expect(report.results.some((x: { fg: string }) => x.fg === 'on-surface')).toBe(true)
+    expect(report.results.every((x: { fg: string }) => !x.fg.includes('--color-'))).toBe(true)
+  })
+
+  it('rejects the internal --color- id with a bare did-you-mean (exit 2)', () => {
+    const r = capture([
+      'check',
+      '--seed',
+      SEED,
+      '--pairs',
+      JSON.stringify([['--color-on-surface', '--color-surface']]),
+    ])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toContain('bare role name')
+    expect(r.err).toContain('on-surface')
+  })
 })
 
 // why: `adjust` surfaces core's adjustTokens — it shifts named md tokens by a ±HCT
@@ -454,12 +509,13 @@ describe('tonex check — token-name pairs (theme-aware --pairs)', () => {
 // --seed is USAGE, never GATE. Core owns the token-domain throw; the CLI maps it to 2.
 describe('tonex adjust', () => {
   const SEED = '#3b82f6'
-  const SHIFT = JSON.stringify([{ mode: 'light', token: '--color-primary', dTone: -5, dChroma: 3 }])
+  const SHIFT = JSON.stringify([{ mode: 'light', token: 'primary', dTone: -5, dChroma: 3 }])
 
-  it('shifts a named token and prints before/after at exit 0; --format hex gives hex output', () => {
+  it('shifts a bare-named token and prints before/after at exit 0; --format hex gives hex output', () => {
     const { code, out } = capture(['adjust', '--seed', SEED, '--shifts', SHIFT])
     expect(code).toBe(OK)
-    expect(out).toContain('--color-primary')
+    expect(out).toMatch(/\bprimary\b/)
+    expect(out).not.toContain('--color-') // output uses the bare public role, not the internal id
     expect(out).toMatch(/oklch\(.*\).*→.*oklch\(.*\)/) // default = oklch
     const hexOut = capture(['adjust', '--seed', SEED, '--shifts', SHIFT, '--format', 'hex'])
     expect(hexOut.out).toMatch(/#[0-9a-f]{6}.*→.*#[0-9a-f]{6}/i)
@@ -470,6 +526,7 @@ describe('tonex adjust', () => {
     expect(code).toBe(OK)
     const report = JSON.parse(out)
     expect(report.shifts).toHaveLength(1)
+    expect(report.shifts[0].token).toBe('primary') // bare public role, not --color-primary
     expect(report.shifts[0].before).toMatch(/^oklch\(/) // default = oklch
     expect(report.shifts[0].after).toMatch(/^oklch\(/)
     expect(report.shifts[0].achieved).toBeDefined()
@@ -481,14 +538,29 @@ describe('tonex adjust', () => {
   })
 
   it('an unknown token name is a usage error (exit 2), never a gate', () => {
-    const bad = JSON.stringify([{ mode: 'light', token: '--color-nope', dTone: -5 }])
+    const bad = JSON.stringify([{ mode: 'light', token: 'nope', dTone: -5 }])
     const r = capture(['adjust', '--seed', SEED, '--shifts', bad])
     expect(r.code).toBe(USAGE) // core's throw mapped to 2, not GATE
   })
 
-  it('a shadcn role pasted from `generate --to shadcn` points at the md token to use (exit 2)', () => {
+  it('the internal --color- id is rejected with a bare did-you-mean (exit 2)', () => {
+    // why: --color-* is the internal token id, not the public surface — adjust
+    // takes the bare role name an agent reads from `--to colors`.
+    const r = capture([
+      'adjust',
+      '--seed',
+      SEED,
+      '--shifts',
+      JSON.stringify([{ mode: 'light', token: '--color-primary', dTone: 5 }]),
+    ])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toContain('bare role name')
+    expect(r.err).toContain('primary')
+  })
+
+  it('a shadcn role pasted from `generate --to shadcn` points at the md role to use (exit 2)', () => {
     // why: an agent copies --primary out of shadcn output → adjust must name the
-    // bound md token (--color-primary) and still exit 2, not throw a bare unknown.
+    // bound md role (bare `primary`) and still exit 2, not throw a bare unknown.
     const r = capture([
       'adjust',
       '--seed',
@@ -498,14 +570,14 @@ describe('tonex adjust', () => {
     ])
     expect(r.code).toBe(USAGE)
     expect(r.err).toContain('--primary is a shadcn role')
-    expect(r.err).toContain('--color-primary') // the md token it binds to
+    expect(r.err).toContain('did you mean primary') // the bare md role it binds to
   })
 
   it('bad calls are usage errors (exit 2): missing seed, bad --shifts JSON, no axis', () => {
     expect(capture(['adjust', '--shifts', SHIFT]).code).toBe(USAGE) // missing --seed
     expect(capture(['adjust', '--seed', SEED]).code).toBe(USAGE) // missing --shifts
     expect(capture(['adjust', '--seed', SEED, '--shifts', 'not-json']).code).toBe(USAGE)
-    const noAxis = JSON.stringify([{ mode: 'light', token: '--color-primary' }])
+    const noAxis = JSON.stringify([{ mode: 'light', token: 'primary' }])
     expect(capture(['adjust', '--seed', SEED, '--shifts', noAxis]).code).toBe(USAGE)
   })
 })

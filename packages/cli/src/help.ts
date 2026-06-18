@@ -21,10 +21,11 @@ commands:
       one call instead of a manual search. Exit 1 if even --contrast 1
       can't reach it (the level is structurally unreachable for some pairs).
   check    <fg> <bg> [--aaa] [--large] [--json]
-      Verify one ad-hoc fg/bg hex pairing. Exit 0 iff it clears the level.
+      Verify one ad-hoc fg/bg pairing (each a 6-digit hex or canonical
+      oklch(L C H)). Exit 0 iff it clears the level.
   check    --pairs '<json>' [--aaa] [--large] [--json]
-      Batch-verify a JSON array of [fg, bg] hex pairs; exit 1 if any fail,
-      enumerating the offenders and their ratios.
+      Batch-verify a JSON array of [fg, bg] pairs (hex or oklch); exit 1 if
+      any fail, enumerating the offenders and their ratios.
   check    --seed <hex> --pairs '<json>' [--variant <name>] [--mode light|dark] [--aaa] [--json]
       Batch-verify [fg, bg] TOKEN-NAME pairs (the names from generate output)
       against the derived theme; exit 1 if a text pair fails, 2 if a name is
@@ -46,7 +47,7 @@ commands:
                json = Material Theme JSON (a www-shaped export, reused as-is for now).
   --binding    shadcn role→md-token routing preset (--to shadcn only).
                one of: default, clean, mixed, layered, seamless (default: default).
-  --soft-borders  soften --border/--input/--sidebar-border to --color-outline-variant
+  --soft-borders  soften --border/--input/--sidebar-border to the outline-variant tone
                for faint, shadcn-style borders (--to shadcn only).
   --extended   widen the roster from core (28 roles, the sufficient baseline) to
                core + extended (50). Reach for it only when core doesn't cover the

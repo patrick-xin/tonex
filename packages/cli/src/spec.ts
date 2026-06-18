@@ -123,7 +123,7 @@ const softBorders: FlagSpec = {
   name: '--soft-borders',
   type: 'boolean',
   description:
-    'soften the shadcn edge roles (--border/--input/--sidebar-border) to --color-outline-variant for faint, shadcn-style borders (only consumed by --to shadcn)',
+    'soften the shadcn edge roles (--border/--input/--sidebar-border) to the outline-variant tone for faint, shadcn-style borders (only consumed by --to shadcn)',
 }
 const tint: FlagSpec = {
   name: '--tint',
@@ -162,7 +162,7 @@ const pairs: FlagSpec = {
   name: '--pairs',
   type: 'json',
   description:
-    'JSON array of [fg, bg] pairs to batch-verify; hex pairs theme-free, or token names with --seed (resolved against the derived theme)',
+    'JSON array of [fg, bg] pairs to batch-verify; theme-free pairs are hex or canonical oklch(L C H), or token names with --seed (resolved against the derived theme)',
 }
 const findContrast: FlagSpec = {
   name: '--find-contrast',
@@ -284,8 +284,8 @@ export function describePayload() {
         forms: [
           'check --seed <hex> [--variant] [--contrast] [--mode] [--aaa] [--json]  — gate the derived theme (both modes unless --mode)',
           'check --seed <hex> [--variant] [--mode] [--aaa] --find-contrast [--json] — min --contrast that clears the level',
-          'check <fg> <bg> [--aaa] [--large] [--json]                    — one ad-hoc fg/bg HEX pairing (theme-free)',
-          'check --pairs <json> [--aaa] [--large] [--json]               — batch of [fg,bg] HEX pairs (theme-free)',
+          'check <fg> <bg> [--aaa] [--large] [--json]                    — one ad-hoc fg/bg pairing, hex or oklch (theme-free)',
+          'check --pairs <json> [--aaa] [--large] [--json]               — batch of [fg,bg] pairs, hex or oklch (theme-free)',
           'check --seed <hex> --pairs <json> [--variant] [--mode] [--aaa] [--json] — batch of [fg,bg] TOKEN-NAME pairs against the derived theme',
         ],
         flags: CHECK_FLAGS.map(flagInfo),

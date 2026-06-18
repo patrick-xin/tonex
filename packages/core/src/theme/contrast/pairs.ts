@@ -6,7 +6,8 @@ import {
 } from '../../chart/schema'
 import { type CustomColorEntry, slugifyCustomColorName } from '../custom-color/entry'
 import { nearestName } from '../edit-distance'
-import { MD_TOKEN_NAMES, type MdTokenName, SHADCN_ROLE_NAMES, type ShadcnRoleName } from '../schema'
+import { type MdTokenName, SHADCN_ROLE_NAMES, type ShadcnRoleName } from '../schema'
+import { bareMdName, canonicalMdName, COLOR_PREFIX, PUBLIC_TOKEN_NAMES } from '../token-vocab'
 
 // why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
 // spec semantics (`on-X` always pairs with `X`; `-foreground` always pairs
@@ -734,23 +735,24 @@ export type ResolveContrastPairsResult =
   | { ok: true; pairs: ContrastPair[] }
   | { ok: false; errors: string[] }
 
-// why: resolve agent-supplied BARE token names into scored ContrastPairs — the
-// `tonex check --seed --pairs '[["--muted-foreground","--card"],…]'` path. The
-// agent copies token names straight out of `generate` output and asks "is this
-// pairing legible?" without re-pasting resolved hex. Sibling of
-// `customColorContrastPairs`: both build ContrastPair[] from runtime input the
-// closed CONTRAST_PAIRS tuple can't enumerate.
+// why: resolve agent-supplied PUBLIC token names into scored ContrastPairs — the
+// `tonex check --seed --pairs '[["muted-foreground","card"],…]'` path. The agent
+// copies token names straight out of `generate` output and asks "is this pairing
+// legible?" without re-pasting resolved hex. Sibling of `customColorContrastPairs`:
+// both build ContrastPair[] from runtime input the closed CONTRAST_PAIRS tuple
+// can't enumerate.
 //
-// Layer is INFERRED from the name (the four token tuples are disjoint by
-// construction): `--color-chart-N`→md-chart, `--chart-N`→shadcn-chart,
-// `--color-*`→md, any other `--*`→shadcn — exactly the layer `layerMapFor`
-// reads, so a resolved pair indexes the same merged TokenMap `evaluatePair`
-// will. A pair whose fg/bg are different families (md vs shadcn) is rejected:
-// the scorer reads both sides from ONE map, so cross-family is unscoreable.
-// Unknown names come back as a did-you-mean error rather than letting
-// evaluatePair throw deep in the scorer. Intent defaults to text (the strict
-// 4.5 legibility bar — the dominant agent question); the per-level threshold is
-// re-applied downstream by applyLevel, so this only sets the baked baseline.
+// The PUBLIC vocabulary is the form an agent reads: BARE md roles (`on-surface`,
+// the `--to colors` key) and shadcn `--slot` names (`--foreground`, the
+// `--to shadcn` key). The internal `--color-` id is NOT public — it is rejected
+// with a bare did-you-mean. The `--` prefix is the family discriminator: no dash
+// → md role (canonicalized through token-vocab), `--` → shadcn slot. A bare md
+// role resolves to its CANONICAL `--color-` id so the pair indexes the same
+// merged TokenMap `evaluatePair` reads. A cross-family pair (md fg + shadcn bg)
+// is rejected: the scorer reads both sides from ONE map. Intent defaults to text
+// (the strict 4.5 legibility bar — the dominant agent question); the per-level
+// threshold is re-applied downstream by applyLevel, so this only sets the baked
+// baseline.
 export function resolveContrastPairs(
   pairs: readonly (readonly [string, string])[],
   { intent = 'text' }: { intent?: ContrastPair['intent'] } = {},
@@ -759,55 +761,78 @@ export function resolveContrastPairs(
   const resolved: ContrastPair[] = []
   const errors: string[] = []
   for (const [fg, bg] of pairs) {
-    const fgFamily = familyOf(fg)
-    const bgFamily = familyOf(bg)
-    if (fgFamily === undefined) {
-      errors.push(unknownTokenError(fg))
+    const cf = classify(fg)
+    if (!cf.ok) {
+      errors.push(cf.error)
       continue
     }
-    if (bgFamily === undefined) {
-      errors.push(unknownTokenError(bg))
+    const cb = classify(bg)
+    if (!cb.ok) {
+      errors.push(cb.error)
       continue
     }
-    if (fgFamily !== bgFamily) {
+    if (cf.family !== cb.family) {
       errors.push(
-        `"${fg}" (${fgFamily}) and "${bg}" (${bgFamily}) are in different layers — a pair must be within one layer`,
+        `"${fg}" (${cf.family}) and "${bg}" (${cb.family}) are in different layers — a pair must be within one layer`,
       )
       continue
     }
-    const chart = isChartToken(fg) || isChartToken(bg)
+    const chart = isChartToken(cf.canonical) || isChartToken(cb.canonical)
     const layer: ContrastPair['layer'] =
-      fgFamily === 'md' ? (chart ? 'md-chart' : 'md') : chart ? 'shadcn-chart' : 'shadcn'
-    resolved.push({ fg, bg, layer, intent, threshold })
+      cf.family === 'md' ? (chart ? 'md-chart' : 'md') : chart ? 'shadcn-chart' : 'shadcn'
+    resolved.push({ fg: cf.canonical, bg: cb.canonical, layer, intent, threshold })
   }
   return errors.length > 0 ? { ok: false, errors } : { ok: true, pairs: resolved }
 }
 
-// why: the merged maps `buildReport` builds per layer — md and md-chart share
-// the md family (md-chart = md ∪ chart), shadcn and shadcn-chart the shadcn
-// family. A pair must stay within one family because the scorer reads fg and bg
-// from a single map. undefined = not a known token in any layer.
-const MD_NAMES = new Set<string>([...MD_TOKEN_NAMES, ...MD_CHART_TOKEN_NAMES])
+// why: shadcn slot names are the public form already (no `--color-` prefix), so
+// the SHADCN set keys on them verbatim. CHART detection runs on the CANONICAL
+// name (`--color-chart-N` / `--chart-N`) classify resolves to, so it indexes the
+// same chart layer the scorer reads.
 const SHADCN_NAMES = new Set<string>([...SHADCN_ROLE_NAMES, ...SHADCN_CHART_TOKEN_NAMES])
 const CHART_NAMES = new Set<string>([...MD_CHART_TOKEN_NAMES, ...SHADCN_CHART_TOKEN_NAMES])
-const ALL_NAMES: readonly string[] = [...MD_NAMES, ...SHADCN_NAMES]
 
-function familyOf(name: string): 'md' | 'shadcn' | undefined {
-  if (MD_NAMES.has(name)) return 'md'
-  if (SHADCN_NAMES.has(name)) return 'shadcn'
-  return undefined
+type Classified =
+  | { ok: true; canonical: string; family: 'md' | 'shadcn' }
+  | { ok: false; error: string }
+
+// why: map one public name to its family + canonical id, or an error. The `--`
+// prefix discriminates: `--color-*` is the internal id (rejected, pointed at the
+// bare role), any other `--*` is a shadcn slot (verbatim), and a bare name is an
+// md role (canonicalized). This is exactly "type the name from whichever output
+// you read" — bare from `--to colors`, `--slot` from `--to shadcn`.
+function classify(name: string): Classified {
+  if (name.startsWith(COLOR_PREFIX)) {
+    const bare = bareMdName(name)
+    return canonicalMdName(bare) !== undefined
+      ? {
+          ok: false,
+          error: `"${name}" uses the internal --color- id — use the bare role name "${bare}"`,
+        }
+      : { ok: false, error: unknownTokenError(name) }
+  }
+  if (name.startsWith('--')) {
+    return SHADCN_NAMES.has(name)
+      ? { ok: true, canonical: name, family: 'shadcn' }
+      : { ok: false, error: unknownTokenError(name) }
+  }
+  const canonical = canonicalMdName(name)
+  return canonical !== undefined
+    ? { ok: true, canonical, family: 'md' }
+    : { ok: false, error: unknownTokenError(name) }
 }
 
 function isChartToken(name: string): boolean {
   return CHART_NAMES.has(name)
 }
 
-// why: a did-you-mean over core's whole token vocabulary — core owns the names,
-// so the nearest-match suggestion is a domain query, not CLI presentation (the
-// CLI just prints this). `nearestName` ranges over BOTH namespaces here because
-// `--pairs` accepts md AND shadcn tokens (unlike adjust, which is md-only).
+// why: a did-you-mean over the PUBLIC token vocabulary — core owns the names, so
+// the nearest-match suggestion is a domain query, not CLI presentation (the CLI
+// just prints this). `nearestName` ranges over both public namespaces (bare md
+// roles ∪ shadcn slots) because `--pairs` accepts both — never the internal
+// `--color-` id, which would re-leak the prefix in the error.
 function unknownTokenError(token: string): string {
-  const best = nearestName(token, ALL_NAMES)
+  const best = nearestName(token, PUBLIC_TOKEN_NAMES)
   return best
     ? `"${token}" is not a known token (did you mean "${best}"?)`
     : `"${token}" is not a known token`

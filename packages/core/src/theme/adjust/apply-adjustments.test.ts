@@ -57,7 +57,7 @@ describe('applyAdjustments', () => {
     // of the applied `after`. --color-primary is non-treated so the pin survives
     // derive verbatim (the round-trip assertion needs a treatment-immune token).
     const results = adjustTokens(DEFAULT_INPUTS, [
-      { mode: 'light', token: '--color-primary', dTone: 6, dChroma: 0 },
+      { mode: 'light', token: 'primary', dTone: 6, dChroma: 0 },
     ])
     const next = applyAdjustments(DEFAULT_INPUTS, results)
     const derived = deriveTheme(next)

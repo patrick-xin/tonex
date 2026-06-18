@@ -7,7 +7,7 @@
 // domain throws (unknown token / invalid mode / no-axis request) and maps them to
 // exit 2; it does NOT re-validate the token domain (surface, don't reimplement).
 import { argbFromHex, hexString, oklchString } from '@tonex/color-utils'
-import { type ColorFormat } from '@tonex/core'
+import { bareMdName, type ColorFormat } from '@tonex/core'
 import { adjustTokens, type AdjustRequest, type AdjustResult } from '@tonex/core/adjust'
 import { flagValue, hasFlag, parseArgs, type ParsedArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
@@ -139,7 +139,8 @@ function line(r: AdjustResult, format: ColorFormat): string {
   const encode = format === 'oklch' ? oklchString : hexString
   const before = encode(argbFromHex(r.before))
   const after = encode(argbFromHex(r.after))
-  return `${r.mode.padEnd(5)} ${r.token}  ${before} → ${after}   req ${delta(r.requested)}   got ${delta(r.achieved)}`
+  // bare role name — the public surface the agent typed, not the internal --color- id
+  return `${r.mode.padEnd(5)} ${bareMdName(r.token)}  ${before} → ${after}   req ${delta(r.requested)}   got ${delta(r.achieved)}`
 }
 
 function delta(d: { dTone: number; dChroma: number }): string {
@@ -158,7 +159,7 @@ function leanRow(r: AdjustResult, format: ColorFormat) {
   const encode = format === 'oklch' ? oklchString : hexString
   return {
     mode: r.mode,
-    token: r.token,
+    token: bareMdName(r.token),
     before: encode(argbFromHex(r.before)),
     after: encode(argbFromHex(r.after)),
     requested: r.requested,

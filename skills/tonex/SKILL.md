@@ -66,17 +66,16 @@ The defaults ship a complete, contrast-safe theme — but they *are* defaults (`
 
 Read those two REFERENCE sections *at this moment* — this is the one point in the workflow they pay off, and it's how you offer the live menu instead of reciting a list that rots. Each dial is a one-word change to the recipe: offer to re-generate with any, then re-gate (step 2) and re-deliver. The full menu with every flag and default is `tonex describe`.
 
-## Token naming differs by surface — the #1 trap
+## Token naming — use the name from the output you read
 
-The same underlying token has a different name per command:
+`adjust` and `check --pairs` take the **same names `generate` printed** — no renaming:
 
 | where | name for `primary` |
 |---|---|
-| `colors.json` keys | `primary` |
-| `--to shadcn` output | `--primary` |
-| `adjust` / `check --pairs` | `--color-primary` |
+| `--to colors` keys · `adjust` · `check --pairs` (md) | `primary` |
+| `--to shadcn` output · `check --pairs` (shadcn) | `--primary` |
 
-Drive `adjust` / `--pairs` from the `--color-*` form. shadcn output names do not round-trip back to `--color-*`. Full map in [REFERENCE.md](REFERENCE.md#token-naming-across-surfaces).
+md roles are bare (`on-surface`); shadcn slots keep the `--` (`--foreground`). The `--` prefix is the tell: bare = md role, `--` = shadcn slot. `adjust` is md-only (bare roles); `check --pairs` takes either, but not mixed in one call. The internal `--color-*` id is **not** an input — tonex rejects it and points you at the bare name. Full map in [REFERENCE.md](REFERENCE.md#token-naming-across-surfaces).
 
 ## The invariant
 
