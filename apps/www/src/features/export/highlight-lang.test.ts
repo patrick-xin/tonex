@@ -16,6 +16,6 @@ describe('tabToHighlightLang', () => {
   // the load-bearing case: Design.md's body is a `colors:` map, so it reads as
   // YAML, not Markdown.
   it('maps Design.md to yaml', () => {
-    expect(tabToHighlightLang('Design.md')).toBe('yaml')
+    expect(tabToHighlightLang('DESIGN.md')).toBe('yaml')
   })
 })

@@ -11,7 +11,7 @@
 // header-free. The switch is exhaustive, so a new tab is a compile error until
 // it declares a route — no silent fallthrough to the shadcn default.
 
-export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart' | 'Design.md'
+export type ExportTab = 'Tailwind' | 'CSS' | 'shadcn' | 'JSON' | 'Dart' | 'DESIGN.md'
 
 export type ExportRoute =
   | { exporter: 'designMd'; ext: 'md'; header: false }
@@ -22,7 +22,7 @@ export type ExportRoute =
 
 export function resolveExportRoute(tab: ExportTab): ExportRoute {
   switch (tab) {
-    case 'Design.md':
+    case 'DESIGN.md':
       return { exporter: 'designMd', ext: 'md', header: false }
     case 'JSON':
       return { exporter: 'json', ext: 'json', header: false }

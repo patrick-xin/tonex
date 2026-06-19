@@ -28,7 +28,7 @@ describe('resolveExportRoute', () => {
     expect(resolveExportRoute('CSS')).toEqual({ exporter: 'nativeCss', ext: 'css', header: true })
     expect(resolveExportRoute('JSON')).toEqual({ exporter: 'json', ext: 'json', header: false })
     expect(resolveExportRoute('Dart')).toEqual({ exporter: 'dart', ext: 'dart', header: false })
-    expect(resolveExportRoute('Design.md')).toEqual({
+    expect(resolveExportRoute('DESIGN.md')).toEqual({
       exporter: 'designMd',
       ext: 'md',
       header: false,
@@ -40,7 +40,7 @@ describe('resolveExportRoute', () => {
     // parse and a DESIGN.md `colors:` paste. The data formats must stay
     // header-free — flip one and the user's paste silently corrupts.
     const cssFamily: ExportTab[] = ['Tailwind', 'CSS', 'shadcn']
-    const dataFormats: ExportTab[] = ['JSON', 'Dart', 'Design.md']
+    const dataFormats: ExportTab[] = ['JSON', 'Dart', 'DESIGN.md']
     for (const tab of cssFamily) expect(resolveExportRoute(tab).header).toBe(true)
     for (const tab of dataFormats) expect(resolveExportRoute(tab).header).toBe(false)
   })

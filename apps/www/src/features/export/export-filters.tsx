@@ -65,7 +65,7 @@ const INCLUDES_BY_TAB: Partial<Record<ExportTab, readonly IncludeKey[]>> = {
   Dart: ['includeChart', 'includePalette', 'includeContrastVariants'],
   // why: DESIGN.md is a flat hex color block — extended roles is its only
   // meaningful include (mode is picked separately, in the dialog header).
-  'Design.md': ['includeExtended'],
+  'DESIGN.md': ['includeExtended'],
 }
 
 const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
@@ -79,7 +79,7 @@ const FORMAT_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>([
 // so its tab picks a single mode where the CSS tabs co-emit both. No other tab
 // needs the chooser; Design.md is also absent from FORMAT_TABS (it is hex-only,
 // so the oklch/hex chooser would be a no-op).
-const MODE_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>(['Design.md'])
+const MODE_TABS: ReadonlySet<ExportTab> = new Set<ExportTab>(['DESIGN.md'])
 
 function isOn(meta: OptionMeta, options: ExportOptions): boolean {
   return meta.defaultOn ? options[meta.key] !== false : options[meta.key] === true

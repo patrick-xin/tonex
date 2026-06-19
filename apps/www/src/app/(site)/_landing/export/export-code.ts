@@ -213,7 +213,7 @@ class MaterialTheme {
       scrim: Color(0xff000000),
 }
 `,
-  'Design.md': `colors:
+  'DESIGN.md': `colors:
   primary: "#a890e9"
   on-primary: "#270762"
   primary-container: "#6750a4"
