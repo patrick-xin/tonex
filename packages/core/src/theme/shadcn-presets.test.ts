@@ -4,22 +4,22 @@ import { MODES } from './mode'
 import { DEFAULT_INPUTS, type PortableTheme } from './schema'
 import { findActivePreset, SHADCN_PRESETS, type ShadcnPreset } from './shadcn-presets'
 
-// why: the live preset set during the exploration pass — `default` plus three
-// tuner imports (grove/lagoon/breeze) and five designed presets
-// (noir/paper/enterprise/sunset/sage). The six original issue-#36 presets are
-// commented out in shadcn-presets.ts; restore a name here if its block is
-// uncommented. Member set (not iteration order) is what R1 asserts; sorting on
-// both sides keeps the test resilient to key-order reshuffles.
+// why: the live preset set — `default` plus the designed presets shipped in
+// shadcn-presets.ts. Keep this list in lockstep with the declared keys: adding,
+// renaming, or removing a preset there must be mirrored here or R1 fails.
+// Member set (not iteration order) is what R1 asserts; sorting on both sides
+// keeps the test resilient to key-order reshuffles.
 const PRESET_NAMES = [
   'default',
-  'grove',
+  'stone',
   'lagoon',
   'breeze',
-  'noir',
   'paper',
   'enterprise',
   'sunset',
   'sage',
+  'fire',
+  'electron',
 ] as const
 type PresetName = (typeof PRESET_NAMES)[number]
 

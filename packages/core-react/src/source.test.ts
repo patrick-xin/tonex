@@ -1031,7 +1031,7 @@ describe('ambient soft-border survives a switch (sticky-soft)', () => {
   })
 
   it('does not force hard — a soft-baking preset stays soft from a hard start', () => {
-    useSource.getState().actions.setShadcnPreset('noir')
+    useSource.getState().actions.setShadcnPreset('sage')
     expect(edgesAreSoft()).toBe(true)
   })
 })
@@ -1094,7 +1094,7 @@ describe('seedTouched signal', () => {
   })
 
   it('applying a preset leaves the signal false', () => {
-    useSource.getState().actions.setShadcnPreset('grove')
+    useSource.getState().actions.setShadcnPreset('stone')
     expect(useSource.getState().seedTouched).toBe(false)
   })
 })
@@ -1114,28 +1114,28 @@ describe('setShadcnPreset seed supersession', () => {
   })
 
   it('replaces an untouched boot-default seed with the preset curated seed', () => {
-    useSource.getState().actions.setShadcnPreset('grove')
-    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.grove.seed)
+    useSource.getState().actions.setShadcnPreset('stone')
+    expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.stone.seed)
   })
 
   it('keeps a user-chosen seed and drops the curated one', () => {
     useSource.getState().actions.setSeedHex('#ff00aa')
     const chosen = useSource.getState().seed
-    useSource.getState().actions.setShadcnPreset('grove')
+    useSource.getState().actions.setShadcnPreset('stone')
     expect(useSource.getState().seed).toEqual(chosen)
   })
 
   it('keeps a locked seed even when untouched', () => {
     const locked = useSource.getState().seed
     useSource.setState({ seedHexLock: true, _hydrated: true })
-    useSource.getState().actions.setShadcnPreset('grove')
+    useSource.getState().actions.setShadcnPreset('stone')
     expect(useSource.getState().seed).toEqual(locked)
   })
 
   // why: ADR-0031 #3 / story 12 — a curated seed must not count as a user
   // choice, so a second preset still supplies its own curated seed.
   it('a second preset supersedes the first preset curated seed', () => {
-    useSource.getState().actions.setShadcnPreset('grove')
+    useSource.getState().actions.setShadcnPreset('stone')
     useSource.getState().actions.setShadcnPreset('lagoon')
     expect(useSource.getState().seed).toEqual(SHADCN_PRESETS.lagoon.seed)
   })
