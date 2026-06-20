@@ -58,6 +58,23 @@ export function formatLayer(theme: DerivedTheme, layer: 'md' | 'shadcn'): string
   ].join('\n\n')
 }
 
+// why: the literal-seed brand pair (ADR-0032) lives in the shadcn layer keyed in
+// shadcn's bare convention (`--brand` / `--brand-foreground`). The md-family
+// exporters (Tailwind css.ts, native-css.ts, design-md.ts) key tokens in the
+// `--color-*` namespace and strip/rename from there — `bareName` → `--brand`,
+// `designKey` → `brand`, `emitName` leaves it un-prefixed (not an MD3 system
+// token). Re-key the pair into that namespace once here so each md sink treats it
+// exactly like any other md token. The values are layer-invariant (the same seed
+// + computed AA on-color), so reading them off `shadcn.brand` is correct. Emission
+// stays opt-in via ExportOptions.includeBrand; callers add nothing when it's off.
+export function mdBrandPair(theme: DerivedTheme): TokenMap {
+  const out: TokenMap = {}
+  for (const [name, argb] of Object.entries(theme.shadcn.brand)) {
+    out[`--color-${name.slice('--'.length)}`] = argb
+  }
+  return out
+}
+
 // why: emission order must match the baked globals.css (drift-guard
 // constraint). deriveTheme's `light` field iterates MD_TOKEN_NAMES in
 // family-grouped order while skipping extended; merging extended back in via

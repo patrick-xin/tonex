@@ -176,3 +176,28 @@ describe('exportNativeCss — provenance recipe', () => {
     )
   })
 })
+
+describe('exportNativeCss with includeBrand', () => {
+  // why: brand parity (ADR-0032). Off by default (drift-guard). On, the literal-
+  // seed brand pair emits flat in :root — mode-invariant, so NO light-dark()
+  // wrapper — and keeps the --color-* namespace (brand is not an MD3 system
+  // token, same rule as chart/custom slugs that never become --md-sys-color-*).
+  const theme = deriveTheme(DEFAULT_INPUTS)
+
+  it('omits --color-brand by default', () => {
+    expect(exportNativeCss({ default: theme })).not.toContain('--color-brand')
+  })
+
+  it('emits the brand pair flat in :root, un-prefixed and mode-invariant', () => {
+    const out = exportNativeCss({ default: theme }, { includeBrand: true })
+    const root = parseBlock(out, ':root')
+    expect(root['--color-brand']).toBe(oklchString(theme.shadcn.brand['--brand']))
+    expect(root['--color-brand-foreground']).toBe(
+      oklchString(theme.shadcn.brand['--brand-foreground']),
+    )
+    // mode-invariant: a flat value, never a light-dark() pair
+    expect(root['--color-brand']).not.toContain('light-dark(')
+    // not an MD3 system token
+    expect(out).not.toContain('--md-sys-color-brand')
+  })
+})

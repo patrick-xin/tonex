@@ -3,7 +3,7 @@ import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { SHADCN_ROLE_NAMES } from '../schema'
 import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
-import { mergeMdEmission } from './format'
+import { mdBrandPair, mergeMdEmission } from './format'
 
 // why: paste-ready CSS for downstream consumers. Two shapes by audience:
 //  - 'md': full Tailwind v4 globals.css (boilerplate header + @theme inline +
@@ -207,6 +207,16 @@ function buildMdRuleTokens(
   if (opts.includePalette && mode === 'light' && tier === 'default') {
     Object.assign(merged, theme.md.palette)
   }
+  // why: brand (ADR-0032) is mode/contrast-invariant, so — like palette — it
+  // declares once on the default-tier :root and is inherited everywhere. Merge
+  // only keys the layer doesn't already carry, so a user's custom color named
+  // "brand" (already emitting --color-brand via the custom path) wins over the
+  // injected fill while the toggle still contributes --color-brand-foreground.
+  if (opts.includeBrand && mode === 'light' && tier === 'default') {
+    for (const [name, argb] of Object.entries(mdBrandPair(theme))) {
+      if (!(name in merged)) merged[name] = argb
+    }
+  }
   return merged
 }
 
@@ -242,6 +252,10 @@ function mdUtilityNames(theme: DerivedTheme, opts: ResolvedOptions): string[] {
   if (opts.includeExtended) for (const k of Object.keys(theme.md.lightExtended)) set.add(k)
   if (opts.includeChart) for (const k of Object.keys(theme.md.lightChart)) set.add(k)
   if (opts.includePalette) for (const k of Object.keys(theme.md.palette)) set.add(k)
+  // why: register the brand utilities so `bg-brand` / `text-brand-foreground`
+  // resolve. The Set dedupes against a custom color already named "brand". The
+  // :root value flows in via buildMdRuleTokens (the bridge reads var(--brand)).
+  if (opts.includeBrand) for (const k of Object.keys(mdBrandPair(theme))) set.add(k)
   return Array.from(set)
 }
 

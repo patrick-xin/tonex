@@ -43,18 +43,22 @@ export function SettingsFields({
           <Separator className="opacity-50" />
         </>
       )}
+      {/* why: brand is one global switch (ADR-0032), not a per-layer one. It rides
+          both popovers: on shadcn it surfaces the brand button + audit rows + export
+          pair; on md the literal-seed pair rides the Tailwind/CSS/Design.md exports
+          (the md "where's my seed?" answer). The description names the common effect. */}
+      <Field name="brand-color" className="gap-1">
+        <FieldLabel className="items-center justify-between w-full">
+          Brand color
+          <Switch checked={brandEnabled} onCheckedChange={setBrandEnabled} />
+        </FieldLabel>
+        <FieldDescription className="max-w-5/6">
+          Export brand color pair (current seed)
+        </FieldDescription>
+      </Field>
+      <Separator className="opacity-50" />
       {layer === 'shadcn' && (
         <>
-          <Field name="brand-color" className="gap-1">
-            <FieldLabel className="items-center justify-between w-full">
-              Brand color
-              <Switch checked={brandEnabled} onCheckedChange={setBrandEnabled} />
-            </FieldLabel>
-            <FieldDescription className="max-w-5/6">
-              Export brand color pair (current seed)
-            </FieldDescription>
-          </Field>
-          <Separator className="opacity-50" />
           <SoftBordersToggle />
           <Separator className="opacity-50" />
         </>
