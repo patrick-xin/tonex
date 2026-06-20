@@ -50,12 +50,15 @@ export interface ExportOptions {
   includeExtended?: boolean
   includePalette?: boolean
   includeChart?: boolean
-  // why: opt-in stable brand pair (shadcn layer only). When true, the shadcn
-  // exporter emits `--brand` / `--brand-foreground` — the literal seed plus a
-  // computed AA on-color, mode-invariant — and registers their `--color-brand`
-  // utilities. Off by default so DEFAULT_INPUTS emits nothing new and the baked
-  // globals.css drift-guard baseline stays byte-identical. Only the shadcn path
-  // reads it; md/CSS/JSON/Dart ignore it (md users get the full custom set).
+  // why: opt-in stable brand pair (ADR-0032). When true, the exporter emits the
+  // literal-seed brand fill plus a computed AA on-color (mode-invariant) and
+  // registers its `--color-brand` utilities. Read by shadcn AND the md-family CSS
+  // sinks — Tailwind (exportCss md), native CSS (exportNativeCss), and Design.md
+  // (exportDesignMd) — so the "where's my seed?" answer is exportable in both
+  // layers; the md sinks key it `--color-brand` (their namespace) via mdBrandPair.
+  // JSON / Dart still ignore it (data formats; their consumers re-add the seed as
+  // a custom color). Off by default so DEFAULT_INPUTS emits nothing new and the
+  // baked globals.css drift-guard baseline stays byte-identical.
   includeBrand?: boolean
   includeContrastVariants?: boolean
   // why: shadcn bootstrap toggle. When true, the shadcn exporter prepends

@@ -4,6 +4,7 @@ import type { Mode } from '../mode'
 import { hexString } from '../oklch'
 import { MD_CORE_TOKEN_NAMES, MD_TOKEN_NAMES } from '../schema'
 import type { ContrastBundle, ExportOptions } from './bundle'
+import { mdBrandPair } from './format'
 
 // why: emits one mode's color surface as a DESIGN.md (@google/design.md)
 // `colors:` YAML block — the fragment a user pastes into their own DESIGN.md
@@ -52,6 +53,7 @@ export function buildDesignMdColors(
   const theme = bundle.default
   const includeExtended = options.includeExtended ?? false
   const includeChart = options.includeChart ?? false
+  const includeBrand = options.includeBrand ?? false
 
   const core = mode === 'light' ? theme.md.light : theme.md.dark
   const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
@@ -70,6 +72,18 @@ export function buildDesignMdColors(
   for (const name of Object.keys(core)) {
     if (MD_TOKEN_SET.has(name)) continue
     out[designKey(name)] = hexString(core[name] as number)
+  }
+  // why: the literal-seed brand pair (ADR-0032), opt-in — `brand` /
+  // `brand-foreground` ride inline as flat kebab keys, same shape as a custom
+  // slug. Trails the user's customs; mode-invariant, so the single chosen mode is
+  // exact. Skip a key a custom color already owns (a custom named "brand" wins),
+  // mirroring the CSS sinks' dedup.
+  if (includeBrand) {
+    for (const [name, argb] of Object.entries(mdBrandPair(theme))) {
+      const key = designKey(name)
+      if (key in out) continue
+      out[key] = hexString(argb)
+    }
   }
   // why: chart trails, opt-in — same gate and tail position as json.ts. Chart
   // is its own mode-aware family on md, iterated explicitly (ADR-0027).

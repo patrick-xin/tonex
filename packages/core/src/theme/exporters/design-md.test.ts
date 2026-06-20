@@ -152,3 +152,37 @@ describe('exportDesignMd — provenance recipe', () => {
     expect(out.startsWith(`# ${recipe}\ncolors:`)).toBe(true)
   })
 })
+
+describe('buildDesignMdColors with includeBrand', () => {
+  // why: brand parity (ADR-0032). The flat colors map gains brand/brand-foreground
+  // (kebab, --color- stripped) when the brand switch is on, riding inline like a
+  // custom slug. Off by default (drift-guard). The pair is the literal seed plus
+  // its AA-safe on-color, mode-invariant — design.md is single-mode + hex.
+  const bundle: ContrastBundle = { default: deriveTheme(DEFAULT_INPUTS) }
+
+  it('omits brand keys by default', () => {
+    const out = buildDesignMdColors(bundle, 'light', {})
+    expect(out).not.toHaveProperty('brand')
+    expect(out).not.toHaveProperty('brand-foreground')
+  })
+
+  it('emits brand + brand-foreground as hex when includeBrand', () => {
+    const out = buildDesignMdColors(bundle, 'light', { includeBrand: true })
+    expect(out.brand).toMatch(HEX)
+    expect(out['brand-foreground']).toMatch(HEX)
+  })
+
+  it('keeps a custom color named "brand" (custom wins; the foreground still rides)', () => {
+    const withCustomBrand: PortableTheme = {
+      ...DEFAULT_INPUTS,
+      customColors: [
+        { id: 'c1', name: 'Brand', hex: '#0a7e8c', blend: false, shadcnSource: 'color' },
+      ],
+    }
+    const customBundle: ContrastBundle = { default: deriveTheme(withCustomBrand) }
+    const withToggle = buildDesignMdColors(customBundle, 'light', { includeBrand: true })
+    const withoutToggle = buildDesignMdColors(customBundle, 'light', {})
+    expect(withToggle.brand).toBe(withoutToggle.brand)
+    expect(withToggle['brand-foreground']).toMatch(HEX)
+  })
+})

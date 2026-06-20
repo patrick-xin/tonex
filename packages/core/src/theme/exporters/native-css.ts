@@ -3,7 +3,7 @@ import type { Mode } from '../mode'
 import { hexString, oklchString } from '../oklch'
 import { MD_TOKEN_NAMES } from '../schema'
 import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
-import { mergeMdEmission } from './format'
+import { mdBrandPair, mergeMdEmission } from './format'
 
 // why: framework-agnostic Material Design CSS — the artifact a non-Tailwind
 // audience pastes. Distinct from exporters/css.ts (`md` layer) on three axes:
@@ -51,6 +51,7 @@ interface ResolvedOptions {
   mdSysPrefix: boolean
   includeExtended: boolean
   includeChart: boolean
+  includeBrand: boolean
 }
 
 // why: native-CSS defaults diverge from css.ts — extended is ON because
@@ -62,7 +63,28 @@ function resolveOptions(options: ExportOptions): ResolvedOptions {
     mdSysPrefix: options.mdSysPrefix ?? true,
     includeExtended: options.includeExtended ?? true,
     includeChart: options.includeChart ?? false,
+    includeBrand: options.includeBrand ?? false,
   }
+}
+
+// why: the literal-seed brand pair (ADR-0032), opt-in. Emitted FLAT (not a
+// light-dark() pair) because it is mode-invariant, and kept in the --color-*
+// namespace because brand is not an MD3 system token (emitName never renames it,
+// same as chart/custom slugs). Deduped against the tokens already in :root so a
+// custom color named "brand" keeps its value (custom wins) while the toggle still
+// contributes --color-brand-foreground.
+function brandDeclarations(
+  theme: DerivedTheme,
+  opts: ResolvedOptions,
+  present: ReadonlySet<string>,
+): string[] {
+  if (!opts.includeBrand) return []
+  const out: string[] = []
+  for (const [name, argb] of Object.entries(mdBrandPair(theme))) {
+    if (present.has(name)) continue
+    out.push(`  ${name}: ${projectArgb(argb, opts.colorFormat)};`)
+  }
+  return out
 }
 
 // why: the mode-aware token set for one tier — system core (+ extended) merged
@@ -98,7 +120,18 @@ export function exportNativeCss(bundle: ContrastBundle, options: ExportOptions =
   const banner = options.provenance ? `/* ${options.provenance} */\n\n` : ''
   const blocks: string[] = []
 
-  const rootLines = ['  color-scheme: light dark;', ...tierDeclarations(bundle.default, opts)]
+  // why: the emitted :root names (after the md-sys rename) — the dedup set the
+  // opt-in brand pair checks against, so a custom "brand" isn't declared twice.
+  const present = new Set(
+    Object.keys(modeTokens(bundle.default, 'light', opts)).map((n) =>
+      emitName(n, opts.mdSysPrefix),
+    ),
+  )
+  const rootLines = [
+    '  color-scheme: light dark;',
+    ...tierDeclarations(bundle.default, opts),
+    ...brandDeclarations(bundle.default, opts, present),
+  ]
   blocks.push(`:root {\n${rootLines.join('\n')}\n}`)
 
   // why: switch `color-scheme` for the two dominant toggle conventions — a

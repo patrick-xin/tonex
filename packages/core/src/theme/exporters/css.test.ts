@@ -580,3 +580,38 @@ describe('exportCss — provenance recipe', () => {
     expect(exportCss(bundle, 'md', {}).startsWith('/*')).toBe(false)
   })
 })
+
+describe('exportCss(bundle, "md") with includeBrand', () => {
+  // why: brand parity with shadcn (ADR-0032) — the md-family exports surface the
+  // literal-seed brand pair too, so "where's my seed?" has an exportable answer in
+  // the md layer, not just shadcn. Off by default (keeps the drift-guard baseline
+  // byte-identical). On, the pair rides md's namespace convention: BARE
+  // --brand/--brand-foreground in :root, bridged to --color-brand utilities in
+  // @theme inline. Mode-invariant, so declared once in :root and inherited.
+  const theme = deriveTheme(DEFAULT_INPUTS)
+
+  it('omits --brand entirely by default', () => {
+    const out = exportCss({ default: theme }, 'md')
+    expect(out).not.toContain('--brand:')
+    expect(out).not.toContain('--color-brand:')
+  })
+
+  it('emits the brand pair in :root and registers --color-brand utilities', () => {
+    const out = exportCss({ default: theme }, 'md', { includeBrand: true })
+    const root = parseBlock(out, ':root')
+    const brand = projectLayer(theme.shadcn.brand)
+    expect(root['--brand']).toBe(brand['--brand'])
+    expect(root['--brand-foreground']).toBe(brand['--brand-foreground'])
+    expect(out).toContain('--color-brand: var(--brand);')
+    expect(out).toContain('--color-brand-foreground: var(--brand-foreground);')
+  })
+
+  it('does not double-register when a custom color is already named "brand"', () => {
+    // the custom "Brand" already emits --color-brand via the custom path; the
+    // injected fill must defer to it (custom wins), while the toggle still adds
+    // the foreground the custom color doesn't carry.
+    const out = exportCss({ default: deriveTheme(withCustomColor) }, 'md', { includeBrand: true })
+    expect(out.match(/--color-brand: var\(--brand\);/g) ?? []).toHaveLength(1)
+    expect(out).toContain('--color-brand-foreground: var(--brand-foreground);')
+  })
+})
