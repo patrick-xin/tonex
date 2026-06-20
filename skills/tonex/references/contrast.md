@@ -36,4 +36,4 @@ Nudge a single token without re-seeding the whole theme:
 tonex adjust --seed '#3b82f6' --shifts '[{"mode":"dark","token":"primary","dTone":5}]'
 # → dark  primary  #6e9fff → #86adff   req t+5 c+0   got t+4.99 c-6.78
 ```
-It shifts named tokens by a relative ±HCT delta and prints before/after plus the **gamut-clamped achieved** delta (so a clamp shows up in the numbers). It **never gates contrast** — re-run `check` afterward (decision tree step 3). The token names are the bare md roles `--to colors` prints; see [token naming](palette.md#token-naming-across-surfaces).
+It shifts named tokens by a relative ±HCT delta and prints before/after plus the **gamut-clamped achieved** delta (so a clamp shows up in the numbers). It **never gates contrast**, and it **doesn't persist** — so the whole-theme `check --seed` gate re-derives clean from the seed and won't see your shift. Verify the shift *ad-hoc* instead: feed the printed after-value and the color it pairs against into the `check <fg> <bg>` form (e.g. `tonex check '#86adff' '<paired-bg>'`). The token names are the bare md roles `--to colors` prints; see [token naming](palette.md#token-naming-across-surfaces).

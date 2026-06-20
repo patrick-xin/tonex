@@ -69,7 +69,7 @@ Use the exact same recipe as step 2 — same `--seed`, `--variant`, `--contrast`
 
 **Deliver the recipe with the colors.** Whatever target you write into, the delivered file must carry its recipe — the exact `generate` command — so a later agent can reproduce or extend it without hunting for flags lost to context. The recipe is the durable source of truth.
 
-**Side path — nudge one token without re-seeding:** `tonex adjust --shifts '…'` (never gates contrast) → re-run step 2. Detail in [references/contrast.md](references/contrast.md#adjusting-one-token).
+**Side path — nudge one token without re-seeding:** `tonex adjust --shifts '…'` (never gates contrast, and doesn't persist — so re-check the printed after-value *ad-hoc* with `check <fg> <bg>`, not the seed gate, which wouldn't see the shift). Detail in [references/contrast.md](references/contrast.md#adjusting-one-token).
 
 **Side path — add a color the seed can't reach** (a `success` green on a blue brand): `--custom '[{"name":"success","hex":"#22c55e"}]'` derives and contrast-checks it like any other role, so `check` gates it too. State/semantic colors, the `blend` flag, and how each entry rides every output → [references/patterns.md](references/patterns.md#state-and-semantic-colors-success-warning-info).
 

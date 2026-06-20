@@ -27,6 +27,7 @@ tonex generate --seed '#3b82f6' \
 
 - MCU **harmonizes** each hex toward the seed so the state colors belong to the family. Turn that off per-entry with `"blend": false` when a brand-exact value must stay literal (a logo green, a regulated brand red).
 - Each entry rides every output — the derived roles (`success`, `on-success`, …) and, in `--to shadcn`, the pair (`--success` / `--success-foreground`). `check` gates them like anything else, so an unsafe custom hex blocks at exit 1.
+- Each custom color derives a full **4-role group** (`success`, `on-success`, `success-container`, `on-success-container`), but shadcn has only one `--success` slot. `shadcnSource` picks which pair feeds it: `"color"` (default) = the vivid fill (like `--primary` — a solid button), `"container"` = the muted background tone (a soft banner/badge). Only affects `--to shadcn`; every other format emits all four roles regardless. Both stay contrast-gated.
 - `--to colors` and `--to json` also carry the **definitions** (the source hex + blend flag that re-derive the slugs), so the artifact stays self-describing.
 - Pin the `--custom` JSON into the recipe so a later run reproduces them.
 
