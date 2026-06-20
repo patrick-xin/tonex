@@ -17,6 +17,7 @@ export {
   type ContrastBundle,
   type ExportOptions,
 } from './bundle'
+export { buildColorsJson, type ColorsJson, exportColorsJson } from './colors-json'
 export { type ExportLayer, exportCss } from './css'
 export { exportDart } from './dart'
 export { buildDesignMdColors, exportDesignMd } from './design-md'

@@ -239,3 +239,16 @@ describe('exportDart — palette channel (slice dart-4)', () => {
     )
   })
 })
+
+// why: the recipe rides as a leading Dart `//` comment above the import line
+// (ADR-0039 Decision 7). Absent the option the file is unchanged.
+describe('exportDart — provenance recipe', () => {
+  const bundle: ContrastBundle = { default: deriveTheme(DEFAULT_INPUTS) }
+  const recipe = "tonex generate --seed '#3b82f6' --variant cmf --to dart"
+
+  it('prepends the recipe as a leading // comment, import intact below', () => {
+    const out = exportDart(bundle, { provenance: recipe })
+    expect(out.startsWith(`// ${recipe}\n`)).toBe(true)
+    expect(out).toContain('import "package:flutter/material.dart";')
+  })
+})

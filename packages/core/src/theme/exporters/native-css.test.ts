@@ -158,3 +158,21 @@ describe('exportNativeCss — includeChart', () => {
     expect(root['--md-sys-color-chart-1']).toBeUndefined()
   })
 })
+
+// why: same provenance contract as css.ts — the opaque recipe string renders as
+// a leading /* */ comment when set, nothing when absent (ADR-0039 Decision 7).
+describe('exportNativeCss — provenance recipe', () => {
+  const recipe = "tonex generate --seed '#3b82f6' --variant cmf --to css"
+
+  it('prepends the recipe as a leading /* */ comment, :root intact below', () => {
+    const out = exportNativeCss({ default: deriveTheme(DEFAULT_INPUTS) }, { provenance: recipe })
+    expect(out.startsWith(`/* ${recipe} */`)).toBe(true)
+    expect(out).toContain(':root {')
+  })
+
+  it('emits no comment banner when provenance is absent', () => {
+    expect(exportNativeCss({ default: deriveTheme(DEFAULT_INPUTS) }, {}).startsWith('/*')).toBe(
+      false,
+    )
+  })
+})

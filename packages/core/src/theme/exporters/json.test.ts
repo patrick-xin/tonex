@@ -286,3 +286,25 @@ describe('exportJson — serialization wrapper', () => {
     expect(JSON.parse(str)).toEqual(buildMaterialThemeJson(source, bundle, options))
   })
 })
+
+// why: JSON has no comment syntax, so the recipe rides in the MTB-native
+// `description` field — the same field that carries provenance today (ADR-0039
+// Decision 7). The TYPE: CUSTOM marker is kept so MTB still recognizes the
+// import; the caller-supplied recipe replaces only the trailing stamp line, and
+// because no date is stamped on that path the JSON stays deterministic.
+describe('exportJson — provenance recipe', () => {
+  const source: PortableTheme = DEFAULT_INPUTS
+  const bundle: ContrastBundle = { default: deriveTheme(source) }
+  const recipe = "tonex generate --seed '#3b82f6' --variant cmf --to json"
+
+  it('routes the recipe into description, keeping the TYPE: CUSTOM marker', () => {
+    const json = buildMaterialThemeJson(source, bundle, { provenance: recipe })
+    expect(json.description).toBe(`TYPE: CUSTOM\n${recipe}`)
+  })
+
+  it('falls back to the dated tonex stamp when provenance is absent', () => {
+    const json = buildMaterialThemeJson(source, bundle, {})
+    expect(json.description.startsWith('TYPE: CUSTOM\n')).toBe(true)
+    expect(json.description).not.toContain('tonex generate')
+  })
+})

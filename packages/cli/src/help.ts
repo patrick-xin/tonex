@@ -9,8 +9,9 @@ import { DEFAULT_VARIANT, variants } from '@tonex/core/variants'
 export const HELP = `usage: tonex <command> [options]
 
 commands:
-  generate --seed <hex> [--variant <name>] [--to shadcn|yaml|json]
+  generate --seed <hex> [--variant <name>] [--to colors|shadcn|yaml|json]
            [--mode light|dark] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>]
+           [--custom '<json>']
       Derive a theme from a seed hex color and print it.
   check    --seed <hex> [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
       Audit the derived theme's WCAG contrast. Both modes unless --mode
@@ -21,10 +22,11 @@ commands:
       one call instead of a manual search. Exit 1 if even --contrast 1
       can't reach it (the level is structurally unreachable for some pairs).
   check    <fg> <bg> [--aaa] [--large] [--json]
-      Verify one ad-hoc fg/bg hex pairing. Exit 0 iff it clears the level.
+      Verify one ad-hoc fg/bg pairing (each a 6-digit hex or canonical
+      oklch(L C H)). Exit 0 iff it clears the level.
   check    --pairs '<json>' [--aaa] [--large] [--json]
-      Batch-verify a JSON array of [fg, bg] hex pairs; exit 1 if any fail,
-      enumerating the offenders and their ratios.
+      Batch-verify a JSON array of [fg, bg] pairs (hex or oklch); exit 1 if
+      any fail, enumerating the offenders and their ratios.
   check    --seed <hex> --pairs '<json>' [--variant <name>] [--mode light|dark] [--aaa] [--json]
       Batch-verify [fg, bg] TOKEN-NAME pairs (the names from generate output)
       against the derived theme; exit 1 if a text pair fails, 2 if a name is
@@ -37,15 +39,33 @@ commands:
   describe
       Print the machine-readable surface (commands, flags, contrast policy).
 
+  --seed       a 6-digit hex (#3b82f6) or a canonical oklch(L C H) brand color.
   --variant    one of: ${Object.keys(variants).join(', ')} (default: ${DEFAULT_VARIANT}).
-  --to         output target (default shadcn). shadcn = oklch :root/.dark block;
+  --to         output target (default shadcn). colors = the canonical colors.json
+               (recipe header + both-mode role values, the artifact other tools
+               project from); shadcn = oklch :root/.dark block;
                yaml = single-mode colors: block for a design.md;
                json = Material Theme JSON (a www-shaped export, reused as-is for now).
+  --binding    shadcn role→md-token routing preset (--to shadcn only).
+               one of: default, clean, mixed, layered, seamless (default: default).
+  --soft-borders  soften --border/--input/--sidebar-border to the outline-variant tone
+               for faint, shadcn-style borders (--to shadcn only).
+  --extended   widen the roster from core (28 roles, the sufficient baseline) to
+               core + extended (50). Reach for it only when core doesn't cover the
+               target's slots. colors/yaml/json honor it; shadcn is unaffected.
   --tint / --desaturate  surface-treatment strength 0..1 (mutually exclusive).
+  --tint-palette  neutral palette the tint algo repaints surfaces with (default zinc).
+               one of: slate, gray, zinc, neutral, stone, taupe, mauve, mist, olive.
+  --custom     JSON array of {name, hex, blend?, shadcnSource?} colors added on top
+               of the seed palette — each emits a harmonized 4-role md group + a
+               shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check.
+               blend defaults true, shadcnSource defaults "color", hex is hex or oklch.
+               Rides in every output; colors/json also carry the definitions
+               (colors' "custom" block / json's extendedColors).
   --aaa        raise the WCAG bar to AAA (default AA). --large uses large-text thresholds.
   --contrast   MCU palette contrast level, 0..1 (default 0).
   --mode       light|dark. generate: which mode yaml emits (default light;
-               shadcn/json ignore it). check: scope the audit to one mode
+               colors/shadcn/json ignore it). check: scope the audit to one mode
                (default both, the stricter union).
 
 exit codes: 0 = clean · 1 = contrast gate failure · 2 = usage/input error.`

@@ -265,5 +265,14 @@ export function exportDart(bundle: ContrastBundle, options: ExportOptions = {}):
   const parts = ['import "package:flutter/material.dart";', '', body.join('\n')]
   if (options.includeChart) parts.push('', chartColorsClass(bundle.default))
   parts.push('')
-  return parts.join('\n')
+  // why: the recipe rides as a leading Dart `//` comment above the import
+  // (ADR-0039 Decision 7); per-line prefix keeps a multi-line recipe a comment,
+  // empty when absent so the file is unchanged.
+  const banner = options.provenance
+    ? `${options.provenance
+        .split('\n')
+        .map((line) => `// ${line}`)
+        .join('\n')}\n`
+    : ''
+  return banner + parts.join('\n')
 }

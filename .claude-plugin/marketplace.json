@@ -1,0 +1,16 @@
+{
+  "name": "tonex",
+  "owner": {
+    "name": "Patrick Xin",
+    "url": "https://github.com/patrick-xin"
+  },
+  "plugins": [
+    {
+      "name": "tonex",
+      "source": "./",
+      "description": "Turn a brand seed color into a complete light+dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's Material Color Utilities.",
+      "homepage": "https://github.com/patrick-xin/tonex",
+      "license": "MIT"
+    }
+  ]
+}
