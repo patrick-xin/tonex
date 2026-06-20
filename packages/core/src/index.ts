@@ -47,13 +47,16 @@ export {
   type TokenMap,
 } from './theme/derive'
 export {
+  buildColorsJson,
   buildContrastBundle,
   buildDesignMdColors,
   COLOR_FORMATS,
   type ColorFormat,
+  type ColorsJson,
   type ContrastBundle,
   type ExportLayer,
   type ExportOptions,
+  exportColorsJson,
   exportCss,
   exportDart,
   exportDesignMd,
@@ -67,3 +70,4 @@ export { sourceColorHexFromImage } from './theme/image'
 export { MODES, type Mode } from './theme/mode'
 export { selectSeedHex } from './theme/seed'
 export { applySurfaceDesaturate, applySurfaceTint } from './theme/surface'
+export { bareMdName } from './theme/token-vocab'

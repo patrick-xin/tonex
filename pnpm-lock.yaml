@@ -242,17 +242,19 @@ importers:
         version: 3.2.4(@types/debug@4.1.13)(@types/node@22.19.17)(jiti@2.6.1)(jsdom@29.1.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.4)
 
   packages/cli:
-    dependencies:
+    devDependencies:
       '@tonex/color-utils':
         specifier: workspace:*
         version: link:../color-utils
       '@tonex/core':
         specifier: workspace:*
         version: link:../core
-    devDependencies:
       '@tonex/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      esbuild:
+        specifier: ^0.28.0
+        version: 0.28.0
       tsx:
         specifier: ^4.20.6
         version: 4.21.0

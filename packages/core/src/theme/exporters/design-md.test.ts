@@ -138,3 +138,17 @@ describe('exportDesignMd — YAML colors-block serializer', () => {
     expect(exportDesignMd(bundle, 'light', {})).toBe(expected)
   })
 })
+
+// why: the recipe rides in the delivered DESIGN.md as a leading YAML `#` comment
+// above the colors: block — valid YAML, travels with the paste (ADR-0039
+// Decision 7). Absent the option the block is unchanged (the exact-output test
+// above still holds).
+describe('exportDesignMd — provenance recipe', () => {
+  const bundle: ContrastBundle = { default: deriveTheme(DEFAULT_INPUTS) }
+  const recipe = "tonex generate --seed '#3b82f6' --variant cmf --to yaml --mode light"
+
+  it('prepends the recipe as a YAML # comment above colors:', () => {
+    const out = exportDesignMd(bundle, 'light', { provenance: recipe })
+    expect(out.startsWith(`# ${recipe}\ncolors:`)).toBe(true)
+  })
+})

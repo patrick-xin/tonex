@@ -1,5 +1,5 @@
 {
-  "name": "tonex",
+  "name": "tonex-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -10,6 +10,8 @@
     "lint": "turbo run lint",
     "check:conventions": "node scripts/check-conventions.mjs",
     "check:adr": "node .claude/skills/adr/scripts/check-adr-citations.mjs",
+    "plugin:contact": "node scripts/inject-plugin-contact.mjs",
+    "plugin:version": "node scripts/sync-plugin-version.mjs",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "prepare": "husky"

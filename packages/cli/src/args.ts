@@ -6,7 +6,7 @@
 // `--seed=#fff` form agents emit constantly. Declaring the flags as data closes
 // both at the seam instead of leaving each call site to re-derive them.
 
-export type FlagType = 'hex' | 'enum' | 'unit' | 'boolean' | 'json'
+export type FlagType = 'color' | 'enum' | 'unit' | 'boolean' | 'json'
 
 export interface FlagSpec {
   readonly name: string
@@ -14,11 +14,17 @@ export interface FlagSpec {
   readonly description: string
   readonly required?: boolean
   readonly values?: readonly string[]
+  // why: the value omitting the flag yields, as a citeable field for `describe`
+  // rather than prose an agent has to regex out of `description`. Set it only when
+  // there's a concrete domain default (numeric for `--contrast`); booleans leave it
+  // unset — absence already means off. May sit OUTSIDE `values` (check's --mode
+  // default is "both", which the light|dark enum can't express).
+  readonly default?: string | number
 }
 
 export interface ParsedArgs {
   // why: boolean flags map to `true`, value flags to their string. A value flag's
-  // coercion (hex/unit/enum) stays in the handler that owns its error message.
+  // coercion (color/unit/enum) stays in the handler that owns its error message.
   readonly flags: ReadonlyMap<string, string | true>
   readonly positionals: readonly string[]
 }
