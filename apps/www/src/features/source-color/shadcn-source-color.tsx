@@ -9,6 +9,7 @@ import { HctControlSliders } from '@/features/hct-controls'
 import { GuideAnchor } from '@/features/onboarding-guide'
 import { ImagePicker } from './image-picker'
 import { SourceColorSection } from './source-color-section'
+import { WhereIsMySeed } from './where-is-my-seed'
 
 // why: shadcn users arrive with a brand hex, so hex is the always-on primary —
 // the input sits inline at the top of the rail rather than behind a tab. HCT
@@ -35,6 +36,7 @@ export function ShadcnSourceColor() {
   return (
     <GuideAnchor anchorKey="seed-color" className="space-y-4 pt-4">
       <SourceColorSection />
+      <WhereIsMySeed />
       <div
         aria-disabled={seedHexLock}
         className={cn(seedHexLock && 'pointer-events-none opacity-50')}
