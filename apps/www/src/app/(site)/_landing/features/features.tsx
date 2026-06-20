@@ -100,7 +100,7 @@ function FeatureCard({
   return (
     <div
       style={{ '--accent': accent } as CSSProperties}
-      className="flex w-64 shrink-0 snap-start flex-col gap-3 rounded-md border border-transparent bg-surface-container-low p-6 transition-colors duration-200 group sm:w-auto sm:shrink relative"
+      className="flex w-64 shrink-0 snap-start flex-col gap-3 rounded-xl border border-transparent bg-surface-container-low p-6 transition-colors duration-200 group sm:w-auto sm:shrink relative"
     >
       <ShimmerBorder className="via-[color-mix(in_oklab,var(--accent),transparent)]" />
       <ShimmerBorder
@@ -125,7 +125,7 @@ export function Features() {
           heading="Everything else you'd reach for"
           description="The smaller decisions, already made, the polish is there before you ask for it."
         />
-        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+        <div className="flex snap-x snap-mandatory gap-4 sm:gap-6 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <FeatureCard
               key={feature.id}

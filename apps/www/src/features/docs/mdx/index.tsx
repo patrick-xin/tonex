@@ -2,13 +2,24 @@ import Link from 'next/link'
 import type * as React from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
+import { Kbd } from '@/components/ui/kbd'
 import { focusVisibleRing } from '@/components/ui/styles'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/tables'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Callout } from './call-out'
 import { CodeFigure } from './code-figure'
 import { CodeBlockTab, CodeBlockTabs, CodeBlockTabsList, CodeBlockTabsTrigger } from './code-tabs'
+import { DocCard } from './doc-card'
 import { MDXImage } from './mdx-image'
+import { Step, Steps } from './steps'
 
 export const mdxComponents = {
   pre: ({ className, children, ...props }: React.ComponentProps<'pre'>) => {
@@ -23,6 +34,22 @@ export const mdxComponents = {
         {children}
       </pre>
     )
+  },
+  code: ({ className, children, ...props }: React.ComponentProps<'code'>) => {
+    if (typeof children === 'string') {
+      return (
+        <code
+          className={cn(
+            'not-prose bg-secondary-container text-on-secondary-container rounded-sm text-sm px-1',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </code>
+      )
+    }
+    return <code {...props}>{children}</code>
   },
   figure: CodeFigure,
   figcaption: ({ className, children, ...props }: React.ComponentProps<'figcaption'>) => {
@@ -79,4 +106,14 @@ export const mdxComponents = {
   CodeBlockTabsTrigger,
   CodeBlockTab,
   Callout,
+  DocCard,
+  Step,
+  Steps,
+  Kbd,
+  Table,
+  TableCell,
+  TableHeader,
+  TableRow,
+  TableBody,
+  TableHead,
 }

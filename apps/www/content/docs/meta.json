@@ -1,6 +1,9 @@
 {
   "pages": [
+    "---Get Started---",
     "introduction",
+    "quickstart",
+    "---Concepts---",
     "key-concepts",
     "---Web App---",
     "web-app",
@@ -8,6 +11,8 @@
     "cli",
     "---Skills---",
     "skills",
+    "---Reference---",
+    "reference",
     "about"
   ]
 }

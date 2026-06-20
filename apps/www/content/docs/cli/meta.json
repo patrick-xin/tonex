@@ -1,4 +1,4 @@
 {
-  "title": "Cli",
-  "pages": ["introduction", "installation", "commands", "skills"]
+  "title": "CLI",
+  "pages": ["introduction", "installation", "commands", "targets-formats", "other-tools"]
 }

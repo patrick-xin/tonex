@@ -85,10 +85,10 @@ export function NavTabs({ config, extras }: { config: NavConfig; extras?: ReactN
         className="flex-1"
         value={tabs.find((tab) => tab.href === pathname)?.label || tabs[0]?.label}
       >
-        <TabsList className="gap-6">
+        <TabsList className="gap-0">
           {tabs.map((tab, index) => (
             <TabsTab
-              className="sm:w-28 text-on-surface-variant hover:text-on-surface data-active:text-on-surface flex-1 h-full"
+              className="text-on-surface-variant hover:text-on-surface data-active:text-on-surface flex-1 h-full"
               nativeButton={false}
               key={tab.label}
               value={tab.label}

@@ -1,0 +1,22 @@
+---
+title: Surfaces
+description: Tune the neutral backgrounds with Tint or Desaturate.
+---
+
+Surfaces are the neutral backgrounds behind your content. Tonex derives them from the seed like everything else, and gives you two ways to adjust how colored they feel. The two are separate algorithms; you use one at a time.
+
+## Desaturate
+
+Desaturate pulls the surfaces toward grey by reducing their chroma. At 0% the surfaces are unchanged; raise the level and the whole surface range, including the text that sits on it, loses color evenly. Reach for it when the default surfaces feel too tinted. This is also how you keep Material's surfaces exactly as derived: the two algorithms differ at 0% — Desaturate at 0% leaves them unchanged, while Tint at 0% rebuilds them from the plain neutral.
+
+## Tint
+
+Tint rebuilds the surfaces from a neutral you choose — one of the Tailwind neutral palettes such as zinc, slate, stone, gray, or neutral — then blends your brand hue back in proportional to the level. At 0% you get the plain neutral; raise the level and the surfaces take on more of your brand color. A separate text accent controls how much of that hue reaches the text on the surfaces.
+
+## Per mode
+
+Surface strength is **per mode**: light and dark each carry their own level. The algorithm and the chosen palette are shared. See [Light & dark](/docs/web-app/light-dark).
+
+## Soft borders
+
+Soft borders is a separate toggle in **Settings**. It uses softer colors on borders and inputs. It can lower contrast on those elements, so check the result if you rely on crisp edges.

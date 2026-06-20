@@ -39,6 +39,7 @@ export const NAV_LINKS: readonly SiteRoute[] = [
   ROUTES.home,
   ROUTES.materialTheme,
   ROUTES.shadcn,
+  ROUTES.docs,
   ROUTES.about,
   ROUTES.roadmap,
 ]

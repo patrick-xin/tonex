@@ -47,7 +47,7 @@ export function BlocksDemo() {
         <RecentTransactions />
         <CoverArt />
       </div>
-      <div className="hidden sm:flex sm:w-105 flex-col gap-6">
+      <div className="hidden sm:block">
         <ProjectQuoteForm />
       </div>
     </div>

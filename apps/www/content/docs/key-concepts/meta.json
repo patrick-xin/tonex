@@ -1,4 +1,4 @@
 {
-  "title": "Key Concepts",
-  "pages": ["material-design", "hct", "design-tokens", "limitations"]
+  "title": "Concepts",
+  "pages": ["how-tonex-thinks", "semantic-model", "hct", "design-tokens", "variants", "contrast"]
 }

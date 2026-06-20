@@ -23,25 +23,25 @@ function themeWith(overrides: Partial<PortableTheme>): PortableTheme {
 describe('resolvePresetApply — seed source field', () => {
   it('supersedes an untouched, unlocked seed with the preset curated seed', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: false, seedHexLock: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
-    expect(patch.seed).toEqual(SHADCN_PRESETS.grove.seed)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone)
+    expect(patch.seed).toEqual(SHADCN_PRESETS.stone.seed)
   })
 
   it('keeps a touched seed and drops the curated one', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone)
     expect(patch.seed).toBeUndefined()
   })
 
   it('keeps a locked seed even when untouched', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: false, seedHexLock: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone)
     expect(patch.seed).toBeUndefined()
   })
 
   it('keeps a seed that is touched AND locked', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone)
     expect(patch.seed).toBeUndefined()
   })
 
@@ -50,7 +50,7 @@ describe('resolvePresetApply — seed source field', () => {
   // it; the resolver must read the flag, never compare to DEFAULT_INPUTS.seed.
   it('keeps a seed equal to the boot default when the signal says touched', () => {
     const theme = themeWith({ seedTouched: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone)
     expect(patch.seed).toBeUndefined()
   })
 
@@ -60,8 +60,8 @@ describe('resolvePresetApply — seed source field', () => {
   it('never marks the seed touched in the returned patch', () => {
     const untouched = themeWith({ seedTouched: false, seedHexLock: false })
     const touched = themeWith({ seed: USER_SEED, seedTouched: true })
-    expect('seedTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.grove)).toBe(false)
-    expect('seedTouched' in resolvePresetApply(touched, SHADCN_PRESETS.grove)).toBe(false)
+    expect('seedTouched' in resolvePresetApply(untouched, SHADCN_PRESETS.stone)).toBe(false)
+    expect('seedTouched' in resolvePresetApply(touched, SHADCN_PRESETS.stone)).toBe(false)
   })
 })
 
@@ -129,8 +129,8 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   // read as a user choice on the next switch (mirrors the untouched-adopt rule).
   it('adopts the curated seed over a touched seed when the seed choice is set', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true })
-    expect(patch.seed).toEqual(SHADCN_PRESETS.grove.seed)
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone, { seed: true })
+    expect(patch.seed).toEqual(SHADCN_PRESETS.stone.seed)
     expect(patch.seedTouched).toBe(false)
   })
 
@@ -147,7 +147,7 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   // authority regardless of what the UI passes.
   it('keeps a locked seed even when the seed choice is set', () => {
     const theme = themeWith({ seed: USER_SEED, seedTouched: true, seedHexLock: true })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone, { seed: true })
     expect(patch.seed).toBeUndefined()
   })
 
@@ -168,7 +168,7 @@ describe('resolvePresetApply — explicit adopt choices (dialog switches)', () =
   // `touched: false` that wasn't there before (the existing patch-shape pins).
   it('does not add a touched signal for an untouched field given a choice', () => {
     const theme = themeWith({ seedTouched: false, contrastTouched: false })
-    const patch = resolvePresetApply(theme, SHADCN_PRESETS.grove, { seed: true, contrast: true })
+    const patch = resolvePresetApply(theme, SHADCN_PRESETS.stone, { seed: true, contrast: true })
     expect('seedTouched' in patch).toBe(false)
     expect('contrastTouched' in patch).toBe(false)
   })
@@ -214,10 +214,10 @@ describe('resolvePresetApply — ambient soft-border (sticky-soft)', () => {
   })
 
   it('does NOT carry a hard weight — a soft-baking preset keeps its curated soft edges', () => {
-    // themeWith({}) is the boot default (hard edges); noir bakes soft. Hard is not
-    // carried, so noir's curated bindings pass through verbatim.
-    const patch = resolvePresetApply(themeWith({}), SHADCN_PRESETS.noir)
-    expect(patch.shadcnRoleBindings).toEqual(SHADCN_PRESETS.noir.shadcnRoleBindings)
+    // themeWith({}) is the boot default (hard edges); sage bakes soft. Hard is not
+    // carried, so sage's curated bindings pass through verbatim.
+    const patch = resolvePresetApply(themeWith({}), SHADCN_PRESETS.sage)
+    expect(patch.shadcnRoleBindings).toEqual(SHADCN_PRESETS.sage.shadcnRoleBindings)
   })
 
   it('does NOT carry a custom edge — the preset bake stands', () => {

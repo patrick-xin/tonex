@@ -16,7 +16,7 @@ export function tabToHighlightLang(tab: ExportTab): HighlightLang {
       return 'json'
     case 'Dart':
       return 'dart'
-    case 'Design.md':
+    case 'DESIGN.md':
       return 'yaml'
   }
 }

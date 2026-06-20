@@ -1,0 +1,20 @@
+---
+title: Role Overrides
+description: Pin a shadcn role to an exact color.
+---
+
+A role override pins a single shadcn role to an exact color. Unlike a [binding](/docs/web-app/shadcn/role-bindings), which keeps tracking the system, an override is fixed: the role holds the value you set regardless of the seed, variant, or contrast.
+
+## Setting an override
+
+Pin a role by giving it a value — type a hex, use the color picker, pick a Tailwind swatch, or take the current color as a snapshot. From then on that role ignores its binding and shows your value.
+
+An override is **per mode** and is **terminal**: it beats both the role's binding and any palette override. It's the last word on that role's color.
+
+## Clearing an override
+
+Each override clears from its own row, returning the role to its binding so it tracks the system again.
+
+## When to use it
+
+Reach for an override when one role must be an exact color — a brand value, or a color matched to an external constraint — and nothing upstream should move it. For a global change to a whole family, use a [palette override](/docs/web-app/overrides) instead; for a different automatic mapping, use a [binding](/docs/web-app/shadcn/role-bindings).

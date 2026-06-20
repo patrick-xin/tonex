@@ -1,6 +1,138 @@
 ---
 title: Commands
-description: Commands
+description: generate, check, adjust, and describe — the full command surface.
 ---
 
-Placeholder content.
+Tonex is a subcommand CLI:
+
+```bash
+npx tonex <command> [options]
+```
+
+The commands are `generate`, `check`, `adjust`, and `describe`. Flags use the `--flag value` form, or `--flag=value`, rather than `key=value`. Unknown flags are usage errors. Run `tonex --help` for the same reference in your terminal, or `tonex describe` for it as JSON.
+
+## Generate
+
+Derive a theme from a seed and print it.
+
+```bash
+npx tonex generate --seed "#6A9CFF" [options] > globals.css
+```
+
+### Seed
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--seed` | required | Source color. Accepts hex, like `"#6A9CFF"`, or `oklch(L C H)`. |
+
+### Palette strategy
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--variant` | `cmf` | `cmf`, `tonalSpot`, `neutral`, `fidelity`, `content`, `vibrant`, `expressive`, `rainbow`, `fruitSalad`, or `monochrome`. See [Variants](/docs/key-concepts/variants). |
+| `--second-color` | none | Hex or `oklch(L C H)`. CMF only; reshapes the tertiary palette and error hue. |
+| `--contrast` | `0` | `0` to `1`. MCU palette contrast level — the palette-layer remedy for raising separation. |
+
+### Output
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--to` | `shadcn` | `colors`, `shadcn`, `yaml`, or `json`. See [Targets & formats](/docs/cli/targets-formats); for non-native tools, see [Mapping to Other Tools](/docs/cli/other-tools). |
+| `--format` | `oklch` | `oklch` or `hex`. Applies to `colors`, `shadcn`, and `json`; `yaml` is always hex. |
+| `--mode` | `light` | `light` or `dark`. Only `yaml` reads this; `colors`, `shadcn`, and `json` co-emit both modes. |
+| `--extended` | off | Adds extended roles for `colors`, `yaml`, and `json`. No-op for `shadcn`. |
+
+### shadcn binding
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--binding` | `default` | `default`, `clean`, `mixed`, `layered`, or `seamless`. `shadcn` only; controls role-to-token routing. |
+| `--soft-borders` | off | `shadcn` only; softens border, input, and sidebar border tokens. |
+
+### Surface shaping
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--tint` | none | `0` to `1`; `0` is max neutral. Exclusive with `--desaturate`. |
+| `--tint-palette` | `zinc` | `slate`, `gray`, `zinc`, `neutral`, `stone`, `taupe`, `mauve`, `mist`, or `olive`. Used when `--tint` is set. |
+| `--desaturate` | none | `0` to `1`; `0` is a no-op. Exclusive with `--tint`. |
+
+```bash
+npx tonex generate --seed "#6A9CFF" > globals.css
+npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+npx tonex generate --seed "#6A9CFF" --to colors
+npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
+npx tonex generate --seed "#6A9CFF" --to json --format hex
+```
+
+Delivered projections carry their own recipe so a later agent can reproduce them. `shadcn` and `yaml` emit a leading command comment; `json` embeds the command in its description. `colors` emits structured recipe metadata because it is usually a transient read target. For the full `--to colors` → map by intent → `check --pairs` workflow, see [Mapping to Other Tools](/docs/cli/other-tools).
+
+## Check
+
+Audit WCAG contrast. Exit `0` clears the level; exit `1` means a text pair fails. Add `--json` to any form for machine-readable output, `--aaa` to raise the bar from AA to AAA, and `--large` on ad-hoc pair checks to use large-text thresholds.
+
+```bash
+npx tonex check --seed "#6A9CFF" [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
+npx tonex check --seed "#6A9CFF" --find-contrast [--variant <name>] [--mode light|dark] [--aaa] [--json]
+npx tonex check "#1a1a1a" "#ffffff" [--aaa] [--large] [--json]
+npx tonex check --pairs '[["#1a1a1a","#ffffff"],["#888","#fff"]]' [--aaa] [--large] [--json]
+npx tonex check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]' [--variant <name>] [--mode light|dark] [--aaa] [--json]
+```
+
+Example verdicts:
+
+```txt
+PASS — AA contrast — 134 pairs clear
+FAIL — 3.68:1 below AA text (4.5)
+FOUND — AAA clears at --contrast 0.9
+re-derive: generate --seed #6A9CFF --variant cmf --contrast 0.9
+```
+
+`--find-contrast` exits `1` if even `--contrast 1` cannot reach the level. The token-name form exits `2` on an unknown token name, with a did-you-mean.
+
+## Token names
+
+Different surfaces use different names for the same role:
+
+| Surface | Name for `primary` |
+| --- | --- |
+| `--to colors` JSON keys | `primary` |
+| `--to shadcn` output | `--primary` |
+| `adjust` and `check --pairs` token names | `--color-primary` |
+
+Use the `--color-` prefix for token-name checks and adjustments.
+
+## Adjust
+
+Shift named tokens by a relative HCT delta and print before/after facts plus the gamut-clamped achieved delta. Exit `0` on a clean shift, `2` on a bad token name or malformed `--shifts`. It never gates contrast — run `check` for that.
+
+```bash
+npx tonex adjust --seed "#6A9CFF" \
+  --shifts '[{"mode":"light","token":"--color-surface","dTone":-4,"dChroma":2}]' [--json]
+```
+
+A shift result reports the requested and achieved movement:
+
+```txt
+light --color-surface  oklch(…) → oklch(…)   req t-4 c+2   got t-3.9 c+2.16
+```
+
+`--shifts` takes a JSON array of `{mode, token, dTone?, dChroma?}` entries, each with at least one axis. `adjust` also accepts the shared seed knobs (`--variant`, `--contrast`, `--tint`/`--desaturate`); the per-shift `mode` lives inside each entry, so there is no `--mode` flag.
+
+## Describe
+
+Print the machine-readable surface — every command and flag from the same specs the parser validates against, the contrast verdict policy and thresholds, and the exit-code taxonomy.
+
+```bash
+npx tonex describe
+```
+
+Top-level JSON keys include `tool`, `exitCodes`, `commands`, `contrast`, `variants`, `targets`, and `bindings`.
+
+## Exit codes
+
+| Code | Meaning | Agent response |
+| --- | --- | --- |
+| `0` | Clean — the gate passed, or output was produced. | Proceed. |
+| `1` | Contrast gate failure — the artifact is wrong. | Apply a color remedy, such as raising `--contrast` or re-pairing tokens. |
+| `2` | Usage or input error — the call is wrong. | Fix the flags or inputs. |

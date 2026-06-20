@@ -115,7 +115,7 @@ const popupVariants = cva(
     variants: {
       side: {
         bottom: 'row-start-2 animate-fade-up border-t border-b-outline-variant',
-        left: 'max-w-md animate-slide-right border-r border-r-outline-variant w-[calc(100%-3rem)]',
+        left: 'max-w-md border-r animate-slide-right border-r-outline-variant w-[calc(100%-3rem)]',
         right: 'max-w-md animate-slide-left border-l border-l-outline-variant w-[calc(100%-3rem)]',
         top: 'animate-fade-down border-b border-b-outline-variant',
       },

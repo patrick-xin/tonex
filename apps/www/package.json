@@ -23,6 +23,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@google/design.md": "^0.3.0",
     "@paper-design/shaders": "^0.0.76",
     "@paper-design/shaders-react": "^0.0.76",
     "@phosphor-icons/react": "^2.1.10",

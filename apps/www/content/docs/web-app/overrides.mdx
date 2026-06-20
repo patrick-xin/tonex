@@ -1,0 +1,41 @@
+---
+title: Overrides
+description: Adjust a single color family, or add your own named colors, without breaking the harmony.
+---
+
+The engine derives every family from the seed. Overrides let you step in at the family level — change one family's source, or add families of your own — while the engine keeps the rest coherent.
+
+For pinning a single shadcn role to an exact value, see [Role overrides](/docs/web-app/shadcn/role-overrides); this page covers the broader, family-level adjustments.
+
+## Palette override
+
+A palette override changes the color a whole family is built from. You can override six families:
+
+| Family | What it covers |
+|--------|----------------|
+| `primary` | The main brand and accent color |
+| `secondary` | The supporting accent |
+| `tertiary` | The third accent |
+| `error` | Error and destructive states |
+| `surface` | The neutral backgrounds |
+| `outline` | Borders and dividers |
+
+Pick a color for a family and its full range of shades rebuilds from your color. The other families are untouched. The variant's tone choices still apply — your color is the *source* of the family's ramp, not the exact shades, so the result stays balanced with the rest of the system.
+
+A palette override is the right tool for a global shift in one family. It sits above the engine's output and below a role pin: if you later pin a specific role, the pin wins.
+
+> Under the **CMF** variant, the tertiary override is disabled, because tertiary is driven by the [second source color](/docs/key-concepts/variants#cmf-and-a-second-source) instead.
+
+## Custom colors
+
+Custom colors are families you add yourself — a brand orange, a status green — that aren't part of the standard set. Each custom color has a name and a value, and you can add, edit, and remove them freely.
+
+Tonex runs a custom color through the same engine as the built-in families, deriving its matching `on-` and container variants. So a custom color behaves like a real role, not a loose swatch, and exports alongside your theme tokens.
+
+### Harmonize toward the seed
+
+Each custom color can harmonize toward the seed. With it on, the color's hue is rotated toward your seed so it sits naturally in the palette. With it off, the color stays exactly as you entered it. Use harmonize when you want the color to belong to the system; turn it off when the exact value matters more than the fit.
+
+## Where overrides sit
+
+Overrides are the third stage in the [pipeline](/docs/how-tonex-thinks#an-order-decides-what-wins): they come after the engine and before surfaces and role pins. Each later stage can override what an earlier one produced, which is what lets you make a precise change in one place without it spreading.

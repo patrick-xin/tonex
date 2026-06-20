@@ -1,5 +1,5 @@
+export { DocsToc } from '../docs-toc'
 export { DocsHeader } from './docs-header'
 export { DocsLayout } from './docs-layout'
 export { DocsSidebar } from './docs-sidebar'
 export { DocsSidebarTree } from './docs-sidebar-tree'
-export { DocsToc } from './docs-toc'

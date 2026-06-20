@@ -1,0 +1,38 @@
+---
+title: Variants
+description: Set the palette's character from the same seed.
+---
+
+The seed fixes your color. The variant decides how the system built around it feels — its character — without changing the seed.
+
+## Variant
+
+A variant is a strategy for deriving the palette. The same seed under a different variant produces a different but still-coherent system, so you pick a character, not just a hue.
+
+The variants are grouped by how far they move from the seed:
+
+- **Standard** — source-faithful schemes that stay close to your seed.
+  - **CMF** — the spec scheme and Tonex's default, which takes a second source color.
+  - **Tonal Spot** — the default Material You scheme.
+  - **Fidelity** — stays close to your seed color. What you pick is roughly what you get.
+  - **Content** — similar to Fidelity but more conservative. Good for image-heavy interfaces.
+- **Expressive** — high-chroma schemes that push away from the seed for more color.
+  - **Vibrant** — pushes chroma to the maximum for a bold, energetic palette.
+  - **Expressive** — uses contrasting hues across roles for a dynamic, unexpected feel.
+  - **Fruit Salad** — rotates hues across palette roles for a playful, multicolor result.
+  - **Rainbow** — similar to Fruit Salad but with a wider hue spread.
+- **Subdued** — restrained, low-chroma schemes.
+  - **Neutral** — desaturated. Minimal chroma, close to grayscale.
+  - **Monochrome** — single hue, zero chroma variation. Ultra-minimal.
+
+
+Switching variants keeps your seed and rebuilds everything else.
+
+## CMF and a second source
+
+The CMF variant accepts a **second source** color in addition to the seed. The second color drives the **tertiary** family and shifts the error hue, so you can steer those parts of the system with a color of your choice rather than letting them derive from the seed alone. Without a second source, CMF behaves like a seed-only scheme.
+
+Two things set CMF apart from the other variants. The primary color keeps your seed's tone — a light seed gives a light primary, a dark seed a dark one — where other variants pull primary to a fixed lightness instead. And it gives surfaces real color rather than near-neutral grey, kept accessible by dynamic contrast.
+
+Because tertiary comes from the second source under CMF, the tertiary [palette override](/docs/web-app/overrides) is turned off while CMF is active.
+

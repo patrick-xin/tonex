@@ -1,0 +1,20 @@
+---
+title: Limitations
+description: Edge cases and current constraints worth knowing.
+---
+
+A few things behave in ways worth knowing up front.
+
+## Out-of-gamut OKLCH
+
+The engine works in sRGB. When you paste an OKLCH color that sits outside the sRGB gamut, Tonex maps it back in by reducing its chroma at the same lightness and hue — the standard CSS Color 4 mapping. The result is the closest in-gamut color, not the one you typed, and the app doesn't flag when this happens. If a pasted OKLCH looks less saturated than expected, it was outside sRGB and got pulled in.
+
+## Tailwind color picker
+
+The Tailwind color picker offers the colors in Tailwind's default palette, not arbitrary values. For an exact brand color that isn't in that palette, enter it as hex or OKLCH instead. The picker is a shortcut for the common case, not a replacement for direct input.
+
+The palette is stored in OKLCH, and Tailwind's most vivid shades fall outside sRGB. Those swatches go through the same gamut mapping as a pasted OKLCH, so picking, say, `yellow-500` seeds the in-gamut approximation rather than Tailwind's exact value. The chosen swatch is a starting point, not a guaranteed byte-for-byte match.
+
+## Near grey seeds
+
+A seed with almost no color has little hue to work with. Controls that act on hue have nothing to adjust and may turn off — there's no hue in a grey to shift. The system still generates; it just works from tone alone. Charts handle this by falling back to a set hue so the series still has color.

@@ -2,7 +2,7 @@
 
 Docs here are read by agents at generation time, where they compete with the surrounding code for influence. An agent acts on what a doc *tells it to do*, not on the argument for why a rule is good — agents are dominated by what they read at generation time, not by what they were told earlier. That one fact splits the docs into two classes with two jobs:
 
-- **Imperative docs** — `CLAUDE.md` (root + per-layer), `rules/*`, `glossary.md`, `api/*`, `working-style.md`. Read *to act*: every line must change what an agent does the moment it reads it.
+- **Imperative docs** — `AGENTS.md` (root + per-layer; `CLAUDE.md` is a `@AGENTS.md` import shim Claude Code auto-loads), `rules/*`, `glossary.md`, `api/*`, `working-style.md`. Read *to act*: every line must change what an agent does the moment it reads it.
 - **ADRs** — read *to decide*, in the rare moment an agent changes or challenges a recorded decision. An ADR holds the one thing code cannot: the road not taken.
 
 This ADR governs both, and is the one place permitted to explain why the docs look like this — reached by number, exactly as every other rule reaches its rationale.
@@ -13,11 +13,11 @@ The early agent docs (`working-style.md`, the first rule shards) were written es
 
 **Decision:**
 
-1. **Imperative docs carry direct-effect content only.** `CLAUDE.md` (root + per-layer), `rules/*`, `glossary.md`, `api/*`, `working-style.md` — every line must change what an agent does at the moment it reads it. One imperative per bullet; definitions live in the glossary; the *why* lives in an ADR cited by number.
+1. **Imperative docs carry direct-effect content only.** `AGENTS.md` (root + per-layer; `CLAUDE.md` re-exports it via `@AGENTS.md`), `rules/*`, `glossary.md`, `api/*`, `working-style.md` — every line must change what an agent does at the moment it reads it. One imperative per bullet; definitions live in the glossary; the *why* lives in an ADR cited by number.
 
 2. **The line is applicability, not justification.** Keep the clause that tells an agent *when a rule fires or when its exception hits* — that has direct effect. Cut the clause that argues *why the rule is correct* — that goes to an ADR. Test per clause: "does this change what I do this turn, or does it explain why the rule is good?"
 
-3. **Two whys, two homes.** Why the *doc system* exists and how an agent traverses it (root `CLAUDE.md` → per-layer `CLAUDE.md` → `glossary.md` + `rules/index.md` → ADR by number) lives here, in this root ADR. Why a *given rule* is what it is lives in that rule's own subject ADR, cited by number. This ADR is not a sink for all rationale — only the doc system's own.
+3. **Two whys, two homes.** Why the *doc system* exists and how an agent traverses it (root `AGENTS.md` → per-layer `AGENTS.md` → `glossary.md` + `rules/index.md` → ADR by number; each `CLAUDE.md` is a `@AGENTS.md` import that auto-loads the sibling `AGENTS.md`, so the traversal is identical for Claude Code) lives here, in this root ADR. Why a *given rule* is what it is lives in that rule's own subject ADR, cited by number. This ADR is not a sink for all rationale — only the doc system's own.
 
 4. **ADRs are the designated prose home — the rule inverts there.** An ADR is *allowed* to reason; that is its job (bounded by Part B: it reasons about decisions, not spec). Transient docs (issue tracker, PRDs, disposal memos) are exempt. The imperative-only rule binds the doc classes in #1, nowhere else.
 
@@ -64,5 +64,9 @@ ADRs were previously *frozen rationale* kept in sync with reality by discipline 
 - ADR-0022's "Doc lifecycle note" is superseded by Decisions 6–7. A *new decision* still gets a new ADR with a supersession redirect (the `ADR-0014 → ADR-0022` chain stands), but a decision's *current statement* lives as current truth in its own body, never reconstructed from a frozen body plus an amendment chain.
 - Existing amended ADRs are reshaped to Decision 7: decision-bearing amendments fold into the body with anchors and rejected-alternatives preserved; pure spec-drift amendments are dropped to the code and tests that already carry them.
 - `.claude/skills/adr/scripts/check-adr-citations.mjs` (`pnpm check:adr`) enforces Decision 8 — every `ADR-N c.M` / `ADR-N amendment <date>` cited in code or docs must resolve to a live anchor (the ADR file exists, the commitment number is declared, the amendment date is still present). It is the harness that makes aggressive folds safe: rewrite prose, then prove no cited anchor was dropped. It runs whole-tree in CI (the only scope that catches an ADR edit orphaning a citation elsewhere) and file-scoped in lint-staged on staged `.ts/.tsx/.md`. The same guard enforces Decision 11 in reverse — every active ADR must declare a `Code anchors:` footer, and each named file must exist and carry the `ADR-N` breadcrumb (or the ADR declares `none — <reason>`). Coverage reads the declared paths directly, so it reaches files the citation scan skips (vendored `packages/mcu/`, any `.json`): the breadcrumb a sweep needs is proven present on the surface it lands on.
+
+**Amendment anchors** — dates cited from code/docs; each refinement is folded into the body above and kept here only so the citation resolves in one hop:
+
+- **2026-06-18** — the imperative-doc home moved from `CLAUDE.md` to `AGENTS.md` (root + per-layer); `CLAUDE.md` is now a one-line `@AGENTS.md` import shim. Why: `AGENTS.md` is the tool-agnostic cross-agent filename many agent tools read, while `CLAUDE.md` is Claude-Code-specific — keeping the rules in `AGENTS.md` and the `CLAUDE.md` re-export lets every agent tool reach the same imperatives and Claude Code still auto-loads them. Folded into the Imperative-docs class (intro + c.1) and the traversal chain (c.3).
 
 **Code anchors:** `.claude/skills/adr/scripts/check-adr-citations.mjs` — the guard that enforces c.8 and c.11.

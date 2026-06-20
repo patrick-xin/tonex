@@ -21,8 +21,8 @@ import {
 //
 // Preset seeds are curated data in packages/core/src/theme/shadcn-presets.ts;
 // asserted case-insensitively since the field may echo a different hex casing.
-const NOIR_HEX = /#5b57d6/i // noir preset's curated seed
-const GROVE_HEX = /#27b08b/i // grove preset's curated seed
+const STONE_HEX = /#161616/i // stone preset's curated seed
+const PAPER_HEX = /#e3bfaa/i // paper preset's curated seed
 const TOUCHED = '#123456' // an arbitrary user-edited seed, distinct from any preset
 
 test.describe('shadcn preset apply', () => {
@@ -34,10 +34,10 @@ test.describe('shadcn preset apply', () => {
     // pick raises no decision: it applies immediately and supersedes the
     // untouched seed with the preset's curated one.
     await presetButton(page).click()
-    await presetChip(page, 'noir').click()
+    await presetChip(page, 'stone').click()
 
     await expect(presetDialog(page)).toHaveCount(0)
-    await expect(seedField(page)).toHaveValue(NOIR_HEX)
+    await expect(seedField(page)).toHaveValue(STONE_HEX)
   })
 
   test('a pick over a touched seed opens the keep-vs-adopt dialog', async ({ page }) => {
@@ -45,11 +45,11 @@ test.describe('shadcn preset apply', () => {
     await setSeedHex(page, TOUCHED) // mark the seed touched
 
     await presetButton(page).click()
-    await presetChip(page, 'grove').click()
+    await presetChip(page, 'paper').click()
 
     await expect(presetDialog(page)).toBeVisible()
     await expect(
-      presetDialog(page).getByRole('heading', { name: /switch to grove/i }),
+      presetDialog(page).getByRole('heading', { name: /switch to paper/i }),
     ).toBeVisible()
   })
 
@@ -57,7 +57,7 @@ test.describe('shadcn preset apply', () => {
     await gotoTheme(page, 'shadcn')
     await setSeedHex(page, TOUCHED)
     await presetButton(page).click()
-    await presetChip(page, 'grove').click()
+    await presetChip(page, 'paper').click()
 
     // the dialog defaults to "Current" (the safe choice) — apply as-is.
     await presetDialog(page).getByRole('button', { name: 'Apply' }).click()
@@ -70,20 +70,20 @@ test.describe('shadcn preset apply', () => {
     await gotoTheme(page, 'shadcn')
     await setSeedHex(page, TOUCHED)
     await presetButton(page).click()
-    await presetChip(page, 'grove').click()
+    await presetChip(page, 'paper').click()
 
     await presetChoiceCard(page, 'Preset').click()
     await presetDialog(page).getByRole('button', { name: 'Apply' }).click()
 
     await expect(presetDialog(page)).toHaveCount(0)
-    await expect(seedField(page)).toHaveValue(GROVE_HEX)
+    await expect(seedField(page)).toHaveValue(PAPER_HEX)
   })
 
   test('Cancel applies nothing — the touched seed survives', async ({ page }) => {
     await gotoTheme(page, 'shadcn')
     await setSeedHex(page, TOUCHED)
     await presetButton(page).click()
-    await presetChip(page, 'grove').click()
+    await presetChip(page, 'paper').click()
 
     await presetDialog(page).getByRole('button', { name: 'Cancel' }).click()
 

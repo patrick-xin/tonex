@@ -1,6 +1,31 @@
 ---
-title: Intro
-description: Intro
+title: Introduction
+description: One engine, a small set of subcommands, built to be driven by people and agents.
 ---
 
-Placeholder content.
+The CLI runs the same engine as the web app, from your terminal or an agent.
+
+## Built for agents
+
+A command is predictable for both human and agents. An agent can call `npx tonex` and read the result from standard output the same way it calls any other tool. Two things make it agent-friendly:
+
+- **`tonex describe`** emits the whole contract as JSON — commands, flags, the contrast policy, and the exit-code taxonomy — so an agent learns what blocks versus warns before running anything.
+- **Exit codes are a contract**: `0` clean, `1` contrast gate failure (the colors are wrong), `2` usage or input error (the call is wrong).
+
+## Subcommands
+
+Tonex is a subcommand CLI — `tonex <command> [options]`:
+
+- **`generate`** — derive a theme from a seed and print it (shadcn, DESIGN.md YAML, or Material Theme JSON).
+- **`check`** — audit WCAG contrast. Gate a derived theme, find the minimum contrast level that passes, or verify ad-hoc color pairs.
+- **`adjust`** — shift named tokens by a relative HCT delta and report the gamut-clamped result.
+- **`describe`** — print the machine-readable surface: every command, flag, and the contrast policy.
+
+`generate` is the common path: one command, one file, deterministic. Run `tonex` or `tonex --help` for usage at any time.
+
+
+## Next
+
+- [Installation](/docs/cli/installation)
+- [Commands](/docs/cli/commands)
+- [Targets & formats](/docs/cli/targets-formats)

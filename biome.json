@@ -22,7 +22,8 @@
     "rules": {
       "recommended": true,
       "a11y": {
-        "useSemanticElements": "warn"
+        "useSemanticElements": "warn",
+        "useValidAnchor": "warn"
       }
     }
   },

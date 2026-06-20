@@ -20,8 +20,8 @@ describe('presetSwatches', () => {
   })
 
   it('reflects each preset as its pure curated look — different presets differ', () => {
-    // grove (teal) and default (violet) must not derive the same primary.
-    expect(presetSwatches('grove').light.primary).not.toBe(presetSwatches('default').light.primary)
+    // lagoon (teal) and default (violet) must not derive the same primary.
+    expect(presetSwatches('lagoon').light.primary).not.toBe(presetSwatches('default').light.primary)
   })
 
   it('co-derives both modes — light and dark backgrounds differ', () => {
@@ -32,8 +32,8 @@ describe('presetSwatches', () => {
 
 describe('presetSwatches with a resolved source override', () => {
   it('derives against the provided seed/contrast, not the preset’s curated source', () => {
-    const curated = presetSwatches('grove').light.primary
-    const overridden = presetSwatches('grove', {
+    const curated = presetSwatches('lagoon').light.primary
+    const overridden = presetSwatches('lagoon', {
       seed: SHADCN_PRESETS.default.seed,
       contrastLevel: SHADCN_PRESETS.default.contrastLevel,
     }).light.primary
@@ -41,23 +41,23 @@ describe('presetSwatches with a resolved source override', () => {
   })
 
   it('equals the curated look when handed the preset’s own source', () => {
-    const curated = presetSwatches('grove')
-    const explicit = presetSwatches('grove', {
-      seed: SHADCN_PRESETS.grove.seed,
-      contrastLevel: SHADCN_PRESETS.grove.contrastLevel,
+    const curated = presetSwatches('lagoon')
+    const explicit = presetSwatches('lagoon', {
+      seed: SHADCN_PRESETS.lagoon.seed,
+      contrastLevel: SHADCN_PRESETS.lagoon.contrastLevel,
     })
     expect(explicit.light.primary).toBe(curated.light.primary)
     expect(explicit.dark.bg).toBe(curated.dark.bg)
   })
 
   it('returns valid hex for every role under an override source', () => {
-    const s = presetSwatches('grove', {
+    const s = presetSwatches('lagoon', {
       seed: SHADCN_PRESETS.default.seed,
       contrastLevel: SHADCN_PRESETS.default.contrastLevel,
     })
     for (const mode of MODES) {
       for (const role of ROLES) {
-        expect(s[mode][role], `grove.${mode}.${role}`).toMatch(HEX)
+        expect(s[mode][role], `lagoon.${mode}.${role}`).toMatch(HEX)
       }
     }
   })

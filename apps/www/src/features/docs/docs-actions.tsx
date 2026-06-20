@@ -26,7 +26,7 @@ export function DocsActions({ slug, url }: { slug: string[]; url: string }) {
         >
           <ChevronDownIcon className="size-3.5 transition-[transform,colors] text-on-surface-variant group-hover:text-on-surface" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={cn('w-42 -translate-x-28 surface-popup-blur!')}>
+        <DropdownMenuContent className={cn('w-42 sm:-translate-x-28 surface-popup-blur!')}>
           {Object.entries(menuItems).map(([key, value]) => (
             <DropdownMenuItem
               className="text-sm capitalize text-on-surface-variant group"

@@ -13,8 +13,9 @@ import {
   Tailwind,
   Text,
 } from 'react-email'
-import { CollageFonts } from './collage-fonts'
-import { collageTailwindConfig } from './theme'
+import { SITE_CONFIG } from '@/lib/site-config'
+import { EmailFonts } from './fonts'
+import { emailTailwindConfig } from './theme'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ? `https://${process.env.NEXT_PUBLIC_APP_URL}` : ''
 
@@ -29,38 +30,39 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
-  const brand = companyName
+  const brand = SITE_CONFIG.brand
   const welcomeTitle = `Welcome to ${brand}`
 
   const tips: WelcomeTip[] = [
     {
-      title: 'Complete your profile',
+      title: 'Start from any color',
       description:
-        'Add a photo and a short bio so teammates recognize you in comments and mentions.',
+        'Drop in a hex or a brand color. Every role is generated from that one seed — never hand-picked, so the whole palette stays in tune.',
     },
     {
-      title: 'Turn on notifications',
-      description: 'Choose email or in-app alerts so you never miss a review request or deadline.',
+      title: 'Contrast, guaranteed',
+      description:
+        'Every theme is checked against WCAG in both light and dark, so your text stays legible on every surface.',
     },
     {
-      title: 'Browse templates',
+      title: 'Export anywhere',
       description:
-        'Starter layouts and snippets help your team ship polished work without reinventing the wheel.',
+        'Copy paste-ready tokens for shadcn and Tailwind, or design.md and Material — then bind the roles however your UI needs.',
     },
   ]
 
   return (
-    <Tailwind config={collageTailwindConfig}>
+    <Tailwind config={emailTailwindConfig}>
       <Html>
         <Head>
-          <CollageFonts />
+          <EmailFonts />
         </Head>
 
-        <Body className="bg-canvas font-14 font-inter text-fg m-0 p-0">
-          <Preview>Welcome to {brand}</Preview>
+        <Body className="bg-surface font-14 font-sans text-on-surface m-0 p-0">
+          <Preview>Welcome to {brand} — one seed color, a whole theme</Preview>
           <Container className="mx-auto max-w-[640px] px-4 pt-16 pb-6">
-            <Section className="shadow-collage-card rounded-[8px]">
-              <Section className="bg-bg border-stroke rounded-[8px] border overflow-hidden">
+            <Section className="shadow-card rounded-[8px]">
+              <Section className="bg-surface-container-lowest border-outline-variant rounded-[8px] border overflow-hidden">
                 <Section className="p-0">
                   <Img
                     src={`${baseUrl}/placeholder.png`}
@@ -72,48 +74,50 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
 
                 <Section className="mobile:px-6! mobile:pt-10 px-10 pt-20 pb-14 text-left">
                   <Section className="mb-9 text-left">
-                    <Text className="font-48 text-fg m-0 font-sans">{welcomeTitle}</Text>
-                    <Text className="font-14 font-inter text-fg-2 m-0 mt-[18px]">
-                      Thank you for signing up for {brand}.
+                    <Text className="font-48 text-on-surface m-0 font-serif">{welcomeTitle}</Text>
+                    <Text className="font-14 font-sans text-on-surface-variant m-0 mt-[18px]">
+                      Thanks for subscribing. {brand} turns a single seed color into a complete,
+                      WCAG-contrast-checked theme — light and dark — ready to paste into shadcn,
+                      Tailwind, and beyond.
                     </Text>
-                    <Text className="font-14 font-inter text-fg-2 m-0">
-                      You&apos;re all set—explore what&apos;s new and get your first project going.
+                    <Text className="font-14 font-sans text-on-surface-variant m-0">
+                      We&apos;ll send the occasional note when something worth your time ships.
                     </Text>
                   </Section>
 
                   <Section className="text-left">
                     <Button
                       href={url}
-                      className="bg-brand font-15 font-inter text-fg-inverted inline-block border-none px-5 py-3.5 text-center"
+                      className="bg-primary font-15 font-sans text-on-primary inline-block border-none px-5 py-3.5 text-center"
                     >
-                      Explore
+                      See the roadmap
                     </Button>
                   </Section>
                 </Section>
 
-                <Section className="bg-bg-2 mobile:px-0! px-4 mobile:py-16! py-20">
+                <Section className="bg-surface-container mobile:px-0! px-4 mobile:py-16! py-20">
                   <Section className="px-6">
-                    <Text className="font-48 text-fg m-0 max-w-[400px] font-sans">
-                      Your first week in {brand}
+                    <Text className="font-48 text-on-surface m-0 max-w-[400px] font-serif">
+                      From one color to a whole system
                     </Text>
-                    <Text className="font-14 font-inter text-fg-2 m-0 mt-[18px] max-w-[479px]">
-                      Small steps add up. Use this short checklist to get comfortable—everything
-                      here is optional, but it helps you feel at home faster.
+                    <Text className="font-14 font-sans text-on-surface-variant m-0 mt-[18px] max-w-[479px]">
+                      {brand} does the color math so you don&apos;t have to — coherent roles, in
+                      light and dark, that stay legible wherever you put them.
                     </Text>
                   </Section>
                   <Section className="px-6 pt-14">
-                    <Text className="font-15 font-inter text-fg m-0">
-                      Here&apos;s what to try first:
+                    <Text className="font-15 font-sans text-on-surface m-0">
+                      What&apos;s inside:
                     </Text>
                     <Section className="pt-9">
                       {tips.map((item, idx) => (
-                        <Section key={String(idx)} className="border-stroke border-b py-6">
+                        <Section key={String(idx)} className="border-outline-variant border-b py-6">
                           <Row>
                             <Column className="w-[92%] align-top">
-                              <Text className="font-20 font-inter text-fg m-0 leading-normal">
+                              <Text className="font-20 font-sans text-on-surface m-0 leading-normal">
                                 {item.title}
                               </Text>
-                              <Text className="font-14 font-inter text-fg-2 m-0 mt-1 max-w-[380px]">
+                              <Text className="font-14 font-sans text-on-surface-variant m-0 mt-1 max-w-[380px]">
                                 {item.description}
                               </Text>
                             </Column>
@@ -143,10 +147,10 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
                   />
                 </Section>
 
-                <Section className="border-stroke border-t px-10 py-16">
-                  <Text className="font-13 font-inter text-fg-3 m-0 max-w-[320px]">
-                    Collage is the workspace where your team keeps projects, context, and updates
-                    together—from first idea to launch.
+                <Section className="border-outline-variant border-t px-10 py-16">
+                  <Text className="font-13 font-sans text-on-surface-variant m-0 max-w-[320px]">
+                    {brand} turns a seed color into a complete, contrast-checked theme system —
+                    light and dark, ready to ship.
                   </Text>
 
                   <Row align="left">
@@ -155,7 +159,7 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
                         <Row align="left">
                           {/* X img */}
                           <Column className="w-5 pr-2">
-                            <Link href="https://example.com/" className="inline-block">
+                            <Link href={SITE_CONFIG.social.x} className="inline-block">
                               <Img
                                 src={`${baseUrl}/static/shared/social-x-black.png`}
                                 alt="X"
@@ -167,7 +171,7 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
                           </Column>
                           {/* GH img */}
                           <Column className="w-5">
-                            <Link href="https://example.com/" className="inline-block">
+                            <Link href={SITE_CONFIG.social.github} className="inline-block">
                               <Img
                                 src={`${baseUrl}/static/shared/social-gh-black.png`}
                                 alt="GitHub"
@@ -184,17 +188,17 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
 
                   <Row align="left">
                     <Column className="w-full pt-8 align-top">
-                      <Text className="font-11 font-inter text-fg-2 m-0">tonex</Text>
+                      <Text className="font-11 font-mono text-on-surface-variant m-0">tonex</Text>
                     </Column>
                   </Row>
 
                   <Row align="left">
                     <Column className="w-full pt-5 align-top">
-                      <Text className="font-11 font-inter text-fg-2 m-0 max-w-[169px]">
-                        <Link href="https://example.com/" className="text-fg-2">
+                      <Text className="font-11 font-sans text-on-surface-variant m-0 max-w-[200px]">
+                        <Link href="https://example.com/" className="text-on-surface-variant">
                           Unsubscribe
                         </Link>{' '}
-                        from {companyName} marketing emails.
+                        from {companyName} updates.
                       </Text>
                     </Column>
                   </Row>
@@ -209,7 +213,7 @@ export const WelcomeEmail = ({ companyName, url }: WelcomeEmailProps) => {
 }
 
 WelcomeEmail.PreviewProps = {
-  companyName: 'Collage',
+  companyName: 'tonex',
   url: 'https://example.com/',
 } satisfies WelcomeEmailProps
 

@@ -1,16 +1,16 @@
 import type { TailwindConfig } from 'react-email'
 import plugin from 'tailwindcss/plugin'
 
+// MD3 role tokens, generated from #6750a4.
 const colors = {
-  canvas: '#FBFCFB',
-  bg: '#FFFFFF',
-  'bg-2': '#FBFCFB',
-  fg: '#103B05',
-  'fg-2': '#194A07',
-  'fg-3': '#869C7F',
-  'fg-inverted': '#FBFFF9',
-  stroke: '#D8E1D4',
-  brand: '#103B05',
+  primary: '#5b4497',
+  'on-primary': '#eadeff',
+  surface: '#fdf7ff',
+  'surface-container-lowest': '#ffffff',
+  'surface-container': '#f3eaff',
+  'on-surface': '#352f43',
+  'on-surface-variant': '#625c72',
+  'outline-variant': '#b7aec7',
 } as const
 
 const fontScale = {
@@ -40,7 +40,7 @@ const fontScale = {
   88: { fontSize: '88px', lineHeight: '1', letterSpacing: '-2.64px' },
 } as const
 
-export const collageTailwindConfig: TailwindConfig = {
+export const emailTailwindConfig: TailwindConfig = {
   plugins: [
     plugin(({ addUtilities, addVariant }) => {
       addVariant('mobile', '@media (max-width: 600px)')
@@ -55,12 +55,13 @@ export const collageTailwindConfig: TailwindConfig = {
     extend: {
       colors,
       boxShadow: {
-        'collage-card':
-          '0px 76px 21px 0px rgba(193,195,193,0), 0px 49px 19px 0px rgba(193,195,193,0.01), 0px 27px 16px 0px rgba(193,195,193,0.05), 0px 12px 12px 0px rgba(193,195,193,0.09), 0px 3px 7px 0px rgba(193,195,193,0.1)',
+        card: '0px 76px 21px 0px rgba(193,195,193,0), 0px 49px 19px 0px rgba(193,195,193,0.01), 0px 27px 16px 0px rgba(193,195,193,0.05), 0px 12px 12px 0px rgba(193,195,193,0.09), 0px 3px 7px 0px rgba(193,195,193,0.1)',
       },
+      // DESIGN.md type voices: Vidaloka (display serif), IBM Plex Sans (UI), IBM Plex Mono (data).
       fontFamily: {
-        sans: ['Arial', 'Helvetica', 'sans-serif'],
-        inter: ['Inter', 'Arial', 'sans-serif'],
+        serif: ['Vidaloka', 'Georgia', 'serif'],
+        sans: ['IBM Plex Sans', 'Arial', 'Helvetica', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
     },
   },

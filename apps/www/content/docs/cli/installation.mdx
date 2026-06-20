@@ -1,18 +1,53 @@
 ---
 title: Installation
-description: Installation tonex cli
+description: Run the Tonex CLI with npx, install it globally, or add the Tonex skill for agent-led theme work.
 ---
 
+The CLI is a single zero-dependency bundle. For one-off generation or agent runs, use `npx`:
 
-```package-install
-npx tonex
+```bash
+npx tonex@latest generate --seed "#6A9CFF" > globals.css
 ```
 
-```javascript title="index.js" showLineNumbers {2,4}
-function fibonacci(n) {
-  if (n <= 1) return n
-  return fibonacci(n - 1) + fibonacci(n - 2)
-}
+That form needs no global install. Replace `generate ...` with any command:
 
-console.log(fibonacci(10))
+```bash
+npx tonex@latest <command> [options]
 ```
+
+## Optional global install
+
+If you want a shorter command, install it globally:
+
+```bash
+npm i -g tonex
+```
+
+Then run:
+
+```bash
+tonex <command> [options]
+```
+
+## Verify the CLI
+
+Use `--help` for human-readable usage, or `describe` for the machine-readable contract that agents should read first:
+
+```bash
+tonex --help
+tonex describe
+```
+
+## Install the agent skill
+
+The CLI is the engine. The `tonex` skill carries the judgment for mapping roles, choosing remedies, and using the contrast gate correctly.
+
+```bash
+npx skills add patrick-xin/tonex --skill tonex
+```
+
+Do not use `--all`; this repository also contains internal maintainer skills. Scope the install to `--skill tonex`.
+
+## Requirements
+
+Requires a current Node.js runtime.

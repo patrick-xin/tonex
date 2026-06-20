@@ -1,4 +1,4 @@
 {
-  "title": "Shadcn",
-  "pages": ["presets", "role-bindings"]
+  "title": "shadcn",
+  "pages": ["presets", "role-bindings", "role-overrides"]
 }
