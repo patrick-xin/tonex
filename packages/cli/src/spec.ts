@@ -236,7 +236,7 @@ const custom: FlagSpec = {
   name: '--custom',
   type: 'json',
   description:
-    'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed), shadcnSource defaults "color", hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
+    'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed); shadcnSource picks which md pair the single shadcn slot binds — "color" (default) = the vivid fill (like --primary), "container" = the muted background tone (only affects --to shadcn); hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
 }
 const aaa: FlagSpec = {
   name: '--aaa',
