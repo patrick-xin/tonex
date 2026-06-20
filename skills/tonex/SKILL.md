@@ -90,6 +90,8 @@ md roles are bare (`on-surface`); shadcn slots keep the `--` (`--foreground`). T
 
 Every token in the delivered theme comes from `tonex`, from one recipe. Never type a hex that didn't come from the user as the seed. Never paste tokens across two different runs — contrast is only guaranteed within one recipe. To change the feel: shift the recipe and regenerate the whole set, or `adjust` then re-gate.
 
+A role is the seed *re-toned for the job*, not the seed returned verbatim — `primary` won't equal the seed hex, because its lightness was reassigned for contrast. Don't read that as drift and don't reach for a fresh color. The one time the *literal* seed belongs in the output is a deliberate brand moment (logo, mark) — that's the escape hatch in [references/contrast.md](references/contrast.md#the-literal-brand-escape-hatch), where you paint the fill with the seed and derive its text color with `check --foreground`; it's the lone hex you didn't get back from a recipe, and it sits outside the coordinated contrast system, so verify any other pairing it touches.
+
 **Step 2 is not optional.** A theme delivered without a passing `check` is unverified, and it holds only for a recipe you actually gated. "It's just a blue, it'll be fine" is exactly the pairing that fails in dark mode.
 
 Before you call the theme done, confirm:
