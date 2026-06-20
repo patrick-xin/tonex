@@ -1,0 +1,38 @@
+name: Publish CLI
+# why: publish the `tonex` npm package on a *scoped* tag push (`tonex@1.2.3`).
+# git tags are repo-wide, so the tag PATTERN is what scopes intent: a release
+# names exactly one package and never implies a www (apps/) release. Other
+# publishable packages get their own `name@version` tag + matching guard.
+on:
+  push:
+    tags:
+      - 'tonex@*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      # guard: a mis-typed tag must not publish the wrong number. The tag is the
+      # trigger; packages/cli/package.json is the source of truth — they must agree.
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#tonex@}"
+          PKG=$(node -p "require('./packages/cli/package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag tonex@$TAG != packages/cli/package.json $PKG"
+            exit 1
+          fi
+      # guard: the plugin manifests ride the same version (the skill drives this CLI).
+      - run: pnpm plugin:version --check
+      - run: pnpm --filter tonex build
+      - run: pnpm --filter tonex publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
