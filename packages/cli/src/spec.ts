@@ -143,6 +143,23 @@ const desaturate: FlagSpec = {
   type: 'unit',
   description: 'surface desaturate strength 0..1; 0 = no-op (exclusive with --tint)',
 }
+// why: the user color(s) added ON TOP of the seed-derived palette. Agent-first
+// JSON batch (the --pairs/--shifts precedent), each entry {name, hex, blend?,
+// shadcnSource?}: MCU harmonizes the hex toward the seed (blend, default true)
+// and emits a contrast-GUARANTEED 4-role md group (--color-{slug} + on/container)
+// plus a shadcn pair (--{slug}/--{slug}-foreground; shadcnSource picks which md
+// pair feeds it, default 'color'). hex takes the --seed contract (hex or oklch).
+// Validation is core's (validateCustomColorEntry: reserved-name / slug-collision
+// / hex) — surfaced, never reimplemented. Carried in EVERY output (the shadcn pair,
+// plus the derived roles in yaml/json/colors) and gated by `check`; --to colors and
+// --to json also carry the definitions (colors' `custom` block / json's
+// extendedColors), the re-derivation input that keeps both self-describing.
+const custom: FlagSpec = {
+  name: '--custom',
+  type: 'json',
+  description:
+    'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed), shadcnSource defaults "color", hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
+}
 const aaa: FlagSpec = {
   name: '--aaa',
   type: 'boolean',
@@ -196,6 +213,7 @@ export const GENERATE_FLAGS = [
   tint,
   tintPalette,
   desaturate,
+  custom,
 ] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
@@ -211,6 +229,7 @@ export const CHECK_FLAGS = [
   tint,
   tintPalette,
   desaturate,
+  custom,
   aaa,
   large,
   format,

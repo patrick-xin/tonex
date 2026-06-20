@@ -4,7 +4,13 @@
 // hexes, `--pairs`) score raw via @tonex/color-utils; theme-AWARE (`--seed`,
 // `--find-contrast`) derive then run @tonex/core/audit — the engine owns that
 // scorer (the CLI never re-scores). The present flags pick the form.
-import { argbFromHex, contrastRatio, hexFromColorInput, hexString, oklchString } from '@tonex/color-utils'
+import {
+  argbFromHex,
+  contrastRatio,
+  hexFromColorInput,
+  hexString,
+  oklchString,
+} from '@tonex/color-utils'
 import { bareMdName, type ColorFormat, deriveTheme, MODES, type Mode } from '@tonex/core'
 import {
   type AuditThemeResult,
@@ -73,8 +79,13 @@ function findMinContrast(args: ParsedArgs, io: Io): number {
   // one. `--mode` scopes the verdict to one projection (the same audit the gate
   // uses), so the remedy matches the single-mode yaml the agent emits.
   const clears = (c: number): boolean =>
-    scopeAudit(auditTheme(deriveTheme({ ...source, contrastLevel: uniform(c) }), { level }), mode)
-      .ok
+    scopeAudit(
+      auditTheme(deriveTheme({ ...source, contrastLevel: uniform(c) }), {
+        level,
+        customColors: source.customColors,
+      }),
+      mode,
+    ).ok
 
   // already clears at the floor → no remedy needed (the AA seed-only case).
   if (clears(0)) {
@@ -90,7 +101,10 @@ function findMinContrast(args: ParsedArgs, io: Io): number {
 
   // unreachable → even max contrast leaves text pairs short; report how many.
   const atMax = scopeAudit(
-    auditTheme(deriveTheme({ ...source, contrastLevel: uniform(1) }), { level }),
+    auditTheme(deriveTheme({ ...source, contrastLevel: uniform(1) }), {
+      level,
+      customColors: source.customColors,
+    }),
     mode,
   )
   if (!atMax.ok) {
@@ -150,7 +164,14 @@ function checkTheme(args: ParsedArgs, io: Io): number {
   const level = levelOf(args)
   const fmt = formatOf(args, io)
   if (typeof fmt === 'number') return fmt
-  const result = scopeAudit(auditTheme(deriveTheme(source), { level }), mode)
+  // why: pass source.customColors so the gate appends each entry's text pairs
+  // (on-color/color, on-container/container, shadcn -foreground/root) — the
+  // contrast GUARANTEE is the whole point of adding a custom color, so an unsafe
+  // user hex blocks at exit 1 like any other failing text pair.
+  const result = scopeAudit(
+    auditTheme(deriveTheme(source), { level, customColors: source.customColors }),
+    mode,
+  )
 
   if (hasFlag(args, '--json')) {
     io.out(`${JSON.stringify({ mode: mode ?? 'both', ...leanReport(result, fmt) }, null, 2)}\n`)
@@ -239,7 +260,12 @@ function checkPairs(args: ParsedArgs, io: Io): number {
   if (typeof entries === 'number') return entries
   const pairs: [string, string][] = []
   for (const p of entries) {
-    if (!Array.isArray(p) || p.length !== 2 || typeof p[0] !== 'string' || typeof p[1] !== 'string') {
+    if (
+      !Array.isArray(p) ||
+      p.length !== 2 ||
+      typeof p[0] !== 'string' ||
+      typeof p[1] !== 'string'
+    ) {
       io.err(`tonex: each --pairs entry must be [fg, bg]; bad entry ${JSON.stringify(p)}\n`)
       return USAGE
     }

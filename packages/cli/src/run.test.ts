@@ -303,6 +303,74 @@ describe('tonex generate', () => {
   })
 })
 
+// why: --custom adds user color(s) ON TOP of the seed-derived palette — MCU
+// harmonizes each toward the seed and emits a contrast-guaranteed 4-role md
+// group + a shadcn pair per entry. The agent-first JSON batch mirrors
+// --pairs/--shifts. These pin the CLI's responsibility (parse → source →
+// recipe → gate), not the engine's MCU math (pinned in core's
+// custom-color.test.ts). "success" is a deliberately NON-reserved name.
+describe('tonex custom colors', () => {
+  const SEED = '#3b82f6'
+  const SUCCESS = JSON.stringify([{ name: 'success', hex: '#22c55e' }])
+
+  it('--custom emits the per-entry shadcn pair (--{slug}/--{slug}-foreground) and pins it into the recipe', () => {
+    const r = capture(['generate', '--seed', SEED, '--custom', SUCCESS])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--success:')
+    expect(r.out).toContain('--success-foreground:')
+    // the recipe re-runs THIS projection — the custom entry rides inside it
+    expect(r.out).toContain('--custom')
+    expect(r.out).toContain('"name":"success"')
+  })
+
+  it('--custom pairs enter the contrast gate — check audits more pairs than the bare seed', () => {
+    const passCount = (out: string) => Number(out.match(/(\d+) pairs clear/)?.[1])
+    const base = capture(['check', '--seed', SEED])
+    const withCustom = capture(['check', '--seed', SEED, '--custom', SUCCESS])
+    expect(base.code).toBe(OK)
+    expect(withCustom.code).toBe(OK)
+    // the success color's on-X/X text pairs are now gated → strictly more pairs
+    expect(passCount(withCustom.out)).toBeGreaterThan(passCount(base.out))
+  })
+
+  it('rejects a reserved name and malformed --custom as usage errors (exit 2), never a silent no-op', () => {
+    const reserved = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--custom',
+      JSON.stringify([{ name: 'primary', hex: '#000000' }]),
+    ])
+    expect(reserved.code).toBe(USAGE)
+    expect(reserved.err).toMatch(/reserved/i)
+    expect(capture(['generate', '--seed', SEED, '--custom', 'not-json']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--custom', '[]']).code).toBe(USAGE) // empty batch
+  })
+
+  it('--custom hex takes the --seed color contract (hex or oklch); --to colors carries it (definition + derived roles)', () => {
+    const viaOklch = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--to',
+      'colors',
+      '--custom',
+      JSON.stringify([{ name: 'success', hex: 'oklch(0.72 0.19 150)' }]),
+    ])
+    expect(viaOklch.code).toBe(OK)
+    // colors is self-describing: the DEFINITION rides in the `custom` block (the
+    // re-derivation input, with the oklch projected to an sRGB hex) and the DERIVED
+    // roles ride inline in both modes — so an agent binds custom values from colors.
+    const colors = JSON.parse(viaOklch.out)
+    expect(colors.custom).toEqual([
+      expect.objectContaining({ name: 'success', blend: true, shadcnSource: 'color' }),
+    ])
+    expect(colors.custom[0].hex).toMatch(/^#[0-9a-f]{6}$/) // oklch → projected sRGB hex
+    expect(colors.light).toHaveProperty('success')
+    expect(colors.dark).toHaveProperty('on-success')
+  })
+})
+
 // why: `check` is the contrast gate, overloaded across forms that share one
 // exit-code contract (0 clears the level, 1 a text pair fails, 2 a bad call).
 describe('tonex check — whole-theme gate', () => {

@@ -5,6 +5,7 @@ import {
   MD_CORE_TOKEN_NAMES,
   MD_TOKEN_NAMES,
   type PortableTheme,
+  slugifyCustomColorName,
   type SurfaceAlgo,
 } from '../schema'
 import { selectSeedHex } from '../seed'
@@ -42,12 +43,30 @@ import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
 // `surface.level` are read from the light mode because the CLI applies both
 // uniformly across modes (source.ts `uniform`) — the only producer in v1; a
 // future per-mode producer would widen these to a {light,dark} pair.
+// why: one custom-color DEFINITION — the `--custom` round-trip payload (name,
+// source hex, blend-toward-seed flag, which md pair feeds the shadcn slot;
+// description when set). colors.json's analogue of Material JSON's extendedColors:
+// these definitions are the re-derivation INPUT for the custom slugs emitted in
+// light/dark, so the header still re-derives every value (Decision 7). Native
+// lowercase hex (our format), not MTB's uppercase.
+export interface ColorsJsonCustom {
+  name: string
+  hex: string
+  blend: boolean
+  shadcnSource: 'color' | 'container'
+  description?: string
+}
+
 export interface ColorsJson {
   seed: string
   variant: string
   contrast: number
   surface: { algo: SurfaceAlgo; level: number }
   format: ColorFormat
+  // why: the user's custom-color definitions (empty when none). Part of the
+  // re-derivable header — they reproduce the custom slugs that ride in light/dark,
+  // exactly as seed+variant reproduce the seed roles.
+  custom: ColorsJsonCustom[]
   light: Record<string, string>
   dark: Record<string, string>
 }
@@ -72,13 +91,15 @@ function projectColor(argb: number, fmt: ColorFormat): string {
 // ROSTER so key order is canonical and a missing token is visibly skipped, never
 // silently defaulted. `includeExtended` selects the roster tier (core default /
 // full opt-in), mirroring design-md.ts and json.ts — the merged lookup always
-// holds both tiers, so the roster choice is purely which keys to emit. Roster-only
-// (no custom slugs, no chart): every emitted key is a role the header re-derives.
+// holds both tiers, so the roster choice is purely which keys to emit. Custom
+// slugs trail the roster (chart stays out); every emitted key still re-derives from
+// the header — roles from the knobs, customs from the `custom` definitions block.
 function buildMode(
   theme: DerivedTheme,
   mode: Mode,
   fmt: ColorFormat,
   includeExtended: boolean,
+  customSlugs: readonly string[],
 ): Record<string, string> {
   const core = mode === 'light' ? theme.md.light : theme.md.dark
   const extended = mode === 'light' ? theme.md.lightExtended : theme.md.darkExtended
@@ -90,7 +111,44 @@ function buildMode(
     if (argb === undefined) continue
     out[roleKey(name)] = projectColor(argb, fmt)
   }
+  // why: custom slugs trail the roster (like chart trails core+extended in
+  // json.ts/css.ts). They live in the core md bucket (derive.ts splitMdLayer) —
+  // first-class brand surfaces, not extended ornament — so they emit regardless of
+  // includeExtended. Each slug expands to its 4 derived md tokens in MCU's order.
+  for (const slug of customSlugs) {
+    for (const name of customTokenNames(slug)) {
+      const argb = lookup[name]
+      if (argb === undefined) continue
+      out[roleKey(name)] = projectColor(argb, fmt)
+    }
+  }
   return out
+}
+
+// why: the 4 md token names one custom slug emits, in MCU's order (kept in
+// lockstep with derive.ts buildCustomColorsMd) — color, on-color, container,
+// on-container. roleKey strips `--color-` to the kebab role the map carries.
+function customTokenNames(slug: string): string[] {
+  return [
+    `--color-${slug}`,
+    `--color-on-${slug}`,
+    `--color-${slug}-container`,
+    `--color-on-${slug}-container`,
+  ]
+}
+
+// why: the custom DEFINITIONS — source.customColors projected to the `--custom`
+// round-trip payload (`id` dropped: re-derived from the slug). The re-derivation
+// input for the custom slugs above, mirroring json.ts's buildExtendedColors but in
+// colors.json's native vocabulary (hex/blend/shadcnSource, lowercase hex).
+function buildCustom(source: PortableTheme): ColorsJsonCustom[] {
+  return source.customColors.map((e) => ({
+    name: e.name,
+    hex: e.hex,
+    blend: e.blend,
+    shadcnSource: e.shadcnSource,
+    ...(e.description !== undefined ? { description: e.description } : {}),
+  }))
 }
 
 // why: the active algo's level. surfaceAlgo is single-valued, so the recipe
@@ -110,14 +168,16 @@ export function buildColorsJson(
   const fmt: ColorFormat = options.colorFormat ?? 'oklch'
   const includeExtended = options.includeExtended ?? false
   const theme = bundle.default
+  const customSlugs = source.customColors.map((e) => slugifyCustomColorName(e.name))
   return {
     seed: selectSeedHex(source),
     variant: source.variant,
     contrast: source.contrastLevel.light,
     surface: { algo: source.surfaceAlgo, level: surfaceLevel(source) },
     format: fmt,
-    light: buildMode(theme, 'light', fmt, includeExtended),
-    dark: buildMode(theme, 'dark', fmt, includeExtended),
+    custom: buildCustom(source),
+    light: buildMode(theme, 'light', fmt, includeExtended, customSlugs),
+    dark: buildMode(theme, 'dark', fmt, includeExtended, customSlugs),
   }
 }
 

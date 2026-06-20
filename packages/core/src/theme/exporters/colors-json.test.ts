@@ -93,7 +93,7 @@ describe('buildColorsJson — canonical recipe + both-mode role values', () => {
       expect(out.light).not.toEqual(out.dark)
     })
 
-    it('omits chart keys and custom slugs — roster only, so every value re-derives from the header', () => {
+    it('omits chart keys; with no custom colors the roster is exactly core', () => {
       const { light } = buildColorsJson(source, bundle, {})
       expect(light).not.toHaveProperty('chart-1')
       expect(Object.keys(light)).toEqual(CORE_KEYS)
@@ -114,6 +114,73 @@ describe('buildColorsJson — canonical recipe + both-mode role values', () => {
         expect(v).toMatch(HEX)
       }
     })
+  })
+})
+
+// why: customs are carried like Material JSON's extendedColors — the DEFINITIONS
+// (the `--custom` round-trip payload: name/hex/blend/shadcnSource) sit in a header
+// block that re-derives the slugs, so the "header alone re-derives the values"
+// contract (Decision 7) still holds. Unlike json.ts (which keeps derived custom
+// tokens out of `schemes` to mirror MTB's exact shape), colors.json ALSO emits the
+// derived custom roles inline in light/dark — it's the agent's bind-by-hand roster,
+// so the actual contrast-correct values must be readable here like they are from
+// --to shadcn / --to yaml. Customs are first-class (derive.ts: they merge into core,
+// not extended), so they appear regardless of includeExtended.
+describe('buildColorsJson — custom colors (definitions + derived roles)', () => {
+  const withCustom: PortableTheme = {
+    ...DEFAULT_INPUTS,
+    customColors: [
+      { id: 'success', name: 'success', hex: '#22c55e', blend: true, shadcnSource: 'color' },
+    ],
+  }
+  const bundle: ContrastBundle = { default: deriveTheme(withCustom) }
+  const CUSTOM_KEYS = ['success', 'on-success', 'success-container', 'on-success-container']
+
+  it('defaults to an empty custom block when the source has no custom colors', () => {
+    expect(
+      buildColorsJson(DEFAULT_INPUTS, { default: deriveTheme(DEFAULT_INPUTS) }, {}).custom,
+    ).toEqual([])
+  })
+
+  it('records each entry as a re-derivable definition (the --custom round-trip payload)', () => {
+    expect(buildColorsJson(withCustom, bundle, {}).custom).toEqual([
+      { name: 'success', hex: '#22c55e', blend: true, shadcnSource: 'color' },
+    ])
+  })
+
+  it('carries the optional description when set', () => {
+    const withDesc: PortableTheme = {
+      ...DEFAULT_INPUTS,
+      customColors: [
+        {
+          id: 'success',
+          name: 'success',
+          description: 'positive states',
+          hex: '#22c55e',
+          blend: true,
+          shadcnSource: 'color',
+        },
+      ],
+    }
+    expect(buildColorsJson(withDesc, { default: deriveTheme(withDesc) }, {}).custom[0]).toEqual({
+      name: 'success',
+      hex: '#22c55e',
+      blend: true,
+      shadcnSource: 'color',
+      description: 'positive states',
+    })
+  })
+
+  it('appends the 4 derived custom roles after the core roster, both modes', () => {
+    const out = buildColorsJson(withCustom, bundle, {})
+    expect(Object.keys(out.light)).toEqual([...CORE_KEYS, ...CUSTOM_KEYS])
+    expect(Object.keys(out.dark)).toEqual([...CORE_KEYS, ...CUSTOM_KEYS])
+    for (const k of CUSTOM_KEYS) expect(out.light[k]).toMatch(OKLCH)
+  })
+
+  it('keeps custom roles first-class — present regardless of includeExtended', () => {
+    const wide = buildColorsJson(withCustom, bundle, { includeExtended: true })
+    expect(Object.keys(wide.light)).toEqual([...FULL_KEYS, ...CUSTOM_KEYS])
   })
 })
 

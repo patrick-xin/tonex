@@ -16,7 +16,12 @@ import {
   MODES,
   type Mode,
 } from '@tonex/core'
-import { type PortableTheme, SHADCN_BINDING_PRESETS, withSoftEdges } from '@tonex/core/schema'
+import {
+  type CustomColorEntry,
+  type PortableTheme,
+  SHADCN_BINDING_PRESETS,
+  withSoftEdges,
+} from '@tonex/core/schema'
 import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
@@ -54,6 +59,14 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   } else if (source.surfaceDesaturateLevel.light > 0) {
     parts.push(`--desaturate ${source.surfaceDesaturateLevel.light}`)
   }
+  // why: custom colors shape the derived theme, so the recipe must carry them to
+  // reproduce the projection. Re-serialize the RESOLVED entries (hex already
+  // projected to sRGB, blend/shadcnSource defaulted) — never the raw flag — so a
+  // later regenerate emits the same custom tokens. Single-quoted for the shell;
+  // the JSON's own double quotes nest cleanly inside.
+  if (source.customColors.length > 0) {
+    parts.push(`--custom '${serializeCustom(source.customColors)}'`)
+  }
   if (hasFlag(args, '--extended')) parts.push('--extended')
   const fmt = flagValue(args, '--format')
   if (fmt !== undefined) parts.push(`--format ${fmt}`)
@@ -63,6 +76,22 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   parts.push(`--to ${target}`)
   if (target === 'yaml') parts.push(`--mode ${flagValue(args, '--mode') ?? 'light'}`)
   return parts.join(' ')
+}
+
+// why: the recipe's custom-color payload — the color-defining fields only (name,
+// hex, blend, shadcnSource; description when set, since it surfaces in --to json).
+// `id` is dropped: the CLI re-derives it from the slug, so emitting it would be
+// noise a later parse just re-synthesizes.
+function serializeCustom(entries: readonly CustomColorEntry[]): string {
+  return JSON.stringify(
+    entries.map((e) => ({
+      name: e.name,
+      hex: e.hex,
+      blend: e.blend,
+      shadcnSource: e.shadcnSource,
+      ...(e.description !== undefined ? { description: e.description } : {}),
+    })),
+  )
 }
 
 // why: `generate` derives the theme and prints it for one output target — the

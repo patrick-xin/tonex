@@ -11,6 +11,7 @@ export const HELP = `usage: tonex <command> [options]
 commands:
   generate --seed <hex> [--variant <name>] [--to colors|shadcn|yaml|json]
            [--mode light|dark] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>]
+           [--custom '<json>']
       Derive a theme from a seed hex color and print it.
   check    --seed <hex> [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
       Audit the derived theme's WCAG contrast. Both modes unless --mode
@@ -55,6 +56,12 @@ commands:
   --tint / --desaturate  surface-treatment strength 0..1 (mutually exclusive).
   --tint-palette  neutral palette the tint algo repaints surfaces with (default zinc).
                one of: slate, gray, zinc, neutral, stone, taupe, mauve, mist, olive.
+  --custom     JSON array of {name, hex, blend?, shadcnSource?} colors added on top
+               of the seed palette — each emits a harmonized 4-role md group + a
+               shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check.
+               blend defaults true, shadcnSource defaults "color", hex is hex or oklch.
+               Rides in every output; colors/json also carry the definitions
+               (colors' "custom" block / json's extendedColors).
   --aaa        raise the WCAG bar to AAA (default AA). --large uses large-text thresholds.
   --contrast   MCU palette contrast level, 0..1 (default 0).
   --mode       light|dark. generate: which mode yaml emits (default light;
