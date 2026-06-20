@@ -47,6 +47,7 @@ import type { EvaluatedPair, Level } from './types'
 // instead of reaching into sibling files. The two audit functions live below.
 export { applyLevel, levelThreshold } from './apply-level'
 export { isDecorative } from './decorative'
+export { type DeriveForegroundOptions, deriveForeground } from './foreground'
 export { type Result, resultOf } from './result'
 export { type ContrastSummary, summarizeContrast } from './summary'
 export type { EvaluatedPair, Level } from './types'

@@ -38,4 +38,32 @@ This token is additive. It does not touch the existing primary / primary-contain
 
 **Why:** that problem is the MCU mode×variant flip from the opening — a genuinely harder question about how roles should be routed, with its own trade-offs across every variant. Bundling a routing change into this token would couple a safe, isolated addition to a contested redesign. Brand stands alone and ships independently; normalizing the primary binding remains open and is decided on its own terms when taken up.
 
-**Code anchors:** `packages/core/src/theme/contrast/pairs.ts`, `packages/core/src/theme/contrast/contrast.ts` — stable literal seed brand token.
+---
+
+_amendment 2026-06-19 — the agent-facing surface (the CLI / `colors.json`, ADR-0039) reframes how the literal seed and its foreground reach a consumer. The www editor emits a standing `--brand` / `--brand-foreground` pair behind its opt-in switch (commitments 1–5, unchanged); the agent surface does not. Four decisions settle why, and where the foreground now lives._
+
+## 6. The brand pair is categorically an override, never a role
+
+The brand fill + foreground is a literal pin — an override in ADR-0026's sense — and must never appear in the role roster. It is not role #29; it is not a derivation the role table knows about.
+
+**Why:** commitment 1 already classifies brand as an override, not a symbolic role→token binding. Letting it leak into the role roster would re-import exactly the mode×variant instability the literal pin exists to escape, and would invite a consumer to treat the seed as one more derived role to bind — which it is categorically not.
+
+## 7. The agent surface emits no standing brand token
+
+`colors.json` and the CLI emit no `--brand` token. An agent already holds the seed as its own input — it _is_ the thing the agent passed in — so restating it as an emitted token is redundant at best, and at worst invites treating it as "role #29": a value to bind like the derived roles, which it is not.
+
+**Why:** the www editor needs a standing token because its user picks a color in a GUI and needs it surfaced as a usable variable; the agent never lost the seed in the first place. Re-emitting it adds a token whose only honest meaning is "the input you gave me", and an emitted token reads as a role to bind. The agent surface stays the role set plus the seed-as-input, with no pseudo-role echo.
+
+## 8. The AA-safe foreground is a derivable capability, not a pre-emitted token
+
+For the agent surface, the AA-safe foreground of a literal fill is computed on demand on the contrast surface (`deriveForeground`), not shipped as a standing token. Given any fill, the capability returns the maximum-contrast (or ratio-targeted) on-color.
+
+**Why:** by commitment 7 there is no standing brand token to attach a foreground to. But the _capability_ — "what is the AA-safe on-color for this fill?" — is exactly what a consumer pairing the seed against itself needs, and it is a pure function of the fill and a target ratio. Placing it on the contrast surface (where the WCAG verdict already lives) keeps it usable for any literal fill, not just the seed, and ratio-parameterized so the same pick serves AA, AAA, and large-text. The www editor's standing `--brand-foreground` is now a thin caller of this same capability at ratio 4.5, so the byte-stable value and the agent-surface capability can't diverge.
+
+## 9. The seed-tone dead zone is variant-independent — the override is the only stable home
+
+The reason the literal value needs an override home at all is variant-independent: seeds at roughly tone 51–59 land on neither `primary` nor `primary-container` across every variant family. No variant rescues the seed, so the override is the only construction that surfaces the literal value reliably.
+
+**Why:** one might hope a different variant would route a mid-tone seed onto a directly-usable vivid role, removing the need for the literal pin. It does not. Across CMF (container clamp), content, and fidelity (a ±10 tone-delta pin against the fixed primary), a seed in the T51–59 band is assigned to neither the vivid `primary` nor the soft `primary-container` — the dead zone is structural, not a tonalSpot artifact. Since no variant choice rescues the seed, the literal override (commitments 1–2) is not a tonalSpot workaround but the only stable home for the exact value the user chose.
+
+**Code anchors:** `packages/core/src/theme/contrast/pairs.ts`, `packages/core/src/theme/contrast/contrast.ts`, `packages/core/src/audit/foreground.ts` — stable literal seed brand token + its derivable AA-safe foreground.

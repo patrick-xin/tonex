@@ -16,6 +16,7 @@ import {
   type AuditThemeResult,
   auditPairs,
   auditTheme,
+  deriveForeground,
   type EvaluatedAuditPair,
   type Level,
   levelThreshold,
@@ -41,6 +42,7 @@ export function check(argv: readonly string[], io: Io): number {
   const args = parsed.args
 
   if (hasFlag(args, '--find-contrast')) return findMinContrast(args, io)
+  if (hasFlag(args, '--foreground')) return checkForeground(args, io)
   // why: --pairs has two forms on one flag — without --seed the entries are raw
   // hexes scored theme-free; WITH --seed they are token NAMES resolved against
   // the derived theme and scored through the engine gate. Presence of --seed is
@@ -246,6 +248,60 @@ function checkPair(args: ParsedArgs, io: Io): number {
   }
   io.out(`${verdictLine(ok, ratio, level, large, threshold)}\n`)
   return ok ? OK : GATE
+}
+
+// why: the GENERATOR form — derive the AA-safe foreground for one literal fill
+// (a brand swatch, a tool's hardcoded hex) via core's deriveForeground, then SCORE
+// the result back. Distinct from the 2-positional VERIFY form: that proves a pairing,
+// this MANUFACTURES one. The fill takes the same color contract as --seed (hex or
+// canonical oklch); hexFromColorInput projects to the scored sRGB hex.
+//
+// HONESTY (the crux, mirroring findMinContrast's UNREACHABLE answer): for a fill at
+// the luminance crossover (~mid-tone) NO foreground — not even pure black/white —
+// can reach 4.5:1, so we never claim "AA by construction". deriveForeground always
+// returns the MAX-contrast pick; here we score it and tell the truth — clears →
+// PASS/exit 0, falls short → FAIL/exit 1 with the achieved ratio, the pick still
+// printed so the caller has the best available color either way.
+function checkForeground(args: ParsedArgs, io: Io): number {
+  const raw = flagValue(args, '--foreground')
+  const fill = raw === undefined ? null : hexFromColorInput(raw)
+  if (fill === null) {
+    io.err(
+      `tonex: invalid --foreground fill "${raw ?? ''}" — use a 6-digit hex (#6750a4) or canonical oklch(L C H)\n`,
+    )
+    return USAGE
+  }
+
+  const level = levelOf(args)
+  const large = hasFlag(args, '--large')
+  const threshold = textThreshold(level, large)
+  const fmt = formatOf(args, io)
+  if (typeof fmt === 'number') return fmt
+
+  const fillArgb = argbFromHex(fill)
+  const fgArgb = deriveForeground(fillArgb, { ratio: threshold })
+  const ratio = contrastRatio(fgArgb, fillArgb)
+  const ok = ratio >= threshold
+  const encode = fmt === 'oklch' ? oklchString : hexString
+  const foreground = encode(fgArgb)
+
+  if (hasFlag(args, '--json')) {
+    io.out(
+      `${JSON.stringify({ ok, level, large, threshold, fill, foreground, ratio: round2(ratio) }, null, 2)}\n`,
+    )
+    return ok ? OK : GATE
+  }
+
+  const label = `${level.toUpperCase()} ${large ? 'large text' : 'text'} (${threshold})`
+  if (ok) {
+    io.out(`PASS — foreground ${foreground} on ${fill} — ${ratio.toFixed(2)}:1 clears ${label}\n`)
+    return OK
+  }
+  // honest UNREACHABLE: the returned foreground is the MAX-contrast pick; say so.
+  io.out(
+    `FAIL — foreground ${foreground} on ${fill} — ${ratio.toFixed(2)}:1 below ${label}\n  no foreground can reach ${threshold}:1 on this fill (its tone tops out at ${ratio.toFixed(2)}:1 from black/white); this is the max-contrast pick\n`,
+  )
+  return GATE
 }
 
 // why: the batch oracle — `--pairs '[["#fff","#000"],…]'` verifies every pairing
