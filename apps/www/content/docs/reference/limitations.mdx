@@ -11,6 +11,8 @@ Don't expect `primary` or `primary-container` to come back as the exact color yo
 
 The generated roles are a coordinated, contrast-tuned system. Reach for them by their job — a `primary` that reads against its surface — rather than as a place to find your exact brand color back. When you genuinely need your input to appear unchanged, that's what the literal brand color is for: it pins your seed as-is so it never drifts, and Tonex pairs it with a generated foreground that stays legible on top. Treat it as a deliberate override for when exactness matters, not the default way to use a role.
 
+For the plain-language version of this, see [Why doesn't primary match the color I picked?](/docs/reference/troubleshooting#why-doesnt-primary-match-the-color-i-picked) in Troubleshooting.
+
 ## Out-of-gamut OKLCH
 
 The engine works in sRGB. When you paste an OKLCH color that sits outside the sRGB gamut, Tonex maps it back in by reducing its chroma at the same lightness and hue — the standard CSS Color 4 mapping. The result is the closest in-gamut color, not the one you typed, and the app doesn't flag when this happens. If a pasted OKLCH looks less saturated than expected, it was outside sRGB and got pulled in.
