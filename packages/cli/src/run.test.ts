@@ -502,6 +502,44 @@ describe('tonex check — pair oracle', () => {
   })
 })
 
+// why: `--foreground <fill>` derives the AA-safe on-color for an arbitrary literal
+// fill (a brand swatch, a tool's hardcoded hex) via core's deriveForeground — the
+// generator form, distinct from the two-positional VERIFY form. The crux is HONESTY:
+// EVERY fill clears AA by construction (worst case ~4.58:1 from the better extreme),
+// so the honest GATE path only bites at AAA (7:1), where a true mid-tone fill reaches
+// neither side's bar; there the tool returns the max-contrast pick and reports
+// truthfully (GATE), never claiming a pass it can't deliver.
+describe('tonex check — foreground generator', () => {
+  it('derives a foreground for an off-mid fill, clears AA (exit 0), and the round-trip verifies', () => {
+    const FILL = '#6750a4'
+    const { code, out } = capture(['check', '--foreground', FILL, '--json'])
+    expect(code).toBe(OK)
+    const r = JSON.parse(out)
+    expect(r.ok).toBe(true)
+    expect(r.ratio).toBeGreaterThanOrEqual(4.5)
+    // the derived foreground, fed back through the VERIFY form, must itself pass.
+    expect(capture(['check', r.foreground, r.fill]).code).toBe(OK)
+  })
+
+  it('a mid-tone fill at the AAA crossover takes the honest GATE path (exit 1) — no foreground can reach 7', () => {
+    // why: WCAG math guarantees EVERY sRGB fill reaches 4.5 from black or white, so
+    // the true unreachable band only bites at AAA (7): a mid-grey like #808080 tops
+    // out near 5.3 from black, short of 7. The tool returns that max-contrast pick
+    // and reports honestly rather than claiming a pass it can't deliver.
+    const { code, out } = capture(['check', '--foreground', '#808080', '--aaa', '--json'])
+    expect(code).toBe(GATE)
+    const r = JSON.parse(out)
+    expect(r.ok).toBe(false)
+    expect(r.threshold).toBe(7)
+    expect(r.ratio).toBeLessThan(7) // the max achievable, honestly below the AAA floor
+    expect(r.foreground).toBeTruthy() // still returns the best pick, never empty
+  })
+
+  it('an invalid fill is a usage error (exit 2), not a silent pass', () => {
+    expect(capture(['check', '--foreground', 'not-a-color']).code).toBe(USAGE)
+  })
+})
+
 // why: with --seed, --pairs entries are token NAMES the agent copied from
 // `generate` output — resolved against the derived theme and scored through the
 // engine gate (not raw hex). The exit taxonomy splits cleanly: a failing named

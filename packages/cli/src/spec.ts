@@ -187,6 +187,18 @@ const findContrast: FlagSpec = {
   description:
     'with --seed: report the minimum --contrast level that clears the target level, in one call (no manual search)',
 }
+// why: the GENERATOR form — given one literal fill (a brand swatch, a tool's
+// hardcoded hex), derive its AA-safe foreground via core's deriveForeground rather
+// than verify a pairing. A flag (not a 1-positional overload) so the form is loud:
+// the 2-positional path VERIFIES, this one GENERATES. Same color contract as --seed
+// (hex or oklch). HONEST about the luminance crossover — a mid-tone fill that no
+// foreground can lift to the threshold returns the max-contrast pick and GATEs.
+const foreground: FlagSpec = {
+  name: '--foreground',
+  type: 'color',
+  description:
+    'derive the AA-safe foreground for one literal fill (hex or oklch) — prints the on-color + achieved ratio + verdict; --aaa/--large set the target ratio. Exit 0 clears it, 1 if no foreground can reach the ratio (a mid-tone fill against a raised --aaa bar) — the max-contrast pick is still returned',
+}
 // why: `adjust`'s only command-specific flag — a JSON batch of shift requests,
 // mirroring core's `adjustTokens` shape and the existing `--pairs` precedent. The
 // per-request mode lives INSIDE each entry, so `adjust` needs no `--mode` flag (the
@@ -236,6 +248,7 @@ export const CHECK_FLAGS = [
   json,
   pairs,
   findContrast,
+  foreground,
 ] as const
 
 // why: `adjust` reuses the shared seed→theme knobs (parseSource reads them) plus its
@@ -304,6 +317,7 @@ export function describePayload() {
           'check --seed <hex> [--variant] [--contrast] [--mode] [--aaa] [--json]  — gate the derived theme (both modes unless --mode)',
           'check --seed <hex> [--variant] [--mode] [--aaa] --find-contrast [--json] — min --contrast that clears the level',
           'check <fg> <bg> [--aaa] [--large] [--json]                    — one ad-hoc fg/bg pairing, hex or oklch (theme-free)',
+          'check --foreground <fill> [--aaa] [--large] [--json]          — derive the AA-safe foreground for one literal fill, hex or oklch (theme-free); exit 1 if no foreground can reach the level',
           'check --pairs <json> [--aaa] [--large] [--json]               — batch of [fg,bg] pairs, hex or oklch (theme-free)',
           'check --seed <hex> --pairs <json> [--variant] [--mode] [--aaa] [--json] — batch of [fg,bg] TOKEN-NAME pairs against the derived theme',
         ],
