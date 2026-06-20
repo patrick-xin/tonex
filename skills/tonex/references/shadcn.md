@@ -31,8 +31,8 @@ tonex generate --seed '#3b82f6' --to shadcn
 ```
 
 - **Both modes, one call.** The output carries `:root` (light) *and* `.dark` (dark); `--mode` is a no-op here. Paste the whole block into `globals.css`.
-- **Leading recipe comment is the durable artifact.** The `/* tonex generate … */` line is the runnable command that reproduces this exact block (resolved knobs, so a later default change can't drift it). Keep it — it's how the next agent regenerates or extends the theme. There's no separate `colors.json` to commit.
-- **shadcn names, not MD3 names.** This renames the underlying MD3 tokens into shadcn's vocabulary — `on-primary` → `--primary-foreground`, `surface` → `--background`, plus shadcn-only slots (`--card`, `--muted`, `--accent`, `--destructive`). To **check** a shadcn pairing, feed these `--slot` names straight into `check --pairs` (`[["--primary-foreground","--primary"]]`) — they're valid input. To **adjust** the underlying tone, use the bare md role name (`on-primary`); `adjust` is md-only. See the map in [../REFERENCE.md](../REFERENCE.md#token-naming-across-surfaces).
+- **Leading recipe comment is the durable artifact.** The `/* tonex generate … */` line is the runnable command that reproduces this exact block (resolved knobs, so a later default change can't drift it). Keep it — it's how the next agent regenerates or extends the theme.
+- **shadcn names, not MD3 names.** This renames the underlying MD3 tokens into shadcn's vocabulary — `on-primary` → `--primary-foreground`, `surface` → `--background`, plus shadcn-only slots (`--card`, `--muted`, `--accent`, `--destructive`). To **check** a shadcn pairing, feed these `--slot` names straight into `check --pairs` (`[["--primary-foreground","--primary"]]`) — they're valid input. To **adjust** the underlying tone, use the bare md role name (`on-primary`); `adjust` is md-only. See the map in [palette.md](palette.md#token-naming-across-surfaces).
 - **Encoding.** Defaults to oklch (shadcn v4's native form). `--format hex` for sRGB hex instead.
 
 ## End-to-end: theme a shadcn app at AAA

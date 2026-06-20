@@ -1,6 +1,6 @@
-# tonex — reference
+# tonex — the palette
 
-Companion to [SKILL.md](SKILL.md). The authoritative flag contract is always `tonex describe`; this file is the judgment the contract can't encode.
+How to **shape** the palette: the role set, the variant and surface knobs that derive it, and how its tokens are named. Companion to [SKILL.md](../SKILL.md). The authoritative flag contract is always `tonex describe`; this file is the judgment the contract can't encode.
 
 ## The role set (`--to colors`)
 
@@ -108,60 +108,6 @@ Drive `adjust` and `check --pairs` with the **exact name you read from the outpu
 - **shadcn slots keep the `--`** (`--foreground`, `--card`, `--muted`, `--destructive`) — exactly what `--to shadcn` prints. `check --pairs` takes these for a shadcn pairing (`adjust` is md-only). A single `--pairs` call must stay within one layer — don't mix a bare md role with a `--slot`.
 - The internal `--color-*` id is **not** an input — tonex rejects it and points you at the bare role name.
 
-## Authoring into a target with no built-in projection
-
-`--to shadcn|yaml|json` are the built-in projections — each has its own guide: [shadcn](references/shadcn.md), [design.md](references/design-md.md), [json](references/json.md). For any other target you build the projection by hand — this is the skill's job, not the CLI's.
-
-Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
-
-1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from the `--to colors` output. This name→intent match is the *default*, not a rule: if you'd rather drive the UI from the generated `secondary` or `tertiary`, do it — the names don't bind you. What you can't skip is step 3: the guarantee covers the pairing you check, whatever roles it's between.
-2. **The tone is already fixed.** You don't choose lightness — the token's value already carries the contrast tonex guaranteed against its paired surface. Don't re-pick it.
-3. **Verify every pairing you assert.** A foreign target fuses what MD3 splits — one `--ink` slot may be text *and* border *and* icon over several backgrounds. That slot's value must satisfy the **union** of contrast constraints across *every* background it touches. After mapping, gate it:
-   ```
-   tonex check --seed '#3b82f6' --pairs '[["on-surface","surface"], …]'
-   ```
-   Exit `1` enumerates the failing pairs; pick a higher-contrast token for that slot, or raise `--contrast`, and re-check.
-
-The cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part. When in doubt, map a fused slot to the token that satisfies its *strictest* use, then prove it with `check --pairs`.
-
-Finally, **record the recipe** — the exact `generate` command — in the file you write (a comment header). The recipe reproduces the role *values*; the mapping you just made is reproduced by the slots in the file itself. A later agent re-runs the recipe and re-applies the same mapping; without the recipe in the file, your binding is unrecoverable once the conversation is gone.
-
-## Contrast policy (what `check` blocks vs. warns)
-
-This table and the thresholds below mirror `tonex describe`'s `contrast` field (the authoritative policy + numbers; trust it if they ever disagree). What's here is the *interpretation* the field can't carry.
-
-| pair kind | verdict | effect on exit code |
-| --- | --- | --- |
-| text on its background | **block** | failure → exit `1` |
-| non-text (borders, large UI) | warn | advisory, never blocks |
-| decorative | exempt | not evaluated |
-
-- Default bar is **AA**; `--aaa` raises it. `--large` uses large-text thresholds for the ad-hoc `<fg> <bg>` / theme-free `--pairs` forms.
-- The theme-free forms (`<fg> <bg>` and `--pairs` without `--seed`) accept each color as a **6-digit hex or canonical `oklch(L C H)`** — paste a shadcn/tweakcn oklch straight in. An out-of-gamut oklch is gamut-mapped to sRGB before scoring, and the verdict echoes that projected hex (the color actually scored).
-- `--mode light|dark` scopes the audit to one projection (default: both, the stricter union). Scope it when you only emitted one mode (e.g. a single-mode design.md `colors:` block) so the gate matches what you shipped.
-- The remedy ladder for a text failure: `--find-contrast` to get the minimum `--contrast` → re-generate → re-check. If `UNREACHABLE`, gate at AA.
-
-## Exit-code playbook
-
-The codes mirror `tonex describe`'s `exitCodes` (authoritative; trust it if they ever disagree). The *response* to each is the judgment below.
-
-| exit | meaning | what to do |
-| --- | --- | --- |
-| `0` | clean / output produced | proceed |
-| `1` | a text pair fails WCAG — the *artifact* is wrong | apply a color remedy: `--find-contrast` then raise `--contrast`, or re-pair the slot to a higher-contrast token. **Never** ship the artifact. |
-| `2` | usage/input error — the *call* is wrong | fix the flags/JSON. tonex prints a did-you-mean for typo'd flags and unknown token names. |
-
-Don't collapse `1` and `2` — they demand opposite responses (fix the colors vs. fix the command).
-
-## Adjusting one token
-
-Nudge a single token without re-seeding the whole theme:
-```
-tonex adjust --seed '#3b82f6' --shifts '[{"mode":"dark","token":"primary","dTone":5}]'
-# → dark  primary  #6e9fff → #86adff   req t+5 c+0   got t+4.99 c-6.78
-```
-It shifts named tokens by a relative ±HCT delta and prints before/after plus the **gamut-clamped achieved** delta (so a clamp shows up in the numbers). It **never gates contrast** — re-run `check` afterward (decision tree step 3).
-
 ## Command cheat-sheet
 
 | command | purpose |
@@ -174,8 +120,8 @@ It shifts named tokens by a relative ±HCT delta and prints before/after plus th
 | `adjust --seed <hex> --shifts '<json>'` | shift named tokens by a ±HCT delta (facts only; never gates) |
 | `describe` | the machine-readable contract (commands, flags, contrast policy, exit codes) |
 
-Add `--json` to `check` and `adjust` for machine-readable output.
+Add `--json` to `check` and `adjust` for machine-readable output. Contrast policy, exit codes, and the `adjust` remedy live in [contrast.md](contrast.md).
 
 ## End-to-end examples
 
-End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [references/shadcn.md](references/shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
+End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [shadcn.md](shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
