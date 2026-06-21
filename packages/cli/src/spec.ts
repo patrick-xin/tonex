@@ -90,7 +90,17 @@ const contrast: FlagSpec = {
   name: '--contrast',
   type: 'unit',
   default: 0,
-  description: 'MCU palette contrast level 0..1 — the palette-layer AAA remedy',
+  description: 'MCU palette contrast level 0..1 for both modes — the palette-layer AAA remedy',
+}
+const contrastLight: FlagSpec = {
+  name: '--contrast-light',
+  type: 'unit',
+  description: 'contrast level 0..1 for light mode only; overrides --contrast for light',
+}
+const contrastDark: FlagSpec = {
+  name: '--contrast-dark',
+  type: 'unit',
+  description: 'contrast level 0..1 for dark mode only; overrides --contrast for dark',
 }
 // why: the roster TIER — a capacity ladder, not a taxonomy. Core (28 roles) is the
 // sufficient baseline most projects need; --extended widens to core + extended (50)
@@ -128,7 +138,20 @@ const softBorders: FlagSpec = {
 const tint: FlagSpec = {
   name: '--tint',
   type: 'unit',
-  description: 'surface tint strength 0..1; 0 = max neutral (exclusive with --desaturate)',
+  description:
+    'surface tint strength 0..1 for both modes; 0 = max neutral (exclusive with --desaturate)',
+}
+const tintLight: FlagSpec = {
+  name: '--tint-light',
+  type: 'unit',
+  description:
+    'surface tint strength 0..1 for light mode only; overrides --tint for light (exclusive with --desaturate)',
+}
+const tintDark: FlagSpec = {
+  name: '--tint-dark',
+  type: 'unit',
+  description:
+    'surface tint strength 0..1 for dark mode only; overrides --tint for dark (exclusive with --desaturate)',
 }
 const tintPalette: FlagSpec = {
   name: '--tint-palette',
@@ -141,7 +164,40 @@ const tintPalette: FlagSpec = {
 const desaturate: FlagSpec = {
   name: '--desaturate',
   type: 'unit',
-  description: 'surface desaturate strength 0..1; 0 = no-op (exclusive with --tint)',
+  description: 'surface desaturate strength 0..1 for both modes; 0 = no-op (exclusive with --tint)',
+}
+const desaturateLight: FlagSpec = {
+  name: '--desaturate-light',
+  type: 'unit',
+  description:
+    'surface desaturate strength 0..1 for light mode only; overrides --desaturate for light (exclusive with --tint)',
+}
+const desaturateDark: FlagSpec = {
+  name: '--desaturate-dark',
+  type: 'unit',
+  description:
+    'surface desaturate strength 0..1 for dark mode only; overrides --desaturate for dark (exclusive with --tint)',
+}
+// why: surfaceTintTextLevel was previously unreachable from the CLI (issue #218). It
+// applies a brand-accent tint to on-surface/on-surface-variant text, decoupled from
+// surfaceTintLevel so "neutral surfaces + brand text" is achievable with any surface algo.
+const tintText: FlagSpec = {
+  name: '--tint-text',
+  type: 'unit',
+  description:
+    'brand-accent tint strength 0..1 on on-surface/on-surface-variant text for both modes; decoupled from --tint',
+}
+const tintTextLight: FlagSpec = {
+  name: '--tint-text-light',
+  type: 'unit',
+  description:
+    'brand-accent text tint strength 0..1 for light mode only; overrides --tint-text for light',
+}
+const tintTextDark: FlagSpec = {
+  name: '--tint-text-dark',
+  type: 'unit',
+  description:
+    'brand-accent text tint strength 0..1 for dark mode only; overrides --tint-text for dark',
 }
 // why: the user color(s) added ON TOP of the seed-derived palette. Agent-first
 // JSON batch (the --pairs/--shifts precedent), each entry {name, hex, blend?,
@@ -222,9 +278,18 @@ export const GENERATE_FLAGS = [
   format,
   extended,
   contrast,
+  contrastLight,
+  contrastDark,
   tint,
+  tintLight,
+  tintDark,
   tintPalette,
   desaturate,
+  desaturateLight,
+  desaturateDark,
+  tintText,
+  tintTextLight,
+  tintTextDark,
   custom,
 ] as const
 
@@ -237,10 +302,19 @@ export const CHECK_FLAGS = [
   variant,
   secondColor,
   contrast,
+  contrastLight,
+  contrastDark,
   checkMode,
   tint,
+  tintLight,
+  tintDark,
   tintPalette,
   desaturate,
+  desaturateLight,
+  desaturateDark,
+  tintText,
+  tintTextLight,
+  tintTextDark,
   custom,
   aaa,
   large,
@@ -260,9 +334,18 @@ export const ADJUST_FLAGS = [
   variant,
   secondColor,
   contrast,
+  contrastLight,
+  contrastDark,
   tint,
+  tintLight,
+  tintDark,
   tintPalette,
   desaturate,
+  desaturateLight,
+  desaturateDark,
+  tintText,
+  tintTextLight,
+  tintTextDark,
   shifts,
   format,
   json,

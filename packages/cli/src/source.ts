@@ -77,30 +77,60 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     cmfSecondSourceHex = second
   }
 
-  // why: --contrast surfaces MCU's existing contrastLevel input — the palette-layer
-  // remedy when re-mapping tokens can't reach AAA. One scalar applied uniformly to
-  // both modes; the schema bounds it [0,1], so we reject out-of-range rather than
-  // derive a theme the persisted shape would refuse.
+  // why: --contrast / --contrast-light / --contrast-dark surface MCU's contrastLevel.
+  // Base flag sets both modes uniformly (the common case, back-compat); per-mode flags
+  // override a single mode. Resolution: per-mode wins, base fills the other, absence
+  // falls back to the schema default. Out-of-range is exit 2 per flag, not a clamp.
   const contrastArg = flagValue(args, '--contrast')
+  const contrastLightArg = flagValue(args, '--contrast-light')
+  const contrastDarkArg = flagValue(args, '--contrast-dark')
   let contrastLevel = DEFAULT_INPUTS.contrastLevel
-  if (contrastArg !== undefined) {
-    const parsed = parseUnit(contrastArg, '--contrast')
-    if ('error' in parsed) {
-      io.err(parsed.error)
+  if (
+    contrastArg !== undefined ||
+    contrastLightArg !== undefined ||
+    contrastDarkArg !== undefined
+  ) {
+    const resolved = resolveModeLevel(
+      contrastArg,
+      contrastLightArg,
+      contrastDarkArg,
+      DEFAULT_INPUTS.contrastLevel.light,
+      '--contrast',
+      '--contrast-light',
+      '--contrast-dark',
+    )
+    if ('error' in resolved) {
+      io.err(resolved.error)
       return USAGE
     }
-    contrastLevel = uniform(parsed.value)
+    contrastLevel = resolved
   }
 
   // why: --tint / --desaturate expose the surface treatment — tonex's signature
   // departure that pulls tinted MD3 backgrounds back toward neutral. surfaceAlgo is
-  // single-valued, so at most one applies. Each carries a required [0,1] strength
-  // (a bare boolean would be a no-op, since DEFAULT_INPUTS surface is desaturate@0).
+  // single-valued across modes, so at most one algo applies. Per-mode flags
+  // (--tint-light/dark, --desaturate-light/dark) override only their mode; the base
+  // flag fills the other; absence falls back to the schema default. Any mix of tint
+  // and desaturate flags is a usage error (surface uses one algo).
   const tintArg = flagValue(args, '--tint')
+  const tintLightArg = flagValue(args, '--tint-light')
+  const tintDarkArg = flagValue(args, '--tint-dark')
   const desaturateArg = flagValue(args, '--desaturate')
+  const desaturateLightArg = flagValue(args, '--desaturate-light')
+  const desaturateDarkArg = flagValue(args, '--desaturate-dark')
   const paletteArg = flagValue(args, '--tint-palette')
-  if (tintArg !== undefined && desaturateArg !== undefined) {
-    io.err(`tonex: --tint and --desaturate are mutually exclusive (surface uses one algo)\n`)
+  const tintTextArg = flagValue(args, '--tint-text')
+  const tintTextLightArg = flagValue(args, '--tint-text-light')
+  const tintTextDarkArg = flagValue(args, '--tint-text-dark')
+
+  const hasTint = tintArg !== undefined || tintLightArg !== undefined || tintDarkArg !== undefined
+  const hasDesaturate =
+    desaturateArg !== undefined ||
+    desaturateLightArg !== undefined ||
+    desaturateDarkArg !== undefined
+
+  if (hasTint && hasDesaturate) {
+    io.err(`tonex: --tint and --desaturate flags are mutually exclusive (surface uses one algo)\n`)
     return USAGE
   }
   if (
@@ -112,28 +142,67 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     )
     return USAGE
   }
-  if (paletteArg !== undefined && tintArg === undefined) {
+  if (paletteArg !== undefined && !hasTint) {
     io.err(`tonex: note — --tint-palette is only consumed when --tint is set\n`)
   }
+
   let surface: Partial<PortableTheme> = {}
-  if (tintArg !== undefined) {
-    const parsed = parseUnit(tintArg, '--tint')
-    if ('error' in parsed) {
-      io.err(parsed.error)
+  if (hasTint) {
+    const level = resolveModeLevel(
+      tintArg,
+      tintLightArg,
+      tintDarkArg,
+      DEFAULT_INPUTS.surfaceTintLevel.light,
+      '--tint',
+      '--tint-light',
+      '--tint-dark',
+    )
+    if ('error' in level) {
+      io.err(level.error)
       return USAGE
     }
     surface = {
       surfaceAlgo: 'tint',
-      surfaceTintLevel: uniform(parsed.value),
+      surfaceTintLevel: level,
       ...(paletteArg !== undefined ? { surfacePaletteName: paletteArg as NeutralPaletteName } : {}),
     }
-  } else if (desaturateArg !== undefined) {
-    const parsed = parseUnit(desaturateArg, '--desaturate')
-    if ('error' in parsed) {
-      io.err(parsed.error)
+  } else if (hasDesaturate) {
+    const level = resolveModeLevel(
+      desaturateArg,
+      desaturateLightArg,
+      desaturateDarkArg,
+      DEFAULT_INPUTS.surfaceDesaturateLevel.light,
+      '--desaturate',
+      '--desaturate-light',
+      '--desaturate-dark',
+    )
+    if ('error' in level) {
+      io.err(level.error)
       return USAGE
     }
-    surface = { surfaceAlgo: 'desaturate', surfaceDesaturateLevel: uniform(parsed.value) }
+    surface = { surfaceAlgo: 'desaturate', surfaceDesaturateLevel: level }
+  }
+
+  // why: --tint-text / --tint-text-light / --tint-text-dark surface
+  // surfaceTintTextLevel — the brand-accent tint on on-surface/on-surface-variant
+  // text. Decoupled from surfaceAlgo by design, so it applies with any surface algo.
+  const hasTintText =
+    tintTextArg !== undefined || tintTextLightArg !== undefined || tintTextDarkArg !== undefined
+  if (hasTintText) {
+    const level = resolveModeLevel(
+      tintTextArg,
+      tintTextLightArg,
+      tintTextDarkArg,
+      DEFAULT_INPUTS.surfaceTintTextLevel.light,
+      '--tint-text',
+      '--tint-text-light',
+      '--tint-text-dark',
+    )
+    if ('error' in level) {
+      io.err(level.error)
+      return USAGE
+    }
+    surface = { ...surface, surfaceTintTextLevel: level }
   }
 
   // why: --custom adds user color(s) on top of the seed-derived palette. A
@@ -242,11 +311,50 @@ function parseCustomColors(args: ParsedArgs, io: Io): CustomColorEntry[] | numbe
   return entries
 }
 
-// why: a [0,1] scalar both modes share — the per-mode split is a www-only
-// affordance, so the CLI applies one level uniformly (--contrast/--tint/--desaturate).
-// Shared with `commands/check` (find-contrast sweeps contrastLevel through it).
+// why: a [0,1] scalar applied to both modes — used by find-contrast's bisect sweep,
+// which searches for a uniform --contrast remedy (per PRD #218: per-mode find-contrast
+// is a noted extension). Shared with `commands/check`.
 export function uniform(value: number): { light: number; dark: number } {
   return { light: value, dark: value }
+}
+
+// why: the per-mode resolver for all four level knobs (contrast/tint/desaturate/tintText).
+// Resolution rule: per-mode flag wins for its mode; base flag fills the other mode;
+// absence falls back to the schema default. Returns a discriminated result so 0 (a
+// valid level) is distinguishable from an exit code — the caller maps { error } to USAGE.
+function resolveModeLevel(
+  base: string | undefined,
+  light: string | undefined,
+  dark: string | undefined,
+  defaultVal: number,
+  baseName: string,
+  lightName: string,
+  darkName: string,
+): { light: number; dark: number } | { error: string } {
+  let baseVal: number | undefined
+  let lightVal: number | undefined
+  let darkVal: number | undefined
+
+  if (base !== undefined) {
+    const p = parseUnit(base, baseName)
+    if ('error' in p) return p
+    baseVal = p.value
+  }
+  if (light !== undefined) {
+    const p = parseUnit(light, lightName)
+    if ('error' in p) return p
+    lightVal = p.value
+  }
+  if (dark !== undefined) {
+    const p = parseUnit(dark, darkName)
+    if ('error' in p) return p
+    darkVal = p.value
+  }
+
+  return {
+    light: lightVal ?? baseVal ?? defaultVal,
+    dark: darkVal ?? baseVal ?? defaultVal,
+  }
 }
 
 // why: the shared [0,1]-flag validator. Returns a discriminated result rather than
