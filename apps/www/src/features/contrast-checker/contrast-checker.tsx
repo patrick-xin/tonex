@@ -50,9 +50,13 @@ function Body({ theme, mode, layer }: BodyProps) {
   const showExtended = useUiPrefs((s) => s.showExtended)
   const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const customColors = useSource((s) => s.customColors)
-  // why: brand is shadcn-only (ADR-0032) — gate the opt-in eval on both the
-  // layer and the editor's brand toggle. On the md route brandLayer never
-  // matches the route filter anyway, but gating the eval keeps the report lean.
+  // why: the brand AUDIT is shadcn-only, even though the brand EXPORT now spans
+  // the md-family CSS sinks too (ADR-0032). Two reasons it stays shadcn-only here:
+  // the brand-foreground/brand self-pair is AA by construction (deriveForeground),
+  // so it can't fail and adds no audit signal; and the only brand pairs that CAN
+  // fail are brand-as-text-on-`--background`/`--card` — keyed to shadcn role
+  // names, with no md-surface analog and no md brand-on-surface showcase to flag.
+  // So on the md route the eval stays lean and brandLayer never matches anyway.
   const includeBrand = layer === 'shadcn' && brandEnabled
   const report = evaluateThemeContrast(theme, customColors, { includeBrand })
   // why: each route owns one layer's pairs AND its chart + custom siblings. md

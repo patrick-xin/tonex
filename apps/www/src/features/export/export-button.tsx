@@ -69,8 +69,9 @@ export const ExportButton = ({
   const mode: Mode = pickedMode ?? activeMode ?? 'dark'
   // why: brand emission has no export-dialog toggle of its own (ADR-0032) —
   // one editor switch governs it. Overlay the brand pref onto the core
-  // includeBrand param here; the shadcn exporter is the only reader, md/JSON/
-  // Dart ignore it, so overlaying unconditionally is harmless on every tab.
+  // includeBrand param here; the shadcn and md-family CSS sinks (Tailwind, CSS,
+  // Design.md) read it, JSON/Dart ignore it, so overlaying unconditionally is
+  // harmless on every tab.
   const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const { exportContent, ext } = useExportContent({
     exportTab,

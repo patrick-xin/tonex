@@ -27,6 +27,16 @@ tonex generate --seed '#3b82f6' --to colors
 - **Core roster by default; `--extended` widens it.** The roster is a *capacity ladder*, not a taxonomy. The default 28 **core** roles (the accents, their containers, the full `surface-container-*` family, outlines) are the sufficient baseline for most projects. `--extended` adds the 22 **extended** roles (`*-fixed`, `*-dim`, `inverse-*`, `surface-tint`, `shadow`, `scrim`) — reach for it only when a target has slots core doesn't cover (inverted surfaces, modal scrims, tones that hold across modes). The question is "does core cover this project's slots?", not "is this a Material feature?". You know the project, so tell the user `--extended` exists and let them opt in rather than defaulting to the wider set. (A further rung — raw palette tones 0..100 — isn't exposed yet.)
 - **One encoding per rendering**, chosen by `--format oklch|hex`. To re-encode, re-run with the other format — don't convert values yourself.
 
+## A role is the seed re-toned, not the seed
+
+A role carries the seed's hue and chroma; only its **lightness** is reassigned for the job it has to do. `primary` is the seed re-toned to sit legibly on `surface`; `primary-container` is the same brand color re-toned lighter to hold `on-primary-container` text. The seed's character survives in every role — what moves is the tone, so the pair clears WCAG.
+
+- **Do** read a role as "the brand color, tuned for this slot." The whole point of the engine is that you don't pick tones by eye — it reassigns lightness so each pairing is legible.
+- **Don't** expect `primary` or `primary-container` to come back equal to the seed hex. They won't, and that's not drift — they're the seed re-toned for contrast. If you wanted the literal seed back, you wouldn't need an engine.
+- **Don't** treat a re-toned `primary` as a different color and reach for a fresh hue. It's the same color doing a different job; switching the variant or knob changes the *feel*, not which color it is.
+
+When the literal seed is genuinely the requirement — a logo fill, a brand mark, a deliberate brand moment — that's an escape hatch, not the default: see [contrast.md § The literal-brand escape hatch](contrast.md#the-literal-brand-escape-hatch).
+
 ## Choosing a variant
 
 `--variant` picks the algorithm that derives the system from the seed. Default is **`cmf`** — keep it unless the user asks for a different feel. The ten variants fall into four groups — this table mirrors `tonex describe`'s `variants` field (the authoritative group→variant map; trust it if they ever disagree):
@@ -119,6 +129,7 @@ Drive `adjust` and `check --pairs` with the **exact name you read from the outpu
 | `check --seed <hex> --find-contrast` | report the minimum `--contrast` that clears the level |
 | `check --seed <hex> --pairs '<json>'` | verify specific `[fg, bg]` token-name pairings |
 | `check <fg> <bg>` / `check --pairs '<json>'` (no `--seed`) | theme-free ad-hoc check; each color is hex or oklch |
+| `check --foreground <fill>` | derive the AA-safe text color for one literal fill (the [literal-brand escape hatch](contrast.md#the-literal-brand-escape-hatch)) |
 | `adjust --seed <hex> --shifts '<json>'` | shift named tokens by a ±HCT delta (facts only; never gates) |
 | `describe` | the machine-readable contract (commands, flags, contrast policy, exit codes) |
 

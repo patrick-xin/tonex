@@ -1,7 +1,6 @@
 // MCU is the only color engine — no engine slot, no alternate generators (ADR-0001).
 // deriveTheme stays pure (source → { md, shadcn, warnings }): zero React, zero side
 // effects, no ThemeSystem facade — DOM and clipboard live in sinks (ADR-0005).
-import { contrastRatio } from '@tonex/color-utils'
 import {
   argbFromHex,
   type DynamicColor,
@@ -10,6 +9,10 @@ import {
   MaterialDynamicColors,
   customColor as mdCustomColor,
 } from '@tonex/mcu'
+// why: the brand foreground is the contrast surface's `deriveForeground` at the AA
+// ratio — imported from the audit LEAF (not the barrel) so derive doesn't pull the
+// audit index (which type-imports DerivedTheme) and create an import cycle.
+import { deriveForeground } from '../../audit/foreground'
 import { applyShadcnChartOverrides, buildMdChart, rebrandChart } from '../../chart/build'
 import { variants } from '../../variants'
 import { cmfSecondSourceDisabledReason } from '../../variants/cmf-second-source'
@@ -473,26 +476,14 @@ function buildCustomColorsMd(groups: ResolvedCustomGroup[], mode: Mode): TokenMa
 // future sink-side hooks) propagate. Pair selector is per-entry shadcnSource:
 // 'color' → --{slug}/--{slug}-foreground ← --color-{slug}/--color-on-{slug};
 // 'container' → ← --color-{slug}-container/--color-on-{slug}-container.
-// why: a stable, mode-invariant on-color for the literal brand fill. The fill
-// doesn't follow MCU's per-mode tonal flip, so one foreground is picked for max
-// AA against it. MD3-style: a hue-matched near-white / near-black (tinted toward
-// the brand hue at low chroma) rather than flat #fff/#000 — but only if the tint
-// still clears the 4.5:1 text floor; otherwise fall back to pure white/black so
-// AA is never sacrificed for the tint.
-const BRAND_FG_TINT_CHROMA = 8
-const BRAND_FG_LIGHT_TONE = 98
-const BRAND_FG_DARK_TONE = 12
-const AA_TEXT_RATIO = 4.5
-const BRAND_FG_WHITE = argbFromHex('#ffffff')
-const BRAND_FG_BLACK = argbFromHex('#000000')
-
+// why: a stable, mode-invariant on-color for the literal brand fill — a thin
+// caller of the contrast surface's `deriveForeground` at the AA text ratio
+// (ADR-0032: the literal seed's AA-safe foreground is a derivable capability,
+// not a pre-emitted token). The full strategy (max-contrast side, low-chroma
+// hue tint, fall back to the pure extreme) lives in @tonex/core/audit so the
+// CLI can ask for the same pick at any ratio; the value here stays byte-stable.
 function brandForeground(fillArgb: number): number {
-  const fill = Hct.fromInt(fillArgb)
-  const goLight = contrastRatio(BRAND_FG_WHITE, fillArgb) >= contrastRatio(BRAND_FG_BLACK, fillArgb)
-  const tone = goLight ? BRAND_FG_LIGHT_TONE : BRAND_FG_DARK_TONE
-  const tinted = Hct.from(fill.hue, Math.min(fill.chroma, BRAND_FG_TINT_CHROMA), tone).toInt()
-  if (contrastRatio(tinted, fillArgb) >= AA_TEXT_RATIO) return tinted
-  return goLight ? BRAND_FG_WHITE : BRAND_FG_BLACK
+  return deriveForeground(fillArgb, { ratio: 4.5 })
 }
 
 function buildCustomColorsShadcn(groups: ResolvedCustomGroup[], mdLayer: TokenMap): TokenMap {

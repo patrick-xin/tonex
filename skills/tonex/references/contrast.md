@@ -37,3 +37,21 @@ tonex adjust --seed '#3b82f6' --shifts '[{"mode":"dark","token":"primary","dTone
 # → dark  primary  #6e9fff → #86adff   req t+5 c+0   got t+4.99 c-6.78
 ```
 It shifts named tokens by a relative ±HCT delta and prints before/after plus the **gamut-clamped achieved** delta (so a clamp shows up in the numbers). It **never gates contrast**, and it **doesn't persist** — so the whole-theme `check --seed` gate re-derives clean from the seed and won't see your shift. Verify the shift *ad-hoc* instead: feed the printed after-value and the color it pairs against into the `check <fg> <bg>` form (e.g. `tonex check '#86adff' '<paired-bg>'`). The token names are the bare md roles `--to colors` prints; see [token naming](palette.md#token-naming-across-surfaces).
+
+## The literal-brand escape hatch
+
+Roles re-tone the seed for legibility ([palette.md](palette.md#a-role-is-the-seed-re-toned-not-the-seed)), so `primary` won't equal the seed hex. Usually that's exactly what you want. The exception is when the **literal** brand color is the requirement and exactness is the point — a logo fill, a brand mark, a deliberate brand moment where the color must be *that* hex, not a contrast-tuned cousin. You already hold the exact seed: it was your own input.
+
+For that case, paint the fill with the literal seed, then derive its text color with the generator instead of guessing:
+
+```
+tonex check --foreground '<seed>'
+# → PASS — foreground oklch(0.983 0.0123 317.74) on #6750a4 — 6.11:1 clears AA text (4.5)
+```
+
+`check --foreground <fill>` takes one literal fill (6-digit hex or canonical oklch) and prints the AA-safe foreground (the on-color) for it, with the achieved ratio and a PASS/FAIL verdict. It honors `--aaa` / `--large` and `--format oklch|hex`, and `--json` for a machine-readable row. Exit `0` when the foreground clears the level; exit `1` only when **no** foreground can reach it — a mid-tone fill against the raised AAA bar — and even then it returns the max-contrast pick, so you always get the best available text color.
+
+- **Do** reach for `check --foreground <seed>` when the literal brand color must appear as-is. One deterministic call gives a guaranteed-legible text color for the fill — no guessing a foreground and looping on the verifier.
+- **Don't** make this the default. Prefer roles; the literal value is for the rare slot where the *exact* hex is the deliverable, not the whole surface. If the brand color just needs to *feel* present, that's `primary`, not a literal pin.
+- **Don't** treat the literal pin as a coordinated part of the system. It sits **outside** tonex's contrast guarantee — only the fill↔foreground pair this command returns is gated. Verify any *other* pairing that literal color participates in with `check --pairs '[[<fg>, <fill>]]'` (or `check <fg> <fill>`).
+- **Don't** invent a standing `brand` token for it. There's no surfaced brand slot; the literal value is the seed you already have, used in place for one job — keep it in the recipe so a later agent knows it was a deliberate pin, not derived output.

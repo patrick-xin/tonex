@@ -101,6 +101,10 @@ The annotated rulebook — each rule's *why* and failure mode, plus the local me
 
 **Before you call a theme done, confirm:** `check` passed on the final recipe (cite the cleared-pair count) · `generate` used that same recipe (`--seed`, `--variant`, `--contrast`, surface knob) · every value came from one run, none hand-typed · for a custom binding, `check --pairs` cleared every pairing you asserted · the file carries its recipe.
 
+A role is the seed *re-toned for the job*, not the seed returned verbatim — `primary` won't equal the seed hex, because its lightness was reassigned for contrast. Don't read that as drift and don't reach for a fresh color. The one time the *literal* seed belongs in the output is a deliberate brand moment (logo, mark) — that's the escape hatch in [references/contrast.md](references/contrast.md#the-literal-brand-escape-hatch), where you paint the fill with the seed and derive its text color with `check --foreground`; it's the lone hex you didn't get back from a recipe, and it sits outside the coordinated contrast system, so verify any other pairing it touches.
+
+**Step 2 is not optional.** A theme delivered without a passing `check` is unverified, and it holds only for a recipe you actually gated. "It's just a blue, it'll be fine" is exactly the pairing that fails in dark mode.
+
 ## More — the reference map
 
 - [references/palette.md](references/palette.md) — the role set, the four variant groups, surface knobs (`--tint`/`--desaturate`), reading oklch, token naming.

@@ -24,6 +24,11 @@ commands:
   check    <fg> <bg> [--aaa] [--large] [--json]
       Verify one ad-hoc fg/bg pairing (each a 6-digit hex or canonical
       oklch(L C H)). Exit 0 iff it clears the level.
+  check    --foreground <fill> [--aaa] [--large] [--json]
+      Derive the AA-safe foreground for one literal fill (hex or oklch) and
+      print the on-color, achieved ratio, and verdict. Exit 0 when it clears
+      the level, 1 when no foreground can (a mid-tone fill at the luminance
+      crossover) — the max-contrast pick is still returned.
   check    --pairs '<json>' [--aaa] [--large] [--json]
       Batch-verify a JSON array of [fg, bg] pairs (hex or oklch); exit 1 if
       any fail, enumerating the offenders and their ratios.
