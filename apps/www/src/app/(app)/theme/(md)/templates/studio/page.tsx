@@ -1,9 +1,4 @@
-import { Capabilities } from './_components/capabilities'
-import { Hero } from './_components/hero'
-import { Moves } from './_components/moves'
-import { Pitch } from './_components/pitch'
-import { Process } from './_components/process'
-import { Stats } from './_components/stats'
+import { Capabilities, Hero, Moves, Pitch, Process, Stats } from './_components'
 
 export default function StudioPage() {
   return (

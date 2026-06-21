@@ -4,23 +4,39 @@ import type * as PageTree from 'fumadocs-core/page-tree'
 import { ChevronRightIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type * as React from 'react'
 import { cn } from 'tailwind-variants'
 import { buttonStyles } from '@/components/ui/button'
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from '@/components/ui/collapsible'
 
+// why: the leaf-link element is the only drawer-coupled concern, so the consumer
+// injects how it's wrapped (e.g. in a DrawerClose) instead of the tree knowing
+// where it's rendered. Sidebar passes nothing → plain links.
+type LinkWrapper = (link: React.ReactElement) => React.ReactElement
+
 interface DocsSidebarTreeProps {
   tree: PageTree.Root
+  className?: string
+  linkWrapper?: LinkWrapper
 }
 
-export function DocsSidebarTree({ tree }: DocsSidebarTreeProps) {
+export function DocsSidebarTree({ tree, className, linkWrapper }: DocsSidebarTreeProps) {
   return (
-    <nav className="flex flex-col gap-1 px-3 py-4">
-      <TreeItems nodes={tree.children} />
+    <nav className={cn('flex flex-col gap-1 px-3 py-4', className)}>
+      <TreeItems nodes={tree.children} linkWrapper={linkWrapper} />
     </nav>
   )
 }
 
-function TreeItems({ nodes, depth = 0 }: { nodes: PageTree.Node[]; depth?: number }) {
+function TreeItems({
+  nodes,
+  depth = 0,
+  linkWrapper,
+}: {
+  nodes: PageTree.Node[]
+  depth?: number
+  linkWrapper?: LinkWrapper
+}) {
   return (
     <>
       {nodes.map((node, i) => {
@@ -42,24 +58,46 @@ function TreeItems({ nodes, depth = 0 }: { nodes: PageTree.Node[]; depth?: numbe
 
         const prev = nodes[i - 1]
         if (node.type === 'folder' && prev?.type === 'separator') {
-          return <TreeItems key={String(i)} nodes={node.children} depth={depth} />
+          return (
+            <TreeItems
+              key={String(i)}
+              nodes={node.children}
+              depth={depth}
+              linkWrapper={linkWrapper}
+            />
+          )
         }
 
         if (node.type === 'folder') {
-          return <CollapsibleFolderItem key={String(i)} node={node} depth={depth} />
+          return (
+            <CollapsibleFolderItem
+              key={String(i)}
+              node={node}
+              depth={depth}
+              linkWrapper={linkWrapper}
+            />
+          )
         }
 
-        return <PageItem key={String(i)} node={node} depth={depth} />
+        return <PageItem key={String(i)} node={node} depth={depth} linkWrapper={linkWrapper} />
       })}
     </>
   )
 }
 
-function PageItem({ node, depth }: { node: PageTree.Item; depth: number }) {
+function PageItem({
+  node,
+  depth,
+  linkWrapper,
+}: {
+  node: PageTree.Item
+  depth: number
+  linkWrapper?: LinkWrapper
+}) {
   const pathname = usePathname()
   const isActive = pathname === node.url
 
-  return (
+  const link = (
     <Link
       href={node.url}
       data-active={isActive || undefined}
@@ -77,9 +115,19 @@ function PageItem({ node, depth }: { node: PageTree.Item; depth: number }) {
       <span className={cn(depth > 0 && 'ml-2')}>{node.name}</span>
     </Link>
   )
+
+  return linkWrapper ? linkWrapper(link) : link
 }
 
-function CollapsibleFolderItem({ node, depth }: { node: PageTree.Folder; depth: number }) {
+function CollapsibleFolderItem({
+  node,
+  depth,
+  linkWrapper,
+}: {
+  node: PageTree.Folder
+  depth: number
+  linkWrapper?: LinkWrapper
+}) {
   const pathname = usePathname()
   const isAncestorActive = containsActivePage(node, pathname)
 
@@ -103,7 +151,7 @@ function CollapsibleFolderItem({ node, depth }: { node: PageTree.Folder; depth: 
       </CollapsibleTrigger>
       <CollapsiblePanel>
         <div className="flex flex-col">
-          <TreeItems nodes={node.children} depth={depth + 1} />
+          <TreeItems nodes={node.children} depth={depth + 1} linkWrapper={linkWrapper} />
         </div>
       </CollapsiblePanel>
     </Collapsible>

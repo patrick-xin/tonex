@@ -2,6 +2,8 @@
 
 import { Camera, Check, Layers, LayoutGrid, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from 'tailwind-variants'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
 export function Capabilities() {
   const [selectedTab, setSelectedTab] = useState<string>('BRAND')
@@ -22,11 +24,13 @@ export function Capabilities() {
               type="button"
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 font-mono text-xs font-black rounded-md transition-all cursor-pointer ${
+              className={cn(
+                'px-4 py-2 font-mono text-xs font-black rounded-md transition-all cursor-pointer outline-transparent',
                 selectedTab === tab
                   ? 'bg-tertiary text-on-tertiary shadow-sm'
-                  : 'text-on-surface-variant hover:text-on-surface'
-              }`}
+                  : 'text-on-surface-variant hover:text-on-surface',
+                focusVisiblePrimaryRing,
+              )}
             >
               {tab}
             </button>
@@ -41,11 +45,13 @@ export function Capabilities() {
               type="button"
               key={cap.id}
               onClick={() => setSelectedTab(cap.id)}
-              className={`border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer ${
+              className={cn(
+                'border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer outline-transparent',
                 isActive
-                  ? 'bg-surface-container border-tertiary shadow-sm ring-1 ring-tertiary-container'
-                  : 'bg-surface-container-low border-outline-variant/60 hover:border-outline-variant'
-              }`}
+                  ? 'bg-surface-container border-outline-variant shadow-sm ring-1 ring-tertiary-container'
+                  : 'bg-surface-container-low border-outline-variant/60 hover:border-outline-variant',
+                focusVisiblePrimaryRing,
+              )}
             >
               <div className="space-y-4">
                 <div className="flex justify-between items-center">

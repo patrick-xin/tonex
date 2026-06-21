@@ -1,7 +1,10 @@
+import { cn } from 'tailwind-variants'
+import { Button } from '@/components/ui/button'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import ContactBuilder from './contact-builder'
 import { CONTACT_ANCHOR_ID } from './scroll-to-contact'
 
-export default function SectionBeliefs() {
+export function SectionBeliefs() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 border-l border-r border-b border-outline-variant">
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-outline-variant min-h-75">
@@ -25,7 +28,7 @@ export default function SectionBeliefs() {
           </p>
         </div>
 
-        <div className="flex justify-between items-end text-xs font-mono text-on-surface-variant uppercase">
+        <div className="flex justify-between items-end text-xs font-mono text-on-surface-variant uppercase mt-auto">
           <span>continued overleaf</span>
           <span>P. 02 / 09</span>
         </div>
@@ -47,13 +50,17 @@ export default function SectionBeliefs() {
             right for both of us — no pitch decks, no proposals before that.
           </p>
         </div>
-        <div className="flex justify-between items-end border-t border-outline-variant pt-4">
-          <button
+        <div className="flex justify-between items-center mt-auto">
+          <Button
+            variant="unstyled"
             type="button"
-            className="text-xs font-mono font-bold text-primary hover:text-on-surface transition-all uppercase text-left decoration-solid underline cursor-pointer"
+            className={cn(
+              'text-xs font-mono font-bold transition-all uppercase text-left decoration-solid underline cursor-pointer p-0 h-fit',
+              focusVisiblePrimaryRing,
+            )}
           >
             book a 30-minute chat
-          </button>
+          </Button>
           <span className="text-sm font-mono text-on-surface-variant">MON-THU 10:00–16:00</span>
         </div>
       </div>

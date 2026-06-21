@@ -1,5 +1,7 @@
 import { MoveRight } from 'lucide-react'
+import { cn } from 'tailwind-variants'
 import { cardStyles } from '@/components/ui/card'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
 export function Moves() {
   return (
@@ -8,10 +10,7 @@ export function Moves() {
         <div>
           <h2 className="text-4xl md:text-5xl font-display font-black tracking-tight leading-tight">
             Three surfaces,{' '}
-            <span className="bg-tertiary-container text-on-tertiary-container px-3 py-0.5 rounded-xl font-sans lowercase">
-              one
-            </span>{' '}
-            system.
+            <span className="text-tertiary py-0.5 rounded-xl font-sans uppercase">one</span> system.
           </h2>
         </div>
       </div>
@@ -34,14 +33,17 @@ export function Moves() {
           <div className="mt-8 pt-4 border-t border-outline-variant flex items-center justify-between">
             <a
               href="#capabilities-section"
-              className="font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold"
+              className={cn(
+                'font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold',
+                focusVisiblePrimaryRing,
+              )}
             >
               VIEW IDENTITY WORK <MoveRight className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
 
-        <div className="border border-outline-variant bg-surface-container-highest rounded-2xl flex flex-col overflow-hidden justify-between p-6">
+        <div className="border border-outline-variant bg-surface-container-low rounded-2xl flex flex-col overflow-hidden justify-between p-6">
           <div className="flex justify-between items-center pb-2 mb-2">
             <span className="font-mono text-xs text-on-surface-variant font-semibold">
               PLATE — 02
@@ -63,7 +65,7 @@ export function Moves() {
         </div>
         <div className={cardStyles({ variant: 'highest', className: 'p-6' })}>
           <div className="space-y-4">
-            <span className="font-mono text-xs tracking-wider font-semibold block text-on-primary-container/80">
+            <span className="font-mono text-xs tracking-wider font-semibold block text-on-surface-variant">
               02 — INTERFACE
             </span>
             <h3 className="text-2xl md:text-3xl font-display font-black leading-snug">
@@ -76,10 +78,13 @@ export function Moves() {
             </p>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-on-primary-container/20 flex items-center justify-between">
+          <div className="mt-auto pt-4 border-t border-outline-variant flex items-center justify-between">
             <a
               href="#pitch-section"
-              className="font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 font-bold text-on-primary-container"
+              className={cn(
+                'font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold',
+                focusVisiblePrimaryRing,
+              )}
             >
               Build with us <MoveRight className="w-3.5 h-3.5" />
             </a>
@@ -100,10 +105,13 @@ export function Moves() {
               sheet or a landing page.
             </p>
           </div>
-          <div className="pt-6 mt-4 border-t border-on-tertiary-container/10">
+          <div className="pt-6 mt-4 border-t border-outline-variant">
             <a
               href="#capabilities-section"
-              className="font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-on-tertiary-container"
+              className={cn(
+                'font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold',
+                focusVisiblePrimaryRing,
+              )}
             >
               READ THE JOURNAL <MoveRight className="w-3.5 h-3.5" />
             </a>
@@ -123,10 +131,13 @@ export function Moves() {
               to a delivery team. The people you meet at the brief are the people who ship the work.
             </p>
           </div>
-          <div className="pt-6 mt-4 border-t border-outline-variant/40">
+          <div className="pt-6 border-t border-outline-variant mt-auto">
             <a
               href="#run-section"
-              className="font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-on-surface"
+              className={cn(
+                'font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold',
+                focusVisiblePrimaryRing,
+              )}
             >
               MEET THE TEAM <MoveRight className="w-3.5 h-3.5 text-on-surface-variant" />
             </a>
@@ -134,7 +145,9 @@ export function Moves() {
         </div>
         <div className={cardStyles({ variant: 'high', className: 'p-6' })}>
           <div className="space-y-3">
-            <span className="font-mono text-xs font-semibold text-error block">05 — TOOLS</span>
+            <span className="font-mono text-xs font-semibold text-on-surface-variant block">
+              05 — TOOLS
+            </span>
             <h4 className="text-xl font-display font-medium text-on-surface">
               Published token sets, typed components, zero lock-in.
             </h4>
@@ -144,10 +157,13 @@ export function Moves() {
               stays legible.
             </p>
           </div>
-          <div className="pt-6 mt-4 border-t border-outline-variant/40">
+          <div className="pt-6 border-t border-outline-variant mt-auto">
             <a
               href="#capabilities-section"
-              className="font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-on-surface"
+              className={cn(
+                'font-mono text-xs tracking-wider hover:underline inline-flex items-center gap-2 text-primary font-bold',
+                focusVisiblePrimaryRing,
+              )}
             >
               SEE A SAMPLE SYSTEM <MoveRight className="w-3.5 h-3.5 text-on-surface-variant" />
             </a>

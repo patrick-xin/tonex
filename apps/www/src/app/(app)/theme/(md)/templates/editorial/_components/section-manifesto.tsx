@@ -1,7 +1,9 @@
+import { cn } from 'tailwind-variants'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import BriefChecklist from './brief-checklist'
 import { ScrollToContactButton } from './scroll-to-contact'
 
-export default function SectionManifesto() {
+export function SectionManifesto() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 border-l border-r border-b border-outline-variant">
       <div className="lg:col-span-4 aspect-4/3 lg:aspect-auto overflow-hidden bg-surface-container border-b lg:border-b-0 lg:border-r border-outline-variant relative">
@@ -40,7 +42,10 @@ export default function SectionManifesto() {
           </span>
           <button
             type="button"
-            className="text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer"
+            className={cn(
+              'text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer',
+              focusVisiblePrimaryRing,
+            )}
           >
             READ ALL 12 LINES
           </button>
@@ -61,7 +66,7 @@ export default function SectionManifesto() {
         </div>
 
         <div className="flex justify-between items-center border-t border-outline-variant pt-4 mt-8">
-          <ScrollToContactButton className="text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer uppercase decoration-solid underline">
+          <ScrollToContactButton className="text-xs font-mono font-bold uppercase decoration-solid underline decoration-outline-variant">
             See full process →
           </ScrollToContactButton>
           <span className="text-sm font-mono text-on-surface-variant uppercase">

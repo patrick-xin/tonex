@@ -2,6 +2,7 @@
 
 import { Clock, FileText, LocateIcon, Send } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,6 +12,7 @@ import {
   SelectItemContent,
   SelectTriggerGroup,
 } from '@/components/ui/select'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { Textarea } from '@/components/ui/textarea'
 
 export function Pitch() {
@@ -45,9 +47,9 @@ export function Pitch() {
           <div className="space-y-4 font-mono text-xs text-on-surface-variant/90 border-t border-outline-variant/60 pt-6">
             <div className="flex items-center gap-2">
               <FileText className="w-3.5 h-3.5 text-tertiary" />
-              <a href="#" className="hover:underline hover:text-on-surface">
+              <span className="hover:underline hover:text-on-surface cursor-pointer">
                 STUDIO@FIELDSET.CO
-              </a>
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <LocateIcon className="w-3.5 h-3.5 text-tertiary" />
@@ -112,11 +114,13 @@ export function Pitch() {
                       type="button"
                       key={type}
                       onClick={() => toggleEngagementType(type)}
-                      className={`px-3 py-1.5 font-mono text-xs font-black transition-all rounded-sm border cursor-pointer ${
+                      className={cn(
+                        'px-3 py-1.5 font-mono text-xs font-black transition-all rounded-sm border outline-transparent',
                         isSelected
                           ? 'bg-tertiary text-on-tertiary border-transparent'
-                          : 'bg-surface-container border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-outline'
-                      }`}
+                          : 'bg-surface-container border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-outline',
+                        focusVisiblePrimaryRing,
+                      )}
                     >
                       {type}
                     </button>

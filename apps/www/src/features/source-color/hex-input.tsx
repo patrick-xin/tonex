@@ -12,7 +12,7 @@ export function HexInput({ hideLabel = false }: { hideLabel?: boolean }) {
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   const seedHexLock = useSource((s) => s.seedHexLock)
 
-  // why: the seed is the one field that opts into oklch paste — shadcn/tweakcn
+  // why: the seed is the one field that opts into oklch paste,
   // users arrive with an `oklch(L C H)` brand color and can drop it straight in
   // (converted to its sRGB hex on commit). Seed-only by design; the token-pinning
   // pickers stay hex-only so oklch never lands on a WYSIWYG-pinned value.

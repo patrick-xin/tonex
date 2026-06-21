@@ -143,7 +143,7 @@ describe('round-trip invariant — independent inverse oracle', () => {
 })
 
 // why: the seed-input transducer. The seed field accepts two color formats — a
-// 6-digit hex and a canonical `oklch(L C H)` (the form shadcn/tweakcn emit) —
+// 6-digit hex and a canonical `oklch(L C H)` —
 // and projects both to one sRGB hex for `setSeedHex`. This is SEED-ONLY by
 // design: returning a hex (never preserving the oklch) is exactly why it's safe
 // on the seed (a lossy derivation input, not a WYSIWYG-pinned token) and must

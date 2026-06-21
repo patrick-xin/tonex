@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
 
 export const CONTACT_ANCHOR_ID = 'contact-anchor'
 
@@ -18,8 +19,8 @@ export function ScrollToContactButton({
   title?: string
 }) {
   return (
-    <button type="button" onClick={scrollToContact} className={className} title={title}>
+    <Button type="button" onClick={scrollToContact} className={className} title={title}>
       {children}
-    </button>
+    </Button>
   )
 }

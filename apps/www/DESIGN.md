@@ -178,22 +178,20 @@ large ones.
 ## Do's and Don'ts
 
 - **Do** reach for a semantic color role for every fill and every piece of text —
-  `primary`, `on-primary`, `surface-container-high`. **Don't** hardcode a hex or
-  `rgb()`; the palette is generated from the seed, and a literal can neither follow
-  it nor guarantee contrast.
-- **Don't** fade text with opacity (`on-surface/60`) to soften it — it breaks
-  contrast. **Do** step down to a lower-emphasis role like `on-surface-variant`.
+  `primary`, `on-primary`, `surface-container-high`. 
+- **Do** step down to a lower-emphasis role like `on-surface-variant`.
 - **Do** disable a control that isn't available — dim it, stop pointer events.
-  **Don't** leave it active and warn after the click.
 - **Do** let depth come from tonal surface layers and hairline outlines first.
-  **Don't** reach for a heavy shadow where a border will separate; save shadow for
-  things that float.
 - **Do** keep motion to the two house easings — a quick spring for popups, a smooth
-  glide for drawers. **Don't** introduce a third curve.
-- **Do** stay on the type scale (`text-xs`, `leading-6`). **Don't** drop in
-  arbitrary values like `text-[10px]`, and balance headings with `text-pretty` /
-  `text-balance` so they don't leave widows.
-- **Do** label icon-only controls for screen readers. **Don't** ship a naked icon
-  button.
+  glide for drawers. 
+- **Do** stay on the type scale (`text-xs`, `leading-6`).
+- **Do** label icon-only controls for screen readers.
 - **Do** mind the small marks — real ellipses (`…`), curly quotes, non-breaking
   spaces in `⌘ K` and brand names, and tabular figures for number columns.
+- **Don't** reach for a heavy shadow where a border will separate; save shadow for
+  things that float.
+- **Don't** hardcode a hex or `rgb()`; the palette is generated from the seed, and a literal can neither follow
+  it nor guarantee contrast.
+- **Don't** fade text with opacity (`on-surface/60`) to soften it — it breaks contrast. 
+- **Don't** drop in arbitrary values like `text-[10px]`, and balance headings with `text-pretty` /
+  `text-balance` so they don't leave widows.

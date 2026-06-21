@@ -94,7 +94,7 @@ export function hexFromOklch(value: string): string {
 }
 
 // why: the seed-input transducer. The seed field accepts two color formats — a
-// 6-digit hex and a canonical `oklch(L C H)` (the form shadcn/tweakcn emit) —
+// 6-digit hex and a canonical `oklch(L C H)` —
 // and projects both to one sRGB hex for `setSeedHex`. Returning a hex (never
 // the oklch) is exactly why it's safe on the seed (a lossy derivation input,
 // not a WYSIWYG-pinned token) and why it must NOT back the override/custom/role

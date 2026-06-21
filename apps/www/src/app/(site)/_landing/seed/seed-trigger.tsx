@@ -9,7 +9,7 @@ export function SeedTrigger() {
   const setSeedHex = useSource((s) => s.actions.setSeedHex)
   // why: same seed, same opt-in as the rail's HexInput — this writes to the same
   // setSeedHex (a lossy derivation input, not a WYSIWYG-pinned token), so a
-  // shadcn/tweakcn user can drop their `oklch(L C H)` brand color straight in
+  // shadcn user can drop their `oklch(L C H)` brand color straight in
   // here too (converted to its sRGB hex on commit).
   const { hexInput, handleChange, inputProps } = useHexFieldState(seedHex, setSeedHex, {
     acceptOklch: true,

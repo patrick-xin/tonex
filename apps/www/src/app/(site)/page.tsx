@@ -4,6 +4,7 @@ import { ExportSection } from './_landing/export/export-section'
 import { Features } from './_landing/features/features'
 import { FinalCta } from './_landing/final-cta/final-cta'
 import { ShaderHero } from './_landing/hero/shader-hero'
+import { IntergrationSection } from './_landing/intergration/intergration'
 import { PreviewSection } from './_landing/preview/preview'
 import { ProductSection } from './_landing/product/product'
 import { SeedSection } from './_landing/seed/seed-section'
@@ -17,6 +18,7 @@ export default function LandingPage() {
       <PreviewSection />
       <ProductSection />
       <ExportSection />
+      <IntergrationSection />
       <Features />
       <FinalCta />
       <SiteFooter />

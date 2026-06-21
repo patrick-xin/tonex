@@ -59,7 +59,7 @@ describe('useHexFieldState', () => {
   })
 })
 
-// why: the seed field opts into oklch paste (shadcn/tweakcn `oklch(L C H)`);
+// why: the seed field opts into oklch paste;
 // the token-pinning pickers (override/custom/role) do NOT. The opt-in flag is
 // the line — the default-false path must stay byte-identical to the hex-only
 // contract above, so oklch can never leak into a WYSIWYG-pinned picker.
