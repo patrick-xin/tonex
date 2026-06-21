@@ -26,7 +26,7 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import type * as React from 'react'
-import { Separator } from '../../../../../../../../components/shadcn/separator'
+import { Separator } from '@/components/shadcn/separator'
 import { NavDocuments } from './nav-documents'
 import { NavMain } from './nav-main'
 import { NavSecondary } from './nav-secondary'

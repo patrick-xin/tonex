@@ -1,6 +1,6 @@
 # WYSIWYG — preview and export never drift
 
-The previous prototype's load-bearing failure mode: users got one set of colors in the live preview, pasted the export into their own project, and saw different colors. Competitors (tweakcn, realtimecolors) hit the same trap. The cause was multiple derive paths producing the same logical tokens through subtly different code (rounding, color-space conversion, mode-specific resolution), one feeding the preview and another feeding the export.
+The previous prototype's load-bearing failure mode: users got one set of colors in the live preview, pasted the export into their own project, and saw different colors. The cause was multiple derive paths producing the same logical tokens through subtly different code (rounding, color-space conversion, mode-specific resolution), one feeding the preview and another feeding the export.
 
 **Decision:** `deriveTheme(source)` is the single source of truth for token **values**. Every other consumer — `applyDom`, every entry in `exporters/`, the SSR'd `globals.css` — only **formats** what `deriveTheme` returned. None of them re-compute, re-round, or re-convert.
 

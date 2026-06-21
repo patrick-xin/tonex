@@ -2,17 +2,6 @@ import type { ComponentProps } from 'react'
 
 import { cn } from 'tailwind-variants'
 
-/**
- * Tonex logo — single path (two subpaths, one fill).
- *
- * Color follows `currentColor`; drive it with a text color (`text-foreground`,
- * `text-primary`, …). Smallest/cheapest variant — use this everywhere you
- * don't need to color the two halves independently.
- *
- * Note: the mark is non-square (116×138). `size-*` letterboxes it without
- * distortion (default `preserveAspectRatio`); for an exact fit, size by one
- * axis, e.g. `className="h-6 w-auto"`.
- */
 function TonexLogo({ className, ...props }: ComponentProps<'svg'>) {
   return (
     <svg
@@ -28,18 +17,6 @@ function TonexLogo({ className, ...props }: ComponentProps<'svg'>) {
   )
 }
 
-/**
- * Tonex logo — separate paths for independent styling / two-tone.
- *
- * Both halves default to `currentColor`, so this renders identically to
- * <TonexLogo /> until you split the colors. Recolor a half by targeting its
- * slot, e.g. on the parent:
- *
- *   <TonexLogoDuo className="[&_[data-slot=tonex-logo-accent]]:fill-red-500" />
- *
- * `tonex-logo-primary` is the large X stroke; `tonex-logo-accent` is the small
- * left chevron.
- */
 function TonexLogoDuo({ className, ...props }: ComponentProps<'svg'>) {
   return (
     <svg

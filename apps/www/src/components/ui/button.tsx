@@ -84,7 +84,9 @@ const buttonStyles = tv({
         'active:bg-[color-mix(in_srgb,var(--color-on-primary-container)_12%,var(--color-primary-container))]',
       ],
       unstyled: 'bg-transparent hover:bg-transparent',
+      focusVisibleRing,
       glow: 'bg-transparent border border-primary/30 dark:border-primary/15 hover:bg-primary/8 shadow-md shadow-primary/10 dark:shadow-sm',
+      focusVisiblePrimaryRing,
     },
   },
   defaultVariants: {

@@ -14,9 +14,7 @@ import { type FocusEvent, useRef, useState } from 'react'
 // what this field accepts can never drift from what the engine accepts. Focus
 // also selects the whole value so the field is type-to-replace. Spread the
 // returned `inputProps` onto the <Input> to wire focus/blur.
-//
-// `acceptOklch` opts a field into pasting a canonical `oklch(L C H)` (the form
-// shadcn/tweakcn emit): it's converted to its sRGB hex on commit. SEED ONLY —
+// `acceptOklch` opts a field into pasting a canonical `oklch(L C H)`, it's converted to its sRGB hex on commit.
 // the seed is a lossy derivation input, not a WYSIWYG-pinned token, so the
 // gamut projection is safe there. The token-pinning pickers (override/custom/
 // role) leave it off, so oklch can never leak into a value that must equal the
