@@ -831,7 +831,10 @@ describe('tonex per-mode level flags (issue #218)', () => {
     expect(capture(['generate', '--seed', SEED, '--contrast-light', '-0.1']).code).toBe(USAGE)
     expect(capture(['generate', '--seed', SEED, '--tint-light', '2']).code).toBe(USAGE)
     expect(capture(['generate', '--seed', SEED, '--desaturate-dark', '99']).code).toBe(USAGE)
-    expect(capture(['generate', '--seed', SEED, '--tint-text', '5']).code).toBe(USAGE)
+    // --tint 0 activates the tint algo so this fails on range, not the requires-tint guard
+    expect(capture(['generate', '--seed', SEED, '--tint', '0', '--tint-text', '5']).code).toBe(
+      USAGE,
+    )
   })
 
   // describe completeness: every new flag appears in the machine-readable surface
@@ -869,23 +872,41 @@ describe('tonex per-mode level flags (issue #218)', () => {
     ).toBe(USAGE)
   })
 
-  // --tint-text: a new base flag for surfaceTintTextLevel (previously unreachable)
-  it('--tint-text sets surfaceTintTextLevel for both modes; symmetric recipe emits base flag', () => {
-    const base = capture(['generate', '--seed', SEED])
-    const r = capture(['generate', '--seed', SEED, '--tint-text', '0.6'])
-    expect(r.code).toBe(OK)
-    expect(r.out).not.toBe(base.out)
-    expect(r.out).toContain('--tint-text 0.6')
-    expect(r.out).not.toContain('--tint-text-light')
-    expect(r.out).not.toContain('--tint-text-dark')
+  // --tint-text is consumed by deriveTheme ONLY under the tint algo, so without --tint
+  // it would silently no-op — we reject it loudly (the --second-color-on-non-cmf contract).
+  it('--tint-text without --tint is a usage error (exit 2), not a silent no-op', () => {
+    expect(capture(['generate', '--seed', SEED, '--tint-text', '0.6']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--tint-text-light', '0.4']).code).toBe(USAGE)
+    expect(
+      capture(['generate', '--seed', SEED, '--desaturate', '0.3', '--tint-text', '0.6']).code,
+    ).toBe(USAGE)
   })
 
-  // --tint-text asymmetry: per-mode flags override
-  it('--tint-text-light / --tint-text-dark set per-mode text tint; recipe emits per-mode flags', () => {
+  // Under --tint, --tint-text actually changes the DERIVED colours (not just the recipe
+  // line) — the regression guard for the silent no-op — and the symmetric recipe round-trips.
+  it('--tint 0 --tint-text 0.6 tints the text and emits a round-tripping base recipe', () => {
+    const tintOnly = capture(['generate', '--seed', SEED, '--tint', '0'])
+    const withText = capture(['generate', '--seed', SEED, '--tint', '0', '--tint-text', '0.6'])
+    expect(withText.code).toBe(OK)
+    // strip the embedded recipe comment so we compare ONLY derived token values
+    const tokens = (s: string) =>
+      s
+        .split('\n')
+        .filter((l) => !l.includes('tonex generate'))
+        .join('\n')
+    expect(tokens(withText.out)).not.toBe(tokens(tintOnly.out))
+    expect(withText.out).toContain('--tint-text 0.6')
+    expect(withText.out).not.toContain('--tint-text-light')
+  })
+
+  // --tint-text asymmetry: per-mode flags override (under an active tint algo)
+  it('--tint 0 --tint-text-light 0.4 --tint-text-dark 0.8 emits per-mode text-tint flags', () => {
     const r = capture([
       'generate',
       '--seed',
       SEED,
+      '--tint',
+      '0',
       '--tint-text-light',
       '0.4',
       '--tint-text-dark',

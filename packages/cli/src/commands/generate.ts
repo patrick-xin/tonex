@@ -71,6 +71,16 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
       if (tl.dark > 0) parts.push(`--tint-dark ${tl.dark}`)
     }
     parts.push(`--tint-palette ${source.surfacePaletteName}`)
+    // why: --tint-text is consumed by deriveTheme only under the tint algo, and the
+    // resolver rejects it without --tint, so emit it INSIDE this branch — a desaturate
+    // theme can never produce a `--desaturate … --tint-text` recipe that would re-error.
+    const ttl = source.surfaceTintTextLevel
+    if (ttl.light === ttl.dark) {
+      if (ttl.light > 0) parts.push(`--tint-text ${ttl.light}`)
+    } else {
+      if (ttl.light > 0) parts.push(`--tint-text-light ${ttl.light}`)
+      if (ttl.dark > 0) parts.push(`--tint-text-dark ${ttl.dark}`)
+    }
   } else {
     const dl = source.surfaceDesaturateLevel
     if (dl.light === dl.dark) {
@@ -79,14 +89,6 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
       if (dl.light > 0) parts.push(`--desaturate-light ${dl.light}`)
       if (dl.dark > 0) parts.push(`--desaturate-dark ${dl.dark}`)
     }
-  }
-
-  const ttl = source.surfaceTintTextLevel
-  if (ttl.light === ttl.dark) {
-    if (ttl.light > 0) parts.push(`--tint-text ${ttl.light}`)
-  } else {
-    if (ttl.light > 0) parts.push(`--tint-text-light ${ttl.light}`)
-    if (ttl.dark > 0) parts.push(`--tint-text-dark ${ttl.dark}`)
   }
   // why: custom colors shape the derived theme, so the recipe must carry them to
   // reproduce the projection. Re-serialize the RESOLVED entries (hex already

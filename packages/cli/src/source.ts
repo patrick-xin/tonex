@@ -128,9 +128,22 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     desaturateArg !== undefined ||
     desaturateLightArg !== undefined ||
     desaturateDarkArg !== undefined
+  const hasTintText =
+    tintTextArg !== undefined || tintTextLightArg !== undefined || tintTextDarkArg !== undefined
 
   if (hasTint && hasDesaturate) {
     io.err(`tonex: --tint and --desaturate flags are mutually exclusive (surface uses one algo)\n`)
+    return USAGE
+  }
+  // why: surfaceTintTextLevel is consumed by deriveTheme ONLY under the tint algo
+  // (applyTreatment routes desaturate to a path that ignores it). Setting --tint-text
+  // without --tint would silently no-op, so we reject it loudly — the same contract as
+  // --second-color on a non-cmf variant. "Neutral surfaces + brand text" is reachable
+  // as `--tint 0 --tint-text <0..1>` (tint level 0 = max-neutral surfaces).
+  if (hasTintText && !hasTint) {
+    io.err(
+      `tonex: --tint-text requires --tint (text tint is consumed only under the tint surface algo)\n  for neutral surfaces + brand text, use --tint 0 --tint-text <0..1>\n`,
+    )
     return USAGE
   }
   if (
@@ -185,9 +198,8 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
 
   // why: --tint-text / --tint-text-light / --tint-text-dark surface
   // surfaceTintTextLevel — the brand-accent tint on on-surface/on-surface-variant
-  // text. Decoupled from surfaceAlgo by design, so it applies with any surface algo.
-  const hasTintText =
-    tintTextArg !== undefined || tintTextLightArg !== undefined || tintTextDarkArg !== undefined
+  // text. Decoupled from surfaceTintLevel (text can tint while surfaces stay neutral),
+  // but consumed only under the tint algo — guarded above so it never silently no-ops.
   if (hasTintText) {
     const level = resolveModeLevel(
       tintTextArg,
