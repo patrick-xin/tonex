@@ -34,18 +34,16 @@ export function HeroContent() {
         variants={item}
         className="text-[clamp(40px,6vw,96px)] font-semibold leading-tight sm:leading-none tracking-tight text-on-surface mb-8 font-display"
       >
-        Pro-grade color system.
-        <br />
-        Yours only.
+        The color layer for your
+        <br /> design system.
       </motion.h1>
-      <motion.p
-        variants={item}
-        className="text-xl text-on-surface-variant max-w-[54ch] mb-10 text-pretty"
-      >
-        Built on perceptual color science.
-        <br /> One seed, one coherent palette, one identity across every product.
-      </motion.p>
-      <CtaButtons />
+      <div className="ml-2">
+        <motion.p variants={item} className="text-xl max-w-xl mb-10 text-pretty">
+          Built on perceptual color science. One color becomes a full, role-mapped token set -
+          coherent in any system it's bound into.
+        </motion.p>
+        <CtaButtons />
+      </div>
     </motion.div>
   )
 }

@@ -46,13 +46,13 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
     >
       <TabsListContent
         className="mx-auto mb-6 overflow-x-auto max-w-full no-scrollbar"
-        indicatorClassName="bg-secondary-container"
+        indicatorClassName="bg-secondary-container data-[orientation=horizontal]:h-[calc(100%-12px)]"
       >
         {EXPORT_TABS.map(({ value, label, icon: TabIcon }) => (
           <TabsTab
             key={value}
             value={value}
-            className="text-on-surface-variant hover:text-on-surface data-active:text-on-secondary-container sm:min-w-26 flex-1"
+            className="text-on-surface-variant data-active:text-on-secondary-container hover:text-on-surface sm:min-w-28 flex-1"
           >
             <TabIcon /> {label}
           </TabsTab>
@@ -62,16 +62,16 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
         <TabsPanel
           key={value}
           value={value}
-          className="mx-auto max-h-[50vh] w-full overflow-hidden mask-b-from-20% mask-b-to-90%"
+          className="mx-auto max-h-[50vh] w-full overflow-hidden mask-b-from-20% mask-b-to-90% max-w-4xl"
         >
-          <div className="rounded-md border border-outline-variant/40 border-t-0 relative">
-            <div className="bg-surface-container-high rounded-md rounded-b-none flex gap-2 py-2 px-4">
+          <div className="overflow-hidden rounded-lg border border-t-0 border-outline-variant/40 shadow-sm relative">
+            <div className="bg-surface-container-high rounded-md rounded-b-none flex gap-2 py-2 px-4 relative">
               <div className="bg-red-500 size-3 rounded-full" />
               <div className="bg-yellow-500 size-3 rounded-full" />
               <div className="bg-green-500 size-3 rounded-full" />
-              <ShimmerBorder />
+              <ShimmerBorder className="h-0.5" />
             </div>
-            <div className="h-[50vh] bg-surface-container-low overflow-hidden relative text-xs">
+            <div className="h-[50vh] bg-surface-container-low overflow-hidden text-xs leading-relaxed">
               {/* biome-ignore lint/security/noDangerouslySetInnerHtml: server-highlighted static demo code from a hardcoded constant */}
               <div dangerouslySetInnerHTML={{ __html: highlighted[value] }} />
             </div>

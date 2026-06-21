@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import { TonexLogo } from '@/components/icons/logo'
+import { MdIcon } from '@/components/icons/md'
 import { ShadcnIcon } from '@/components/icons/shadcn'
 import { DemoLoader } from '@/components/shared/demo-loader'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
@@ -17,7 +17,7 @@ const MdDemos = dynamic(() => import('./md-demos'), {
 
 const PRODUCT_TABS = [
   { value: 'shadcn', label: 'Shadcn' },
-  { value: 'tonex', label: 'tonex' },
+  { value: 'md', label: 'Material Design Tokens' },
 ] as const
 
 type ProductTab = (typeof PRODUCT_TABS)[number]['value']
@@ -44,7 +44,7 @@ export function PreviewTabs() {
           value="md"
           className="text-on-surface-variant hover:text-on-surface data-active:text-on-secondary-container"
         >
-          <TonexLogo className="size-4.25" /> Tonex
+          <MdIcon className="size-4.25" /> Material Design Tokens
         </TabsTab>
       </TabsListContent>
       <div className="overflow-x-auto overflow-y-hidden sm:overscroll-x-contain mask-[linear-gradient(to_bottom,black_80%,transparent)] min-w-0 h-[60vh] px-4 sm:px-0">
