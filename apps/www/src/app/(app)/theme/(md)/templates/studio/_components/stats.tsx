@@ -36,7 +36,7 @@ export function Stats() {
             One engagement available. We don't take more than we can run well.
           </span>
         </div>
-        <div className="flex justify-between items-end">
+        <div className="flex justify-between items-center">
           <a href="#pitch-section" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
             Pitch your project <MoveRight className="w-3.5 h-3.5 ml-1.5 inline-block" />
           </a>
