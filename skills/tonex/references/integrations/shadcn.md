@@ -32,8 +32,24 @@ tonex generate --seed '#3b82f6' --to shadcn
 
 - **Both modes, one call.** The output carries `:root` (light) *and* `.dark` (dark); `--mode` is a no-op here. Paste the whole block into `globals.css`.
 - **Leading recipe comment is the durable artifact.** The `/* tonex generate … */` line is the runnable command that reproduces this exact block (resolved knobs, so a later default change can't drift it). Keep it — it's how the next agent regenerates or extends the theme.
-- **shadcn names, not MD3 names.** This renames the underlying MD3 tokens into shadcn's vocabulary — `on-primary` → `--primary-foreground`, `surface` → `--background`, plus shadcn-only slots (`--card`, `--muted`, `--accent`, `--destructive`). To **check** a shadcn pairing, feed these `--slot` names straight into `check --pairs` (`[["--primary-foreground","--primary"]]`) — they're valid input. To **adjust** the underlying tone, use the bare md role name (`on-primary`); `adjust` is md-only. See the map in [palette.md](palette.md#token-naming-across-surfaces).
+- **shadcn names, not MD3 names.** This renames the underlying MD3 tokens into shadcn's vocabulary — `on-primary` → `--primary-foreground`, `surface` → `--background`, plus shadcn-only slots (`--card`, `--muted`, `--accent`, `--destructive`). To **check** a shadcn pairing, feed these `--slot` names straight into `check --pairs` (`[["--primary-foreground","--primary"]]`) — they're valid input. To **adjust** the underlying tone, use the bare md role name (`on-primary`); `adjust` is md-only. See the map in [palette.md](../palette.md#token-naming-across-surfaces).
 - **Encoding.** Defaults to oklch (shadcn v4's native form). `--format hex` for sRGB hex instead.
+
+## Surface layering
+
+`--binding <preset>` picks how shadcn's *surface* slots (`--card`, `--popover`, `--muted`, `--accent`, `--sidebar*`) route onto the md surface-elevation tiers — the depth/layering feel. shadcn-only (noted-and-ignored for other targets). It's **pure routing**: it doesn't touch the recipe (variant/surface/contrast), so the same seed re-projects into a different arrangement without re-deriving.
+
+| preset | feel |
+| --- | --- |
+| `default` | balanced — a neutral surface mapping to start from |
+| `clean` | flat — card, popover, and background share one layer |
+| `mixed` | mode-aware — light and dark route to different layers |
+| `layered` | stacked depth — each surface sits on its own elevation tier |
+| `seamless` | subtle depth — cards lift gently, popovers blend into the page |
+
+- **Contrast-safe across all five.** Each preset keeps every slot paired with its guaranteed on-color (`--card` → a surface tier, `--card-foreground` → `on-surface`), so the WCAG guarantee survives the reroute — the presets differ in elevation, not legibility.
+- **`check` doesn't read `--binding`** — it gates the default routing. The presets are curated safe; if you ship a non-default one and want belt-and-suspenders, verify its slots with `check --pairs` using the **md tokens** they route to.
+- **`--soft-borders` layers on top** of whichever binding is in play — it softens the edge roles (`--border`/`--input`/`--sidebar-border`) to the faint `outline-variant` tone, independent of the routing.
 
 ## End-to-end: theme a shadcn app at AAA
 

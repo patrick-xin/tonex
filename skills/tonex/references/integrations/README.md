@@ -1,15 +1,15 @@
-# Target: any tool with no built-in projection
+# Integrations — binding tonex into any target
 
-This is the **general method** — how tonex colors *any* target. `--to shadcn|yaml|json` (see [shadcn.md](shadcn.md), [design-md.md](design-md.md), [json.md](json.md)) are not separate machinery; they are **pre-baked shortcuts of this method** for three popular consumers. For everything else — an email tool, a component library, a slide deck, a custom design system, another skill you're driving — you run the method by hand. That is the skill's job, not the CLI's.
+This folder is the **integrations catalog**. The built-in targets each have a file beside this one — [shadcn.md](shadcn.md), [design-md.md](design-md.md), [json.md](json.md); this README is the **general method** they're shortcuts of. `--to shadcn|yaml|json` are not separate machinery; they are **pre-baked shortcuts of this method** for three popular consumers. For everything else — an email tool, a component library, a slide deck, a custom design system, another skill you're driving — you run the method by hand. That is the skill's job, not the CLI's.
 
 ## The rule
 
 When you integrate with another tool or skill:
 
 1. **Figure out how it consumes color** — find its color surface: a config object, a token file, a theme block, a set of CSS variables. List its slots and what each is *for*.
-2. **`tonex generate … --to colors`** — get the role set (read [palette.md](palette.md) for the roster and `--extended`).
+2. **`tonex generate … --to colors`** — get the role set (read [palette.md](../palette.md) for the roster and `--extended`).
 3. **Map roles → slots by intent** (below).
-4. **`tonex check --pairs`** — prove every pairing you asserted ([contrast.md](contrast.md)).
+4. **`tonex check --pairs`** — prove every pairing you asserted ([contrast.md](../contrast.md)).
 
 The names don't bind you; the contrast guarantee follows the *pairing you check*, not the role name you keep.
 
@@ -17,13 +17,15 @@ The names don't bind you; the contrast guarantee follows the *pairing you check*
 
 Treat the target's color surface as a **slot manifest**: a list of `{ slot, intent, paired-against }`. For each slot:
 
-1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text is `on-primary`, a card surface is `surface-container`, etc. Read the value from the `--to colors` output. This name→intent match is the *default*, not a rule: if you'd rather drive the UI from the generated `secondary` or `tertiary`, do it — the names don't bind you. What you can't skip is step 3: the guarantee covers the pairing you check, whatever roles it's between.
+1. **Pick the token by intent.** MD3 tokens *are* the intent layer — a "primary action fill" is `primary`, its text `on-primary`, a card surface `surface-container`. Read the value from `--to colors`. The name→intent match is the default; if you'd rather drive the UI from `secondary` or `tertiary`, do it — what you can't skip is step 3.
 2. **The tone is already fixed.** You don't choose lightness — the token's value already carries the contrast tonex guaranteed against its paired surface. Don't re-pick it.
 3. **Verify every pairing you assert.** A foreign target fuses what MD3 splits — one `--ink` slot may be text *and* border *and* icon over several backgrounds. That slot's value must satisfy the **union** of contrast constraints across *every* background it touches. After mapping, gate it:
    ```
    tonex check --seed '#3b82f6' --pairs '[["on-surface","surface"], …]'
    ```
    Exit `1` enumerates the failing pairs; pick a higher-contrast token for that slot, or raise `--contrast`, and re-check.
+
+Before mapping, know what *kind* of tone each role is — accents work as fills, containers are backgrounds, inverse flips polarity. The three role classes and where each binds safely are in [patterns.md](../patterns.md#which-role-binds-safely-where-the-three-classes).
 
 The cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part. When in doubt, map a fused slot to the token that satisfies its *strictest* use, then prove it with `check --pairs`.
 

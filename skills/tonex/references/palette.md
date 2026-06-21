@@ -99,6 +99,8 @@ So `--tint 0` and `--desaturate 0` do **opposite** things — they are not one k
 
 The palettes are Tailwind v4 neutrals (plus four project-extended ones: `taupe`, `mauve`, `mist`, `olive`). At `--tint 0` the output is the pure chosen palette at each token's MCU tone, so the choice matters most near level 0 — at level 1 the surfaces converge toward the primary's hue regardless.
 
+**The knobs don't move contrast.** Both pin each token's *tone* and change only hue/chroma — and WCAG ratios are tone-driven, so they barely shift across the whole `0→1` range. A surface knob won't break a comfortably-passing theme. Re-gate anyway (the recipe changed, and `check` is one command): a light-mode accent-on-`surface` pair already sitting at the AA edge can still wobble by a fraction.
+
 ## Reading oklch values
 
 Values are `oklch(L C H)`: **L** = lightness/tone (0–1), **C** = chroma (how colorful, ~0–0.37), **H** = hue (degrees). You can't see color, but you can compare these numbers — a higher **C** is more saturated, a lower **L** is darker. That's how you compare two variants, or confirm an `adjust` landed: read the axis, don't guess the look.
@@ -135,4 +137,4 @@ Add `--json` to `check` and `adjust` for machine-readable output. Contrast polic
 
 ## End-to-end examples
 
-End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [shadcn.md](shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
+End-to-end walkthroughs live with their target, since each is target-specific — e.g. theming a shadcn app at AAA is in [integrations/shadcn.md](integrations/shadcn.md#end-to-end-theme-a-shadcn-app-at-aaa).
