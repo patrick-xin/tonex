@@ -6,8 +6,10 @@
 // seed→theme resolver in `source.ts`; the flag schema (parsed + introspected) in
 // `spec.ts`; the IO seam + exit codes in `io.ts`; the usage text in `help.ts`.
 import { adjust } from './commands/adjust'
+import { apply } from './commands/apply'
 import { check } from './commands/check'
 import { generate } from './commands/generate'
+import { serialize } from './commands/serialize'
 import { HELP } from './help'
 import { type Io, OK, USAGE } from './io'
 import { describePayload } from './spec'
@@ -33,6 +35,10 @@ export function run(argv: readonly string[], io: Io): number {
       return check(rest, io)
     case 'adjust':
       return adjust(rest, io)
+    case 'serialize':
+      return serialize(rest, io)
+    case 'apply':
+      return apply(rest, io)
     case 'describe':
       io.out(`${JSON.stringify(describePayload(), null, 2)}\n`)
       return OK

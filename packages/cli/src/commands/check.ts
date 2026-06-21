@@ -22,6 +22,7 @@ import {
   levelThreshold,
   resolveContrastPairs,
 } from '@tonex/core/audit'
+import type { PortableTheme } from '@tonex/core/schema'
 import { DEFAULT_VARIANT } from '@tonex/core/variants'
 import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
 import { HELP } from '../help'
@@ -160,6 +161,16 @@ function checkTheme(args: ParsedArgs, io: Io): number {
   const source = parseSource(args, io)
   if (typeof source === 'number') return source
 
+  return gateTheme(source, args, io)
+}
+
+// why: the source-AGNOSTIC whole-theme gate — lifted out of `checkTheme` (issue #219)
+// so `apply --check` runs the SAME gate over a loaded `colors.json` that `check --seed`
+// runs over a derived theme. It feeds the WHOLE `PortableTheme` to `deriveTheme`, so a
+// pin/override inside a www-authored file that breaks a text pair blocks here (exit 1),
+// exactly like a derived failure — there is no separate "apply" audit path. Reads the
+// same flags as `check`'s whole-theme form (`--mode`/`--aaa`/`--format`/`--json`).
+export function gateTheme(source: PortableTheme, args: ParsedArgs, io: Io): number {
   const mode = modeOf(args, io)
   if (typeof mode === 'number') return mode
 

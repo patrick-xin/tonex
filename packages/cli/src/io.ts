@@ -6,6 +6,12 @@
 export interface Io {
   out: (chunk: string) => void
   err: (chunk: string) => void
+  // why: the INPUT seam — `apply` reads a serialized colors.json by path, or from
+  // stdin when path is undefined (the `apply -` / piped form). Returns the raw text,
+  // or null on a read failure (missing file, no piped stdin) which the command maps
+  // to exit 2. Kept on `Io` so `run(argv, io)` stays the pure boundary every test
+  // drives — `cli.ts` wires the real fs, a test injects canned input.
+  read: (path: string | undefined) => string | null
 }
 
 // why: the exit-code taxonomy, borrowed from design.md's split of "fix the call"
