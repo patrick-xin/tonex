@@ -27,6 +27,7 @@ Issues live in GitHub Issues at [`patrick-xin/tonex`](https://github.com/patrick
 - Small, vertically-sliced changes per [`docs/agents/slice-strategy.md`](./docs/agents/slice-strategy.md).
 - Tests required for behaviour changes. The drift-guard test pins `globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))`; a baseline change requires regenerating the bake.
 - New constraints with no in-code home → `AGENTS.md`. New decisions → an ADR.
+- Changes to a publishable package (`packages/*` except `typescript-config`) need a changeset — run `pnpm changeset`; `apps/www` and config don't. CI's `changeset status` enforces it. A deliberate no-release change → `pnpm changeset --empty`.
 
 ## Security
 

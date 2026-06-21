@@ -8,6 +8,9 @@
     "coverage": "turbo run coverage",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
     "check:conventions": "node scripts/check-conventions.mjs",
     "check:adr": "node .claude/skills/adr/scripts/check-adr-citations.mjs",
     "plugin:contact": "node scripts/inject-plugin-contact.mjs",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.14",
+    "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "husky": "^9.1.7",
