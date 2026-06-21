@@ -1,6 +1,8 @@
+import { cn } from 'tailwind-variants'
+import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 import { HONORS } from '../data'
 
-export default function SectionStrategy() {
+export function SectionStrategy() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 border-l border-r border-b border-outline-variant">
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-outline-variant min-h-75">
@@ -56,7 +58,10 @@ export default function SectionStrategy() {
           </span>
           <button
             type="button"
-            className="text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer uppercase underline"
+            className={cn(
+              'text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer uppercase underline',
+              focusVisiblePrimaryRing,
+            )}
           >
             DOWNLOAD MENU
           </button>
@@ -94,7 +99,10 @@ export default function SectionStrategy() {
           </span>
           <button
             type="button"
-            className="text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer"
+            className={cn(
+              'text-xs font-mono font-bold text-primary hover:text-on-surface transition-colors cursor-pointer',
+              focusVisiblePrimaryRing,
+            )}
           >
             READ
           </button>

@@ -1,0 +1,6 @@
+export { SectionBeliefs } from './section-beliefs'
+export { SectionCapability } from './section-capability'
+export { SectionHero } from './section-hero'
+export { SectionManifesto } from './section-manifesto'
+export { SectionStrategy } from './section-strategy'
+export { SectionWork } from './section-work'

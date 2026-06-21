@@ -1,20 +1,22 @@
-export default function SectionHero() {
+import { Button } from '@/components/ui/button'
+
+export function SectionHero() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 border border-outline-variant">
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-outline-variant min-h-75 lg:min-h-110">
         <div className="flex justify-between items-start text-xs font-mono text-on-surface-variant uppercase">
-          <span>tonex°</span>
+          <span>tonex</span>
           <span>LA</span>
         </div>
         <div className="my-auto py-8">
-          <h1 className="font-sans text-8xl md:text-9xl font-bold tracking-tighter text-on-surface leading-none select-none lowercase">
-            tonex<span className="font-light text-primary">°</span>
+          <h1 className="font-display text-primary text-4xl sm:text-8xl font-bold tracking-tighter leading-none select-none lowercase">
+            tonex
           </h1>
         </div>
 
         <div className="flex justify-between items-end text-sm font-mono text-on-surface-variant uppercase">
           <span>Print · Identity · Digital</span>
-          <span>EST. 2014 • LA</span>
+          <span>EST. 2020</span>
         </div>
       </div>
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-outline-variant min-h-75">
@@ -68,16 +70,13 @@ export default function SectionHero() {
           </h2>
         </div>
 
-        <div className="flex justify-between items-end border-t border-outline-variant pt-4">
+        <div className="flex justify-between items-center border-t border-outline-variant pt-4">
           <span className="text-sm font-mono text-on-surface-variant uppercase">
             • a note from the studio, no. 14
           </span>
-          <button
-            type="button"
-            className="text-xs font-mono font-bold tracking-widest text-primary hover:text-on-surface transition-colors cursor-pointer"
-          >
+          <Button size="sm" variant="link">
             READ
-          </button>
+          </Button>
         </div>
       </div>
     </section>

@@ -113,7 +113,10 @@ export default function CapabilitySlider() {
         <button
           type="button"
           onClick={handlePrev}
-          className="group flex items-center gap-1.5 text-xs font-mono tracking-wider text-on-surface hover:text-primary transition-colors cursor-pointer"
+          className={cn(
+            'group flex items-center gap-1.5 text-xs font-mono tracking-wider text-on-surface hover:text-primary transition-colors cursor-pointer',
+            focusVisiblePrimaryRing,
+          )}
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>PREV SYSTEM</span>
@@ -122,7 +125,10 @@ export default function CapabilitySlider() {
         <button
           type="button"
           onClick={handleNext}
-          className="group flex items-center gap-1.5 text-xs font-mono tracking-wider text-on-surface hover:text-primary transition-colors cursor-pointer"
+          className={cn(
+            'group flex items-center gap-1.5 text-xs font-mono tracking-wider text-on-surface hover:text-primary transition-colors cursor-pointer',
+            focusVisiblePrimaryRing,
+          )}
         >
           <span>VIEW {CAPABILITIES[(activeIndex + 1) % CAPABILITIES.length].title}</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

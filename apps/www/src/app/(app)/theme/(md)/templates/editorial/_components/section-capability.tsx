@@ -1,7 +1,7 @@
 import CapabilitySlider from './capability-slider'
 import { ScrollToContactButton } from './scroll-to-contact'
 
-export default function SectionCapability() {
+export function SectionCapability() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 border-l border-r border-b border-outline-variant">
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-outline-variant min-h-75">
@@ -17,7 +17,7 @@ export default function SectionCapability() {
         </div>
         <div className="flex justify-between items-center border-t border-outline-variant pt-4">
           <span className="text-sm font-mono text-on-surface-variant">— next intake July 2026</span>
-          <ScrollToContactButton className="px-4 py-1.5 bg-primary text-on-primary font-mono text-xs tracking-wider rounded-sm hover:-translate-y-0.5 transition-all cursor-pointer font-bold uppercase">
+          <ScrollToContactButton className="px-4 py-1.5 bg-primary text-on-primary font-mono text-xs tracking-wider rounded-sm font-bold uppercase">
             START BRIEF
           </ScrollToContactButton>
         </div>

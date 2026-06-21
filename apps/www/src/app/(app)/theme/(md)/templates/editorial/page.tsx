@@ -1,9 +1,11 @@
-import SectionBeliefs from './_components/section-beliefs'
-import SectionCapability from './_components/section-capability'
-import SectionHero from './_components/section-hero'
-import SectionManifesto from './_components/section-manifesto'
-import SectionStrategy from './_components/section-strategy'
-import SectionWork from './_components/section-work'
+import {
+  SectionBeliefs,
+  SectionCapability,
+  SectionHero,
+  SectionManifesto,
+  SectionStrategy,
+  SectionWork,
+} from './_components'
 
 export default function EditorialPage() {
   return (

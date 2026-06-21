@@ -152,7 +152,7 @@ export const CAPABILITIES: Capability[] = [
     title: 'EDITORIAL',
     serfWord: 'PRINT',
     description:
-      'Our historic core. We craft books exhibition broadsheets with extreme grid discipline, selecting materials, and binding method with tactile longevity in mind.',
+      'Our historic core. We craft books exhibition broadsheets with extreme grid discipline, selecting materials, and binding method with tactile longevity in mind. Each piece is designed as a lasting record of cultural memory.',
     details: [
       'Book Design, Layout & Art Direction',
       'Independent Catalogues & Monographs',
