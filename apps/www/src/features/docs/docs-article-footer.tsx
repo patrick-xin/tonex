@@ -23,7 +23,7 @@ export const DocsArticleFooter = ({ neighbours }: DocsArticleFooterProps) => {
       <nav
         aria-label="Previous and next pages"
         className={cn(
-          'sm:flex hidden items-center gap-4 justify-between',
+          'flex flex-col sm:flex-row sm:items-center gap-4 justify-between',
           hasNext && hasPrevious
             ? 'justify-between'
             : hasPrevious
@@ -38,7 +38,7 @@ export const DocsArticleFooter = ({ neighbours }: DocsArticleFooterProps) => {
                 variant: 'outline',
               }),
               'not-prose flex flex-col items-start h-20',
-              hasNext ? 'flex-1' : 'w-1/2',
+              hasNext ? 'flex-1' : 'w-full sm:w-1/2',
             )}
             href={neighbours.previous.url}
             prefetch={false}
@@ -57,7 +57,7 @@ export const DocsArticleFooter = ({ neighbours }: DocsArticleFooterProps) => {
                 variant: 'outline',
               }),
               'not-prose flex flex-col items-end h-20',
-              hasPrevious ? 'flex-1' : 'w-1/2',
+              hasPrevious ? 'flex-1' : 'w-full sm:w-1/2',
             )}
             href={neighbours.next.url}
             prefetch={false}

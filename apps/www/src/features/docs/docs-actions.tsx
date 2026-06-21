@@ -21,7 +21,7 @@ export function DocsActions({ slug, url }: { slug: string[]; url: string }) {
             size: 'sm',
             variant: 'glow',
             className:
-              'h-8 rounded-l-none border-l data-popup-open:bg-primary/12 data-popup-open:hover:bg-primary/12 data-popup-open:[&_svg]:rotate-180 max-md:[&_svg]:rotate-180 max-md:data-popup-open:[&_svg]:rotate-0 group',
+              'h-8 rounded-l-none border-l data-popup-open:bg-primary/12 data-popup-open:hover:bg-primary/12 data-popup-open:[&_svg]:rotate-180 group',
           })}
         >
           <ChevronDownIcon className="size-3.5 transition-[transform,colors] text-on-surface-variant group-hover:text-on-surface" />
