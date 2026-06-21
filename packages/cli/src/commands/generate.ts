@@ -50,14 +50,45 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   if (source.cmfSecondSourceHex !== null) {
     parts.push(`--second-color '${source.cmfSecondSourceHex}'`)
   }
-  if (source.contrastLevel.light > 0) parts.push(`--contrast ${source.contrastLevel.light}`)
+  // why: emit symmetric (base) flags when light == dark, per-mode flags when they
+  // differ — so a symmetric theme keeps a short recipe and an asymmetric one round-trips
+  // faithfully. The per-mode flags only emit the non-default side (0 = absent → default),
+  // keeping the recipe minimal while guaranteeing re-derivation.
+  const cl = source.contrastLevel
+  if (cl.light === cl.dark) {
+    if (cl.light > 0) parts.push(`--contrast ${cl.light}`)
+  } else {
+    if (cl.light > 0) parts.push(`--contrast-light ${cl.light}`)
+    if (cl.dark > 0) parts.push(`--contrast-dark ${cl.dark}`)
+  }
+
   if (source.surfaceAlgo === 'tint') {
-    parts.push(
-      `--tint ${source.surfaceTintLevel.light}`,
-      `--tint-palette ${source.surfacePaletteName}`,
-    )
-  } else if (source.surfaceDesaturateLevel.light > 0) {
-    parts.push(`--desaturate ${source.surfaceDesaturateLevel.light}`)
+    const tl = source.surfaceTintLevel
+    if (tl.light === tl.dark) {
+      parts.push(`--tint ${tl.light}`)
+    } else {
+      if (tl.light > 0) parts.push(`--tint-light ${tl.light}`)
+      if (tl.dark > 0) parts.push(`--tint-dark ${tl.dark}`)
+    }
+    parts.push(`--tint-palette ${source.surfacePaletteName}`)
+    // why: --tint-text is consumed by deriveTheme only under the tint algo, and the
+    // resolver rejects it without --tint, so emit it INSIDE this branch — a desaturate
+    // theme can never produce a `--desaturate … --tint-text` recipe that would re-error.
+    const ttl = source.surfaceTintTextLevel
+    if (ttl.light === ttl.dark) {
+      if (ttl.light > 0) parts.push(`--tint-text ${ttl.light}`)
+    } else {
+      if (ttl.light > 0) parts.push(`--tint-text-light ${ttl.light}`)
+      if (ttl.dark > 0) parts.push(`--tint-text-dark ${ttl.dark}`)
+    }
+  } else {
+    const dl = source.surfaceDesaturateLevel
+    if (dl.light === dl.dark) {
+      if (dl.light > 0) parts.push(`--desaturate ${dl.light}`)
+    } else {
+      if (dl.light > 0) parts.push(`--desaturate-light ${dl.light}`)
+      if (dl.dark > 0) parts.push(`--desaturate-dark ${dl.dark}`)
+    }
   }
   // why: custom colors shape the derived theme, so the recipe must carry them to
   // reproduce the projection. Re-serialize the RESOLVED entries (hex already

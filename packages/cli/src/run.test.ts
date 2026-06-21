@@ -747,3 +747,185 @@ describe('tonex — discovery surface', () => {
     expect(variants.expressive).toContain('vibrant')
   })
 })
+
+// why: issue #218 — CLI per-mode level alignment. PortableTheme carries contrastLevel,
+// surfaceTintLevel, surfaceDesaturateLevel, and surfaceTintTextLevel as per-mode
+// {light,dark} but the CLI was collapsing them to a uniform scalar. These tests pin
+// the new base+per-mode-override flag surface and the recipe round-trip that proves
+// www↔CLI unification: an asymmetric theme's recipe re-derives the exact same theme.
+describe('tonex per-mode level flags (issue #218)', () => {
+  const SEED = '#3b82f6'
+
+  // Back-compat: --contrast 0.3 still means both modes, recipe stays minimal
+  it('--contrast 0.3 is back-compat: recipe emits the base flag, not per-mode flags', () => {
+    const r = capture(['generate', '--seed', SEED, '--contrast', '0.3'])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--contrast 0.3')
+    expect(r.out).not.toContain('--contrast-light')
+    expect(r.out).not.toContain('--contrast-dark')
+  })
+
+  // Asymmetry: per-mode flag overrides only its mode; recipe emits per-mode flags
+  it('--contrast-dark 0.5 overrides dark only; recipe emits --contrast-dark, not base flag', () => {
+    const base = capture(['generate', '--seed', SEED])
+    const r = capture(['generate', '--seed', SEED, '--contrast-dark', '0.5'])
+    expect(r.code).toBe(OK)
+    expect(r.out).not.toBe(base.out)
+    expect(r.out).toContain('--contrast-dark 0.5')
+    expect(r.out).not.toContain('--contrast-light')
+    expect(r.out).not.toContain('--contrast 0.5') // no symmetric base in recipe
+  })
+
+  // Base + per-mode override resolves to the right asymmetric pair
+  it('--contrast 0.3 --contrast-dark 0.5 resolves {light:0.3, dark:0.5}; recipe pins both per-mode flags', () => {
+    const symLight = capture(['generate', '--seed', SEED, '--contrast', '0.3'])
+    const asym = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--contrast',
+      '0.3',
+      '--contrast-dark',
+      '0.5',
+    ])
+    expect(asym.code).toBe(OK)
+    expect(asym.out).not.toBe(symLight.out) // dark mode differs
+    expect(asym.out).toContain('--contrast-light 0.3')
+    expect(asym.out).toContain('--contrast-dark 0.5')
+    expect(asym.out).not.toContain('--contrast 0.3') // asymmetric → no base flag in recipe
+  })
+
+  // Recipe round-trip: asymmetric recipe re-derives the same theme
+  it('asymmetric recipe round-trips: re-running the per-mode flags reproduces the same output', () => {
+    const r1 = capture(['generate', '--seed', SEED, '--contrast', '0.3', '--contrast-dark', '0.5'])
+    expect(r1.code).toBe(OK)
+    // Re-run using the exact per-mode flags the recipe would embed (+ resolved --variant cmf)
+    const r2 = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--variant',
+      'cmf',
+      '--contrast-light',
+      '0.3',
+      '--contrast-dark',
+      '0.5',
+      '--to',
+      'shadcn',
+    ])
+    expect(r2.code).toBe(OK)
+    expect(r2.out).toBe(r1.out)
+  })
+
+  // Symmetric recipe stays minimal: a symmetric theme still uses the base flag
+  it('symmetric theme uses base flag in recipe; only asymmetric theme uses per-mode flags', () => {
+    const sym = capture(['generate', '--seed', SEED, '--contrast', '0.5'])
+    expect(sym.out).toContain('--contrast 0.5')
+    expect(sym.out).not.toContain('--contrast-light')
+    expect(sym.out).not.toContain('--contrast-dark')
+  })
+
+  // Validation: out-of-range per-mode values are usage errors
+  it('out-of-range per-mode values are usage errors (exit 2)', () => {
+    expect(capture(['generate', '--seed', SEED, '--contrast-dark', '1.5']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--contrast-light', '-0.1']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--tint-light', '2']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--desaturate-dark', '99']).code).toBe(USAGE)
+    // --tint 0 activates the tint algo so this fails on range, not the requires-tint guard
+    expect(capture(['generate', '--seed', SEED, '--tint', '0', '--tint-text', '5']).code).toBe(
+      USAGE,
+    )
+  })
+
+  // describe completeness: every new flag appears in the machine-readable surface
+  it('describe lists all nine new per-mode flags in generate, check, and adjust', () => {
+    const payload = JSON.parse(capture(['describe']).out)
+    const newFlags = [
+      '--contrast-light',
+      '--contrast-dark',
+      '--tint-light',
+      '--tint-dark',
+      '--desaturate-light',
+      '--desaturate-dark',
+      '--tint-text',
+      '--tint-text-light',
+      '--tint-text-dark',
+    ]
+    for (const cmd of ['generate', 'check', 'adjust'] as const) {
+      const names = new Set(payload.commands[cmd].flags.map((f: { name: string }) => f.name))
+      for (const flag of newFlags) {
+        expect(names.has(flag)).toBe(true)
+      }
+    }
+  })
+
+  // Mutual exclusion extended to per-mode tint/desaturate flags
+  it('per-mode tint flags are mutually exclusive with desaturate flags (any mix)', () => {
+    expect(
+      capture(['generate', '--seed', SEED, '--tint-light', '0.3', '--desaturate', '0.5']).code,
+    ).toBe(USAGE)
+    expect(
+      capture(['generate', '--seed', SEED, '--tint', '0.3', '--desaturate-dark', '0.5']).code,
+    ).toBe(USAGE)
+    expect(
+      capture(['generate', '--seed', SEED, '--tint-dark', '0.3', '--desaturate-light', '0.5']).code,
+    ).toBe(USAGE)
+  })
+
+  // --tint-text is consumed by deriveTheme ONLY under the tint algo, so without --tint
+  // it would silently no-op — we reject it loudly (the --second-color-on-non-cmf contract).
+  it('--tint-text without --tint is a usage error (exit 2), not a silent no-op', () => {
+    expect(capture(['generate', '--seed', SEED, '--tint-text', '0.6']).code).toBe(USAGE)
+    expect(capture(['generate', '--seed', SEED, '--tint-text-light', '0.4']).code).toBe(USAGE)
+    expect(
+      capture(['generate', '--seed', SEED, '--desaturate', '0.3', '--tint-text', '0.6']).code,
+    ).toBe(USAGE)
+  })
+
+  // Under --tint, --tint-text actually changes the DERIVED colours (not just the recipe
+  // line) — the regression guard for the silent no-op — and the symmetric recipe round-trips.
+  it('--tint 0 --tint-text 0.6 tints the text and emits a round-tripping base recipe', () => {
+    const tintOnly = capture(['generate', '--seed', SEED, '--tint', '0'])
+    const withText = capture(['generate', '--seed', SEED, '--tint', '0', '--tint-text', '0.6'])
+    expect(withText.code).toBe(OK)
+    // strip the embedded recipe comment so we compare ONLY derived token values
+    const tokens = (s: string) =>
+      s
+        .split('\n')
+        .filter((l) => !l.includes('tonex generate'))
+        .join('\n')
+    expect(tokens(withText.out)).not.toBe(tokens(tintOnly.out))
+    expect(withText.out).toContain('--tint-text 0.6')
+    expect(withText.out).not.toContain('--tint-text-light')
+  })
+
+  // --tint-text asymmetry: per-mode flags override (under an active tint algo)
+  it('--tint 0 --tint-text-light 0.4 --tint-text-dark 0.8 emits per-mode text-tint flags', () => {
+    const r = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--tint',
+      '0',
+      '--tint-text-light',
+      '0.4',
+      '--tint-text-dark',
+      '0.8',
+    ])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--tint-text-light 0.4')
+    expect(r.out).toContain('--tint-text-dark 0.8')
+    expect(r.out).not.toContain('--tint-text 0')
+  })
+
+  // --tint-light / --tint-dark: per-mode surface tint
+  it('--tint-light / --tint-dark set per-mode surface tint; recipe emits per-mode flags', () => {
+    const base = capture(['generate', '--seed', SEED])
+    const r = capture(['generate', '--seed', SEED, '--tint-light', '0.3', '--tint-dark', '0.7'])
+    expect(r.code).toBe(OK)
+    expect(r.out).not.toBe(base.out)
+    expect(r.out).toContain('--tint-light 0.3')
+    expect(r.out).toContain('--tint-dark 0.7')
+    expect(r.out).not.toContain('--tint 0.')
+  })
+})
