@@ -16,10 +16,7 @@ import { SurfaceAdjustment } from '../../components/icons/surface-adjustment'
 // why: a tour step is *authored* against a stable anchor key, not a live ref —
 // the host resolves anchorKey → element at render via the guide registry
 // (makeLiveAnchor). layers gates which layer sees the step (you tour your own
-// workspace). learnMore + onEnter are carried but inert this slice: learnMore
-// is the help deep-link (slice 2), onEnter opens a hidden host before the
-// spotlight (later slices). Each teaser is one tight sentence — canonical depth
-// lives in the linked Help section, not here.
+// workspace).
 export type GuideStep = {
   key: string
   layers: Layer[]

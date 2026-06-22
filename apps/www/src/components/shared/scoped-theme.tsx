@@ -8,24 +8,13 @@ import { selectPortable, useSource } from '@tonex/core-react'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 
-/**
- * Renders its subtree under a different set of token "knobs" than the page — a
- * scheme variant, a pinned contrast, a second seed — while still tracking the
- * seed the user picks live. We derive a theme from the current source with
- * `overrides` merged in, then emit its MD role tokens as scoped CSS custom
- * properties, so `bg-surface` / `text-primary` inside resolve against this scope
- * rather than the page.
- *
- * The wrapper is `display:contents`, so it adds no layout box but its custom
- * properties still cascade in. Both light and dark blocks are emitted so the
- * subtree flips correctly with `.dark`.
- *
- * Cost is bounded by the number of DISTINCT knob sets on the page, not the
- * number of cards. A module cache holds one derived result per knob set, keyed
- * against a signature of the live source: a seed change recomputes that entry in
- * place (replaced, never appended — so a live-dragging landing page can't grow
- * the cache), while sibling cards sharing a knob set reuse the same derive pass.
- */
+// why: the wrapper is `display:contents`, so it adds no layout box but its
+// scoped custom properties still cascade in. Both light and dark blocks are
+// emitted so the subtree flips correctly with `.dark`.
+//
+// why: the module cache holds one derived result per knob set, keyed against a
+// signature of the live source — a seed change recomputes that entry in place
+// (replaced, never appended, so a live-dragging landing page can't grow the cache).
 
 type Overrides = Partial<PortableTheme>
 

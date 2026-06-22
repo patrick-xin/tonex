@@ -1,9 +1,5 @@
 import type { ReactNode } from 'react'
 
-/**
- * Copy for the tabular Key Concepts accordions. Each row maps to one
- * `<ConceptTable>` line — edit the text here, not in the JSX.
- */
 export type ConceptRow = { key: string; col1: ReactNode; col2: ReactNode }
 
 /**

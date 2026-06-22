@@ -2,10 +2,7 @@ import { createDialogHandle } from '@/components/ui/dialog'
 import { createDrawerHandle } from '@/components/ui/drawer'
 import { createPopoverHandle } from '@/components/ui/popover'
 import type { HelpSection } from '@/features/help-dialog/help-sections'
-/**
- * Centralized dialog handles for site-wide command menu integration.
- * Add new handles here as features are onboarded.
- */
+
 export const exportDialogHandle = createDialogHandle<null>()
 export const checkContrastDialogHandle = createDialogHandle<null>()
 // Payload = the help section to deep-link to. Plain opens (H hotkey, command

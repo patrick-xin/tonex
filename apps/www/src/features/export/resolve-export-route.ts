@@ -1,9 +1,6 @@
 // why: one place owns the per-tab routing decision the export pane depends on —
 // which core exporter runs, the file extension, and whether a provenance header
-// is prepended. These used to be scattered across six return sites inside
-// useExportContent's useMemo, with the header prepend duplicated and the
-// extension a string literal at each branch; this folds them into one
-// exhaustively-typed table. The exporter *bodies* are @tonex/core's contract and
+// is prepended, folded into one exhaustively-typed table. The exporter *bodies* are @tonex/core's contract and
 // are not modelled here — this only carries the discriminant the hook switches
 // on, plus the css `layer` (Tailwind → the full md layer; shadcn → :root + .dark
 // only). Header policy is load-bearing: a /* */ banner is valid CSS but corrupts

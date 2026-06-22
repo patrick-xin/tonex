@@ -18,34 +18,14 @@ import { useShallow } from 'zustand/react/shallow'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-// why: dev-only side-by-side for the monotonic-sequential chart prototype
-// (ADR-0027 c.3 trajectory). Not wired into nav-config — reachable only by
-// direct URL while we eyeball-iterate. Deletes when the prototype either
-// promotes (swap call site in `buildMdChart`, remove this page) or gets
-// abandoned. Apply button pushes the current prototype tones into a
-// !important <style> element scoped to the same four selectors applyDom
-// writes to (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`) so
-// real chart components on other routes render with the prototype values;
-// Reset clears it. Override persists across navigation so the user can
-// tour the app and eyeball.
-//
-// chart-1 is always the lightest anchor (ColorBrewer convention). Advanced
-// disclosure exposes N (3-7), per-anchor L* sliders, and `hueSpread` for
-// multi-hue sequential. When hueSpread > 0 the page renders BOTH anchor
-// strategies side-by-side (chart-1 anchor keeps brand at chart-1 across
-// modes; prominent-edge anchor keeps brand at the prominent edge but
-// swaps chart-1/chart-N hues between modes). Apply targets one of the two
-// via the toolbar's anchor toggle. Apply is gated to N=5 since
-// MD_CHART_TOKEN_NAMES / SHADCN_CHART_TOKEN_NAMES are fixed.
+// why: dev-only sink, not in nav-config. Apply writes prototype tones into a
+// !important <style> scoped to the same four selectors applyDom uses
+// (`.md`, `html.dark .md`, `.shadcn`, `html.dark .shadcn`); Reset clears it.
 
 const OVERRIDE_STYLE_ID = 'chart-lab-override'
 const N_MIN = 3
 const N_MAX = 7
 const N_SCHEMA = MD_CHART_TOKEN_NAMES.length
-// why: 120° is the upper end of ColorBrewer's hand-tuned multi-hue sequentials
-// (YlOrRd, YlGnBu). Past ~60° algorithmic generation starts reading as
-// categorical — let the lab go to 120° so the user can see where the wheels
-// fall off.
 const HUE_SPREAD_MAX = 120
 
 interface PartnerRow {

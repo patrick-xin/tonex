@@ -8,10 +8,7 @@ import {
 import { useSource } from '@tonex/core-react'
 import { useState } from 'react'
 
-// why: testbed leaf for slice 3 — minimal CRUD surface for customColors. No
-// HCT sliders, no description field, no live preview swatch (lift those in
-// slice 9+ when production UI ports `new-custom-color.tsx` from legacy).
-// Reads validation errors via store throws — caught here and surfaced inline.
+// why: validation errors surface via store throws — caught here and shown inline.
 export function CustomColors() {
   const customColors = useSource((s) => s.customColors)
   const addCustomColor = useSource((s) => s.actions.addCustomColor)

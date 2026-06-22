@@ -2,14 +2,8 @@
 
 import { useResolvedTokens, useSource } from '@tonex/core-react'
 
-// why: testing-phase shows both modes side-by-side so verification doesn't
-// require a mode toggle. Production target is single-mode UI driven by
-// resolvedTheme; the data shape is mode-keyed regardless. Issue #1.
-//
-// Slice 6: data shape is now md3TokenOverrides (per-token map). This panel
-// still drives only --color-primary-container; a future slice will turn the
-// testbed into a generic token picker. Plumbing migrated, UX surface kept
-// scoped.
+// why: shows both modes side-by-side so verification doesn't require a mode
+// toggle; the data shape (md3TokenOverrides, per-token map) is mode-keyed regardless.
 const TOKEN = '--color-primary-container'
 
 export function PrimaryContainerOverride() {

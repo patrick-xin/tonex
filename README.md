@@ -1,6 +1,6 @@
 # tonex
 
-Edit one source colour, export coherent themes for both **Material 3** and **shadcn**. Light and dark are co-derived; preview and export never drift.
+Tonex is a colour-authoring engine: one seed colour in, a complete, perceptually-coherent, role-mapped token set out — for both **Material 3** and **shadcn**, light and dark co-derived so preview and export never drift. It's built agent-first: you describe the theme, the agent drives the `tonex` CLI from one brand colour and never hand-picks a hex.
 
 See [`docs/vision.md`](./docs/vision.md) for what the project is and who it's for.
 

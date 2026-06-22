@@ -19,12 +19,8 @@ import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 import { DEFAULT_BUNDLE, diffBundle, snapshotBundle } from './bundle-snapshot'
 import { formatCopyOutput } from './format-ts'
 
-// why: Changes tab — surfaces what the user changed vs DEFAULT_INPUTS (recipe
-// plus the curated source inputs), a Load picker seeded from core's
-// SHADCN_PRESETS, Reset (back to the `default` preset), and Copy (emit a
-// SHADCN_PRESETS record entry for paste-back into core). Per ADR-0031 a preset
-// carries its curated seed + contrastLevel alongside the recipe, so the curator
-// surface tunes and emits all three.
+// why: per ADR-0031 a preset carries its curated seed + contrastLevel alongside
+// the recipe, so the curator surface tunes and emits all three.
 export function ChangesTab() {
   const portable = useSource(useShallow(selectPortable))
   const seedHex = useSource(selectSeedHex)
@@ -117,10 +113,6 @@ export function ChangesTab() {
   )
 }
 
-// why: chip row of presets from core's SHADCN_PRESETS — clicking a chip applies
-// that preset's curated seed + contrast + recipe to the rail so the curator can
-// judge it on-temperature, tweak, and re-Copy. Chips wrap so the row scales
-// with the catalog size without needing a dropdown affordance.
 function LoadPresetRow({
   onLoad,
 }: {

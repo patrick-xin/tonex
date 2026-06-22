@@ -1,8 +1,5 @@
-// why: single source of truth for site-level identity + navigation. Nav links
-// used to be duplicated across the command menu (_links.ts), the footer, and the
-// mobile drawer — adding/renaming a route meant editing three files and the
-// social URLs lived inline in the link components. Everything site-wide now
-// derives from here; surfaces attach their own presentation (icons, casing).
+// why: single source of truth for site-level identity + navigation; surfaces
+// (command menu, footer, mobile drawer) attach their own presentation.
 //
 // NOT to be confused with lib/nav-config.ts, which describes the per-route
 // *builder* tabs (MD / shadcn editing surfaces) and their export tabs.
