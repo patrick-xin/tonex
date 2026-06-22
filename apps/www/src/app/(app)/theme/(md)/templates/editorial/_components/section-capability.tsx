@@ -28,10 +28,10 @@ export function SectionCapability() {
       <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-between min-h-75">
         <div className="text-sm font-mono text-on-surface-variant uppercase">FINE ART INDEX</div>
         <div className="flex items-center justify-center my-auto py-4">
-          <span className="font-display italic font-medium text-7xl md:text-8xl text-on-surface-variant select-none">
+          <span className="font-display italic font-medium text-7xl md:text-8xl text-on-surface-variant select-none mr-3 inline-block">
             4
           </span>
-          <div className="w-28 aspect-3/4 overflow-hidden rounded-sm bg-surface-container-high border border-outline-variant mx-4 shadow-md">
+          <div className="w-32 aspect-3/4 overflow-hidden rounded-sm bg-surface-container-high border border-outline-variant mx-4 shadow-md">
             <img
               src="https://images.unsplash.com/photo-1580136579312-94651dfd596d?q=80&w=600&auto=format&fit=crop"
               alt="Fine art classical renaissance oil painting representation"

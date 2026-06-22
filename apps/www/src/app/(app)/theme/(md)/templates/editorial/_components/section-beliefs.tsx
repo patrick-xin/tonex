@@ -1,7 +1,7 @@
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
-import ContactBuilder from './contact-builder'
+import { ContactBuilder } from './contact-builder'
 import { CONTACT_ANCHOR_ID } from './scroll-to-contact'
 
 export function SectionBeliefs() {
@@ -45,7 +45,7 @@ export function SectionBeliefs() {
               conversation →
             </span>
           </h3>
-          <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed">
+          <p className="text-base text-on-surface-variant max-w-xs leading-relaxed">
             We take on two briefs per quarter. A 30-minute call is where we decide if the work is
             right for both of us — no pitch decks, no proposals before that.
           </p>

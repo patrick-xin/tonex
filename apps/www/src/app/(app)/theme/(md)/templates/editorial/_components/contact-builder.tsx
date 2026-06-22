@@ -4,7 +4,7 @@ import { Check } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 
-export default function ContactBuilder() {
+export function ContactBuilder() {
   return (
     <div
       id="contact-builder-card"
@@ -15,7 +15,7 @@ export default function ContactBuilder() {
           hello, TONEX STUDIO
         </h3>
         <p className="text-xs font-mono tracking-wider text-on-surface-variant uppercase mt-1">
-          Brief Constructor • Lisbon HQ
+          Brief Constructor
         </p>
       </div>
 
