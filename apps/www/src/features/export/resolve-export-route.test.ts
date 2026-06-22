@@ -4,9 +4,7 @@ import { type ExportTab, resolveExportRoute } from './resolve-export-route'
 // why: the export hook's promise is WYSIWYG (ADR-0021 c.7) — the pane shows what
 // the user pastes. That rests on three routing decisions per tab: which core
 // exporter runs, the file extension, and whether a provenance header is
-// prepended. Those used to be scattered across six return sites in a
-// store-coupled useMemo, so nothing pinned them and a new tab could fall through
-// silently. This is www's own seam (tab → routing); the exporter *body* shapes
+// prepended. This is www's own seam (tab → routing); the exporter *body* shapes
 // are @tonex/core's contract and are deliberately NOT tested here. The switch is
 // exhaustive over ExportTab, so adding a seventh tab is a compile error until it
 // gets a route — the drift guard is the type, this pins the table it produces.

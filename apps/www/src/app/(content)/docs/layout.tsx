@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { DocsHeader, DocsLayout, DocsSidebar, DocsSidebarTree } from '@/features/docs/layout'
-import { source } from '@/features/docs/utils/source'
+import { DocsHeader, DocsLayout, DocsSidebar, DocsSidebarTree, source } from '@/features/docs'
 
 export default function ContentLayout({ children }: { children: ReactNode }) {
   return (

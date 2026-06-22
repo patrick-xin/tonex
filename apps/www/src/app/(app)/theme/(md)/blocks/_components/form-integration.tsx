@@ -47,8 +47,8 @@ export function ProjectQuoteForm() {
     <Form
       aria-label="Request project quote"
       className="flex flex-col gap-6 rounded-md p-4 sm:p-6 bg-surface-container shadow-md"
-      onFormSubmit={(formValues) => {
-        console.log(formValues)
+      onFormSubmit={() => {
+        // showcase block — no-op submit handler
       }}
     >
       <div>

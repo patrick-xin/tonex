@@ -8,8 +8,7 @@ import { type FocusEvent, useRef, useState } from 'react'
 // without each invalid intermediate firing onChange, and external writes
 // (variant change, palette swap, native picker drag from elsewhere) sync into
 // the buffer when the field is unfocused so seed updates don't blow away
-// mid-typing. One copy, one focus-buffering policy — five sites used to spell
-// this out themselves. Validity is core's `isValidHex` — the same trust-boundary
+// mid-typing. Validity is core's `isValidHex` — the same trust-boundary
 // check the source store uses before MCU's argbFromHex — not a private regex, so
 // what this field accepts can never drift from what the engine accepts. Focus
 // also selects the whole value so the field is type-to-replace. Spread the

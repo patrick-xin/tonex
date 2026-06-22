@@ -4,34 +4,17 @@ import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { cx } from 'tailwind-variants'
 
-/**
- * Hover-triggered fan-out card deck — a variant of `fan-deck.tsx`.
- *
- * Three deliberate differences from the button-triggered original:
- *  1. It fans out while the pointer (or keyboard focus) is over the stage and
- *     collapses back to a stack on leave — no trigger button. The spread plays
- *     first; a card only lifts and comes forward once the fan has settled, so
- *     entering the zone over a card (e.g. sweeping in from the side) doesn't
- *     yank that card up and to the top mid-spread.
- *  2. z-index is set INSTANTLY via `style`, never animated — and it resets the
- *     moment hover ends, *before* the card animates back, not after. Animating
- *     it as a number was the first jitter (the order crept through fractional
- *     values mid-tween). Holding a released card on top until its return settled
- *     was a second jitter: it slid home still on top, then snapped down to its
- *     resting layer at the end of the move. So z is pure: raise on enter, drop
- *     on leave, and the position animation simply follows underneath it.
- *  3. One shared `geometry` drives every card (offsets scale with each card's
- *     distance from center). Tweak `DEFAULT_GEOMETRY`, or pass `geometry`.
- *
- * Structure (unchanged from the original, and load-bearing): each card's
- * centering shell is pointer-events-none so the top shell can't swallow hovers
- * meant for cards beneath it; the stable middle layer holds the horizontal
- * spread + lean + hover detection, while the inner visual layer carries the arc
- * dip, lift, straighten and scale. So hit areas never slide out from under the
- * cursor and stay vertically aligned — an upward sweep can't snag a lower side
- * card, which lets a hovered card safely paint on top. The fixed-width stage is
- * scaled down to fit narrow containers, shrinking cards and offsets together.
- */
+// why: z-index is set INSTANTLY via `style`, never animated — and it resets the
+// moment hover ends, *before* the card animates back, not after. Animating it as
+// a number lets the order creep through fractional values mid-tween (jitter), so
+// z is pure: raise on enter, drop on leave, position animation follows under it.
+//
+// why (load-bearing structure): each card's centering shell is
+// pointer-events-none so the top shell can't swallow hovers meant for cards
+// beneath it; the middle layer holds the horizontal spread + lean + hover
+// detection, the inner visual layer carries the arc dip/lift/straighten/scale.
+// So hit areas never slide out from under the cursor — an upward sweep can't
+// snag a lower side card, which lets a hovered card safely paint on top.
 
 const FAN_TRANSITION = { type: 'tween', duration: 0.5, ease: [0.22, 1, 0.36, 1] } as const
 

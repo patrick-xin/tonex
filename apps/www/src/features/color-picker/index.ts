@@ -1,4 +1,3 @@
-export { AnimatedColorPicker } from './custom/animated-color-picker'
 export { ColorPicker } from './custom/color-picker'
 export { MdSnapshotPicker } from './md/md-snapshot-picker'
 export { MD_TOKEN_ITEM_GROUPS } from './md/md-token-groups'

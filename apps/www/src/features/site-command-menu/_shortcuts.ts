@@ -15,10 +15,10 @@ export interface Item {
   disabled?: boolean
   icon: React.ElementType
   shortcut?: string
-  // why: most handles carry no payload; the Help handle deep-links to a section
-  // (slice 2). The command menu only ever uses these as no-payload DialogTriggers
-  // (open at top), so the payload type is irrelevant at the call site — the union
-  // just keeps the typed Help handle assignable here.
+  // why: most handles carry no payload; the Help handle deep-links to a section.
+  // The command menu only ever uses these as no-payload DialogTriggers, so the
+  // payload type is irrelevant here — the union just keeps the typed Help handle
+  // assignable.
   handle?: BaseDialog.Handle<null> | BaseDialog.Handle<HelpSection>
   popoverHandle?: BasePopover.Handle<null>
 }

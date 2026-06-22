@@ -1,11 +1,7 @@
 import { findNeighbour } from 'fumadocs-core/page-tree'
 import { cacheLife } from 'next/cache'
 import { notFound } from 'next/navigation'
-import { DocsActions } from '@/features/docs/docs-actions'
-import { DocsArticleFooter } from '@/features/docs/docs-article-footer'
-import { DocsToc } from '@/features/docs/layout'
-import { mdxComponents } from '@/features/docs/mdx'
-import { source } from '@/features/docs/utils/source'
+import { DocsActions, DocsArticleFooter, DocsToc, mdxComponents, source } from '@/features/docs'
 
 export function generateStaticParams() {
   return source.generateParams().map((param) => ({

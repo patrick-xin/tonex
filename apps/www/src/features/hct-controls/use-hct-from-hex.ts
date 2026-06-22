@@ -36,14 +36,6 @@ function useEventCallback<T>(handler: (value: T) => void): (value: T) => void {
 // chroma drops below CHROMA_HUE_LOCK the hex projection drifts toward grey and
 // MCU's hue becomes meaningless, but our cached hue stays put — so dragging
 // chroma down and back up doesn't whip the hue thumb.
-//
-// Scope post-ADR-0028: the canonical seed sliders no longer use this hook —
-// HCT lives in the store directly, so the hex ↔ HCT cache that motivates
-// the local state is redundant for that path (hct-control-sliders reads
-// `s.seed` and writes via per-axis setters). This hook remains the right
-// shape for hex-canonical pickers (palette-override, custom-color pins)
-// where the parent owns a hex string and the slider needs to project HCT
-// for the user without losing the wraparound information mid-drag.
 export function useHctFromHex(
   hex: string,
   onChange: (next: string) => void,

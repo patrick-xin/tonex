@@ -9,7 +9,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 // why: steps are authored against stable anchor keys, but the spotlight needs a
 // live element. This returns a RefObject whose `current` resolves the key →
 // element on every read, so a step can reference a control that mounts/unmounts
-// (tab switches, later slices) without the step holding a stale ref.
+// without the step holding a stale ref.
 export function makeLiveAnchor(
   getAnchor: (key: string) => HTMLElement | null,
   key: string,

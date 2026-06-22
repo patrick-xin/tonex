@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getLLMText } from '@/features/docs/utils/get-llm-text'
-import { source } from '@/features/docs/utils/source'
+import { getLLMText, source } from '@/features/docs'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug } = await params

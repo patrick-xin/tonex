@@ -23,8 +23,6 @@ import {
 // className wiring — md primitives consume `--color-*` (default scope), shadcn
 // primitives consume `--primary` / `--card` etc. and MUST render inside a
 // `.shadcn` element so the alias bridge in globals.css remaps the names.
-// First real consumer of primitives — surfaces token churn during slice 3+
-// rebinds.
 
 export function PrimitivesDemo() {
   return (

@@ -81,12 +81,7 @@ export const useUiPrefs = create<UiPrefsState>()(
       // why: selectUiPrefs excludes _hydrated + actions; everything else is
       // a persistable pref by construction. ADR-0023 commitment 5.
       partialize: selectUiPrefs,
-      // why: v1 is initial — no prior version to migrate from. Future versions
-      // append ladder entries per ADR-0009.
       migrate: (persistedState, _version) => persistedState as UiPrefs,
-      // why: type assertion sufficient for v1; the schema is one boolean.
-      // Add Zod validation when the schema gains complexity (per useSource
-      // pattern). ADR-0023 commitment 7.
       onRehydrateStorage: () => (state, error) => {
         if (state === undefined || error !== undefined) return
         state.actions.setHydrated()

@@ -81,7 +81,6 @@ function ChoiceCards({
   )
 }
 
-// why: seed value body — swatch plus the hex it stands for.
 function SeedValue({ hex }: { hex: string }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5">
