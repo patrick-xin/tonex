@@ -73,6 +73,28 @@ const checkMode: FlagSpec = {
   default: 'both',
   description: 'scope the audit to one mode; absent = both modes (the stricter union)',
 }
+// why: `apply`'s `--mode` serves BOTH its forms, so its meaning is form-dependent and
+// it carries no single default — project form: which mode yaml emits (default light,
+// like generate); gate form (`--check`): scope the audit to one mode (default both,
+// like check). The describe `forms` strings carry the per-form shape; the flag itself
+// documents the dual meaning rather than asserting one default that lies about the other.
+const applyMode: FlagSpec = {
+  name: '--mode',
+  type: 'enum',
+  values: MODES,
+  description:
+    'project form: which mode yaml emits (light default; other targets co-emit both and ignore it). gate form (--check): scope the audit to one mode (both default, the stricter union)',
+}
+// why: `apply --check` flips the reader from the projection form to the contrast GATE
+// — the same whole-theme verdict as `check --seed`, run over the LOADED PortableTheme
+// (its pins/overrides included). A boolean switch, mirroring how `--find-contrast`
+// picks check's oracle form; absent = the default projection form.
+const check: FlagSpec = {
+  name: '--check',
+  type: 'boolean',
+  description:
+    'gate the loaded theme’s WCAG contrast instead of projecting it — exit 1 if a text pair fails (the same gate as `check --seed`, honoring any pins in the file)',
+}
 // why: the color ENCODING for the emitted block — `oklch` (default) or `hex`.
 // Values come from core's `COLOR_FORMATS` tuple (ADR-0016: a runtime tuple the
 // CLI consumes lives in core, not re-inlined here), so adding a format in core
@@ -351,6 +373,50 @@ export const ADJUST_FLAGS = [
   json,
 ] as const
 
+// why: `serialize` is the WRITER — it consumes ONLY the derivation-source knobs (the
+// exact set `parseSource` reads, so it inherits #218's per-mode flags automatically)
+// and emits the resulting PortableTheme. No projection knobs (`--to`/`--binding`/…):
+// those choose how a theme is consumed (`apply`'s seam), not what it IS. A projection
+// flag here is therefore an unknown flag → a loud did-you-mean usage error.
+export const SERIALIZE_FLAGS = [
+  seed,
+  variant,
+  secondColor,
+  contrast,
+  contrastLight,
+  contrastDark,
+  tint,
+  tintLight,
+  tintDark,
+  tintPalette,
+  desaturate,
+  desaturateLight,
+  desaturateDark,
+  tintText,
+  tintTextLight,
+  tintTextDark,
+  custom,
+] as const
+
+// why: `apply` is the READER — it takes NO derivation knobs (the theme is loaded, not
+// derived) and instead the projection surface (`--to`/`--binding`/`--soft-borders`/
+// `--format`/`--extended`/`--mode`, shared with generate) plus the `--check` gate
+// switch and its verdict flags (`--aaa`/`--large`/`--json`). The parser validates
+// against this union so a flag valid only for the other form is still parsed; each
+// form reads only what it honors (the same overloaded-union pattern as CHECK_FLAGS).
+export const APPLY_FLAGS = [
+  to,
+  binding,
+  softBorders,
+  extended,
+  format,
+  applyMode,
+  check,
+  aaa,
+  large,
+  json,
+] as const
+
 // why: the membership guards that validate a raw flag string against its enum
 // tuple — grouped with the tuples they check (sibling to the FlagSpec `values`).
 // The command handlers call these so an out-of-set value is a loud usage error,
@@ -410,6 +476,20 @@ export function describePayload() {
         summary:
           'Shift named md tokens by a relative ±HCT delta (tone+chroma) and print before/after facts plus the gamut-clamped achieved delta. Exits 0 (clean) or 2 (bad call); never gates contrast — run `check` for that.',
         flags: ADJUST_FLAGS.map(flagInfo),
+      },
+      serialize: {
+        summary:
+          'Freeze a derived theme into the canonical by-value colors.json (a SCHEMA_VERSION-stamped PortableTheme) and print it to stdout. Takes the same derivation source as generate (--seed + variant/contrast/surface/custom); no projection knobs — `apply` chooses how the theme is consumed. Pipes into `apply`.',
+        flags: SERIALIZE_FLAGS.map(flagInfo),
+      },
+      apply: {
+        summary:
+          'Load a serialized colors.json (file path, or stdin via `-`/pipe) and either project it or gate it, honoring every pin/binding/override in the file. A malformed / schema-invalid / version-mismatched artifact exits 2.',
+        forms: [
+          'apply [<file>|-] [--to <target>] [--binding] [--soft-borders] [--format] [--extended] [--mode] — project the loaded theme into a target (default --to shadcn), like generate',
+          'apply [<file>|-] --check [--aaa] [--mode] [--json] — gate the loaded theme’s contrast, like `check --seed` (exit 1 on a text-pair failure)',
+        ],
+        flags: APPLY_FLAGS.map(flagInfo),
       },
       describe: {
         summary:

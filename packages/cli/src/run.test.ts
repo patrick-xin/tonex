@@ -13,10 +13,18 @@ const OK = 0
 const GATE = 1
 const USAGE = 2
 
-function capture(argv: string[]) {
+// why: `stdin` injects `apply`'s input at the pure boundary — undefined means "no
+// input available" (read returns null → the missing-file/empty-stdin exit-2 path),
+// any string is the piped colors.json. Path is ignored: a test that exercises a real
+// file path still drives the SAME canned text, keeping the suite free of fs fixtures.
+function capture(argv: string[], stdin?: string) {
   const out: string[] = []
   const err: string[] = []
-  const code = run(argv, { out: (c) => out.push(c), err: (c) => err.push(c) })
+  const code = run(argv, {
+    out: (c) => out.push(c),
+    err: (c) => err.push(c),
+    read: () => stdin ?? null,
+  })
   return { code, out: out.join(''), err: err.join('') }
 }
 
@@ -927,5 +935,140 @@ describe('tonex per-mode level flags (issue #218)', () => {
     expect(r.out).toContain('--tint-light 0.3')
     expect(r.out).toContain('--tint-dark 0.7')
     expect(r.out).not.toContain('--tint 0.')
+  })
+})
+
+// why: issue #219 — the by-value PortableTheme round-trip. `serialize` freezes the
+// derivation source into a canonical colors.json; `apply` reads one back and either
+// projects or gates it, honoring every pin/binding/override inside. These pin the
+// load-bearing behaviours at the `run(argv, io)` boundary (never internal calls): the
+// round-trip IDENTITY that proves www↔CLI unification, pin pass-through, the gate
+// seeing pins, and the exit-2 validation contract. Kept minimal per the suite norm.
+describe('tonex serialize / apply (issue #219)', () => {
+  const SEED = '#3b82f6'
+
+  // why: a hand-authored colors.json — serialize a base theme, then inject a pin a CLI
+  // can't author from flags (the www-authored case). Round-trips through JSON so the
+  // result is exactly the wire shape `apply` will load.
+  function withOverride(argv: string[], patch: (t: Record<string, unknown>) => void): string {
+    const theme = JSON.parse(capture(['serialize', ...argv]).out)
+    patch(theme)
+    return JSON.stringify(theme)
+  }
+
+  it('serialize emits a canonical, version-stamped PortableTheme that apply can load', () => {
+    const r = capture(['serialize', '--seed', SEED])
+    expect(r.code).toBe(OK)
+    const theme = JSON.parse(r.out)
+    expect(theme).toHaveProperty('version') // the SCHEMA_VERSION stamp rides in the bytes
+    expect(theme.seed.exactHex).toBe(SEED)
+    // a CLI-constructed theme carries default bindings + empty overrides (pass-through scope)
+    expect(theme.md3TokenOverrides).toEqual({ light: {}, dark: {} })
+    expect(theme.shadcnRoleBindings).toHaveProperty('light')
+  })
+
+  // The unification proof: serialize | apply --to T === generate --to T, byte-for-byte,
+  // because apply reconstructs the same recipe from the frozen source. Representative
+  // targets + an asymmetric (#218) theme.
+  it('round-trips losslessly: serialize | apply --to T equals generate --to T', () => {
+    for (const target of ['shadcn', 'colors', 'yaml'] as const) {
+      const direct = capture(['generate', '--seed', SEED, '--to', target])
+      const serialized = capture(['serialize', '--seed', SEED])
+      expect(serialized.code).toBe(OK)
+      const applied = capture(['apply', '--to', target], serialized.out)
+      expect(applied.code).toBe(OK)
+      expect(applied.out).toBe(direct.out)
+    }
+  })
+
+  it('round-trips an asymmetric (#218) theme: per-mode contrast survives the freeze→apply', () => {
+    const flags = ['--seed', SEED, '--contrast-dark', '0.5']
+    const direct = capture(['generate', ...flags, '--to', 'shadcn'])
+    const serialized = capture(['serialize', ...flags])
+    const applied = capture(['apply', '--to', 'shadcn'], serialized.out)
+    expect(applied.code).toBe(OK)
+    expect(applied.out).toBe(direct.out)
+    expect(applied.out).toContain('--contrast-dark 0.5') // the asymmetric recipe re-derives it
+  })
+
+  // why: the pin the CLI can't author (md3TokenOverrides) must show its PINNED value in
+  // the projection, not the MCU-derived one — apply feeds the whole theme to deriveTheme,
+  // which lands overrides last-write-wins. --to colors --format hex shows the md role
+  // value directly (bare `primary` ← --color-primary), no binding indirection.
+  it('honors an md3TokenOverrides pin in the projection (pinned hex, not the MCU value)', () => {
+    const baseline = JSON.parse(
+      capture(['generate', '--seed', SEED, '--to', 'colors', '--format', 'hex']).out,
+    )
+    const PIN = '#ff0000'
+    expect(baseline.light.primary).not.toBe(PIN) // the MCU value differs from our pin
+    const authored = withOverride(['--seed', SEED], (t) => {
+      ;(t.md3TokenOverrides as { light: Record<string, string> }).light['--color-primary'] = PIN
+    })
+    const r = capture(['apply', '--to', 'colors', '--format', 'hex'], authored)
+    expect(r.code).toBe(OK)
+    expect(JSON.parse(r.out).light.primary).toBe(PIN) // the pinned value wins
+  })
+
+  // why: the gate runs over the LOADED theme, so an override that breaks a text pair
+  // blocks at exit 1 — a pinned on-surface equal to surface kills the body-text pair.
+  it('apply --check sees pins: an override that breaks a text pair exits 1', () => {
+    const clean = withOverride(['--seed', SEED], () => {})
+    expect(capture(['apply', '--check'], clean).code).toBe(OK) // the unpinned theme clears
+    const broken = withOverride(['--seed', SEED], (t) => {
+      // pin light on-surface to white — near the light surface, so on-surface/surface fails
+      ;(t.md3TokenOverrides as { light: Record<string, string> }).light['--color-on-surface'] =
+        '#ffffff'
+    })
+    const r = capture(['apply', '--check'], broken)
+    expect(r.code).toBe(GATE)
+    expect(r.out).toMatch(/FAIL/)
+  })
+
+  it('pipes over stdin: serialize | apply works without a temp file', () => {
+    const serialized = capture(['serialize', '--seed', SEED])
+    expect(serialized.code).toBe(OK)
+    // both the bare-stdin and explicit `-` forms read the piped JSON
+    expect(capture(['apply', '--to', 'shadcn'], serialized.out).code).toBe(OK)
+    expect(capture(['apply', '-', '--to', 'shadcn'], serialized.out).code).toBe(OK)
+  })
+
+  // why: a bad artifact is a loud USAGE error (exit 2 — fix the call), never a silent
+  // default theme. Malformed JSON, wrong shape, and a version mismatch all reject;
+  // pre-launch there is no migration ladder (ADR-0009 c.4).
+  it('rejects malformed / schema-invalid / version-mismatched input with exit 2', () => {
+    expect(capture(['apply', '--to', 'shadcn'], 'not json').code).toBe(USAGE)
+    expect(capture(['apply', '--to', 'shadcn'], '{"foo":"bar"}').code).toBe(USAGE)
+    const mismatched = withOverride(['--seed', SEED], (t) => {
+      t.version = 999
+    })
+    expect(capture(['apply', '--to', 'shadcn'], mismatched).code).toBe(USAGE)
+    // no input at all (no file, nothing piped) is also a usage error, not a default theme
+    expect(capture(['apply', '--to', 'shadcn']).code).toBe(USAGE)
+  })
+
+  // why: a stray projection knob on serialize (or a derivation knob on apply) is a loud
+  // did-you-mean usage error — the seam is enforced at the parser, telling the agent
+  // which verb owns the knob rather than silently ignoring it.
+  it('serialize rejects projection knobs; apply rejects derivation knobs (exit 2)', () => {
+    expect(capture(['serialize', '--seed', SEED, '--to', 'shadcn']).code).toBe(USAGE)
+    expect(
+      capture(['apply', '--seed', SEED], capture(['serialize', '--seed', SEED]).out).code,
+    ).toBe(USAGE)
+  })
+
+  it('describe lists serialize and apply with their flags (and apply’s two forms)', () => {
+    const payload = JSON.parse(capture(['describe']).out)
+    expect(payload.commands.serialize).toBeDefined()
+    expect(payload.commands.apply).toBeDefined()
+    const serializeFlags = new Set(
+      payload.commands.serialize.flags.map((f: { name: string }) => f.name),
+    )
+    expect(serializeFlags.has('--seed')).toBe(true)
+    expect(serializeFlags.has('--to')).toBe(false) // no projection knob on the writer
+    const applyFlags = new Set(payload.commands.apply.flags.map((f: { name: string }) => f.name))
+    expect(applyFlags.has('--to')).toBe(true)
+    expect(applyFlags.has('--check')).toBe(true)
+    expect(applyFlags.has('--seed')).toBe(false) // no derivation knob on the reader
+    expect(payload.commands.apply.forms.length).toBe(2)
   })
 })

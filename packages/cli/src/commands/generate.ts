@@ -136,8 +136,23 @@ export function generate(argv: readonly string[], io: Io): number {
   }
   const args = parsed.args
 
-  let source = parseSource(args, io)
+  const source = parseSource(args, io)
   if (typeof source === 'number') return source
+
+  return project(source, args, io)
+}
+
+// why: the source-AGNOSTIC projection — take ANY `PortableTheme` plus the projection
+// knobs (`--to`/`--binding`/`--soft-borders`/`--format`/`--extended`/`--mode`) and
+// print it for one target. Lifted out of `generate` (issue #219) so `apply` reuses
+// it verbatim: the ONLY difference between `generate --to T` and `apply file --to T`
+// is where the theme came from (a seed vs a loaded colors.json). It honors whatever
+// the theme carries — including `md3TokenOverrides`/`shadcnRoleOverrides` pins from a
+// www-authored file — because `buildContrastBundle`/`deriveTheme` apply that layer
+// last-write-wins over MCU. The recipe it embeds is reconstructed from the (frozen)
+// source, so a serialize→apply round-trip reproduces generate's bytes exactly.
+export function project(sourceTheme: PortableTheme, args: ParsedArgs, io: Io): number {
+  let source = sourceTheme
 
   const bindingArg = flagValue(args, '--binding')
   if (bindingArg !== undefined) {

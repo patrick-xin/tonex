@@ -41,6 +41,18 @@ commands:
       {mode, token, dTone?, dChroma?}) and print before/after facts plus
       the gamut-clamped achieved delta. Exit 0 on a clean shift, 2 on a bad
       token name / malformed --shifts. Never gates contrast — run check for that.
+  serialize --seed <hex> [--variant <name>] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>] [--custom '<json>']
+      Freeze the derived theme into the canonical colors.json (a versioned
+      PortableTheme) and print it to stdout. Same derivation source as
+      generate; no projection knobs (those live on apply). Pipes into apply.
+  apply    [<file>|-] [--to colors|shadcn|yaml|json] [--binding <name>] [--soft-borders] [--format <fmt>] [--extended] [--mode light|dark]
+      Load a serialized colors.json (a file path, or stdin via - or a pipe)
+      and project it into a target (default shadcn), honoring every
+      pin/binding/override in the file. Like generate, but from a theme by value.
+  apply    [<file>|-] --check [--aaa] [--mode light|dark] [--json]
+      Gate the loaded theme's WCAG contrast (the same gate as check --seed).
+      Exit 1 on a text-pair failure. A malformed/invalid/version-mismatched
+      file is a usage error (exit 2).
   describe
       Print the machine-readable surface (commands, flags, contrast policy).
 
