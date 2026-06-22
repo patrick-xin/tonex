@@ -9,13 +9,10 @@ import { CAPABILITIES } from '../data'
 
 export default function CapabilitySlider() {
   const [activeIndex, setActiveIndex] = useState(0)
-
   const current = CAPABILITIES[activeIndex]
-
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % CAPABILITIES.length)
   }
-
   const handlePrev = () => {
     setActiveIndex((prev) => (prev - 1 + CAPABILITIES.length) % CAPABILITIES.length)
   }
@@ -25,7 +22,6 @@ export default function CapabilitySlider() {
       id="capability-slider-container"
       className="flex flex-col h-full justify-between p-6 md:p-8 bg-surface text-on-surface"
     >
-      {/* Top Section */}
       <div className="flex justify-between items-start border-b border-outline-variant pb-4 mb-6">
         <span className="font-mono text-xs tracking-wider text-on-surface-variant font-medium">
           STUDIO CAPABILITY
@@ -60,8 +56,6 @@ export default function CapabilitySlider() {
           ))}
         </div>
       </div>
-
-      {/* Main Content Area with Animated Transitions */}
       <div className="relative overflow-hidden grow flex flex-col justify-center min-h-55">
         <AnimatePresence mode="wait">
           <motion.div
@@ -73,25 +67,19 @@ export default function CapabilitySlider() {
             className="flex flex-col justify-between h-full"
           >
             <div>
-              {/* Massive Fraction Number */}
               <div className="font-display text-4xl italic text-primary/80 font-semibold mb-2">
                 {current.number}
               </div>
-
-              {/* Title Combination */}
               <h3 className="font-sans text-2xl md:text-3xl font-bold tracking-tight text-on-surface mb-4 uppercase">
                 {current.title}{' '}
                 <span className="font-display italic font-medium normal-case block text-on-surface-variant mt-1 text-lg md:text-xl">
                   & {current.serfWord}
                 </span>
               </h3>
-
-              {/* Description Paragraph */}
-              <p className="text-on-surface text-sm leading-relaxed mb-6 max-w-md">
+              <p className="text-on-surface-variant leading-relaxed mb-6 max-w-md">
                 {current.description}
               </p>
 
-              {/* Custom curated details */}
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-4 border-t border-outline-variant pt-4">
                 {current.details.map((detail, idx) => (
                   <li
@@ -107,8 +95,6 @@ export default function CapabilitySlider() {
           </motion.div>
         </AnimatePresence>
       </div>
-
-      {/* Footer Navigation section */}
       <div className="flex justify-between items-center border-t border-outline-variant pt-4 mt-6">
         <button
           type="button"

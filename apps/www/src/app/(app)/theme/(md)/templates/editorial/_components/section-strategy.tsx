@@ -87,9 +87,9 @@ export function SectionStrategy() {
             </span>{' '}
             CRAFT
           </h4>
-          <p className="text-sm text-on-surface-variant leading-relaxed max-w-xs">
-            A small studio in Lisbon, opened the autumn after the Bienal. Eight people, two rooms,
-            one shared physical monograph archive.
+          <p className="text-on-surface-variant leading-relaxed max-w-xs">
+            A small studio in LA, opened the autumn after the Bienal. Eight people, two rooms, one
+            shared physical monograph archive.
           </p>
         </div>
 

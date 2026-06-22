@@ -62,10 +62,6 @@ export function SectionWork() {
         <div className="flex flex-col border-t border-outline-variant">
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((proj) => (
-              // motion.div is the *direct* AnimatePresence child so popLayout can
-              // pop a leaving row out of flow (smooth filter reflow, no snap). The
-              // full-width SheetTrigger inside is the real, keyboard-focusable
-              // trigger spanning the whole row.
               <motion.div
                 key={proj.id}
                 layout
@@ -97,19 +93,15 @@ export function SectionWork() {
                     {proj.tags.map((tag, idx) => (
                       <span
                         key={String(idx)}
-                        className="px-2 py-0.5 text-[9px] font-mono tracking-widest border border-outline-variant text-on-surface-variant rounded-sm"
+                        className="px-2 py-0.5 text-[9px] font-mono tracking-widest border border-outline-variant text-on-surface-variant rounded-sm bg-surface-container-high"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-
-                  {/* Year */}
                   <div className="col-span-1 md:col-span-1 text-right font-mono text-xs text-on-surface-variant font-medium">
                     '{proj.year}
                   </div>
-
-                  {/* Action indicator Dot */}
                   <div className="col-span-1 md:col-span-2 flex justify-end">
                     <div className="w-5 h-5 rounded-full border border-outline-variant group-hover:bg-primary-container group-hover:border-primary flex items-center justify-center transition-all">
                       <ArrowUpRight className="w-2.5 h-2.5 text-on-surface group-hover:text-on-primary-container transition-colors" />
@@ -120,13 +112,7 @@ export function SectionWork() {
             ))}
           </AnimatePresence>
         </div>
-        <div className="flex justify-between items-center mt-6 text-xs font-mono text-on-surface-variant uppercase">
-          <div className="flex gap-4">
-            <span>01</span>
-            <span>02</span>
-            <span>03</span>
-            <span>04</span>
-          </div>
+        <div className="flex justify-end items-center mt-6 text-xs font-mono text-on-surface-variant uppercase">
           <div>
             Showing {filteredProjects.length} of {PROJECTS.length} Monographs
           </div>

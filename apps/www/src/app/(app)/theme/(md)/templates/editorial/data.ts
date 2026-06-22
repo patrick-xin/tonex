@@ -106,8 +106,8 @@ export const PROJECTS: Project[] = [
     year: '23',
     category: 'type',
     description:
-      'Bespoke incised display typography designed for the Lisbon Antiquities festival, drawing heavily on classic limestone carving angles.',
-    client: 'Municipality of Lisbon',
+      'Bespoke incised display typography designed for the LA Antiquities festival, drawing heavily on classic limestone carving angles.',
+    client: 'Municipality of LA',
     medium: 'Digital Type Family / Event Identity',
     dimension: 'Unified OTF suite',
     image:
