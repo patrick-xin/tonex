@@ -379,6 +379,45 @@ describe('tonex custom colors', () => {
   })
 })
 
+// why: --with-chart / --with-brand surface core's two emission opt-ins
+// (ExportOptions.includeChart / includeBrand) the CLI previously never set —
+// the shadcn block shipped without the --chart-1..5 every real shadcn theme
+// carries, and the seed/brand pair was unreachable. Chart is emission-only;
+// brand additionally enters check's gate (the seed/brand text pair).
+describe('tonex chart + brand emission', () => {
+  const SEED = '#3b82f6'
+
+  it('--with-chart emits the shadcn --chart-1..5 block; absent it does not, and the recipe pins it', () => {
+    const off = capture(['generate', '--seed', SEED])
+    expect(off.out).not.toContain('--chart-1:')
+    const on = capture(['generate', '--seed', SEED, '--with-chart'])
+    expect(on.code).toBe(OK)
+    expect(on.out).toContain('--chart-1:')
+    expect(on.out).toContain('--chart-5:')
+    // the recipe re-runs THIS projection — the toggle rides inside it
+    expect(on.out).toContain('--with-chart')
+  })
+
+  it('--with-brand emits the shadcn --brand pair and carries it through the recipe', () => {
+    const r = capture(['generate', '--seed', SEED, '--with-brand'])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--brand:')
+    expect(r.out).toContain('--brand-foreground:')
+    expect(r.out).toContain('--with-brand')
+  })
+
+  it('--with-brand folds the seed/brand pair into the gate — a brand pairing that fails AA now blocks (exit 1)', () => {
+    // the bare seed clears; the literal brand fill (#3b82f6) against the light
+    // surface is only 3.5:1, so once the pair is in the gate it must block (Gap 3).
+    const base = capture(['check', '--seed', SEED])
+    expect(base.code).toBe(OK)
+    const withBrand = capture(['check', '--seed', SEED, '--with-brand', '--json'])
+    expect(withBrand.code).toBe(GATE)
+    expect(withBrand.out).toContain('shadcn-brand')
+    expect(withBrand.out).toContain('--brand')
+  })
+})
+
 // why: `check` is the contrast gate, overloaded across forms that share one
 // exit-code contract (0 clears the level, 1 a text pair fails, 2 a bad call).
 describe('tonex check — whole-theme gate', () => {

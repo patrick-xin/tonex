@@ -81,11 +81,16 @@ function findMinContrast(args: ParsedArgs, io: Io): number {
   // as the user set it, so the answer is the remedy for THIS theme, not a generic
   // one. `--mode` scopes the verdict to one projection (the same audit the gate
   // uses), so the remedy matches the single-mode yaml the agent emits.
+  // why: the oracle searches the SAME audit the gate runs, so --with-brand must scope
+  // it identically — otherwise the reported remedy could clear a gate that then fails
+  // on the brand pair the user asked to include.
+  const includeBrand = hasFlag(args, '--with-brand')
   const clears = (c: number): boolean =>
     scopeAudit(
       auditTheme(deriveTheme({ ...source, contrastLevel: uniform(c) }), {
         level,
         customColors: source.customColors,
+        includeBrand,
       }),
       mode,
     ).ok
@@ -107,6 +112,7 @@ function findMinContrast(args: ParsedArgs, io: Io): number {
     auditTheme(deriveTheme({ ...source, contrastLevel: uniform(1) }), {
       level,
       customColors: source.customColors,
+      includeBrand,
     }),
     mode,
   )
@@ -181,8 +187,15 @@ export function gateTheme(source: PortableTheme, args: ParsedArgs, io: Io): numb
   // (on-color/color, on-container/container, shadcn -foreground/root) — the
   // contrast GUARANTEE is the whole point of adding a custom color, so an unsafe
   // user hex blocks at exit 1 like any other failing text pair.
+  // why: --with-brand opts the seed/brand text pair (ADR-0032) into the gate, the
+  // mirror of generate emitting it (issue #201, Gap 3) — so a theme that emits the
+  // brand pair is gated on it rather than shipping an unaudited pairing.
   const result = scopeAudit(
-    auditTheme(deriveTheme(source), { level, customColors: source.customColors }),
+    auditTheme(deriveTheme(source), {
+      level,
+      customColors: source.customColors,
+      includeBrand: hasFlag(args, '--with-brand'),
+    }),
     mode,
   )
 

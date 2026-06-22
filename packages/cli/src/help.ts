@@ -11,7 +11,7 @@ export const HELP = `usage: tonex <command> [options]
 commands:
   generate --seed <hex> [--variant <name>] [--to colors|shadcn|yaml|json]
            [--mode light|dark] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>]
-           [--custom '<json>']
+           [--custom '<json>'] [--with-chart] [--with-brand]
       Derive a theme from a seed hex color and print it.
   check    --seed <hex> [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
       Audit the derived theme's WCAG contrast. Both modes unless --mode
@@ -79,6 +79,10 @@ commands:
                blend defaults true, shadcnSource defaults "color", hex is hex or oklch.
                Rides in every output; colors/json also carry the definitions
                (colors' "custom" block / json's extendedColors).
+  --with-chart emit the data-viz chart tokens (--chart-1..5) every real shadcn theme
+               carries, derived from the primary palette (generate; shadcn/yaml/json).
+  --with-brand emit the seed/brand pair (--brand/--brand-foreground). generate emits it;
+               check folds the brand text pair into the gate.
   --aaa        raise the WCAG bar to AAA (default AA). --large uses large-text thresholds.
   --contrast   MCU palette contrast level, 0..1 (default 0).
   --mode       light|dark. generate: which mode yaml emits (default light;
