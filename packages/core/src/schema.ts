@@ -5,12 +5,18 @@
 // engine functions, and vice versa.
 
 export {
+  CHART_PALETTE_DESCRIPTIONS,
+  CHART_PALETTES,
   CHART_SCHEMES,
+  type ChartPalette,
   type ChartScheme,
+  chartInputsToPalette,
+  chartPaletteToInputs,
   HUE_ANCHOR_DEFAULT,
   HUE_ANCHORS,
   HUE_SPREAD_DEFAULT,
   type HueAnchor,
+  isChartPalette,
   MD_CHART_TOKEN_NAMES,
   type MdChartTokenName,
   SHADCN_CHART_TOKEN_NAMES,

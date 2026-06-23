@@ -11,6 +11,14 @@ export {
   rebrandChart,
 } from './build'
 export {
+  CHART_PALETTE_DESCRIPTIONS,
+  CHART_PALETTES,
+  type ChartPalette,
+  chartInputsToPalette,
+  chartPaletteToInputs,
+  isChartPalette,
+} from './palette'
+export {
   CHART_SCHEMES,
   type ChartScheme,
   HUE_ANCHOR_DEFAULT,

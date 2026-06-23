@@ -18,6 +18,7 @@ import {
 } from '@tonex/core'
 import {
   type CustomColorEntry,
+  chartInputsToPalette,
   type PortableTheme,
   SHADCN_BINDING_PRESETS,
   withSoftEdges,
@@ -98,10 +99,21 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   if (source.customColors.length > 0) {
     parts.push(`--custom '${serializeCustom(source.customColors)}'`)
   }
+  // why: chart emission is opt-in, so a recipe carries the chart flag only when
+  // the user asked for it — source.chart always holds the default ramp, so gating
+  // on a value comparison would never fire. --chart-palette is the richer flag
+  // (it also implies emission), so it OWNS the chart recipe line: emit the LABEL
+  // (recovered from resolved source.chart via the shared inverse map, never the
+  // raw flag), and fall back to the bare --with-chart only when no palette was
+  // chosen — never both, which would round-trip a redundant pair.
+  if (flagValue(args, '--chart-palette') !== undefined) {
+    parts.push(`--chart-palette ${chartInputsToPalette(source.chart)}`)
+  } else if (hasFlag(args, '--with-chart')) {
+    parts.push('--with-chart')
+  }
   if (hasFlag(args, '--extended')) parts.push('--extended')
-  // why: chart/brand shape the emitted bytes (extra token blocks), so the recipe
-  // must carry them to reproduce the projection — same contract as --extended.
-  if (hasFlag(args, '--with-chart')) parts.push('--with-chart')
+  // why: --with-brand shapes the emitted bytes (the seed/brand pair), so the
+  // recipe must carry it to reproduce the projection — same contract as --extended.
   if (hasFlag(args, '--with-brand')) parts.push('--with-brand')
   const fmt = flagValue(args, '--format')
   if (fmt !== undefined) parts.push(`--format ${fmt}`)
@@ -207,7 +219,13 @@ export function project(sourceTheme: PortableTheme, args: ParsedArgs, io: Io): n
   const exportOptions: ExportOptions = {
     ...(formatArg ? { colorFormat: formatArg } : {}),
     ...(hasFlag(args, '--extended') ? { includeExtended: true } : {}),
-    ...(hasFlag(args, '--with-chart') ? { includeChart: true } : {}),
+    // why: chart emission flips on for EITHER the bare --with-chart toggle (the
+    // default ramp, #201) OR --chart-palette (which also picks the palette and
+    // shaped source.chart in parseSource). Per #227, any --chart-* flag implies
+    // --with-chart, so the palette flag is self-sufficient — no need to pass both.
+    ...(hasFlag(args, '--with-chart') || flagValue(args, '--chart-palette') !== undefined
+      ? { includeChart: true }
+      : {}),
     ...(hasFlag(args, '--with-brand') ? { includeBrand: true } : {}),
   }
 

@@ -1,14 +1,19 @@
 'use client'
 
-import { HUE_SPREAD_DEFAULT } from '@tonex/core/schema'
+import {
+  CHART_PALETTES,
+  type ChartPalette,
+  chartInputsToPalette,
+  chartPaletteToInputs,
+} from '@tonex/core/schema'
 import { useSource } from '@tonex/core-react'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-const CHART_PALETTE_VALUES = ['single', 'multi', 'polychrome'] as const
-type ChartPaletteValue = (typeof CHART_PALETTE_VALUES)[number]
-
-const CHART_PALETTE_LABELS: Record<ChartPaletteValue, string> = {
+// why: presentation labels only — the picklist itself (CHART_PALETTES) and the
+// label↔inputs mapping live in core, shared with the CLI's --chart-palette flag
+// so the two surfaces speak one vocabulary (no duplicated hueSpread constants).
+const CHART_PALETTE_LABELS: Record<ChartPalette, string> = {
   single: 'Single hue',
   multi: 'Multi hue',
   polychrome: 'Polychrome',
@@ -30,25 +35,15 @@ export function ChartPaletteToggle() {
         variant="outline"
         size="xs"
         className="mt-0.5"
-        value={[
-          chartScheme === 'categorical' ? 'polychrome' : chartHueSpread === 0 ? 'single' : 'multi',
-        ]}
+        value={[chartInputsToPalette({ scheme: chartScheme, hueSpread: chartHueSpread })]}
         onValueChange={(value) => {
           if (value.length === 0) return
-          const next = value[0] as ChartPaletteValue
-          if (next === 'polychrome') {
-            setChartScheme('categorical')
-            return
-          }
-          setChartScheme('sequential')
-          if (next === 'single') {
-            setChartHueSpread(0)
-          } else if (chartHueSpread === 0) {
-            setChartHueSpread(HUE_SPREAD_DEFAULT)
-          }
+          const inputs = chartPaletteToInputs(value[0] as ChartPalette)
+          setChartScheme(inputs.scheme)
+          setChartHueSpread(inputs.hueSpread)
         }}
       >
-        {CHART_PALETTE_VALUES.map((v) => (
+        {CHART_PALETTES.map((v) => (
           <ToggleGroupItem className="h-6" key={v} value={v}>
             {CHART_PALETTE_LABELS[v]}
           </ToggleGroupItem>

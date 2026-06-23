@@ -8,7 +8,12 @@
 import { COLOR_FORMATS, type ColorFormat, MODES, type Mode } from '@tonex/core'
 import { type Level, levelThreshold } from '@tonex/core/audit'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
-import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from '@tonex/core/schema'
+import {
+  CHART_PALETTE_DESCRIPTIONS,
+  CHART_PALETTES,
+  SHADCN_BINDING_PRESETS,
+  type ShadcnBindingPresetName,
+} from '@tonex/core/schema'
 import { DEFAULT_VARIANT, VARIANT_GROUPS_ORDERED, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
 
@@ -241,14 +246,34 @@ const custom: FlagSpec = {
 // why: core derives 5 chart tokens/mode (theme.md.lightChart/darkChart) on every
 // run but the exporters emit them only behind ExportOptions.includeChart, which the
 // CLI never set — so a tonex shadcn block shipped WITHOUT the --chart-1..5 every real
-// shadcn theme has (issue #201, Gap 2). This flag flips includeChart; the chart axis
-// (scheme/hueSpread/hueAnchor) stays at its derived default for now. Emission-only —
-// chart tokens are non-text, so they carry no contrast gate. shadcn/yaml/json honor it.
+// shadcn theme has (issue #201, Gap 2). This flag flips includeChart at the derived
+// default ramp; --chart-palette below also picks the palette (and implies this).
+// Emission-only — chart tokens are non-text, so they carry no contrast gate.
+// shadcn/yaml/json honor it.
 const withChart: FlagSpec = {
   name: '--with-chart',
   type: 'boolean',
   description:
     'emit the data-viz chart tokens (--chart-1..5) every real shadcn theme carries, derived from the primary palette; honored by shadcn/yaml/json',
+}
+// why: --chart-palette surfaces core's chart AXIS as ONE intent-named knob —
+// single / multi / polychrome, the exact vocabulary the www "Chart palette"
+// toggle shows — so a GUI choice round-trips to a pasteable command. It maps to
+// core's chart { scheme, hueSpread } via chartPaletteToInputs (the toggle reads
+// the same map; no duplicated hueSpread constants). A DERIVATION-source knob (it
+// shapes the derived theme), so it rides on generate AND serialize, unlike the
+// emission-only --with-chart. Per #227 it IMPLIES --with-chart (presence flips
+// chart emission too), so the two compose — pass --chart-palette alone to pick a
+// palette and emit it; --with-chart stays the bare default-ramp toggle. The raw
+// hueSpread / hueAnchor degrees stay unexposed (#227): an agent forms intent over
+// the named palette, never a hand-picked rotation. Values + describe text come
+// from core's CHART_PALETTES taxonomy.
+const chartPalette: FlagSpec = {
+  name: '--chart-palette',
+  type: 'enum',
+  values: CHART_PALETTES,
+  description:
+    'chart series palette (implies --with-chart): single (one-hue ramp), multi (one hue ramped + gentle rotation, the default ramp), or polychrome (distinct rotated hues). Sets the chart axis on generate/serialize and emits the --chart-1..5 block; same vocabulary as the web app',
 }
 // why: the seed/brand pair (--brand/--brand-foreground, ADR-0032) — the literal seed
 // bytes plus an AA-safe foreground — is derived on every run but emitted only behind
@@ -337,6 +362,7 @@ export const GENERATE_FLAGS = [
   tintTextDark,
   custom,
   withChart,
+  chartPalette,
   withBrand,
 ] as const
 
@@ -422,6 +448,7 @@ export const SERIALIZE_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  chartPalette,
 ] as const
 
 // why: `apply` is the READER — it takes NO derivation knobs (the theme is loaded, not
@@ -540,6 +567,7 @@ export function describePayload() {
     variants: variantTaxonomy(),
     targets: [...TARGETS],
     bindings: bindingCatalog(),
+    chart: { ...CHART_PALETTE_DESCRIPTIONS },
   }
 }
 
