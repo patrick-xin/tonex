@@ -379,6 +379,77 @@ describe('tonex custom colors', () => {
   })
 })
 
+// why: --chart-palette surfaces the chart axis as the SAME single/multi/polychrome
+// vocabulary the www toggle speaks (the shared core map), so a GUI choice round-trips
+// to a pasteable command. Presence implies chart emission (no bare --with-chart here);
+// it's a derivation knob, so it rides on generate AND serialize.
+describe('tonex chart palette', () => {
+  const SEED = '#3b82f6'
+
+  // why: a chart token is emitted ONLY under --chart-palette — the bare seed ships no
+  // chart block, so the flag is the emission switch as well as the axis selector.
+  function chartTokens(out: string): string[] {
+    return [...out.matchAll(/--chart-\d: (oklch\([^)]+\)|#[0-9a-f]{6})/g)].map((m) => m[1])
+  }
+
+  it('emits the --chart-1..5 block only when --chart-palette is set', () => {
+    expect(chartTokens(capture(['generate', '--seed', SEED]).out)).toHaveLength(0)
+    const r = capture(['generate', '--seed', SEED, '--chart-palette', 'multi'])
+    expect(r.code).toBe(OK)
+    // 5 tokens per mode (:root + .dark)
+    expect(chartTokens(r.out).length).toBeGreaterThanOrEqual(5)
+  })
+
+  it('single is one hue, polychrome rotates hues — the axis reaches the engine', () => {
+    const single = chartTokens(
+      capture(['generate', '--seed', SEED, '--chart-palette', 'single']).out,
+    )
+    const poly = chartTokens(
+      capture(['generate', '--seed', SEED, '--chart-palette', 'polychrome']).out,
+    )
+    // single ramps one hue (sequential, spread 0); polychrome's distinct hues differ from it
+    expect(poly.slice(0, 5)).not.toEqual(single.slice(0, 5))
+  })
+
+  it('round-trips: the recipe carries --chart-palette in the web app’s vocabulary', () => {
+    const r = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--to',
+      'shadcn',
+      '--chart-palette',
+      'polychrome',
+    ])
+    expect(r.out).toContain('--chart-palette polychrome')
+  })
+
+  it('is a derivation knob: serialize freezes the chart config (categorical for polychrome)', () => {
+    const theme = JSON.parse(
+      capture(['serialize', '--seed', SEED, '--chart-palette', 'polychrome']).out,
+    )
+    expect(theme.chart.scheme).toBe('categorical')
+  })
+
+  it('an out-of-set palette is a usage error (exit 2), never a silent default', () => {
+    const r = capture(['generate', '--seed', SEED, '--chart-palette', 'rainbow'])
+    expect(r.code).toBe(USAGE)
+    expect(r.err).toContain('single, multi, polychrome')
+  })
+
+  it('describe.chart lists the palette taxonomy for an agent to map intent→palette', () => {
+    const payload = JSON.parse(capture(['describe']).out)
+    expect(Object.keys(payload.chart)).toEqual(['single', 'multi', 'polychrome'])
+    // the flag also advertises its picklist on both generate and serialize
+    for (const cmd of ['generate', 'serialize'] as const) {
+      const flag = payload.commands[cmd].flags.find(
+        (f: { name: string }) => f.name === '--chart-palette',
+      )
+      expect(flag.values).toEqual(['single', 'multi', 'polychrome'])
+    }
+  })
+})
+
 // why: `check` is the contrast gate, overloaded across forms that share one
 // exit-code contract (0 clears the level, 1 a text pair fails, 2 a bad call).
 describe('tonex check — whole-theme gate', () => {

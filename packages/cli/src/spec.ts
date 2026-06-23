@@ -8,7 +8,12 @@
 import { COLOR_FORMATS, type ColorFormat, MODES, type Mode } from '@tonex/core'
 import { type Level, levelThreshold } from '@tonex/core/audit'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
-import { SHADCN_BINDING_PRESETS, type ShadcnBindingPresetName } from '@tonex/core/schema'
+import {
+  CHART_PALETTE_DESCRIPTIONS,
+  CHART_PALETTES,
+  SHADCN_BINDING_PRESETS,
+  type ShadcnBindingPresetName,
+} from '@tonex/core/schema'
 import { DEFAULT_VARIANT, VARIANT_GROUPS_ORDERED, variants } from '@tonex/core/variants'
 import type { FlagSpec } from './args'
 
@@ -238,6 +243,24 @@ const custom: FlagSpec = {
   description:
     'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed); shadcnSource picks which md pair the single shadcn slot binds — "color" (default) = the vivid fill (like --primary), "container" = the muted background tone (only affects --to shadcn); hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
 }
+// why: --chart-palette surfaces core's chart axis as ONE intent-named knob —
+// single / multi / polychrome, the exact vocabulary the www "Chart palette"
+// toggle shows — so a GUI choice round-trips to a pasteable command. It maps to
+// core's chart { scheme, hueSpread } via chartPaletteToInputs (the toggle reads
+// the same map; no duplicated hueSpread constants). A DERIVATION-source knob (it
+// shapes the derived theme), so it rides on generate AND serialize, unlike an
+// emission-only toggle. There is no bare --with-chart on this surface, so
+// presence ALSO implies chart emission in generate output. The raw hueSpread /
+// hueAnchor degrees stay unexposed (#227): an agent forms intent over the named
+// palette, never a hand-picked rotation. Values + describe text come from core's
+// CHART_PALETTES taxonomy.
+const chartPalette: FlagSpec = {
+  name: '--chart-palette',
+  type: 'enum',
+  values: CHART_PALETTES,
+  description:
+    'chart series palette (implies chart emission): single (one-hue ramp), multi (one hue ramped + gentle rotation, the default ramp), or polychrome (distinct rotated hues). Sets the chart axis on generate/serialize and emits the --chart-1..5 block; same vocabulary as the web app',
+}
 const aaa: FlagSpec = {
   name: '--aaa',
   type: 'boolean',
@@ -313,6 +336,7 @@ export const GENERATE_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  chartPalette,
 ] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
@@ -396,6 +420,7 @@ export const SERIALIZE_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  chartPalette,
 ] as const
 
 // why: `apply` is the READER — it takes NO derivation knobs (the theme is loaded, not
@@ -512,6 +537,7 @@ export function describePayload() {
     variants: variantTaxonomy(),
     targets: [...TARGETS],
     bindings: bindingCatalog(),
+    chart: { ...CHART_PALETTE_DESCRIPTIONS },
   }
 }
 

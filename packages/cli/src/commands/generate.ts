@@ -18,6 +18,7 @@ import {
 } from '@tonex/core'
 import {
   type CustomColorEntry,
+  chartInputsToPalette,
   type PortableTheme,
   SHADCN_BINDING_PRESETS,
   withSoftEdges,
@@ -97,6 +98,15 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   // the JSON's own double quotes nest cleanly inside.
   if (source.customColors.length > 0) {
     parts.push(`--custom '${serializeCustom(source.customColors)}'`)
+  }
+  // why: chart emission is opt-in (flag presence), so a recipe carries
+  // --chart-palette only when the user asked for it — source.chart always holds
+  // the default ramp, so gating on a value comparison would never fire. The LABEL
+  // is recovered from the resolved source.chart via the shared inverse map (never
+  // the raw flag string), so a later default change can't silently round-trip a
+  // different palette.
+  if (flagValue(args, '--chart-palette') !== undefined) {
+    parts.push(`--chart-palette ${chartInputsToPalette(source.chart)}`)
   }
   if (hasFlag(args, '--extended')) parts.push('--extended')
   const fmt = flagValue(args, '--format')
@@ -199,6 +209,11 @@ export function project(sourceTheme: PortableTheme, args: ParsedArgs, io: Io): n
   const exportOptions: ExportOptions = {
     ...(formatArg ? { colorFormat: formatArg } : {}),
     ...(hasFlag(args, '--extended') ? { includeExtended: true } : {}),
+    // why: --chart-palette is the only chart entry on this surface (no bare
+    // --with-chart here), so its presence implies emission — flip core's
+    // includeChart so the --chart-1..5 block ships. The palette itself already
+    // shaped source.chart in parseSource; this is the emission half.
+    ...(flagValue(args, '--chart-palette') !== undefined ? { includeChart: true } : {}),
   }
 
   const bundle = buildContrastBundle(source)

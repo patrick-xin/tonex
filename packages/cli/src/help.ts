@@ -11,7 +11,7 @@ export const HELP = `usage: tonex <command> [options]
 commands:
   generate --seed <hex> [--variant <name>] [--to colors|shadcn|yaml|json]
            [--mode light|dark] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>]
-           [--custom '<json>']
+           [--custom '<json>'] [--chart-palette single|multi|polychrome]
       Derive a theme from a seed hex color and print it.
   check    --seed <hex> [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
       Audit the derived theme's WCAG contrast. Both modes unless --mode
@@ -41,7 +41,7 @@ commands:
       {mode, token, dTone?, dChroma?}) and print before/after facts plus
       the gamut-clamped achieved delta. Exit 0 on a clean shift, 2 on a bad
       token name / malformed --shifts. Never gates contrast — run check for that.
-  serialize --seed <hex> [--variant <name>] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>] [--custom '<json>']
+  serialize --seed <hex> [--variant <name>] [--contrast <0..1>] [--tint <0..1> | --desaturate <0..1>] [--custom '<json>'] [--chart-palette <name>]
       Freeze the derived theme into the canonical colors.json (a versioned
       PortableTheme) and print it to stdout. Same derivation source as
       generate; no projection knobs (those live on apply). Pipes into apply.
@@ -79,6 +79,10 @@ commands:
                blend defaults true, shadcnSource defaults "color", hex is hex or oklch.
                Rides in every output; colors/json also carry the definitions
                (colors' "custom" block / json's extendedColors).
+  --chart-palette  chart series palette (implies chart emission): single (one-hue
+               ramp), multi (one hue + gentle rotation, the default ramp), or
+               polychrome (distinct rotated hues). Same vocabulary as the web app;
+               sets the chart axis on generate/serialize and emits --chart-1..5.
   --aaa        raise the WCAG bar to AAA (default AA). --large uses large-text thresholds.
   --contrast   MCU palette contrast level, 0..1 (default 0).
   --mode       light|dark. generate: which mode yaml emits (default light;

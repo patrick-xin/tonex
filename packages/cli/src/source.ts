@@ -6,9 +6,12 @@ import { hexFromColorInput } from '@tonex/color-utils'
 import { hctFromHex } from '@tonex/core'
 import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from '@tonex/core/data'
 import {
+  CHART_PALETTES,
   type CustomColorEntry,
+  chartPaletteToInputs,
   cmfSecondSourceDisabledReason,
   DEFAULT_INPUTS,
+  isChartPalette,
   type PortableTheme,
   slugifyCustomColorName,
   validateCustomColorEntry,
@@ -224,6 +227,26 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   const customColors = parseCustomColors(args, io)
   if (typeof customColors === 'number') return customColors
 
+  // why: --chart-palette surfaces the chart axis as the single/multi/polychrome
+  // vocabulary the www toggle speaks — chartPaletteToInputs is the SHARED map, so
+  // CLI and GUI resolve the same label to the same chart.scheme/hueSpread (no
+  // duplicated constants). A derivation-source knob, so it lives in the shared
+  // resolver: generate emits the chart block and serialize freezes the config off
+  // the SAME chart inputs. Absence leaves DEFAULT_INPUTS.chart (the default ramp)
+  // untouched; an out-of-set value is a loud usage error, never a silent default.
+  // hueAnchor stays at the default — the raw degree knobs aren't exposed (#227).
+  const chartPaletteArg = flagValue(args, '--chart-palette')
+  let chart = DEFAULT_INPUTS.chart
+  if (chartPaletteArg !== undefined) {
+    if (!isChartPalette(chartPaletteArg)) {
+      io.err(
+        `tonex: unknown chart palette "${chartPaletteArg}"\n  one of: ${CHART_PALETTES.join(', ')}\n`,
+      )
+      return USAGE
+    }
+    chart = { ...DEFAULT_INPUTS.chart, ...chartPaletteToInputs(chartPaletteArg) }
+  }
+
   return {
     ...DEFAULT_INPUTS,
     variant,
@@ -231,6 +254,7 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     contrastLevel,
     ...surface,
     customColors,
+    chart,
     seed: { ...hctFromHex(seed), exactHex: seed },
   }
 }
