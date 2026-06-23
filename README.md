@@ -1,25 +1,27 @@
 # tonex
 
-Tonex is a colour-authoring engine: one seed colour in, a complete, perceptually-coherent, role-mapped token set out — for both **Material 3** and **shadcn**, light and dark co-derived so preview and export never drift. It's built agent-first: you describe the theme, the agent drives the `tonex` CLI from one brand colour and never hand-picks a hex.
+One brand color in, a complete contrast-safe theme out — for **Material 3** and **shadcn**, light and dark co-derived so preview and export never drift.
 
-See [`vision.md`](./vision.md) for what the project is and who it's for.
+Tonex is agent-first: you describe the theme, the agent drives the `tonex` CLI from a single seed color and never hand-picks a hex. It's built on [Material Color Utilities](https://github.com/material-foundation/material-color-utilities) but takes opinionated departures — the **CMF (2026)** scheme is the default in place of Material You's TonalSpot, and the surface tint is dialable (tint or desaturate) rather than baked in.
 
 ## Use it with an AI agent
 
-Install the tonex skill, then just describe the theme you want — the agent drives the `tonex` CLI from one brand color and never hand-picks a hex:
+Install the tonex skill, then describe the theme you want:
 
 ```bash
 npx skills add patrick-xin/tonex
 ```
 
-In **Claude Code** or **Cursor**, install the `tonex` plugin from the marketplace instead — the skill auto-loads from [`skills/tonex/`](./skills/tonex/). The skill assumes the `tonex` CLI is on your `PATH`.
+In **Claude Code** or **Cursor**, install the `tonex` plugin from the marketplace instead. The skill assumes the `tonex` CLI is on your `PATH`.
 
-## Stack
+## Structure
 
-- `@tonex/core` — engine. Source store (zustand) → `deriveTheme` → `applyDom` renderer + `exportCss` exporter. Pure colour math is grounded in [Material Color Utilities](https://github.com/material-foundation/material-color-utilities) (vendored as `@tonex/mcu`).
-- `apps/www` — Next.js editor. Layer-segmented routes (`/theme`, `/theme/shadcn`); shared source store; route-controlled canvas.
-
-Architectural commitments live in [`docs/adr/`](./docs/adr/).
+- `@tonex/core` — the pure engine: `deriveTheme` maps a seed to role-mapped MD3 + shadcn tokens, plus exporters and the WCAG audit. No React, no DOM.
+- `@tonex/core-react` — editor runtime: the source store, hooks, and DOM renderer.
+- `@tonex/color-utils` — the color-conversion firewall.
+- `@tonex/mcu` — vendored Material Color Utilities.
+- `tonex` — the CLI that drives the engine from one seed.
+- `apps/www` — the Next.js editor.
 
 ## Local dev
 
@@ -32,7 +34,7 @@ pnpm typecheck                    # workspace typecheck
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Agent collaborators should start at [`docs/agents/working-style.md`](./docs/agents/working-style.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
