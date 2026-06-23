@@ -1,22 +1,30 @@
 ---
 title: Semantic Color Model
-description: Colors named by role, and the role set Tonex generates.
+description: Colors named by role, the brand pair, and the token set Tonex generates.
 ---
 
-Tonex names colors by their job, not their appearance. A color is `primary` or `surface` or `error` because of the role it plays, and each role has a defined relationship to the others. This is the model the whole system rests on. It follows Material Design 3, and it's what lets one seed map cleanly into any tool that shares the same roles.
+Tonex names colors by their job, not their appearance. A color is `primary`, `surface`, or `error` because of the role it plays, and each role has a defined relationship to the others. The role vocabulary comes from Material Design 3 color roles, but the result is not meant to look like Material Design. Tonex uses those roles as a portable color contract.
 
 ## Why roles instead of names
 
-A fixed color like "blue 600" only means something in one palette. A role like `primary` means the same thing everywhere — the main accent — whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, or on a slide and still be the same identity. Roles are the common language; the [semantic source](/docs/how-tonex-thinks#the-semantic-source-is-the-contract) is the contract written in it.
+A fixed color like "blue 600" only means something in one palette. A role like `primary` means the main action or accent color, whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, in Material JSON, or in a custom agent workflow and still be the same color system.
+
+Roles are the common language. The semantic source is the contract; target-specific tokens are mappings from that contract. See [How Tonex Thinks](/docs/key-concepts/how-tonex-thinks#agents-bind-tonex-constrains) for the handoff model.
+
+## Brand pair versus roles
+
+The exact seed color is not the same thing as `primary`. Tonex keeps the literal seed available as a brand pair: the unchanged brand color plus a generated readable foreground. Use that pair when the exact input color matters — a CTA, badge, hero accent, or logo-adjacent surface.
+
+Roles are the system around that brand color. `primary`, `primary-container`, and the other roles may shift tone so they can keep contrast, coordinate with surfaces, and work in both light and dark. The brand pair preserves exactness; the roles preserve usability.
 
 ## The core roles
 
 | Role | Job |
 |------|-----|
-| `primary` | The main brand and accent color |
-| `secondary` | The supporting accent |
-| `tertiary` | A third accent for contrast and range |
-| `surface` | The neutral backgrounds behind content |
+| `primary` | Main action or accent color |
+| `secondary` | Supporting accent |
+| `tertiary` | Third accent for contrast and range |
+| `surface` | Neutral backgrounds behind content |
 | `error` | Error states and destructive actions |
 | `outline` | Borders and dividers |
 
@@ -28,13 +36,47 @@ Every colored area needs readable content on top of it. For each role there's an
 
 Surfaces come as a small range of containers at increasing separation — a base surface, then container levels — so you can show depth and grouping through subtle steps rather than borders alone. Each derives from the same neutral and stays in order by contrast.
 
-## Inverse and effects
+## Inverse, fixed, and effects
 
 A few roles exist for specific needs:
 
 - **Inverse** surfaces and their on colors, for elements like tooltips and snackbars that stand out by flipping light and dark.
+- **Fixed** roles, for stable accent values that should not invert across light and dark in the same way as the main roles.
 - **Scrim** and **shadow**, the colors behind modals and under raised elements.
 
-## In your tools
+## Token sets
 
 These roles are the canonical set. When Tonex exports to a specific tool, each role maps to that tool's own tokens. For shadcn, see [Role bindings](/docs/web-app/shadcn/role-bindings).
+
+| Core | Extended |
+|---|---|
+| `primary` | `primary-fixed` |
+| `on-primary` | `primary-fixed-dim` |
+| `primary-container` | `on-primary-fixed` |
+| `on-primary-container` | `on-primary-fixed-variant` |
+| `secondary` | `primary-dim` |
+| `on-secondary` | `secondary-fixed` |
+| `secondary-container` | `secondary-fixed-dim` |
+| `on-secondary-container` | `on-secondary-fixed` |
+| `tertiary` | `on-secondary-fixed-variant` |
+| `on-tertiary` | `secondary-dim` |
+| `tertiary-container` | `tertiary-fixed` |
+| `on-tertiary-container` | `tertiary-fixed-dim` |
+| `error` | `on-tertiary-fixed` |
+| `on-error` | `on-tertiary-fixed-variant` |
+| `error-container` | `tertiary-dim` |
+| `on-error-container` | `error-dim` |
+| `surface` | `surface-tint` |
+| `on-surface` | `inverse-surface` |
+| `on-surface-variant` | `inverse-on-surface` |
+| `surface-dim` | `inverse-primary` |
+| `surface-bright` | `shadow` |
+| `surface-container-lowest` | `scrim` |
+| `surface-container-low` |  |
+| `surface-container` |  |
+| `surface-container-high` |  |
+| `surface-container-highest` |  |
+| `outline` |  |
+| `outline-variant` |  |
+
+If you need raw tonal palettes, Tonex can expose tone stops for `primary`, `secondary`, `tertiary`, `neutral`, `neutral-variant`, and `error`: `0`, `5`, `10`, `15`, `20`, `25`, `30`, `35`, `40`, `50`, `60`, `70`, `80`, `90`, `95`, `98`, `99`, `100`.

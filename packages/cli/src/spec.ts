@@ -39,7 +39,8 @@ const variant: FlagSpec = {
   type: 'enum',
   values: Object.keys(variants),
   default: DEFAULT_VARIANT,
-  description: 'color scheme',
+  description:
+    'color scheme — 10 variants in 4 groups (see describe.variants). Default cmf is the only seed-tone-faithful scheme (primary keeps the seed lightness) with colored surfaces, and the only one that reads --second-color.',
 }
 // why: cmf's second source color (core's cmfSecondSourceHex). CMF is the only MCU
 // variant that reads a second source — it rebuilds the TERTIARY palette from this
@@ -241,7 +242,7 @@ const custom: FlagSpec = {
   name: '--custom',
   type: 'json',
   description:
-    'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed); shadcnSource picks which md pair the single shadcn slot binds — "color" (default) = the vivid fill (like --primary), "container" = the muted background tone (only affects --to shadcn); hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
+    'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed), shadcnSource defaults "color", hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
 }
 // why: core derives 5 chart tokens/mode (theme.md.lightChart/darkChart) on every
 // run but the exporters emit them only behind ExportOptions.includeChart, which the

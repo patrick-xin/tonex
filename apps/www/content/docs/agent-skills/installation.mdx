@@ -1,0 +1,65 @@
+---
+title: Installation
+description: Install the Tonex skill or plugin for your agent environment.
+---
+
+Install with:
+
+```bash
+npx skills add patrick-xin/tonex --skill tonex
+```
+
+The skill does not replace the CLI. It tells the agent how to call Tonex, when to load reference material, how to map roles into a project, and how to verify contrast before delivering a theme.
+
+## How the agent runs Tonex
+
+The skill tells the agent to check whether `tonex` is installed globally. If it is, the agent can run `tonex ...`. If not, it should run the published package with `npx tonex@latest ...`.
+
+That keeps examples readable while still working in a fresh environment.
+
+## Agent app plugins
+
+Use a plugin if your agent app has a plugin or extension marketplace.
+
+In Claude Code or Cursor, install the `tonex` plugin from that app's marketplace. After installation, the app loads the Tonex skill from the repository's `skills/tonex/` directory. You do not need to run `npx skills add ...` separately.
+
+The plugin package points the host app at the same public skill files:
+
+```txt
+skills/tonex/
+├── SKILL.md
+└── references/
+```
+
+## What the root plugin files are for
+
+The repository includes small plugin manifests for agent hosts:
+
+```txt
+.claude-plugin/plugin.json
+.cursor-plugin/plugin.json
+.codex-plugin/plugin.json
+```
+
+These are not files you edit during normal use. They tell each host app how to present Tonex in its marketplace: name, description, version, logo, repository, and where the skill files live.
+
+## OpenCode
+
+OpenCode plugins are JavaScript or TypeScript modules loaded by OpenCode itself. That is a different plugin system from the Claude/Cursor marketplace package above.
+
+OpenCode can load local plugin files from:
+
+```txt
+.opencode/plugins/              project plugins
+~/.config/opencode/plugins/     global plugins
+```
+
+It can also load npm plugins listed in `opencode.json`:
+
+```json
+{
+  "plugin": ["opencode-example-plugin"]
+}
+```
+
+Tonex does not require an OpenCode plugin to use the CLI. Use the Tonex skill when your agent supports skills; otherwise, tell the agent to run `npx tonex@latest ...` directly.

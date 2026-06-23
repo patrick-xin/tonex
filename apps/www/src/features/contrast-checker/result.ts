@@ -31,19 +31,20 @@ export const RESULT: Record<Result, ResultMeta> = {
   pass: {
     label: 'Pass',
     note: 'readable, good contrast',
-    badgeClass: 'text-on-tnx-success bg-tnx-success',
+    badgeClass:
+      'text-tnx-success bg-tnx-success/10 dark:text-on-tnx-success dark:bg-tnx-success/60',
     dotClass: 'bg-tnx-success dark:bg-on-tnx-success',
   },
   fail: {
     label: 'Hard to read',
     note: 'text is too faint against its background',
-    badgeClass: 'text-on-error-container bg-error-container',
-    dotClass: 'bg-error-container dark:bg-error',
+    badgeClass: 'text-on-error-container bg-error-container/20 dark:bg-error-container',
+    dotClass: 'bg-error',
   },
   warn: {
     label: 'Faint',
     note: 'a border, icon, or fill is low-contrast; fine for some uses',
-    badgeClass: 'text-on-tnx-warning bg-tnx-warning',
+    badgeClass: 'text-tnx-warning bg-tnx-warning/20 dark:text-on-tnx-warning dark:bg-tnx-warning',
     dotClass: 'bg-tnx-warning',
   },
   none: {

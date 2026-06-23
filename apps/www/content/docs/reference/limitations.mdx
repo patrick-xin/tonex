@@ -1,17 +1,19 @@
 ---
 title: Limitations
-description: Edge cases and current constraints worth knowing.
+description: A few things behave in ways worth knowing up front.
 ---
-
-A few things behave in ways worth knowing up front.
 
 ## Your seed isn't your primary color
 
-Don't expect `primary` or `primary-container` to come back as the exact color you seeded. Tonex's roles are tuned for contrast, not to reproduce your input. Your seed's hue and its colorfulness carry through to the whole palette, but its lightness gets reassigned so each role lands where it needs to for legible text and surfaces. A seed in the mid-tones — neither clearly light nor clearly dark — is the most surprising case: both `primary` and `primary-container` get shifted away from where you picked to keep their contrast, so neither role is a byte-for-byte match of what you picked. This is by design, and it's the same across every variant — it's how the roles coordinate, not a quirk of one scheme.
+Don't expect `primary` or `primary-container` to come back as the exact color you seeded. Tonex roles are tuned for legible jobs, not exact reproduction.
 
-The generated roles are a coordinated, contrast-tuned system. Reach for them by their job — a `primary` that reads against its surface — rather than as a place to find your exact brand color back. When you genuinely need your input to appear unchanged, that's what the literal brand color is for: it pins your seed as-is so it never drifts, and Tonex pairs it with a generated foreground that stays legible on top. Treat it as a deliberate override for when exactness matters, not the default way to use a role.
+Your seed still authors the palette. Its hue and chroma carry through, but tone can be reassigned so each role lands where it needs to for readable text and surfaces. A mid-tone seed — neither clearly light nor clearly dark — is the most surprising case: both `primary` and `primary-container` may move away from the exact value you picked so their paired text can read.
 
-For the plain-language version of this, see [Why doesn't primary match the color I picked?](/docs/reference/troubleshooting#why-doesnt-primary-match-the-color-i-picked) in Troubleshooting.
+The generated roles are a coordinated, contrast-tuned system. Reach for them by their job — a `primary` that reads against its surface — not as the place to recover your exact brand color.
+
+When you genuinely need your input to appear unchanged, use the brand pair: the literal seed plus a generated foreground that stays legible on top. Treat it as a deliberate exact-color surface, not the default way to use a role.
+
+For the plain-language version, see [Why doesn't primary match the color I picked?](/docs/reference/troubleshooting#why-doesnt-primary-match-the-color-i-picked) in Troubleshooting.
 
 ## Out-of-gamut OKLCH
 

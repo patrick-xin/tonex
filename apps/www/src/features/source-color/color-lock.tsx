@@ -1,8 +1,8 @@
 'use client'
 
+import { LockIcon, LockOpenIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
 import { useSource } from '@tonex/core-react'
-import { LockIcon, UnlockIcon } from 'lucide-react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
@@ -37,9 +37,15 @@ export const ColorLock = ({ className }: { className?: string }) => {
             aria-label={seedHexLock ? 'Unlock seed' : 'Lock seed'}
           >
             {seedHexLock ? (
-              <LockIcon className="size-4 text-on-surface-variant group-hover:text-on-surface" />
+              <LockIcon
+                weight="bold"
+                className="size-4 text-on-surface/38 group-hover:text-on-surface"
+              />
             ) : (
-              <UnlockIcon className="size-4 text-on-surface-variant group-hover:text-on-surface" />
+              <LockOpenIcon
+                weight="bold"
+                className="size-4 text-on-surface-variant group-hover:text-on-surface"
+              />
             )}
           </Button>
         }

@@ -1,31 +1,51 @@
 ---
 title: Introduction
-description: One engine, a small set of subcommands, built to be driven by people and agents.
+description: Generate, check, and hand off Tonex color systems from the terminal.
 ---
 
-The CLI runs the same engine as the web app, from your terminal or an agent.
+The CLI is the terminal surface for Tonex. It runs the same engine as the web app, but in a form that fits scripts, CI, and agents: input a seed, print a deterministic artifact, then verify the pairings that matter.
+
+```bash
+npx tonex@latest generate --seed "#6A9CFF" > globals.css
+```
+
+That command gives you a role-mapped color system from one seed. The output target can be shadcn CSS, Material JSON, a DESIGN.md color block, or the raw Tonex role set for an agent to map into another tool.
+
+## The CLI loop
+
+Most CLI work follows the same loop:
+
+1. **Generate** a color system from a seed.
+2. **Map** the roles into the target surface, either through a native exporter or an agent/script.
+3. **Check** the final foreground/background pairs against WCAG.
+4. **Adjust** only when you need a precise token-level nudge, then check again.
+
+`generate` is the common path. `check` is the safety gate. `adjust` is a surgical tool, not a replacement for the generator.
 
 ## Built for agents
 
-A command is predictable for both human and agents. An agent can call `npx tonex` and read the result from standard output the same way it calls any other tool. Two things make it agent-friendly:
+The CLI is designed to be read and driven by agents without guessing:
 
-- **`tonex describe`** emits the whole contract as JSON — commands, flags, the contrast policy, and the exit-code taxonomy — so an agent learns what blocks versus warns before running anything.
-- **Exit codes are a contract**: `0` clean, `1` contrast gate failure (the colors are wrong), `2` usage or input error (the call is wrong).
+- **Standard output carries the artifact.** Redirect it into files or let an agent read it directly.
+- **`tonex describe` emits the contract as JSON.** It lists commands, flags, targets, bindings, contrast policy, and exit codes.
+- **Exit codes are stable.** `0` means clean, `1` means a contrast gate failed, and `2` means the command or input was invalid.
+
+That separation matters: a contrast failure means the colors need a remedy; a usage error means the call needs to be fixed.
 
 ## Subcommands
 
-Tonex is a subcommand CLI — `tonex <command> [options]`:
+| Command | Use it to |
+| --- | --- |
+| `generate` | Derive a theme from a seed and print it. |
+| `check` | Audit WCAG contrast for a theme or explicit pairs. |
+| `adjust` | Shift named tokens by relative HCT tone/chroma deltas. |
+| `describe` | Print the machine-readable CLI surface. |
 
-- **`generate`** — derive a theme from a seed and print it (shadcn, DESIGN.md YAML, or Material Theme JSON).
-- **`check`** — audit WCAG contrast. Gate a derived theme, find the minimum contrast level that passes, or verify ad-hoc color pairs.
-- **`adjust`** — shift named tokens by a relative HCT delta and report the gamut-clamped result.
-- **`describe`** — print the machine-readable surface: every command, flag, and the contrast policy.
-
-`generate` is the common path: one command, one file, deterministic. Run `tonex` or `tonex --help` for usage at any time.
-
+Run `npx tonex@latest --help` for human-readable usage, or `npx tonex@latest describe` for the machine-readable contract.
 
 ## Next
 
 - [Installation](/docs/cli/installation)
 - [Commands](/docs/cli/commands)
 - [Targets & formats](/docs/cli/targets-formats)
+- [Mapping to Other Tools](/docs/cli/other-tools)

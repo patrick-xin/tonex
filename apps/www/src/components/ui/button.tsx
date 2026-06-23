@@ -13,7 +13,7 @@ import {
 const buttonStyles = tv({
   base: [
     'inline-flex items-center justify-center gap-2 text-sm font-medium rounded-md whitespace-nowrap transition-[border-color,color,background-color,box-shadow,opacity,outline-color] shadow-xl border border-transparent outline-transparent',
-    'select-none shrink-0 shadow-xs',
+    'select-none shrink-0 shadow-md dark:shadow-xs',
     "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
     disabledState,
     errorState,

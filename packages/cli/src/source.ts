@@ -28,7 +28,7 @@ import { type Io, USAGE } from './io'
 // settled v0 contract; `exactHex` preserves the user's exact bytes (ADR-0028).
 //
 // why: the seed accepts core's `hexFromColorInput` contract — a 6-digit hex OR a
-// canonical `oklch(L C H)` (the form shadcn/tweakcn emit), projected to one sRGB
+// canonical `oklch(L C H)`, projected to one sRGB
 // hex. It is safe HERE precisely because the seed is a lossy derivation input, not
 // a WYSIWYG-pinned token (an out-of-gamut oklch loses chroma) — `exactHex` records
 // the PROJECTED hex, never the raw oklch, mirroring the www seed seam. Surfacing,

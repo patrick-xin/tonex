@@ -1,53 +1,55 @@
 ---
 title: Installation
-description: Run the Tonex CLI with npx, install it globally, or add the Tonex skill for agent-led theme work.
+description: Run Tonex with npx, install it globally, or add the agent skill.
 ---
 
-The CLI is a single zero-dependency bundle. For one-off generation or agent runs, use `npx`:
+You usually do not need to install Tonex. Run the published package directly with `npx`:
 
 ```bash
 npx tonex@latest generate --seed "#6A9CFF" > globals.css
 ```
 
-That form needs no global install. Replace `generate ...` with any command:
+Use this form for one-off generation, CI scripts, and agent runs. It always resolves the npm package, runs the command, and exits without adding a project dependency.
 
-```bash
-npx tonex@latest <command> [options]
-```
+## Global install
 
-## Optional global install
+If you use Tonex often, install it globally for the shorter command.
 
-If you want a shorter command, install it globally:
-
-```bash
+```package-install
 npm i -g tonex
 ```
 
-Then run:
+Then run the same commands without `npx tonex@latest`:
 
 ```bash
-tonex <command> [options]
+tonex generate --seed "#6A9CFF" > globals.css
+tonex check --seed "#6A9CFF"
 ```
 
-## Verify the CLI
+## Verify it works
 
-Use `--help` for human-readable usage, or `describe` for the machine-readable contract that agents should read first:
+Use `--help` for human-readable usage:
 
 ```bash
-tonex --help
-tonex describe
+npx tonex@latest --help
 ```
 
-## Install the agent skill
+Use `describe` when an agent or script needs the machine-readable contract:
 
-The CLI is the engine. The `tonex` skill carries the judgment for mapping roles, choosing remedies, and using the contrast gate correctly.
+```bash
+npx tonex@latest describe
+```
+
+If you installed globally, replace `npx tonex@latest` with `tonex`.
+
+## Agent skill
+
+The CLI generates and checks color systems. The `tonex` skill teaches an agent how to use it: when to generate, how to map roles into another tool, and how to respond to contrast failures.
 
 ```bash
 npx skills add patrick-xin/tonex --skill tonex
 ```
 
-Do not use `--all`; this repository also contains internal maintainer skills. Scope the install to `--skill tonex`.
-
 ## Requirements
 
-Requires a current Node.js runtime.
+Tonex requires Node.js 18 or newer.
