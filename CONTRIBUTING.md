@@ -4,7 +4,7 @@ Thanks for wanting to help. Tonex is a small project with strong conventions —
 
 ## Reading order
 
-1. [`docs/vision.md`](./docs/vision.md) — what the project is.
+1. [`vision.md`](./vision.md) — what the project is.
 2. [`docs/agents/working-style.md`](./docs/agents/working-style.md) — working norms for agents.
 3. Code rules — live in the nearest `AGENTS.md` (the sibling `CLAUDE.md` auto-loads and imports it via `@AGENTS.md`): [`packages/core/AGENTS.md`](./packages/core/AGENTS.md) (engine) and [`apps/www/AGENTS.md`](./apps/www/AGENTS.md) (app).
 4. [`docs/adr/`](./docs/adr/) — architectural decisions of record. ADRs hold living rationale: the decision and its why don't change without a new ADR (or an append-only amendment); bodies may be cleaned as code moves.

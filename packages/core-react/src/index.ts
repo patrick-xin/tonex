@@ -6,8 +6,7 @@
 //
 // apps/www imports stateful symbols from here and pure-engine symbols from
 // @tonex/core. The dependency is one-way (core-react → core, never the
-// reverse), so the engine stays consumable by a CLI/SDK with zero React —
-// the foundation the read-write integration slice builds on.
+// reverse), so the engine stays consumable by a CLI/SDK with zero React.
 export { applyDom } from './applyDom'
 export {
   flushPersist,

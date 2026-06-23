@@ -43,8 +43,7 @@ export type ColorFormat = (typeof COLOR_FORMATS)[number]
 // why: ADR-0021 commitment 6 — the dialog options object. All fields are
 // optional and default to today's lean output. Shared across
 // `buildContrastBundle` (reads includeContrastVariants) and `exportCss`
-// (reads everything else). Slice 3 wires `includeContrastVariants` only;
-// slice 4 wires `colorFormat` + the include* tier filters.
+// (reads everything else).
 export interface ExportOptions {
   colorFormat?: ColorFormat
   includeExtended?: boolean
