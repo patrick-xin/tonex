@@ -238,6 +238,29 @@ const custom: FlagSpec = {
   description:
     'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed); shadcnSource picks which md pair the single shadcn slot binds — "color" (default) = the vivid fill (like --primary), "container" = the muted background tone (only affects --to shadcn); hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
 }
+// why: core derives 5 chart tokens/mode (theme.md.lightChart/darkChart) on every
+// run but the exporters emit them only behind ExportOptions.includeChart, which the
+// CLI never set — so a tonex shadcn block shipped WITHOUT the --chart-1..5 every real
+// shadcn theme has (issue #201, Gap 2). This flag flips includeChart; the chart axis
+// (scheme/hueSpread/hueAnchor) stays at its derived default for now. Emission-only —
+// chart tokens are non-text, so they carry no contrast gate. shadcn/yaml/json honor it.
+const withChart: FlagSpec = {
+  name: '--with-chart',
+  type: 'boolean',
+  description:
+    'emit the data-viz chart tokens (--chart-1..5) every real shadcn theme carries, derived from the primary palette; honored by shadcn/yaml/json',
+}
+// why: the seed/brand pair (--brand/--brand-foreground, ADR-0032) — the literal seed
+// bytes plus an AA-safe foreground — is derived on every run but emitted only behind
+// ExportOptions.includeBrand, unreachable from the CLI (issue #201, Gap 3). This flag
+// flips it for generate (emission) AND for check, where the brand text pair joins the
+// gate so an unsafe seed/brand pairing blocks like any other failing text pair.
+const withBrand: FlagSpec = {
+  name: '--with-brand',
+  type: 'boolean',
+  description:
+    'emit the seed/brand pair (--brand/--brand-foreground, the literal seed + its AA-safe foreground); generate emits it (shadcn/yaml/json), check gates its text pair',
+}
 const aaa: FlagSpec = {
   name: '--aaa',
   type: 'boolean',
@@ -313,6 +336,8 @@ export const GENERATE_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  withChart,
+  withBrand,
 ] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
@@ -338,6 +363,7 @@ export const CHECK_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  withBrand,
   aaa,
   large,
   format,
@@ -409,6 +435,8 @@ export const APPLY_FLAGS = [
   binding,
   softBorders,
   extended,
+  withChart,
+  withBrand,
   format,
   applyMode,
   check,

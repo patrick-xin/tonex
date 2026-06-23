@@ -99,6 +99,10 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
     parts.push(`--custom '${serializeCustom(source.customColors)}'`)
   }
   if (hasFlag(args, '--extended')) parts.push('--extended')
+  // why: chart/brand shape the emitted bytes (extra token blocks), so the recipe
+  // must carry them to reproduce the projection — same contract as --extended.
+  if (hasFlag(args, '--with-chart')) parts.push('--with-chart')
+  if (hasFlag(args, '--with-brand')) parts.push('--with-brand')
   const fmt = flagValue(args, '--format')
   if (fmt !== undefined) parts.push(`--format ${fmt}`)
   const binding = flagValue(args, '--binding')
@@ -196,9 +200,15 @@ export function project(sourceTheme: PortableTheme, args: ParsedArgs, io: Io): n
   // why: --extended is core's `includeExtended` tier knob surfaced as a flag — it
   // widens the emitted roster from core (the sufficient baseline) to core+extended.
   // colors/yaml/json honor it; shadcn's roster is binding-fixed (the note below).
+  // why: --with-chart / --with-brand surface core's includeChart / includeBrand
+  // emission opt-ins (issue #201). Core derives both layers on every run; the CLI
+  // previously never flipped the toggles, so a shadcn block shipped without
+  // --chart-1..5 and the seed/brand pair was unreachable. shadcn/yaml/json honor them.
   const exportOptions: ExportOptions = {
     ...(formatArg ? { colorFormat: formatArg } : {}),
     ...(hasFlag(args, '--extended') ? { includeExtended: true } : {}),
+    ...(hasFlag(args, '--with-chart') ? { includeChart: true } : {}),
+    ...(hasFlag(args, '--with-brand') ? { includeBrand: true } : {}),
   }
 
   const bundle = buildContrastBundle(source)
