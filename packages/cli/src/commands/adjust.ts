@@ -2,7 +2,7 @@
 // relative ±HCT delta (tone+chroma together, no hue axis) and prints before/after
 // FACTS plus the gamut-clamped ACHIEVED delta. It is a pure READER: it never gates
 // contrast (that stays a separate `tonex check` step — ADR-0039 c.5) and never
-// persists (applyAdjustments is a later slice). So its exit taxonomy is just 0
+// persists. So its exit taxonomy is just 0
 // (clean) / 2 (bad call) — never 1. The CLI is the boundary that catches core's
 // domain throws (unknown token / invalid mode / no-axis request) and maps them to
 // exit 2; it does NOT re-validate the token domain (surface, don't reimplement).

@@ -1,10 +1,5 @@
 import type { DynamicScheme, Hct, Variant } from '@tonex/mcu'
 
-// why: extracted from cmf.ts on slice 5 — with 10 registry entries the
-// interface is no longer "the cmf-shape", it's the registry contract. Per
-// cmf.ts's original comment, the trigger was a third entry; ten makes it
-// non-negotiable.
-
 /**
  * Bucket for picker UIs and docs. Lives on `VariantStrategy` so consumers
  * never need to re-derive the taxonomy themselves.

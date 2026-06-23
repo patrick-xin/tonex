@@ -134,8 +134,7 @@ const contrastDark: FlagSpec = {
 // sufficient baseline most projects need; --extended widens to core + extended (50)
 // when core doesn't cover the target's slots (fixed/inverse/dim/scrim roles). Maps
 // to core's `ExportOptions.includeExtended`; honored by colors/yaml/json, a no-op
-// for shadcn (its roster is fixed by the bindings). A further rung — raw palette
-// tones 0..100 — is unbuilt; this flag stays boolean until that lands.
+// for shadcn (its roster is fixed by the bindings).
 const extended: FlagSpec = {
   name: '--extended',
   type: 'boolean',

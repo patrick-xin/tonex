@@ -14,10 +14,6 @@ import { HELP } from './help'
 import { type Io, OK, USAGE } from './io'
 import { describePayload } from './spec'
 
-// why: re-exported so `Io` stays importable from `./run` (its historical home)
-// even though the type now lives in the shared `io.ts` leaf.
-export type { Io } from './io'
-
 export function run(argv: readonly string[], io: Io): number {
   // why: help is first-class — discoverable on stdout with exit 0, so an agent's
   // reflexive `tonex` / `tonex --help` probe doesn't read as a failure. A bare
