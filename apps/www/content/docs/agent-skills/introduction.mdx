@@ -1,0 +1,94 @@
+---
+title: Introduction
+description: How Tonex helps coding agents generate, map, and check color systems.
+---
+
+Tonex can be used directly from the CLI, but it also ships agent-facing instructions. The skill teaches an agent to generate a palette from a seed, map semantic roles into the target project, check the pairs that will render, and leave behind the recipe that reproduces the result.
+
+Use the skill when the agent needs judgment: finding the right seed, choosing the target, mapping roles into an unfamiliar codebase, or deciding how to respond to a contrast failure.
+
+The useful part is that Tonex does not need to be the only skill in the run. It is the color-system layer under whatever the agent is building. A design, prototype, email, chart, dashboard, or video still owns its layout, copy, motion, and component choices; Tonex gives that work a coherent palette with light and dark modes, semantic roles, and contrast checks.
+
+## Combine it with other skills
+
+Tonex works best when it sets the color constraints before another skill starts designing. Give the agent a seed, let Tonex produce the light and dark role set, then let the design or prototyping skill work inside that system instead of inventing one-off hex values.
+
+In that flow, Tonex answers “what colors belong together, across light and dark, with readable pairs?” The other skill answers the domain question: what the page, email, chart, or artifact should be.
+
+Here are two concrete ways to pair Tonex with a domain skill.
+
+### [frontend-design](https://www.skills.sh/anthropics/skills/frontend-design)
+
+A good agent flow looks like this:
+
+<Steps>
+  <Step title="Explore palette vibes">
+    Start with Tonex before layout work begins. A single seed can produce different vibes through knobs like variant, contrast, surface tint, and desaturation; different seeds can shift the whole mood even further. Ask the agent what Tonex knobs are available, then generate a few candidate palettes instead of settling on the first one.
+  </Step>
+  <Step title="Pair palettes with directions">
+    Prototype a few landing page directions using those candidate palettes. Each option can vary color mood, layout, density, tone, and content hierarchy while still using semantic roles instead of hand-picked hex values.
+  </Step>
+  <Step title="Polish the interface">
+    Once a palette and direction win, use the frontend-design skill to refine typography, spacing, composition, motion, and component details. Keep the selected Tonex roles as the color source so the design does not drift during polish.
+  </Step>
+  <Step title="Map and check">
+    Map the roles into the target's token names, then check the foreground/background pairs that will actually render.
+  </Step>
+</Steps>
+
+### [React Email](https://www.skills.sh/vercel-labs/json-render/react-email)
+
+React Email templates usually receive colors through the `<Tailwind>` component's `theme.extend.colors` config, then use them as utility classes such as `bg-surface`, `text-on-surface`, `bg-primary`, and `text-on-primary`.
+
+A good agent flow looks like this:
+
+<Steps>
+  <Step title="Generate the palette">
+    Use Tonex to generate a light-mode hex palette from the brand seed. Email clients need conservative color output, so prefer `--format hex`.
+
+    ```bash
+    npx tonex@latest generate --seed "#7a517b" --to colors --format hex
+    ```
+  </Step>
+  <Step title="Build the template">
+    Ask the React Email skill to use semantic names in `theme.extend.colors`, then style the template with classes such as `bg-surface`, `text-on-surface`, `bg-primary`, and `text-on-primary`.
+  </Step>
+  <Step title="Check rendered pairs">
+    Verify the pairs the email actually uses: `on-primary` on `primary` for the button, `on-surface` on `surface` for body copy, `on-surface-variant` on `surface` for muted footer text, and `primary` on `surface` for links.
+
+    ```bash
+    npx tonex@latest check --seed "#7a517b" --mode light \
+      --pairs '[["on-surface","surface"],["on-surface-variant","surface"],["on-primary","primary"],["primary","surface"]]'
+    ```
+  </Step>
+</Steps>
+
+## What the skill includes
+
+`SKILL.md` is the entry point: when to use Tonex, the required workflow, and the guardrails the agent must follow before delivering colors.
+
+```txt title="skills/tonex"
+├── SKILL.md
+└── references/
+    ├── PALETTE.md
+    ├── CONTRAST.md
+    ├── PATTERNS.md
+    └── integrations/
+        ├── SHADCN.md
+        ├── DESIGN-MD.md
+        ├── JSON.md
+        └── CUSTOM-TARGET.md
+```
+
+The reference files are loaded only when needed:
+
+| File | Purpose |
+| --- | --- |
+| `PALETTE.md` | Role set, variants, surface knobs, and how to read generated values. |
+| `CONTRAST.md` | WCAG gate policy, exit codes, contrast remedies, and the literal-brand escape hatch. |
+| `PATTERNS.md` | Reusable role-binding patterns for state colors, semantic colors, and extended roles. |
+| `SHADCN.md` | How to generate and check a shadcn / Tailwind v4 theme. |
+| `DESIGN-MD.md` | How Tonex fills a DESIGN.md `colors:` block. |
+| `JSON.md` | How to export Material Theme Builder JSON. |
+| `CUSTOM-TARGET.md` | How to map Tonex roles into tools without a native exporter. |
+

@@ -5,6 +5,7 @@ import { SiteHeader } from '../_components/site-header'
 import { FinalCta } from '../_landing/final-cta/final-cta'
 import { AboutHero } from './_components/about-hero'
 import { Decorations } from './_components/decorations'
+import { StoryFuture } from './_components/story-future'
 import { StoryGap } from './_components/story-gap'
 import { StoryMoment } from './_components/story-moment'
 import { StorySolution } from './_components/story-solution'
@@ -28,6 +29,7 @@ export default function AboutPage() {
           <StoryMoment />
           <StoryGap />
           <StorySolution />
+          <StoryFuture />
           <Decorations />
         </div>
       </section>

@@ -16,7 +16,7 @@ export function CodeFigure({ className, children, ...props }: ComponentProps<'fi
     <figure
       ref={figureRef}
       className={cn(
-        'not-prose not-first:mt-4 max-h-120 overflow-y-auto no-scrollbar rounded-md relative min-w-0 w-full',
+        'not-prose not-first:mt-4 max-h-120 overflow-y-auto no-scrollbar rounded-xl relative min-w-0 w-full',
         className,
       )}
       {...props}

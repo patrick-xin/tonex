@@ -19,7 +19,7 @@ const calloutVariants = tv({
     variant: {
       default: 'bg-tertiary-container text-on-tertiary-container border-outline',
       destructive: 'border-error-container/38 bg-error-container/38 text-error [&>svg]:text-error',
-      info: 'bg-tnx-info text-on-tnx-info [&>svg]:text-on-tnx-info',
+      info: 'text-tnx-info bg-tnx-info/20 dark:text-on-tnx-info dark:bg-tnx-info/60 [&>svg]:text-on-tnx-info',
       success: 'border-tnx-success bg-tnx-success text-on-tnx-success [&>svg]:text-on-tnx-success',
       warning: 'border-tnx-warning bg-tnx-warning text-on-tnx-warning [&>svg]:text-on-tnx-warning',
     },

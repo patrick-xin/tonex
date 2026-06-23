@@ -62,18 +62,20 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
         <TabsPanel
           key={value}
           value={value}
-          className="mx-auto max-h-[50vh] w-full overflow-hidden mask-b-from-20% mask-b-to-90% max-w-4xl"
+          className="mx-auto max-h-[50vh] w-full overflow-hidden mask-b-from-20% mask-b-to-90% max-w-4xl shadow-sm"
         >
-          <div className="overflow-hidden rounded-lg border border-t-0 border-outline-variant/40 shadow-sm relative">
-            <div className="bg-surface-container-high rounded-md rounded-b-none flex gap-2 py-2 px-4 relative">
-              <div className="bg-red-500 size-3 rounded-full" />
-              <div className="bg-yellow-500 size-3 rounded-full" />
-              <div className="bg-green-500 size-3 rounded-full" />
-              <ShimmerBorder className="h-0.5" />
+          <div className="overflow-hidden rounded-xl border border-t-0 border-outline-variant/40 relative ">
+            <div className="flex gap-2 py-2 px-4 relative">
+              <div className="bg-red-400 size-3 rounded-full" />
+              <div className="bg-yellow-400 size-3 rounded-full" />
+              <div className="bg-green-400 size-3 rounded-full" />
+              <ShimmerBorder className="h-px" />
             </div>
-            <div className="h-[50vh] bg-surface-container-low overflow-hidden text-xs leading-relaxed">
-              {/* biome-ignore lint/security/noDangerouslySetInnerHtml: server-highlighted static demo code from a hardcoded constant */}
-              <div dangerouslySetInnerHTML={{ __html: highlighted[value] }} />
+            <div className="h-[50vh] overflow-hidden text-xs leading-relaxed">
+              <div className="rounded-t-2xl bg-surface-container-low">
+                {/* biome-ignore lint/security/noDangerouslySetInnerHtml: server-highlighted static demo code from a hardcoded constant */}
+                <div dangerouslySetInnerHTML={{ __html: highlighted[value] }} />
+              </div>
             </div>
           </div>
         </TabsPanel>

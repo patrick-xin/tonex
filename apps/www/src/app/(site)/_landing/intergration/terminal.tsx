@@ -186,17 +186,20 @@ export function Terminal({
       ref={containerRef}
       className={cn('mx-auto w-full max-w-4xl px-4 font-mono text-sm', className)}
     >
-      <div className="overflow-hidden rounded-lg border border-outline-variant/40 border-t-0 bg-surface-container-low shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-outline-variant/40 border-t-0 shadow-sm">
         {/* Title Bar */}
-        <div className="bg-surface-container-high rounded-md rounded-b-none flex gap-2 py-2 px-4 relative">
-          <div className="bg-red-500 size-3 rounded-full" />
-          <div className="bg-yellow-500 size-3 rounded-full" />
-          <div className="bg-green-500 size-3 rounded-full" />
-          <ShimmerBorder />
+        <div className="flex gap-2 py-2 px-4 relative">
+          <div className="bg-red-400 size-3 rounded-full" />
+          <div className="bg-yellow-400 size-3 rounded-full" />
+          <div className="bg-green-400 size-3 rounded-full" />
+          <ShimmerBorder className="h-px" />
         </div>
 
         {/* Session transcript */}
-        <div ref={contentRef} className="no-scrollbar h-120 overflow-y-auto p-4 leading-relaxed">
+        <div
+          ref={contentRef}
+          className="no-scrollbar h-120 overflow-y-auto p-4 leading-relaxed bg-surface-container-low rounded-t-2xl"
+        >
           {transcript.slice(0, stepIdx + 1).map((s, i) => {
             const active = i === stepIdx
             if (s.kind === 'user') {

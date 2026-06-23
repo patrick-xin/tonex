@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { DocsHeader, DocsLayout, DocsSidebar, DocsSidebarTree, source } from '@/features/docs'
+import { DocsHeader, DocsLayout, DocsSectionSidebar, DocsSidebar } from '@/features/docs/layout'
 
 export default function ContentLayout({ children }: { children: ReactNode }) {
   return (
@@ -7,7 +7,7 @@ export default function ContentLayout({ children }: { children: ReactNode }) {
       header={<DocsHeader />}
       sidebar={
         <DocsSidebar>
-          <DocsSidebarTree tree={source.pageTree} />
+          <DocsSectionSidebar />
         </DocsSidebar>
       }
     >

@@ -30,7 +30,7 @@ export function CtaButtons({ className }: { className?: string }) {
         nativeButton={false}
         render={<Link href="/theme" />}
         size="lg"
-        className="px-8 h-12 text-base font-semibold shadow-2xl"
+        className="px-8 h-12 text-base shadow-matte"
         data-testid="cta-md"
       >
         Try Tonex
@@ -40,7 +40,7 @@ export function CtaButtons({ className }: { className?: string }) {
         nativeButton={false}
         variant="outline"
         size="lg"
-        className="px-8 h-12 text-base font-medium"
+        className="px-8 h-12 text-base border-outline shadow-matte"
         render={<Link href="/theme/shadcn" />}
         data-testid="cta-shadcn"
       >

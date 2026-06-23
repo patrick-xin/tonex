@@ -9,13 +9,17 @@ A [binding](/docs/web-app/shadcn/role-bindings) tracks the system, so it moves w
 
 ## Why doesn't primary match the color I picked?
 
-It's still your color. What makes a color recognisably *yours* — its hue and how vivid it is — carries through to every role, `primary` included. The one thing that shifts is its lightness: each role is re-toned lighter or darker so the text and surfaces paired with it stay readable. So `primary` isn't a different color from your seed; it's your color adapted for the job of being a primary, sitting at the lightness that keeps it legible. That re-toning is the contrast guarantee doing its work, not your color getting lost.
+The palette is still authored from your color, but `primary` is a role, not a promise to echo the seed exactly.
 
-When you truly need the exact value you picked — pixel for pixel — that's what the brand override is for. It pins your color as-is and lets Tonex generate a foreground that stays readable on top. It's the rare exception for when an exact match matters, not the everyday way to reach for a role. See [Limitations](/docs/reference/limitations#your-seed-isnt-your-primary-color) for more on why the roles are tuned this way.
+What makes the color recognisably yours — hue and chroma — carries through to the palette. What can shift is tone: Tonex may make a role lighter or darker so the text and surfaces paired with it stay readable. That re-toning is the contrast guarantee doing its work, not your color getting lost.
+
+When you truly need the exact value you picked — pixel for pixel — use the brand pair. It keeps your seed as-is and adds a generated foreground that stays readable on top. It's the exception for exact-color surfaces, not the everyday way to reach for a role.
+
+See [Limitations](/docs/reference/limitations#your-seed-isnt-your-primary-color) for more on why roles are tuned this way.
 
 ## An edit didn't carry to the other mode
 
-Some controls are per mode by design: contrast, surfaces, bindings, and overrides. Switch modes with `D` and make the matching change there. See [Light & dark](/docs/web-app/light-dark).
+Some controls are per mode by design: contrast, surfaces, bindings, and overrides. Switch modes with <Kbd>D</Kbd> and make the matching change there. See [Light & dark](/docs/web-app/light-dark).
 
 ## The hue control is off
 

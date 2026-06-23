@@ -286,7 +286,7 @@ describe('tonex generate', () => {
   })
 
   // why: the seed accepts core's full color-input contract, not just hex — an agent
-  // can paste a shadcn/tweakcn brand color (canonical `oklch(L C H)`) straight in.
+  // can paste a brand color (canonical `oklch(L C H)`) straight in.
   // Pins that the oklch is accepted AND routed through the seed (identical theme to
   // its hex projection), and that the colors.json header records the projected hex
   // (exactHex is the sRGB bytes, never the raw oklch — the seed is a lossy input).
@@ -602,8 +602,7 @@ describe('tonex check — pair oracle', () => {
   })
 
   // why: the operands accept the SAME color contract as --seed — a 6-digit hex OR a
-  // canonical oklch(L C H) — so an agent can paste a shadcn/tweakcn color (oklch is
-  // shadcn v4's native form) straight into the oracle without hand-converting. The
+  // canonical oklch(L C H) straight into the oracle without hand-converting. The
   // echoed color is the PROJECTED hex (the gamut-mapped sRGB actually scored), not the
   // raw oklch — the seed precedent: an out-of-gamut oklch is mapped before scoring, so
   // the verdict and the reported color are the same one.

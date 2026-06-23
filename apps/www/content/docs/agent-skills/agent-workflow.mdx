@@ -1,0 +1,52 @@
+---
+title: Agent Workflow
+description: The loop an agent should follow when applying Tonex to a project.
+---
+
+The Tonex skill gives agents a repeatable color workflow: explore the palette space, bind semantic roles into the target, verify the pairs that will render, and leave behind a reproducible recipe.
+
+This page shows what the agent is doing behind the scenes, whether Tonex is driving the whole theme or acting as the color layer under another skill.
+
+<Steps>
+  <Step title="Read the live contract">
+    Start with `tonex describe` so the agent uses the current command surface, variants, targets, flags, contrast policy, and exit codes instead of relying on stale examples.
+  </Step>
+  <Step title="Choose the source and target">
+    Identify the seed color, the target vocabulary, and the output mode. The seed may be a brand color, an extracted color, or a user-approved candidate. The target may be native, like shadcn, or custom, like an email template, chart theme, or design-token file.
+  </Step>
+  <Step title="Explore palette options">
+    When the visual direction is still open, generate a few candidates. A single seed can shift vibe through Tonex knobs such as variant, contrast, surface tint, and desaturation; different seeds can move the mood even further. Use exploration for drafts, then pick one recipe before delivery.
+  </Step>
+  <Step title="Map roles by intent">
+    Bind Tonex roles to the target's slots by job, not by name alone. `primary` is a main action fill, `on-primary` is text on that fill, `surface` is a background, and `on-surface` is content on that background. For native targets, the CLI can emit the projection directly. For custom targets, treat the target as a slot manifest and map roles into it.
+  </Step>
+  <Step title="Check rendered pairs">
+    Verify the foreground/background pairs that will actually appear in the artifact. Keep `generate` and `check` on the same palette flags. For custom targets, use `check --pairs`; for single-mode outputs, scope the check with `--mode`.
+  </Step>
+  <Step title="Deliver the recipe">
+    Deliver the colors with the exact recipe command that produced them. Put the recipe in the target file or native metadata field, not only in chat, so the next agent can reproduce the theme.
+  </Step>
+</Steps>
+
+## Native and custom targets
+
+For native targets like shadcn, Tonex can export directly. For other tools, the agent uses Tonex as the semantic source and maps roles by intent. See [Mapping to Other Tools](/docs/cli/other-tools).
+
+The important distinction is whether the target already understands Tonex's projection:
+
+| Target type | Agent job |
+| --- | --- |
+| Native projection | Generate the target artifact, check it, and preserve the recipe. |
+| Custom target | Build a slot manifest, bind roles by intent, then check every asserted pair. |
+| Exploratory design | Generate several recipes, compare the vibe, then choose one before final checks. |
+
+## Guardrails
+
+The skill keeps a few rules in front of the agent:
+
+- Do not invent extra colors when a Tonex role already covers the job.
+- Keep `generate` and `check` on the same recipe flags.
+- Treat contrast exit code `1` as a color problem, and exit code `2` as a command problem.
+- For custom targets, verify the actual pairs with `check --pairs`.
+- Keep the recipe in the delivered file so the next agent can reproduce the theme.
+- Do not call exploratory palettes final until one recipe has been selected and checked.

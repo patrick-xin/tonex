@@ -1,56 +1,65 @@
 ---
 title: How Tonex Thinks
-description: The model behind the output. One seed, a system of semantic roles, and an order that decides what wins.
+description: The mental model behind Tonex - one seed, a brand-safe pair, semantic roles, and constraints that survive export.
 ---
 
-Tonex takes one color and derives a full system from it. A few ideas explain everything the editor and the CLI do: the seed, the semantic roles, the generative space they live in, and the order that decides what wins — plus two things that follow from them, how contrast holds and how the result travels to other tools.
+Tonex starts with one color, but it does not treat that color as a swatch to copy everywhere. It treats the seed as intent: the source the rest of the system answers to. From there, Tonex derives semantic roles, light and dark palettes, contrast-safe pairings, and exportable tokens that can be bound into real tools.
 
-## The seed is your color
+The model is simple: preserve the brand where exactness matters, derive the system where coherence matters, and make every override explicit.
 
-You give Tonex a single seed: your brand color. The engine builds the system around it rather than replacing it. The seed sets the tone and hue the rest of the palette answers to.
+## One seed, plus a brand-safe pair
 
-You provide one color. You don't hand-pick the other tokens and hope they cohere — the engine derives them.
+The seed is your starting color: a brand color, a logo sample, a pasted hex value, or a color an agent has been told to use. It gives the system its direction.
 
-## The output is roles, not swatches
+Tonex uses that seed in two ways. First, it keeps the literal color available as a brand pair for places where exactness matters: a CTA, badge, hero accent, logo-adjacent block, or any surface that should use the input color unchanged. Tonex pairs that brand color with an automatically generated text color, so the brand pair can clear WCAG instead of leaving you to guess whether white or black is readable enough.
 
-Tonex doesn't return a list of colors. It returns **semantic roles** — colors named by their job, not their appearance:
+Second, Tonex derives the larger interface system from the seed. The generated roles may shift tone so they can do their jobs. That is why your exact seed is available as the brand pair, while roles like `primary` and `primary-container` are free to become the usable system around it.
+
+## Roles before tokens
+
+Tonex does not return a loose list of colors. It returns **semantic roles**: colors named by their job, not their appearance.
 
 | Role | Job |
 |------|-----|
-| `primary` | The main brand and accent color |
-| `surface` | The neutral backgrounds behind your content |
+| `primary` | Main accent and action color |
+| `surface` | Neutral backgrounds behind content |
 | `on-surface` | Text and icons that sit on a surface |
 | `error` | Error states and destructive actions |
 
-Every role has a defined relationship to the others. `on-surface` is readable on `surface` because the engine builds the pair together, not because you matched them by eye. Naming colors by intent rather than by hue is also what lets the system travel to other tools — more on that below. See [Semantic color model](/docs/key-concepts/semantic-model) for the full set.
+Every role has a relationship to the others. `on-surface` is readable on `surface` because the engine builds the pair together, not because someone matched them by eye. See [Semantic color model](/docs/key-concepts/semantic-model) for the full role set.
 
-## Your identity is a point in a continuous space
+This is what makes Tonex portable. A target may call its main action color `brand`, `accent`, `primary`, or something custom. Tonex starts from semantic intent, then maps that source into the target's naming system.
 
-The system is generative, not a preset. Two things follow from that:
+## Light and dark are co-derived
 
-- Change a single hex digit in the seed, and you get a different but still-coherent system.
-- Keep the seed and turn a knob — variant, contrast, surface — and you get a different system again.
+Dark mode is not a second palette patched onto the first. Tonex derives light and dark from the same source so the roles keep their relationships across both modes.
 
-Your identity is a unique point in a continuous space, not a theme everyone else can also pick. That continuity is also the safety net: when you adjust one color by hand, the engine re-balances the rest so the set stays coherent.
+That matters because color problems often show up at the mode boundary. A color that feels strong in light mode can become muddy in dark mode. A muted surface can lose separation. Text that barely passes in one mode can fail in the other. Tonex treats both modes as one system with two expressions, not two unrelated themes.
 
-## An order decides what wins
+## Constraints decide what wins
 
 You can shape the system at several stages. Later stages override earlier ones:
 
-1. **Seed** — the input color.
+1. **Seed** — the source color and brand-safe pair.
 2. **Engine** — variant, contrast, and the optional second source set the overall palette. See [Variants](/docs/key-concepts/variants) and [Contrast](/docs/key-concepts/contrast).
 3. **Color overrides** — step in on specific colors, at two levels:
    - **Palette level** — change the source color of a whole family, or add your own named colors; the engine rebuilds that family's ramp around it. See [Overrides](/docs/web-app/overrides).
-   - **Token level** — pin a single role to an exact value. A pin stops tracking the system entirely; it's terminal, beating every other stage including a later binding. See [Role overrides](/docs/web-app/shadcn/role-overrides).
+   - **Token level** — pin a single role to an exact value. A pin stops tracking the system entirely; it beats every other stage including a later binding. See [Role overrides](/docs/web-app/shadcn/role-overrides).
 4. **Surfaces** — tint or desaturate the neutral backgrounds. See [Surfaces](/docs/web-app/surfaces).
-5. **shadcn bindings** — point a role at a different generated color so it still tracks the system. (A token-level pin from step 3 overrides this.) See [Role bindings](/docs/web-app/shadcn/role-bindings).
+5. **shadcn bindings** — point a shadcn token at a different generated role so it still tracks the system. A token-level pin from step 3 overrides this. See [Role bindings](/docs/web-app/shadcn/role-bindings).
 
-When two stages touch the same color, the later one wins. This is what lets you make a precise change in one place without it rippling everywhere else.
+When two stages touch the same color, the later one wins. That order is the difference between a flexible system and a pile of exceptions: broad choices stay broad, exact choices stay exact, and overrides do not hide where they came from.
 
-## Contrast is checked as you build
+## Contrast is part of the model
 
-Every foreground/background pair is contrast-audited while you work, against WCAG thresholds. What passes in the preview is what you ship — readability isn't a separate step you run at the end. See [Contrast](/docs/key-concepts/contrast) for the audit itself, and [HCT](/docs/key-concepts/hct) for why working in tone makes contrast something the engine can compute rather than guess.
+Tonex checks foreground/background pairs against WCAG thresholds as you build. What passes in the preview is what you export, so readability is not a cleanup step at the end.
 
-## The semantic source is the contract
+Under the hood, Tonex works in a perceptual color model, so tone changes are systematic instead of guessed by eye. See [Contrast](/docs/key-concepts/contrast) for the audit itself, and [HCT](/docs/key-concepts/hct) for the color model underneath.
 
-Because the roles describe intent, the same system can travel anywhere — `primary` and `on-surface` mean the same thing whether the target is shadcn, Tailwind, or a slide. Tonex exports this semantic source as [design tokens](/docs/key-concepts/design-tokens); from there the last step maps it into whatever token system a given tool uses — directly for known targets, or through an agent for the long tail. The source is the contract; the mapping is the last mile. See [Targets & formats](/docs/cli/targets-formats).
+## Agents bind, Tonex constrains
+
+Agents are good at context. They can inspect a project, learn its token names, and bind a palette into the codebase you actually have. Tonex does not try to own that final mile.
+
+Tonex owns the color contract before that handoff: the seed, brand pair, semantic roles, light and dark behavior, contrast checks, and export rules. The agent can decide where the tokens go. Tonex makes sure the colors it receives are not random output with no safety net.
+
+That is the core idea: the semantic source is the contract; the target mapping is the last mile. See [Design tokens](/docs/key-concepts/design-tokens) and [Targets & formats](/docs/cli/targets-formats) for how that contract travels.

@@ -1,29 +1,44 @@
 ---
 title: Introduction
-description: Tonex turns one brand color into a complete, accessible color system that is yours alone.
+description: Tonex turns one brand color into a complete, contrast-checked color system for apps, agents, and design tokens.
 ---
 
-import { PlayIcon, DiamondIcon, ScaleIcon } from "lucide-react";
+import { PlayIcon, DiamondIcon } from "lucide-react";
 
-## The problem
+Tonex turns one starting color into a complete color system: **semantic roles**, **light and dark palettes**, and **contrast checks** that travel with the output. It is not a theme preset and not another token format. Tonex is the color-authoring layer underneath them — the part that decides what the colors are, how they relate, and which pairings are safe to ship.
 
-Doing color well by hand is risky. Get one token wrong and the whole interface feels off, or fails contrast. So most products retreat to whatever feels safe, and everything converges on the same near-neutral look. Being distinct feels dangerous, so almost no one is.
+Pick a seed from a brand color, a logo, a hex value, or an agent workflow. Tonex builds the system around that intent instead of inheriting whatever the framework, template, or model happened to choose.
 
-## What Tonex does
+## Why color needs authorship
 
-You give Tonex one color. It derives a full system of semantic roles around it — backgrounds, accents, text, states — and checks every pair for contrast as you build. The result is coherent by construction, so you can be colorful without gambling on it.
+Color is easy to start and hard to finish. A single accent looks fine in isolation, but real interfaces need backgrounds, text, borders, states, charts, light mode, dark mode, and every awkward pairing in between. If one role is off, the whole surface can feel wrong. If one foreground/background pair misses contrast, the design stops being usable.
 
-The system is generative, not a preset. Change one digit of the seed and you get a different, still-coherent system; keep the seed and turn a knob and you get another. Your identity is a unique point in a continuous space, not a theme anyone can copy.
+That risk pushes teams toward defaults. Products retreat to safe neutrals, familiar ramps, and the same almost-designed look. Agents make the problem faster: they can generate screens in seconds, but without a color system underneath, their palettes are often just a mood attached to a mockup.
+
+Tonex treats color as **authored by intent**, not inherited by default. The user or agent chooses the direction. The system supplies the structure and constraints.
+
+## What Tonex gives you
+
+You give Tonex one color. It derives a role-mapped system around it: `primary`, `surface`, `on-surface`, `error`, and the other jobs an interface needs. The output is semantic, not just a list of swatches, so each color has a purpose and a known relationship to the others.
+
+Light and dark palettes are generated together, not patched separately. Foreground and background roles are checked for contrast as you work. Under the hood, Tonex uses [Material Color Utilities](https://github.com/material-foundation/material-color-utilities) so those relationships are computed in color space, not guessed by eye.
+
+The result is a palette you can tune without starting over. Change the seed, shift the variant, adjust contrast, tune surfaces, or pin a role when you need control. The system keeps the surrounding roles coherent where it still can, and makes exact choices explicit where it cannot.
+
+## How it fits with agents and tools
+
+Modern design systems have more ways to carry tokens than ever: shadcn themes, Material JSON, DESIGN.md, SKILL.md, DTCG token files, and whatever custom format a project already runs. Those formats describe and transport tokens. Tonex fills the color block.
+
+That matters most when agents are doing the work. The agent knows the target codebase, component library, naming conventions, and final layout. Tonex gives it a coherent palette plus the rules for applying it: which roles go together, which pairs pass contrast, and what should stay stable across light and dark. The agent paints the canvas. Tonex keeps the colors from becoming throwaway output.
 
 ## Two ways to use it
 
 - **Web app** — a visual editor. Set a seed, shape the system, preview it on real components, and export. Start at [Seed color](/docs/web-app/seed).
-- **CLI** — one command from your terminal or an agent. Start at [Installation](/docs/cli/installation).
+- **CLI** — one command from your terminal or an agent. Generate tokens, check contrast, and hand the result to a target format. Start at [Installation](/docs/cli/installation).
 
-Both share one engine, so a seed produces the same system in either.
+Both share one engine, so the same seed produces the same system in either surface.
 
 ## Start here
-
 
 <div className="flex flex-col md:flex-row gap-4 md:justify-between">
   <DocCard 

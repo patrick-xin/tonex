@@ -49,7 +49,11 @@ export const mdxComponents = {
         </code>
       )
     }
-    return <code {...props}>{children}</code>
+    return (
+      <code className="px-2" {...props}>
+        {children}
+      </code>
+    )
   },
   figure: CodeFigure,
   figcaption: ({ className, children, ...props }: React.ComponentProps<'figcaption'>) => {

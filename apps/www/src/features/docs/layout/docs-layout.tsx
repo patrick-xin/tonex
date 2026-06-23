@@ -30,7 +30,7 @@ export function DocsLayout({ header, sidebar, children, className }: DocsLayoutP
         {sidebar}
         <main
           data-scroll-container
-          className="[grid-area:main] overflow-y-auto rounded-xl m-2 md:m-4 md:ml-0 bg-surface shadow-lg dark:shadow-sm mt-12"
+          className="[grid-area:main] overflow-y-auto rounded-xl m-2 md:m-4 md:ml-0 md:mt-0 bg-surface shadow-lg dark:shadow-sm no-scrollbar"
         >
           {children}
         </main>

@@ -1,27 +1,28 @@
 ---
 title: HCT
-description: The color space Tonex works in, and how tone drives contrast.
+description: The color model Tonex uses to keep color edits perceptual.
 ---
 
-HCT is the color space Tonex works in. It stands for **Hue**, **Chroma**, and **Tone**, and it comes from Material Design 3. Its advantage is that tone is built to match how people perceive lightness, which makes contrast something you can compute reliably rather than judge by eye.
+You do not need to understand HCT to use Tonex, but it explains why the controls behave the way they do. HCT stands for **Hue**, **Chroma**, and **Tone**. Tonex uses it as its authoring model: edits move through color in a way that is closer to how people perceive it, instead of treating colors as unrelated hex values.
+
+## Where you meet it
+
+- The seed can be adjusted with HCT sliders, alongside hex and OKLCH input. See [Seed color](/docs/web-app/seed).
+- The [contrast](/docs/key-concepts/contrast) control moves foreground tones farther from their backgrounds.
+- The `adjust` CLI command can shift exported tokens by relative tone and chroma deltas.
 
 ## The three axes
 
-- **Hue** — which color it is, around the circle from red through blue and back. Near-grey colors have no hue to adjust; add a little chroma to bring it back.
-- **Chroma** — how colorful it is, from grey at zero to fully saturated. At some hues and tones a color can't get any more vivid, so chroma stops before the end of its range.
+- **Hue** — which color it is, around the circle from red through blue and back. Near-grey colors have little hue to adjust, so hue controls may turn off until the color has enough chroma.
+- **Chroma** — how colorful it is, from grey at zero toward vivid color. At some hues and tones, sRGB cannot represent more chroma, so the color hits a gamut wall.
 - **Tone** — how light or dark it is, from black at 0 to white at 100.
 
 ## Why tone matters for contrast
 
-Contrast between two colors is mostly a question of how far apart their tones are. Because HCT tone tracks perceived lightness, the engine can place an `on-` color at a tone that holds a target contrast against its background, across any hue. This is why readability holds as you change colors: the relationship is set in tone, not guessed.
+Tone gives Tonex a stable way to reason about lightness. When the engine creates an `on-` color, it can move that foreground to a tone that is likely to separate from its background while preserving the role relationship.
 
-Contrast checks measure each pair against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements. See [Contrast](/docs/key-concepts/contrast) for the full audit, levels, and thresholds.
-
-## Where you meet it
-
-- The seed accepts an HCT value, alongside hex and OKLCH. See [Seed color](/docs/web-app/seed).
-- The [contrast](/docs/key-concepts/contrast) control adjusts how far `on-` tones move to hold their margins.
+That is not the same as guessing contrast from tone alone. Tonex still checks the finished foreground/background pairs against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements. See [Contrast](/docs/key-concepts/contrast) for the audit, levels, and thresholds.
 
 ## HCT and OKLCH
 
-You'll also see OKLCH, a perceptual color space used in CSS. Tonex can take a seed in either, and exports values in OKLCH or hex. HCT is how the engine reasons about tone internally; OKLCH is a common way to write the result down. See [Design tokens](/docs/key-concepts/design-tokens).
+You'll also see OKLCH, a perceptual color space used in CSS. Tonex can take a seed in either format, and exports values as OKLCH or hex. HCT is the internal control model; OKLCH and hex are ways to write the result down. See [Design tokens](/docs/key-concepts/design-tokens).

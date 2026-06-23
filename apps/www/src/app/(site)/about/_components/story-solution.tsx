@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { StoryMesh } from './story-mesh'
 
 export function StorySolution() {
@@ -9,10 +11,21 @@ export function StorySolution() {
         <p>
           That's the part Tonex takes on. You give it one color — the one your product actually is —
           and it derives a coherent system around it: light and dark, every surface, contrast
-          checked as you build. It runs on the same color engine behind Material Design You, so the
-          whole palette holds together from one seed. But it's not a black box — re-point any role,
-          pin any value, and it rebalances around your choice instead of locking you out. A safety
-          net under your judgment, not a replacement for it.
+          checked as you build. It runs on the same color engine behind{' '}
+          <Button
+            nativeButton={false}
+            variant="link"
+            size="lg"
+            className="px-0 underline text-base"
+            render={
+              <Link href="https://m3.material.io/blog/announcing-material-you">
+                Material Design You
+              </Link>
+            }
+          />
+          , so the whole palette holds together from one seed. But it's not a black box — re-point
+          any role, pin any value, and it rebalances around your choice instead of locking you out.
+          A safety net under your judgment, not a replacement for it.
         </p>
       </div>
     </div>
