@@ -20,7 +20,7 @@ export {
 export { buildColorsJson, type ColorsJson, exportColorsJson } from './colors-json'
 export { type ExportLayer, exportCss } from './css'
 export { exportDart } from './dart'
-export { buildDesignMdColors, exportDesignMd } from './design-md'
+export { exportDesignMd } from './design-md'
 export { formatCss, formatLayer } from './format'
 export { exportJson } from './json'
 export { exportNativeCss } from './native-css'

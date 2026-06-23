@@ -17,8 +17,12 @@ The point of this layout is that you change a concern by opening *its* file, wit
 - `run.ts` — **JUST dispatch.** The pure `run(argv, io)` seam + the subcommand switch. Owns nothing else.
 - `commands/generate.ts` — the `generate` command: target (`--to`), encoding (`--format`), mode projection.
 - `commands/check.ts` — the `check` command: all contrast forms (whole-theme gate, `--find-contrast` oracle, ad-hoc `<fg> <bg>`, `--pairs`) **and their output formatters**. Forms cleave on theme-free (raw hex, color-utils) vs theme-aware (derive + `@tonex/core/audit`). `--pairs` straddles the seam: raw hex without `--seed`, token names *with* it (resolved by core's `resolveContrastPairs`, scored by `auditPairs`) — presence of `--seed` is the switch.
-- `source.ts` — the shared seed→`PortableTheme` resolver both commands call (`--seed`/`--variant`/`--contrast`/`--tint`/`--desaturate`). Change the input contract here, once.
+- `commands/adjust.ts` — the `adjust` command: relative ±HCT token deltas (tone+chroma, no hue). A pure **reader** — prints before/after/achieved FACTS, never gates contrast and never persists, so its exit taxonomy is just 0/2 (never 1). _(ADR-0039 c.5)_
+- `commands/serialize.ts` — the `serialize` command: the **writer** half of the by-value `colors.json` round-trip (#219). Takes the same derivation source as `generate` (via `parseSource`) and freezes it as canonical, version-stamped JSON. Projection knobs never appear here — that's `apply`'s seam.
+- `commands/apply.ts` — the `apply` command: the **reader** half of the round-trip. Loads + validates a serialized `colors.json` (exit 2 on a bad artifact), then routes to the shared projection (`--to`, reusing `project`) or gate (`--check`, reusing `gateTheme`) — so `apply file --to T` === `generate --seed X --to T` for that theme.
+- `source.ts` — the shared seed→`PortableTheme` resolver the derivation commands call (`--seed`/`--variant`/`--contrast`/`--tint`/`--desaturate`). Change the input contract here, once.
 - `spec.ts` — flag schema-as-data + the enum membership guards (`isTarget`/`isMode`/`isColorFormat`) + `describe`.
+- `portable.ts` — the `PortableTheme` (de)serializer (#219): canonical stable-ordered emit + CLI-facing parse-error copy over core's `parsePortableTheme`. `serialize` writes through it, `apply` reads.
 - `args.ts` — the generic parser the schema feeds. `io.ts` — the `Io` seam + exit codes. `help.ts` — the usage text. `cli.ts` — the bin (the only `process.*`).
 
 ## Keep exactly (the agent contracts — survive any refactor)
