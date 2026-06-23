@@ -243,23 +243,48 @@ const custom: FlagSpec = {
   description:
     'JSON array of {name, hex, blend?, shadcnSource?} custom-color entries added on top of the seed palette — each emits a harmonized 4-role md group + a shadcn pair (--{slug}/--{slug}-foreground), contrast-gated by check. blend defaults true (harmonize toward seed); shadcnSource picks which md pair the single shadcn slot binds — "color" (default) = the vivid fill (like --primary), "container" = the muted background tone (only affects --to shadcn); hex is a 6-digit hex or oklch. In every output: the shadcn pair, and the derived roles in yaml/json/colors (colors also lists the definitions in a "custom" block).',
 }
-// why: --chart-palette surfaces core's chart axis as ONE intent-named knob —
+// why: core derives 5 chart tokens/mode (theme.md.lightChart/darkChart) on every
+// run but the exporters emit them only behind ExportOptions.includeChart, which the
+// CLI never set — so a tonex shadcn block shipped WITHOUT the --chart-1..5 every real
+// shadcn theme has (issue #201, Gap 2). This flag flips includeChart at the derived
+// default ramp; --chart-palette below also picks the palette (and implies this).
+// Emission-only — chart tokens are non-text, so they carry no contrast gate.
+// shadcn/yaml/json honor it.
+const withChart: FlagSpec = {
+  name: '--with-chart',
+  type: 'boolean',
+  description:
+    'emit the data-viz chart tokens (--chart-1..5) every real shadcn theme carries, derived from the primary palette; honored by shadcn/yaml/json',
+}
+// why: --chart-palette surfaces core's chart AXIS as ONE intent-named knob —
 // single / multi / polychrome, the exact vocabulary the www "Chart palette"
 // toggle shows — so a GUI choice round-trips to a pasteable command. It maps to
 // core's chart { scheme, hueSpread } via chartPaletteToInputs (the toggle reads
 // the same map; no duplicated hueSpread constants). A DERIVATION-source knob (it
-// shapes the derived theme), so it rides on generate AND serialize, unlike an
-// emission-only toggle. There is no bare --with-chart on this surface, so
-// presence ALSO implies chart emission in generate output. The raw hueSpread /
-// hueAnchor degrees stay unexposed (#227): an agent forms intent over the named
-// palette, never a hand-picked rotation. Values + describe text come from core's
-// CHART_PALETTES taxonomy.
+// shapes the derived theme), so it rides on generate AND serialize, unlike the
+// emission-only --with-chart. Per #227 it IMPLIES --with-chart (presence flips
+// chart emission too), so the two compose — pass --chart-palette alone to pick a
+// palette and emit it; --with-chart stays the bare default-ramp toggle. The raw
+// hueSpread / hueAnchor degrees stay unexposed (#227): an agent forms intent over
+// the named palette, never a hand-picked rotation. Values + describe text come
+// from core's CHART_PALETTES taxonomy.
 const chartPalette: FlagSpec = {
   name: '--chart-palette',
   type: 'enum',
   values: CHART_PALETTES,
   description:
-    'chart series palette (implies chart emission): single (one-hue ramp), multi (one hue ramped + gentle rotation, the default ramp), or polychrome (distinct rotated hues). Sets the chart axis on generate/serialize and emits the --chart-1..5 block; same vocabulary as the web app',
+    'chart series palette (implies --with-chart): single (one-hue ramp), multi (one hue ramped + gentle rotation, the default ramp), or polychrome (distinct rotated hues). Sets the chart axis on generate/serialize and emits the --chart-1..5 block; same vocabulary as the web app',
+}
+// why: the seed/brand pair (--brand/--brand-foreground, ADR-0032) — the literal seed
+// bytes plus an AA-safe foreground — is derived on every run but emitted only behind
+// ExportOptions.includeBrand, unreachable from the CLI (issue #201, Gap 3). This flag
+// flips it for generate (emission) AND for check, where the brand text pair joins the
+// gate so an unsafe seed/brand pairing blocks like any other failing text pair.
+const withBrand: FlagSpec = {
+  name: '--with-brand',
+  type: 'boolean',
+  description:
+    'emit the seed/brand pair (--brand/--brand-foreground, the literal seed + its AA-safe foreground); generate emits it (shadcn/yaml/json), check gates its text pair',
 }
 const aaa: FlagSpec = {
   name: '--aaa',
@@ -336,7 +361,9 @@ export const GENERATE_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  withChart,
   chartPalette,
+  withBrand,
 ] as const
 
 // why: `check` is overloaded across three forms (--seed / <fg> <bg> / --pairs); the
@@ -362,6 +389,7 @@ export const CHECK_FLAGS = [
   tintTextLight,
   tintTextDark,
   custom,
+  withBrand,
   aaa,
   large,
   format,
@@ -434,6 +462,8 @@ export const APPLY_FLAGS = [
   binding,
   softBorders,
   extended,
+  withChart,
+  withBrand,
   format,
   applyMode,
   check,

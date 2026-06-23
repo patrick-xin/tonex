@@ -99,16 +99,22 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
   if (source.customColors.length > 0) {
     parts.push(`--custom '${serializeCustom(source.customColors)}'`)
   }
-  // why: chart emission is opt-in (flag presence), so a recipe carries
-  // --chart-palette only when the user asked for it — source.chart always holds
-  // the default ramp, so gating on a value comparison would never fire. The LABEL
-  // is recovered from the resolved source.chart via the shared inverse map (never
-  // the raw flag string), so a later default change can't silently round-trip a
-  // different palette.
+  // why: chart emission is opt-in, so a recipe carries the chart flag only when
+  // the user asked for it — source.chart always holds the default ramp, so gating
+  // on a value comparison would never fire. --chart-palette is the richer flag
+  // (it also implies emission), so it OWNS the chart recipe line: emit the LABEL
+  // (recovered from resolved source.chart via the shared inverse map, never the
+  // raw flag), and fall back to the bare --with-chart only when no palette was
+  // chosen — never both, which would round-trip a redundant pair.
   if (flagValue(args, '--chart-palette') !== undefined) {
     parts.push(`--chart-palette ${chartInputsToPalette(source.chart)}`)
+  } else if (hasFlag(args, '--with-chart')) {
+    parts.push('--with-chart')
   }
   if (hasFlag(args, '--extended')) parts.push('--extended')
+  // why: --with-brand shapes the emitted bytes (the seed/brand pair), so the
+  // recipe must carry it to reproduce the projection — same contract as --extended.
+  if (hasFlag(args, '--with-brand')) parts.push('--with-brand')
   const fmt = flagValue(args, '--format')
   if (fmt !== undefined) parts.push(`--format ${fmt}`)
   const binding = flagValue(args, '--binding')
@@ -206,14 +212,21 @@ export function project(sourceTheme: PortableTheme, args: ParsedArgs, io: Io): n
   // why: --extended is core's `includeExtended` tier knob surfaced as a flag — it
   // widens the emitted roster from core (the sufficient baseline) to core+extended.
   // colors/yaml/json honor it; shadcn's roster is binding-fixed (the note below).
+  // why: --with-chart / --with-brand surface core's includeChart / includeBrand
+  // emission opt-ins (issue #201). Core derives both layers on every run; the CLI
+  // previously never flipped the toggles, so a shadcn block shipped without
+  // --chart-1..5 and the seed/brand pair was unreachable. shadcn/yaml/json honor them.
   const exportOptions: ExportOptions = {
     ...(formatArg ? { colorFormat: formatArg } : {}),
     ...(hasFlag(args, '--extended') ? { includeExtended: true } : {}),
-    // why: --chart-palette is the only chart entry on this surface (no bare
-    // --with-chart here), so its presence implies emission — flip core's
-    // includeChart so the --chart-1..5 block ships. The palette itself already
-    // shaped source.chart in parseSource; this is the emission half.
-    ...(flagValue(args, '--chart-palette') !== undefined ? { includeChart: true } : {}),
+    // why: chart emission flips on for EITHER the bare --with-chart toggle (the
+    // default ramp, #201) OR --chart-palette (which also picks the palette and
+    // shaped source.chart in parseSource). Per #227, any --chart-* flag implies
+    // --with-chart, so the palette flag is self-sufficient — no need to pass both.
+    ...(hasFlag(args, '--with-chart') || flagValue(args, '--chart-palette') !== undefined
+      ? { includeChart: true }
+      : {}),
+    ...(hasFlag(args, '--with-brand') ? { includeBrand: true } : {}),
   }
 
   const bundle = buildContrastBundle(source)

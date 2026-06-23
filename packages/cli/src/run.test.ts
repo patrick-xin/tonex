@@ -381,7 +381,7 @@ describe('tonex custom colors', () => {
 
 // why: --chart-palette surfaces the chart axis as the SAME single/multi/polychrome
 // vocabulary the www toggle speaks (the shared core map), so a GUI choice round-trips
-// to a pasteable command. Presence implies chart emission (no bare --with-chart here);
+// to a pasteable command. It IMPLIES --with-chart (presence flips chart emission too);
 // it's a derivation knob, so it rides on generate AND serialize.
 describe('tonex chart palette', () => {
   const SEED = '#3b82f6'
@@ -447,6 +447,54 @@ describe('tonex chart palette', () => {
       )
       expect(flag.values).toEqual(['single', 'multi', 'polychrome'])
     }
+  })
+
+  it('implies --with-chart: --chart-palette alone emits the block; both flags don’t double in the recipe', () => {
+    const r = capture(['generate', '--seed', SEED, '--chart-palette', 'multi', '--with-chart'])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--chart-1:')
+    // the richer flag owns the recipe line — no redundant bare --with-chart beside it
+    expect(r.out).toContain('--chart-palette multi')
+    expect(r.out).not.toContain('--chart-palette multi --with-chart')
+  })
+})
+
+// why: --with-chart / --with-brand surface core's two emission opt-ins
+// (ExportOptions.includeChart / includeBrand) the CLI previously never set —
+// the shadcn block shipped without the --chart-1..5 every real shadcn theme
+// carries, and the seed/brand pair was unreachable. Chart is emission-only;
+// brand additionally enters check's gate (the seed/brand text pair).
+describe('tonex chart + brand emission', () => {
+  const SEED = '#3b82f6'
+
+  it('--with-chart emits the shadcn --chart-1..5 block; absent it does not, and the recipe pins it', () => {
+    const off = capture(['generate', '--seed', SEED])
+    expect(off.out).not.toContain('--chart-1:')
+    const on = capture(['generate', '--seed', SEED, '--with-chart'])
+    expect(on.code).toBe(OK)
+    expect(on.out).toContain('--chart-1:')
+    expect(on.out).toContain('--chart-5:')
+    // the recipe re-runs THIS projection — the toggle rides inside it
+    expect(on.out).toContain('--with-chart')
+  })
+
+  it('--with-brand emits the shadcn --brand pair and carries it through the recipe', () => {
+    const r = capture(['generate', '--seed', SEED, '--with-brand'])
+    expect(r.code).toBe(OK)
+    expect(r.out).toContain('--brand:')
+    expect(r.out).toContain('--brand-foreground:')
+    expect(r.out).toContain('--with-brand')
+  })
+
+  it('--with-brand folds the seed/brand pair into the gate — a brand pairing that fails AA now blocks (exit 1)', () => {
+    // the bare seed clears; the literal brand fill (#3b82f6) against the light
+    // surface is only 3.5:1, so once the pair is in the gate it must block (Gap 3).
+    const base = capture(['check', '--seed', SEED])
+    expect(base.code).toBe(OK)
+    const withBrand = capture(['check', '--seed', SEED, '--with-brand', '--json'])
+    expect(withBrand.code).toBe(GATE)
+    expect(withBrand.out).toContain('shadcn-brand')
+    expect(withBrand.out).toContain('--brand')
   })
 })
 
