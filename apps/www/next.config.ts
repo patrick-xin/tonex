@@ -13,6 +13,11 @@ const config: NextConfig = {
         destination: '/llms.mdx/docs/:path*',
         permanent: true,
       },
+      {
+        destination: '/docs/introduction',
+        source: '/docs',
+        permanent: true,
+      },
     ]
   },
 }

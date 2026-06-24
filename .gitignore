@@ -38,3 +38,6 @@ entities.json
 
 # fallow churn-analysis cache
 .fallow/
+
+# generated at build time from the root LICENSE
+packages/cli/LICENSE

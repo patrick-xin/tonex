@@ -61,7 +61,11 @@ describe('shiftHct', () => {
     // a positive dTone must raise it; pinning both directions guards a flipped
     // sign that an absolute-magnitude test would miss.
     const before = hctFromHex('#6750a4').tone
-    expect(hctFromHex(shiftHct('#6750a4', { dTone: -10, dChroma: 0 }).hex).tone).toBeLessThan(before)
-    expect(hctFromHex(shiftHct('#6750a4', { dTone: 10, dChroma: 0 }).hex).tone).toBeGreaterThan(before)
+    expect(hctFromHex(shiftHct('#6750a4', { dTone: -10, dChroma: 0 }).hex).tone).toBeLessThan(
+      before,
+    )
+    expect(hctFromHex(shiftHct('#6750a4', { dTone: 10, dChroma: 0 }).hex).tone).toBeGreaterThan(
+      before,
+    )
   })
 })

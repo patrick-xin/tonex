@@ -1,0 +1,36 @@
+---
+title: Good to know
+description: How Tonex behaves on purpose, and the few hard constraints worth knowing up front.
+---
+
+Most surprises in Tonex are intentional — a role moved, an edit stayed in one mode, a color snapped back — because the system is protecting a guarantee. A couple of things are genuine constraints with no fix. Here's both.
+
+## Why doesn't primary match the color I picked?
+
+The palette is still authored from your color, but `primary` is a role, not a promise to echo the seed exactly.
+
+What makes the color recognisably yours — hue and chroma — carries through to the palette. What can shift is tone: Tonex may make a role lighter or darker so the text and surfaces paired with it stay readable. That re-toning is the contrast guarantee doing its work, not your color getting lost.
+
+When you truly need the exact value you picked — pixel for pixel — use the brand pair. It keeps your seed as-is and adds a generated foreground that stays readable on top. It's the exception for exact-color surfaces, not the everyday way to reach for a role. See [Brand color](/docs/authored-layer#brand-color) for more on why roles are tuned this way.
+
+## A color I changed snapped back
+
+A [binding](/docs/web-app/shadcn/role-bindings) tracks the system, so it moves when the seed, variant, or contrast changes. If you need a color to stay put, [pin it with an override](/docs/web-app/shadcn/role-overrides) instead.
+
+## An edit didn't carry to the other mode
+
+Some controls are per mode by design: contrast, surfaces, bindings, and overrides. Switch modes with <Kbd>D</Kbd> and make the matching change there. See [Light & dark](/docs/web-app/light-dark).
+
+## A contrast pair is flagged
+
+Tonex reports contrast but doesn't force it — a flag is information, not a block. Raise the [contrast](/docs/key-concepts/contrast) level, or pin the affected role to a value that passes.
+
+## Out-of-gamut colors are pulled in silently
+
+The engine works in sRGB. When you give Tonex an OKLCH color that sits outside the sRGB gamut — pasted in the app or passed as a `--seed` on the CLI — it maps the color back in by reducing chroma at the same lightness and hue, the standard CSS Color 4 mapping. The result is the closest in-gamut color, not the one you typed, and Tonex doesn't flag when it happens. If an input looks less saturated than expected, it was outside sRGB and got pulled in.
+
+The Tailwind color picker is the same story: its palette is stored in OKLCH, and Tailwind's most vivid shades fall outside sRGB. Picking `yellow-500`, say, seeds the in-gamut approximation rather than Tailwind's exact value.
+
+## Near-grey seeds have no hue to work with
+
+A seed with almost no color has little hue to work with, so controls that act on hue have nothing to adjust and may turn off — there's no hue in a grey to shift. The system still generates; it just works from tone alone. [Charts](/docs/authored-layer#charts) are the exception: they fall back to a set hue so the series still has color.

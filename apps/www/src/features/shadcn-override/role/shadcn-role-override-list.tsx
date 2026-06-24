@@ -1,7 +1,7 @@
 'use client'
 
 import type { ShadcnRoleName } from '@tonex/core/schema'
-import { ColorTile } from '@/components/shared/color-tile'
+import { ColorTile, StaticColorTile } from '@/components/shared/color-tile'
 import { SectionHeading } from '@/components/shared/section-heading'
 import { createPopoverHandle, Popover, PopoverContent } from '@/components/ui/popover'
 import { RoleEditor } from './role-editor'
@@ -13,7 +13,7 @@ const popoverHandle = createPopoverHandle<ShadcnRoleName>()
 export function ShadcnRoleOverrideList() {
   const data = useRoleTokens()
   if (data === null) return null
-  const { mode, hexByRole, warnings, overrides } = data
+  const { mode, hexByRole, warnings, overrides, brandTokens } = data
 
   const renderSwatch = (role: ShadcnRoleName) => {
     const warning = warnings.get(role)
@@ -34,6 +34,22 @@ export function ShadcnRoleOverrideList() {
   return (
     <div className="m-px">
       <div className="space-y-6">
+        {brandTokens !== null && (
+          <section>
+            <SectionHeading className="mb-2">Brand</SectionHeading>
+            <div className="flex flex-wrap gap-2">
+              {brandTokens.map((token) => (
+                <StaticColorTile
+                  key={token.name}
+                  display={token.display}
+                  hex={token.hex}
+                  overridden={false}
+                  size="md"
+                />
+              ))}
+            </div>
+          </section>
+        )}
         {PALETTE_GROUPS.map((group) => (
           <section key={group.label}>
             <SectionHeading className="mb-2">{group.label}</SectionHeading>

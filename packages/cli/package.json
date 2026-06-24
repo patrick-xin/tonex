@@ -23,7 +23,7 @@
     "url": "git+https://github.com/patrick-xin/tonex.git",
     "directory": "packages/cli"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Patrick Xin (https://github.com/patrick-xin)",
   "type": "module",
   "bin": {

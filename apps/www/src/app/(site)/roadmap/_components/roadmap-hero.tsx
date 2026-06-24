@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic'
-import { DottedBackground } from '../../_landing/dots'
+import { DottedBackground } from '../../landing/dots'
 
-const LandingLogo = dynamic(() => import('../../_landing/landing-logo'))
+const LandingLogo = dynamic(() => import('../../landing/landing-logo'))
 
 export function RoadmapHero() {
   return (
@@ -14,7 +14,9 @@ export function RoadmapHero() {
           <h1 className="text-balance text-4xl font-medium sm:text-5xl lg:text-7xl font-display">
             Roadmap
           </h1>
-          <p className="text-base sm:text-[1.2rem]">Everything that already works today.</p>
+          <p className="text-base sm:text-[1.2rem] max-w-md mx-auto text-pretty">
+            A clear path forward, outlining what’s next, what’s evolving, and where Tonex is headed.
+          </p>
         </div>
         <div
           className="absolute bottom-0 inset-x-0 w-full blur-2xl h-56 -translate-y-12"

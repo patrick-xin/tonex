@@ -123,9 +123,7 @@ describe('adjustTokens', () => {
   it('throws on a request with neither axis present', () => {
     // why: AC — a no-axis request carries no instruction; reject it rather than
     // silently returning an identity result.
-    expect(() =>
-      adjustTokens(DEFAULT_INPUTS, [{ mode: 'light', token: 'primary' }]),
-    ).toThrow()
+    expect(() => adjustTokens(DEFAULT_INPUTS, [{ mode: 'light', token: 'primary' }])).toThrow()
   })
 
   it('does not mutate source', () => {

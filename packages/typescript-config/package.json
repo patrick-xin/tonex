@@ -7,5 +7,5 @@
     "./nextjs.json": "./nextjs.json",
     "./library.json": "./library.json"
   },
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

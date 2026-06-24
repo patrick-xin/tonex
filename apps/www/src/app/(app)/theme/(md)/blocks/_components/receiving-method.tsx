@@ -14,8 +14,8 @@ import {
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Fieldset, FieldsetLegend } from '@/components/ui/fieldset'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Radio, RadioGroup } from '@/components/ui/radio'
-import { Label } from '../../../../../../components/ui/label'
 
 const METHODS = [
   { id: 'method-bank', value: 'bank', label: 'Bank Transfer', hint: 'SWIFT / IBAN' },

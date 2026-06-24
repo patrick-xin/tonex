@@ -1,4 +1,4 @@
 {
   "title": "Concepts",
-  "pages": ["how-tonex-thinks", "semantic-model", "hct", "design-tokens", "variants", "contrast"]
+  "pages": ["design-system", "semantic-model", "hct", "variants", "contrast"]
 }
