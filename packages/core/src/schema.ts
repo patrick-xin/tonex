@@ -29,12 +29,7 @@ export {
   type ShadcnBindingPresetName,
 } from './theme/binding-presets'
 export { CONTRAST_PAIRS, type ContrastPair } from './theme/contrast'
-export {
-  HARD_EDGE_TOKEN,
-  isSoftEdgeWeight,
-  SOFT_EDGE_TOKEN,
-  withSoftEdges,
-} from './theme/edge-weight'
+export { isSoftEdgeWeight, SOFT_EDGE_TOKEN, withSoftEdges } from './theme/edge-weight'
 export { paletteOverrideDisabledReason } from './theme/palette-override'
 export { type PresetAdoptChoices, resolvePresetApply } from './theme/preset-apply'
 export {

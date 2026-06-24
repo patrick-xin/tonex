@@ -25,8 +25,6 @@ export {
   PROMINENT_EDGE_DARK_DEFAULT,
   PROMINENT_EDGE_LIGHT_DEFAULT,
   type SequentialModeOutput,
-  type SequentialOutput,
-  type SequentialParams,
 } from './chart'
 export {
   type ContrastReport,
@@ -49,7 +47,6 @@ export {
 export {
   buildColorsJson,
   buildContrastBundle,
-  buildDesignMdColors,
   COLOR_FORMATS,
   type ColorFormat,
   type ColorsJson,
