@@ -46,12 +46,7 @@ export function SiteFooter() {
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
-                  <FooterLink href={ROUTES.materialTheme.href}>
-                    {ROUTES.materialTheme.label}
-                  </FooterLink>
-                </li>
-                <li>
-                  <FooterLink href={ROUTES.shadcn.href}>{ROUTES.shadcn.label}</FooterLink>
+                  <FooterLink href={ROUTES.materialTheme.href}>Web app</FooterLink>
                 </li>
                 <li>
                   <FooterLink href={ROUTES.about.href}>{ROUTES.about.label}</FooterLink>
@@ -65,6 +60,9 @@ export function SiteFooter() {
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
                 <li>
                   <FooterLink href={ROUTES.docs.href}>{ROUTES.docs.label}</FooterLink>
+                </li>
+                <li>
+                  <FooterLink href={ROUTES.changelog.href}>{ROUTES.changelog.label}</FooterLink>
                 </li>
                 <li>
                   <FooterLink href={ROUTES.roadmap.href}>{ROUTES.roadmap.label}</FooterLink>

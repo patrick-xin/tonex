@@ -7,7 +7,7 @@ import {
 import { type CustomColorEntry, slugifyCustomColorName } from '../custom-color/entry'
 import { nearestName } from '../edit-distance'
 import { type MdTokenName, SHADCN_ROLE_NAMES, type ShadcnRoleName } from '../schema'
-import { bareMdName, canonicalMdName, COLOR_PREFIX, PUBLIC_TOKEN_NAMES } from '../token-vocab'
+import { bareMdName, COLOR_PREFIX, canonicalMdName, PUBLIC_TOKEN_NAMES } from '../token-vocab'
 
 // why: ADR-0025 commitment 6 — contrast pair definitions encode M3 + shadcn
 // spec semantics (`on-X` always pairs with `X`; `-foreground` always pairs

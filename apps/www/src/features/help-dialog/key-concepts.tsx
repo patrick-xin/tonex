@@ -94,6 +94,29 @@ export const KeyConcepts = ({ section }: { section: HelpSection | null }) => {
             </ol>
           </AccordionPanel>
         </AccordionItem>
+        <AccordionItem id="source-color" variant="underline" value="source-color">
+          <AccordionSummary
+            variant="underline"
+            className="text-base hover:text-primary hover:decoration-0"
+          >
+            Source Color
+          </AccordionSummary>
+          <AccordionPanel className="mb-3 px-0 space-y-2">
+            <p>
+              The source color is the starting point for the whole theme. Pick a brand color, a
+              product accent, or any color you want the palette to orbit around.
+            </p>
+            <p>
+              Tonex stores that choice as HCT, so the sliders describe how people perceive the
+              color: hue for the family, chroma for vividness, and tone for lightness. The hex field
+              and the HCT controls stay linked.
+            </p>
+            <p>
+              Changing the source color rebuilds generated roles, tonal palettes, and exports while
+              keeping your later adjustments layered on top.
+            </p>
+          </AccordionPanel>
+        </AccordionItem>
         <AccordionItem id="hct" variant="underline" value="hct">
           <AccordionSummary
             variant="underline"

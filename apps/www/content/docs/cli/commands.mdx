@@ -57,9 +57,20 @@ npx tonex generate --seed "#6A9CFF" [options] > globals.css
 | `--tint-palette` | `zinc` | `slate`, `gray`, `zinc`, `neutral`, `stone`, `taupe`, `mauve`, `mist`, or `olive`. Used when `--tint` is set. |
 | `--desaturate` | none | `0` to `1`; `0` is a no-op. Exclusive with `--tint`. |
 
+### Authored layers
+
+These opt-in emissions cover the parts of a theme the engine doesn't derive on its own. See [The authored layer](/docs/authored-layer).
+
+| Flag | Default | Details |
+| --- | --- | --- |
+| `--with-brand` | off | Emit the seed/brand pair (`--brand` / `--brand-foreground`): the literal seed plus its AA-safe foreground. `check` gates the brand text pair. Honored by `shadcn`, `yaml`, `json`. |
+| `--with-chart` | off | Emit the data-viz tokens (`--chart-1`..`5`) every real shadcn theme carries, derived from the primary palette. Honored by `shadcn`, `yaml`, `json`. |
+| `--chart-palette` | none | `single`, `multi`, or `polychrome`. Picks the chart series and emits it (implies `--with-chart`). |
+
 ```bash
 npx tonex generate --seed "#6A9CFF" > globals.css
 npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+npx tonex generate --seed "#6A9CFF" --with-brand --chart-palette polychrome
 npx tonex generate --seed "#6A9CFF" --to colors
 npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
 npx tonex generate --seed "#6A9CFF" --to json --format hex

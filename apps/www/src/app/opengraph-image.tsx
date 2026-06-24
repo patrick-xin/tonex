@@ -34,7 +34,7 @@ export default function OpengraphImage() {
           maxWidth: 900,
         }}
       >
-        One seed colour in, a coherent role-mapped token set out — for Material 3 and shadcn.
+        The color layer for your design system.
       </div>
     </div>,
     size,

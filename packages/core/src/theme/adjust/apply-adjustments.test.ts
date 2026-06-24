@@ -2,9 +2,9 @@ import { argbFromHex } from '@tonex/mcu'
 import { describe, expect, it } from 'vitest'
 import { deriveTheme } from '../derive'
 import { DEFAULT_INPUTS, type PortableTheme } from '../schema'
+import type { AdjustResult } from './adjust-tokens'
 import { adjustTokens } from './adjust-tokens'
 import { applyAdjustments } from './apply-adjustments'
-import type { AdjustResult } from './adjust-tokens'
 
 // why: applyAdjustments is the persist seam (#198) — core owns writing each
 // result's `after` hex into md3TokenOverrides so the consumer never hand-

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { StoryMesh } from './story-mesh'
 
 export function StorySolution() {
@@ -7,25 +6,31 @@ export function StorySolution() {
     <div className="space-y-4 border-t border-primary/20 grid grid-cols-1 relative">
       <StoryMesh />
       <div className="p-6 md:p-14 space-y-4">
-        <h3 className="text-3xl font-semibold">What Tonex does</h3>
+        <h2 className="text-3xl font-semibold">What Tonex does</h2>
         <p>
           That's the part Tonex takes on. You give it one color — the one your product actually is —
-          and it derives a coherent system around it: light and dark, every surface, contrast
-          checked as you build. It runs on the same color engine behind{' '}
-          <Button
-            nativeButton={false}
-            variant="link"
-            size="lg"
-            className="px-0 underline text-base"
-            render={
-              <Link href="https://m3.material.io/blog/announcing-material-you">
-                Material Design You
-              </Link>
-            }
-          />
-          , so the whole palette holds together from one seed. But it's not a black box — re-point
-          any role, pin any value, and it rebalances around your choice instead of locking you out.
-          A safety net under your judgment, not a replacement for it.
+          and it derives a complete, coherent system around it: every role mapped, light and dark
+          co-derived, contrast guaranteed, and what you preview is exactly what you export.
+        </p>
+        <p>
+          Underneath is real color science — the same engine{' '}
+          <Link
+            rel="noreferrer"
+            target="_blank"
+            className="underline decoration-primary"
+            href="https://m3.material.io/blog/announcing-material-you"
+          >
+            Material You
+          </Link>{' '}
+          is built on — but Tonex refuses the Material look that usually comes with it. Surfaces
+          stay Tailwind-native, neutrals are yours to tune, and every value is a choice you made,
+          not a default you inherited. Re-point any role, pin any color, and the system rebalances
+          around your choice instead of locking you out.
+        </p>
+        <p>
+          That's the whole stance: Tonex is the safety net, not the canvas. It guarantees the
+          palette holds together — contrast, roles, light and dark — and hands you the colors plus
+          the rules for using them. Where they land is still yours to decide.
         </p>
       </div>
     </div>

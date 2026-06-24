@@ -18,7 +18,7 @@
 
 - **Worktrees: one per PR, sibling dir, launched from inside.**
   - Cut fresh from `origin/master`: `git worktree add -b feat/<slug> ../tonex-<slug> origin/master`.
-  - Location is a *sibling* of the main repo (`/Users/patrickxin/dev/tonex-<slug>`), never nested inside it — a worktree under the main-repo path is a descendant of a `master` checkout, so any launcher or relative path that resolves to the repo root silently lands on `master`. Siblings share no ancestor. (`.claude/worktrees/` is gitignored and was a false start — don't nest there.)
+  - Location is a *sibling* of the main repo (`../tonex-<slug>`), never nested inside it — a worktree under the main-repo path is a descendant of a `master` checkout, so any launcher or relative path that resolves to the repo root silently lands on `master`. Siblings share no ancestor. (`.claude/worktrees/` is gitignored and was a false start — don't nest there.)
   - Launch the agent from inside the worktree (`cd ../tonex-<slug> && claude`) so its cwd *is* the worktree; otherwise Bash defaults to the launch dir and edits/tests split-brain onto `master`. If cwd is ever the main repo mid-session, target the worktree with absolute paths until you relaunch.
   - `git worktree remove` after the PR merges.
 

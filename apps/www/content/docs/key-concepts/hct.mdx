@@ -7,9 +7,13 @@ You do not need to understand HCT to use Tonex, but it explains why the controls
 
 ## Where you meet it
 
-- The seed can be adjusted with HCT sliders, alongside hex and OKLCH input. See [Seed color](/docs/web-app/seed).
-- The [contrast](/docs/key-concepts/contrast) control moves foreground tones farther from their backgrounds.
-- The `adjust` CLI command can shift exported tokens by relative tone and chroma deltas.
+In web app:
+- The seed can be adjusted with HCT sliders.
+- Palette override where you can tune one family without affecting other families.
+- Custom color where you want to add extra sementic tokens.
+
+In CLI:
+- The `adjust` command can shift exported tokens by relative tone and chroma deltas.
 
 ## The three axes
 
@@ -19,10 +23,7 @@ You do not need to understand HCT to use Tonex, but it explains why the controls
 
 ## Why tone matters for contrast
 
-Tone gives Tonex a stable way to reason about lightness. When the engine creates an `on-` color, it can move that foreground to a tone that is likely to separate from its background while preserving the role relationship.
+Tone gives Tonex a stable way to reason about lightness. When the engine creates a text color, it can move that foreground to a tone that is likely to separate from its background while preserving the role relationship.
 
-That is not the same as guessing contrast from tone alone. Tonex still checks the finished foreground/background pairs against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements. See [Contrast](/docs/key-concepts/contrast) for the audit, levels, and thresholds.
+That is not the same as guessing contrast from tone alone. Tonex still checks the finished foreground/background pairs against WCAG thresholds — 4.5:1 for body text, and 3:1 for large text and interface elements.
 
-## HCT and OKLCH
-
-You'll also see OKLCH, a perceptual color space used in CSS. Tonex can take a seed in either format, and exports values as OKLCH or hex. HCT is the internal control model; OKLCH and hex are ways to write the result down. See [Design tokens](/docs/key-concepts/design-tokens).

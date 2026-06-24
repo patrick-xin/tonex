@@ -1,13 +1,13 @@
 import { SiteFooter } from './_components/site-footer'
 import { SiteHeader } from './_components/site-header'
-import { ExportSection } from './_landing/export/export-section'
-import { Features } from './_landing/features/features'
-import { FinalCta } from './_landing/final-cta/final-cta'
-import { ShaderHero } from './_landing/hero/shader-hero'
-import { IntergrationSection } from './_landing/intergration/intergration'
-import { PreviewSection } from './_landing/preview/preview'
-import { ProductSection } from './_landing/product/product'
-import { SeedSection } from './_landing/seed/seed-section'
+import { ExportSection } from './landing/export/export-section'
+import { Features } from './landing/features/features'
+import { FinalCta } from './landing/final-cta/final-cta'
+import { ShaderHero } from './landing/hero/shader-hero'
+import { IntergrationSection } from './landing/intergration/intergration'
+import { PreviewSection } from './landing/preview/preview'
+import { ProductSection } from './landing/product/product'
+import { SeedSection } from './landing/seed/seed-section'
 
 export default function LandingPage() {
   return (
@@ -15,10 +15,10 @@ export default function LandingPage() {
       <SiteHeader />
       <ShaderHero />
       <SeedSection />
+      <IntergrationSection />
       <PreviewSection />
       <ProductSection />
       <ExportSection />
-      <IntergrationSection />
       <Features />
       <FinalCta />
       <SiteFooter />

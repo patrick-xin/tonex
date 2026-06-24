@@ -5,7 +5,7 @@ export function StoryGap() {
     <div className="grid grid-cols-1 sm:grid-cols-2 relative">
       <MondrianGrid />
       <div className="space-y-4 p-6 md:p-14">
-        <h3 className="text-3xl font-semibold">The gap</h3>
+        <h2 className="text-3xl font-semibold">The gap</h2>
         <p>
           The tools that exist get you partway — drop in a color, watch it live on a real page. That
           part is genuinely solved, and it's the hard, visible part. But a color on a page isn't a
