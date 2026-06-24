@@ -10,7 +10,7 @@ import {
   type PortableTheme,
   SHADCN_ROLE_NAMES,
 } from '../schema'
-import { BARE_MD_ROLE_NAMES, bareMdName, canonicalMdName, COLOR_PREFIX } from '../token-vocab'
+import { BARE_MD_ROLE_NAMES, bareMdName, COLOR_PREFIX, canonicalMdName } from '../token-vocab'
 import { shiftHct } from './shift-hct'
 
 // why: an adjust request names a (mode, token) target and a relative ±HCT delta

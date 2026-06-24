@@ -8,8 +8,8 @@
 // exit 2; it does NOT re-validate the token domain (surface, don't reimplement).
 import { argbFromHex, hexString, oklchString } from '@tonex/color-utils'
 import { bareMdName, type ColorFormat } from '@tonex/core'
-import { adjustTokens, type AdjustRequest, type AdjustResult } from '@tonex/core/adjust'
-import { flagValue, hasFlag, parseArgs, type ParsedArgs } from '../args'
+import { type AdjustRequest, type AdjustResult, adjustTokens } from '@tonex/core/adjust'
+import { flagValue, hasFlag, type ParsedArgs, parseArgs } from '../args'
 import { type Io, OK, USAGE } from '../io'
 import { parseSource } from '../source'
 import { ADJUST_FLAGS, isColorFormat } from '../spec'
@@ -111,7 +111,9 @@ function parseShifts(raw: string | undefined, io: Io): AdjustRequest[] | number 
       return USAGE
     }
     if (e.dChroma !== undefined && !Number.isFinite(e.dChroma)) {
-      io.err(`tonex: --shifts dChroma must be a finite number; bad entry ${JSON.stringify(entry)}\n`)
+      io.err(
+        `tonex: --shifts dChroma must be a finite number; bad entry ${JSON.stringify(entry)}\n`,
+      )
       return USAGE
     }
     if (e.dTone === undefined && e.dChroma === undefined) {

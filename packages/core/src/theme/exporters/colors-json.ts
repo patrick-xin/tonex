@@ -5,8 +5,8 @@ import {
   MD_CORE_TOKEN_NAMES,
   MD_TOKEN_NAMES,
   type PortableTheme,
-  slugifyCustomColorName,
   type SurfaceAlgo,
+  slugifyCustomColorName,
 } from '../schema'
 import { selectSeedHex } from '../seed'
 import type { ColorFormat, ContrastBundle, ExportOptions } from './bundle'
