@@ -1,34 +1,51 @@
 # Contributing
 
-Thanks for wanting to help. Tonex is a small project with strong conventions — the docs below are the source of truth.
+Thanks for your interest in Tonex! Contributions of all kinds are welcome — bug reports, fixes, docs, and features.
 
-## Reading order
+## Getting started
 
-1. [`vision.md`](./vision.md) — what the project is.
-2. [`docs/agents/working-style.md`](./docs/agents/working-style.md) — working norms for agents.
-3. Code rules — live in the nearest `AGENTS.md` (the sibling `CLAUDE.md` auto-loads and imports it via `@AGENTS.md`): [`packages/core/AGENTS.md`](./packages/core/AGENTS.md) (engine) and [`apps/www/AGENTS.md`](./apps/www/AGENTS.md) (app).
-4. [`docs/adr/`](./docs/adr/) — architectural decisions of record. ADRs hold living rationale: the decision and its why don't change without a new ADR (or an append-only amendment); bodies may be cleaned as code moves.
-
-## Dev setup
+This is a pnpm + turbo monorepo. You'll need Node 18+ and [pnpm](https://pnpm.io/).
 
 ```bash
+git clone https://github.com/patrick-xin/tonex.git
+cd tonex
 pnpm install
-pnpm --filter @tonex/core test
-pnpm typecheck
-pnpm --filter @tonex/www dev
 ```
 
-## Issues
+Then, depending on what you're working on:
 
-Issues live in GitHub Issues at [`patrick-xin/tonex`](https://github.com/patrick-xin/tonex/issues). See [`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md) for the canonical triage label vocabulary.
+```bash
+pnpm --filter @tonex/www dev      # run the web app at localhost:3000
+pnpm --filter @tonex/core test    # run the color engine tests
+pnpm test                         # run everything
+pnpm typecheck
+```
 
-## Pull requests
+The codebase is split into a few packages:
 
-- Small, vertically-sliced changes per [`docs/agents/slice-strategy.md`](./docs/agents/slice-strategy.md).
-- Tests required for behaviour changes. The drift-guard test pins `globals.css === formatCss(deriveTheme(DEFAULT_INPUTS))`; a baseline change requires regenerating the bake.
-- New constraints with no in-code home → `AGENTS.md`. New decisions → an ADR.
-- Changes to a publishable package (`packages/*` except `typescript-config`) need a changeset — run `pnpm changeset`; `apps/www` and config don't. CI's `changeset status` enforces it. A deliberate no-release change → `pnpm changeset --empty`.
+- `@tonex/core` — the color engine (pure, framework-free).
+- `@tonex/color-utils`, `@tonex/mcu`, `@tonex/core-react` — supporting libraries.
+- `apps/www` — the Next.js web editor and docs.
+
+## Reporting bugs and requesting features
+
+Open an [issue](https://github.com/patrick-xin/tonex/issues). For bugs, include the seed color you used, what you expected, and what happened — a screenshot or the generated output helps a lot.
+
+## Making changes
+
+1. Fork the repo and create a branch.
+2. Make your change. Keep pull requests focused — one logical change per PR is much easier to review than a large mixed one.
+3. Add or update tests when you change behavior. The engine is test-first, so a behavior change without a test will usually be asked for one.
+4. Run `pnpm check` (formatting + lint) and `pnpm test` before pushing.
+5. If you change a published package (anything in `packages/` except the shared config), run `pnpm changeset` and describe the change — this drives the release notes.
+6. Open the PR with a short description of *what* changed and *why*.
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix: …`, `feat: …`) — this is checked automatically.
+
+## A note on how Tonex is built
+
+Most of Tonex is written with AI agents, and the repo carries a fair amount of structure to support that — architectural decisions live in [`docs/adr/`](./docs/adr/), and code is heavily commented with the reasoning behind it. You don't need to follow any of that to contribute; just write clear code and the maintainer will help fit it in. If you're curious, the conventions live in the `AGENTS.md` files throughout the tree.
 
 ## Security
 
-See [`SECURITY.md`](./SECURITY.md).
+Please don't open public issues for security problems — see [`SECURITY.md`](./SECURITY.md) for how to report them privately.
