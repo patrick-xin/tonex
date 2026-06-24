@@ -26,16 +26,6 @@ A palette override is the right tool for a global shift in one family. It sits a
 
 > Under the **CMF** variant, the tertiary override is disabled, because tertiary is driven by the [second source color](/docs/key-concepts/variants#cmf-and-a-second-source) instead.
 
-## Custom colors
-
-Custom colors are families you add yourself — a brand orange, a status green — that aren't part of the standard set. Each custom color has a name and a value, and you can add, edit, and remove them freely.
-
-Tonex runs a custom color through the same engine as the built-in families, deriving its matching `on-` and container variants. So a custom color behaves like a real role, not a loose swatch, and exports alongside your theme tokens.
-
-### Harmonize toward the seed
-
-Each custom color can harmonize toward the seed. With it on, the color's hue is rotated toward your seed so it sits naturally in the palette. With it off, the color stays exactly as you entered it. Use harmonize when you want the color to belong to the system; turn it off when the exact value matters more than the fit.
-
 ## Where overrides sit
 
-Overrides are the third stage in the [pipeline](/docs/key-concepts/how-tonex-thinks#constraints-decide-what-wins): they come after the engine and before surfaces and role pins. Each later stage can override what an earlier one produced, which is what lets you make a precise change in one place without it spreading.
+Overrides are the third stage in the [pipeline](/docs/how-tonex-thinks#constraints-decide-what-wins): they come after the engine and before surfaces and role pins. Each later stage can override what an earlier one produced, which is what lets you make a precise change in one place without it spreading.

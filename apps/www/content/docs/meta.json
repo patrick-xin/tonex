@@ -3,6 +3,9 @@
     "---Get Started---",
     "introduction",
     "quickstart",
+    "how-tonex-thinks",
+    "authored-layer",
+    "good-to-know",
     "---Concepts---",
     "key-concepts",
     "---Web App---",
@@ -10,9 +13,6 @@
     "---CLI---",
     "cli",
     "---Agent Skills---",
-    "agent-skills",
-    "---Reference---",
-    "reference",
-    "about"
+    "agent-skills"
   ]
 }

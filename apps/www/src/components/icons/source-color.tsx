@@ -21,7 +21,11 @@ export const SourceColor: React.FC = () => {
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
-      <polygon points="100,34 136,54 136,96 100,116 64,96 64,54" fill="url(#vaults-g1)" />
+      <polygon
+        points="100,34 136,54 136,96 100,116 64,96 64,54"
+        fill="url(#vaults-g1)"
+        filter="url(#vaults-glow)"
+      />
       <polygon points="100,45 125,59 125,91 100,105 75,91 75,59" fill="url(#vaults-g2)" />
       <polygon
         points="100,58 114,66 114,84 100,92 86,84 86,66"

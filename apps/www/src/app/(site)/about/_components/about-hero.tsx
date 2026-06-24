@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic'
-import { DottedBackground } from '../../_landing/dots'
+import { DottedBackground } from '../../landing/dots'
 
-const LandingLogo = dynamic(() => import('../../_landing/landing-logo'))
+const LandingLogo = dynamic(() => import('../../landing/landing-logo'))
 
 export function AboutHero() {
   return (
@@ -12,9 +12,11 @@ export function AboutHero() {
       <div className="mx-auto max-w-6xl px-6 text-center py-12">
         <div className="space-y-6 mb-12 relative">
           <h1 className="text-balance text-4xl font-medium sm:text-5xl lg:text-7xl font-display">
-            Use your colors with confidence
+            About
           </h1>
-          <p className="text-base sm:text-[1.2rem]">A color system you can trust.</p>
+          <p className="text-base sm:text-[1.2rem] max-w-md mx-auto text-pretty">
+            An overview of story, principles, and the ideas that shape everything about Tonex.
+          </p>
           <div
             className="absolute bottom-0 inset-x-0 translate-x-1/2 w-1/2 blur-2xl h-56"
             style={{

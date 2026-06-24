@@ -1,0 +1,57 @@
+---
+title: Design systems
+description: What a design system is, why color is its hardest layer, and the slot Tonex fills.
+---
+
+A design system is the single source of truth for how a product looks and behaves: the components you build with, the values that style them, and the rules for combining them. The point isn't documentation. The point is that a decision gets made once and then held everywhere, so the button is the button no matter who's placing it.
+
+If you've never worked inside one, the easiest way to picture a design system is in three layers. At the top are components — the button, the input, the card. Underneath are the values that give those components their look: color, spacing, type, radius, shadow. At the bottom are the conventions that keep people using the first two consistently. Most of the interesting engineering happens in the middle layer, because that's where the actual visual decisions live. Those decisions have a name.
+
+## Design tokens
+
+A design token is a design decision stored as a named value, kept separate from the places that use it. Instead of typing `#2563eb` into forty components, you name the color once and reference the name. Change the value in one place and everything that points at it updates.
+
+That sounds small. It's the thing that makes a design system scale. Tokens are also platform-agnostic — the same decision can compile to CSS variables for the web, and to native formats for iOS and Android, from one source. You author the decision once; each platform gets it in the shape it expects.
+
+The idea came out of Salesforce's design system in 2014, and it's now standard practice rather than a nice-to-have. As of October 2025 there's a shared file format for it: the [Design Tokens Community Group (DTCG)](https://www.designtokens.org/tr/drafts/) published its first stable specification, and the major tools — Figma, Sketch, Tokens Studio, Style Dictionary, Penpot — read it. It's a community standard rather than a formal W3C standard, but in practice it's what the ecosystem has settled on. Tokens you author in one tool now move to another without a conversion script in between.
+
+## The three tiers
+
+Tokens aren't a flat list. They're layered, usually in three tiers, and the layering is the whole trick.
+
+```css
+/* Primitive — a raw value, no meaning */
+--blue-500: #2563eb;
+
+/* Semantic — what the value is for */
+--color-primary: var(--blue-500);
+
+/* Component — a local decision */
+--button-background: var(--color-primary);
+```
+
+Primitives are the palette: raw values with no opinion about how they're used. Semantic tokens add intent — they say what a value is for (`color-primary`) rather than what it literally is (`blue-500`). Component tokens are local decisions that point back up the chain.
+
+The indirection is the payoff. Components reference semantic names, semantic names reference primitives. Re-brand from blue to green and you swap one primitive; every semantic and component token downstream follows automatically. Dark mode is the same move — redefine the semantic layer for the dark theme and every component adapts on its own. A flat list of hex codes can't do any of this, which is why "we'll just keep a list of our colors somewhere" falls apart the moment the product grows.
+
+This is also the layer where most teams underestimate the work, and the reason is almost always color.
+
+## Why color is the hard layer
+
+Picking a brand color is easy. Building a color system is not.
+
+A single source color has to become a lot of things before it's usable. You need a full tonal ramp from light to dark, a light theme and a dark theme, interaction states like hover, active, focus, and disabled, surface colors for backgrounds and cards and borders, and text colors that stay readable on top of all of them. Every text-on-color pairing has to pass contrast for accessibility. And the whole set has to feel like one family rather than a dozen colors that happen to share a folder.
+
+There's a deeper trap underneath that. The naive way to generate a ramp is to lighten and darken a hex value in sRGB — the color space the web defaults to. But sRGB isn't perceptual. Two colors at the "same" numeric lightness can look noticeably different in brightness to the eye, because the math and human vision disagree. So a palette that looks even on paper isn't even on screen, and contrast values you trusted turn out to be wrong. You end up hand-tuning forever.
+
+This is the real gap between a list of colors and a color system. Plenty of design systems get components, spacing, and type into good shape and then quietly hand-maintain color for years, because most tooling treats color as values to store rather than as a system to generate.
+
+## Where Tonex fits
+
+Tonex authors the color layer. You give it a source color and it generates the full token set — ramps, light and dark, states, surfaces, and text — using a perceptual color model called HCT, from [Google's Material Color Utilities](https://github.com/material-foundation/material-color-utilities). Because the model is perceptual, two tokens at the same tone actually read as the same tone, and contrast is computed honestly instead of guessed.
+
+It doesn't replace your design system or introduce another format to learn. It produces the colors the rest of your stack already expects, exported as CSS variables, a Tailwind theme, or the DTCG token format, so the output drops into whatever you already build with. Everything above — your three tiers, your components, your themes — stays exactly as it is. Tonex just fills the color slot properly instead of leaving you to do it by hand.
+
+One more thing worth noting, since tokens are increasingly how machines read a design system too: well-shaped color tokens don't only keep a team consistent, they keep generated UI on-brand. When design tools and AI assistants have a real token set to work from, they produce interfaces that look like your product instead of generic defaults. A clean color layer is what makes that possible.
+
+If you're setting up a design system from scratch, start with the token structure and get color right early — it's the layer that's hardest to retrofit. If you already have one, the colors are usually the part still being tuned by hand. Either way, that's the slot Tonex is built to fill.

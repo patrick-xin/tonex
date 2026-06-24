@@ -1,25 +1,23 @@
 ---
-title: Semantic Color Model
-description: Colors named by role, the brand pair, and the token set Tonex generates.
+title: Semantic color model
+description: The Material Design 3 color roles Tonex generates, and the token set they expand into.
 ---
 
-Tonex names colors by their job, not their appearance. A color is `primary`, `surface`, or `error` because of the role it plays, and each role has a defined relationship to the others. The role vocabulary comes from Material Design 3 color roles, but the result is not meant to look like Material Design. Tonex uses those roles as a portable color contract.
+[Design systems](/docs/key-concepts/design-system) showed the semantic tier — names that say what a color is *for* rather than what it literally is. Tonex's semantic layer is a specific vocabulary: the **Material Design 3 color roles**. A color is `primary`, `surface`, or `error` because of the job it does, and each role has a defined relationship to the others.
 
-## Why roles instead of names
+Tonex borrows the MD3 role *names*, not the Material *look* — themes are meant to look like your brand, with the roles as the contract underneath. The exact seed color stays available separately as the [brand pair](/docs/authored-layer#brand-color).
 
-A fixed color like "blue 600" only means something in one palette. A role like `primary` means the main action or accent color, whatever its actual value. Because roles describe intent, the system Tonex builds can be expressed in shadcn, in Tailwind, in Material JSON, or in a custom agent workflow and still be the same color system.
+## A portable contract
 
-Roles are the common language. The semantic source is the contract; target-specific tokens are mappings from that contract. See [How Tonex Thinks](/docs/key-concepts/how-tonex-thinks#agents-bind-tonex-constrains) for the handoff model.
+Because roles describe intent, the same system can be expressed in shadcn, in Tailwind, in Material JSON, or in a custom agent workflow and still be one color system. A target may call its main action color `brand`, `accent`, or `primary` — the role is the common language, and target-specific tokens are mappings from it.
 
-## Brand pair versus roles
+The semantic source is the contract; the mapping is the last mile. See [How Tonex Thinks](/docs/how-tonex-thinks#agents-bind-tonex-constrains) for the handoff model.
 
-The exact seed color is not the same thing as `primary`. Tonex keeps the literal seed available as a brand pair: the unchanged brand color plus a generated readable foreground. Use that pair when the exact input color matters — a CTA, badge, hero accent, or logo-adjacent surface.
+## The six families
 
-Roles are the system around that brand color. `primary`, `primary-container`, and the other roles may shift tone so they can keep contrast, coordinate with surfaces, and work in both light and dark. The brand pair preserves exactness; the roles preserve usability.
+Every role belongs to one of six families. Each family expands into fills, containers, and text partners — the table below is the starting point, not the full set.
 
-## The core roles
-
-| Role | Job |
+| Family | Job |
 |------|-----|
 | `primary` | Main action or accent color |
 | `secondary` | Supporting accent |
@@ -28,25 +26,26 @@ Roles are the system around that brand color. `primary`, `primary-container`, an
 | `error` | Error states and destructive actions |
 | `outline` | Borders and dividers |
 
-## On colors
+## Fills and their text
 
-Every colored area needs readable content on top of it. For each role there's an `on-` partner — `on-primary`, `on-surface`, and so on — that's built to read against it. Tonex derives the pair together and checks the contrast, so the text on a color is readable by construction. See [HCT](/docs/key-concepts/hct) for how tone makes that reliable, and [Contrast](/docs/key-concepts/contrast) for the audit.
+Every colored area needs readable content on top of it. For each fill there's an `on-` partner — `on-primary`, `on-surface`, and so on — built to read against it. Tonex derives the pair together and checks the contrast, so the text on a color is readable by construction. See [HCT](/docs/key-concepts/hct) for how tone makes that reliable, and [Contrast](/docs/key-concepts/contrast) for the audit.
 
 ## Surfaces and elevation
 
-Surfaces come as a small range of containers at increasing separation — a base surface, then container levels — so you can show depth and grouping through subtle steps rather than borders alone. Each derives from the same neutral and stays in order by contrast.
+The `surface` family is more than one color. It comes as a range of containers at increasing separation — a base surface, then container levels — so you can show depth and grouping through subtle steps rather than borders alone. Each derives from the same neutral and stays in order by contrast. See [Surfaces](/docs/authored-layer#surfaces) for tuning them.
 
-## Inverse, fixed, and effects
+## Special roles
 
 A few roles exist for specific needs:
 
 - **Inverse** surfaces and their on colors, for elements like tooltips and snackbars that stand out by flipping light and dark.
 - **Fixed** roles, for stable accent values that should not invert across light and dark in the same way as the main roles.
 - **Scrim** and **shadow**, the colors behind modals and under raised elements.
+- **Surface tint**, the accent overlay that conveys elevation on tinted surfaces.
 
-## Token sets
+## The full token set
 
-These roles are the canonical set. When Tonex exports to a specific tool, each role maps to that tool's own tokens. For shadcn, see [Role bindings](/docs/web-app/shadcn/role-bindings).
+The six families above expand into the canonical token set. When Tonex exports to a specific tool, each token maps to that tool's own name. For shadcn, see [Role bindings](/docs/web-app/shadcn/role-bindings).
 
 | Core | Extended |
 |---|---|
@@ -78,5 +77,7 @@ These roles are the canonical set. When Tonex exports to a specific tool, each r
 | `surface-container-highest` |  |
 | `outline` |  |
 | `outline-variant` |  |
+
+## Tonal palettes
 
 If you need raw tonal palettes, Tonex can expose tone stops for `primary`, `secondary`, `tertiary`, `neutral`, `neutral-variant`, and `error`: `0`, `5`, `10`, `15`, `20`, `25`, `30`, `35`, `40`, `50`, `60`, `70`, `80`, `90`, `95`, `98`, `99`, `100`.

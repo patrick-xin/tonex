@@ -1,0 +1,60 @@
+---
+title: The authored layer
+description: Where Tonex goes beyond what Material Color Utilities derives.
+---
+
+Material Color Utilities turns your seed into a coherent system of roles. That covers most of the job, but not all of it. Three needs sit outside what the math derives on its own, and for each Tonex authors a deliberate answer rather than leaving you to patch it by hand: keeping your *exact* brand color usable, calming the color in neutral backgrounds, and building a real palette for charts. None of these is a tweak to the engine — each is a decision about where the engine alone isn't enough.
+
+All three are core derivations, not UI conveniences, so they ship in both clients: a toggle in the web app and a flag on the CLI.
+
+## Brand color
+
+The engine never hands back the exact color you chose. Every role is the seed *re-toned* to do a job, and which role reads as "the brand" isn't even stable — it can swap between light and dark, and change again from one variant to the next. So a filled `bg-primary` can come out as a pale container instead of your color, and the one color you unambiguously picked has nowhere dependable to live.
+
+So Tonex keeps the literal seed as a **brand pair**, sitting outside the role system entirely: the unchanged color, plus a foreground computed to stay readable against it. The fill never changes between light and dark — a brand color is an identity, not a background that flips with the theme — and only the paired text adapts to hold contrast. Because the pair is pinned rather than derived, it never drifts when you change variant or mode.
+
+Reach for the brand pair when the exact input color matters — a CTA, a badge, a hero accent, anything logo-adjacent. Everything else should use the roles around it (`primary`, `primary-container`, and the rest), which are free to re-tone so they can keep contrast and coordinate with surfaces. The brand pair preserves exactness; the [roles](/docs/key-concepts/semantic-model) preserve usability.
+
+The brand pair is off by default. In the web app, one switch turns it on everywhere at once — the brand showcase, the contrast audit, and what the export emits. From the CLI, `--with-brand` emits the pair (`--brand` / `--brand-foreground`) on `generate`, and `check` folds the brand text pair into the contrast gate so an unsafe seed blocks like any other failing pair.
+
+## Surfaces
+
+The engine paints neutrals with a little of your brand color — surfaces are tinted by design, and the default variant leans into it. Often that's what you want. Sometimes it isn't: you want calmer, cleaner backgrounds *without* draining the color out of your actual brand components. The math has no dial for that on its own.
+
+So surface treatment is its own layer, and it touches the **backgrounds and their borders only** — the chrome. Your primary, secondary, and the rest of the colored components keep their generated values untouched. That asymmetry is the whole point: clean chrome carrying colored components. You pick one of two algorithms, and they differ at zero.
+
+### Desaturate
+
+Pulls the surfaces toward grey by reducing their color. At 0% they're unchanged — this is also how you keep the engine's surfaces exactly as derived — and higher levels drain color evenly across the whole range, including the text that sits on it. Reach for it when the default surfaces feel too tinted.
+
+### Tint
+
+Rebuilds the surfaces from a neutral you choose — one of the Tailwind neutral palettes such as zinc, slate, or stone — then blends your brand hue back in proportional to the level. At 0% you get the plain neutral; higher levels take on more of your brand. A separate text-accent controls how much of that hue reaches the text, so "clean surfaces, brand-tinted headings" stays reachable.
+
+Surface strength is **per mode** — light and dark each carry their own level — while the algorithm and the chosen palette are shared. See [Light & dark](/docs/web-app/light-dark). In the web app these live in Settings; from the CLI they're `--tint` / `--tint-palette` and `--desaturate` (mutually exclusive).
+
+
+## Charts
+
+Most color tools — the engine included — generate role colors well and then treat charts as an afterthought: a single hue stepped into a ramp, or a handful of hand-picked hexes. A good chart palette is its own problem, and one rule can't serve every chart — sometimes the series belong to one family, sometimes each one has to be told apart at a glance.
+
+So Tonex derives a chart series from the same seed as a first-class palette, not a leftover. You choose how the series is built:
+
+- **Single hue** — one hue stepped across tones. Cohesive, and the natural choice for sequential data like a heatmap or a single trend.
+- **Multi hue** — related hues rotated around your seed. A middle ground: variety that still reads as one family. This is the default.
+- **Polychrome** — several clearly separate hues, for categorical data where each series must stand apart.
+
+Because the rotation happens in the same perceptual model as the rest of the system, distinct series come out *evenly* distinguishable instead of some colors quietly dominating — the trap of rotating hue in ordinary color space. The contrast checks that cover text also cover chart-against-chart and chart-against-background, and a series keeps its meaning across light and dark. Even an achromatic seed produces a colored series rather than a row of greys.
+
+Chart colors are opt-in. In the web app they're a toggle on export; from the CLI, `--with-chart` emits the default ramp and `--chart-palette single|multi|polychrome` picks the series and emits it. See [Export](/docs/web-app/export) and [CLI commands](/docs/cli/commands).
+
+
+## Custom colors
+
+Custom colors are families you add yourself — a warning yellow, a status green — that aren't part of the standard set. Each custom color has a name and a value, and you can add, edit, and remove them freely.
+
+Tonex runs a custom color through the same engine as the built-in families, deriving its matching foreground and container variants. So a custom color behaves like a real role, not a loose swatch.
+
+### Harmonize toward the seed
+
+Each custom color can harmonize toward the seed. With it on, the color's hue is rotated toward your seed so it sits naturally in the palette. With it off, the color stays exactly as you entered it. Use harmonize when you want the color to belong to the system; turn it off when the exact value matters more than the fit.

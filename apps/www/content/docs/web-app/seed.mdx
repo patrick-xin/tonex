@@ -9,7 +9,7 @@ The seed is the single color the whole system is built from. Tonex keeps the lit
 
 You can set the seed three ways:
 
-- **Hex** — type or paste a value like `#6A9CFF`. This field also accepts a pasted OKLCH color such as `oklch(0.7 0.1 327)`, converted to hex on commit.
+- **Hex** — type or paste a value like `#6A9CFF`. This field also accepts OKLCH format(`oklch(0.7 0.1 327)`), converted to hex on commit.
 - **HCT** — adjust the seed with hue, chroma, and tone sliders.
 - **Image** — drop an image and Tonex extracts its main color as the seed.
 
@@ -17,8 +17,8 @@ Whichever you use, the seed becomes the anchor the rest of the palette is derive
 
 ## Seed lock
 
-Lock the seed to keep the source fixed while you change everything else. With the seed locked, adjusting the variant, contrast, or surfaces reshapes the generated roles around the same anchor. The literal brand color stays available as the brand pair.
+Lock the seed to keep the source fixed while you change everything else. With the seed locked, adjusting the variant, contrast, or surfaces reshapes the generated roles around the same anchor. Shortcut: <Kbd>⌘L</Kbd>
 
 ## Tailwind color-picker input
 
-The seed input can show a Tailwind color picker, so you can pick from the Tailwind palette instead of entering a raw value. It's on by default; toggle it in **Settings**. See [Limitations](/docs/reference/limitations) for the edge cases of picker input.
+The seed input can show a Tailwind color picker, so you can pick from the Tailwind palette instead of entering a raw value. It's on by default; toggle it in **Settings**.

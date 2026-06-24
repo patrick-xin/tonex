@@ -7,7 +7,7 @@ export function StoryMoment() {
     <div className="grid grid-cols-1 sm:grid-cols-2 relative">
       <ShimmerBorder side="bottom" />
       <div className="space-y-4 p-6 md:p-14 relative">
-        <h3 className="text-2xl font-semibold">The moment</h3>
+        <h2 className="text-3xl font-semibold">The moment</h2>
         <p>
           There's a moment in every project I quietly dread: the logic works, the layout's in place,
           and then it's time to pick the colors. As a frontend dev, I can hand-pick a palette, tune
@@ -22,10 +22,10 @@ export function StoryMoment() {
             rel="noreferrer"
             target="_blank"
             className="underline decoration-primary"
-            href="https://x.com/juxtopposed"
+            href="https://m3.material.io/blog/announcing-material-you"
           >
-            @Juxtopposed{' '}
-          </Link>
+            @Juxtopposed
+          </Link>{' '}
           puts it plainly:{' '}
         </p>
         <blockquote className="text-on-surface-variant italic">

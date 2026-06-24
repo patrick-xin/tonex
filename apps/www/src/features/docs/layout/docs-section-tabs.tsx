@@ -7,8 +7,8 @@ import { buttonStyles } from '@/components/ui/button'
 import { getDocSections, pickActiveTabKey } from '../utils/doc-sections'
 import { source } from '../utils/source'
 
-// why: section switcher in the header — desktop-only (the mobile drawer already
-// shows the full tree). Route-derived active state mirrors the sidebar's active
+// why: section switcher in the header — desktop-only.
+//  Route-derived active state mirrors the sidebar's active
 // token treatment so the header tab and the lit sidebar group read as one.
 export function DocsSectionTabs({ className }: { className?: string }) {
   const pathname = usePathname()
@@ -29,7 +29,7 @@ export function DocsSectionTabs({ className }: { className?: string }) {
             variant: 'ghost',
             size: 'sm',
             className:
-              'text-on-surface-variant hover:bg-transparent active:bg-transparent hover:text-on-surface data-active:text-on-surface',
+              'text-on-surface-variant hover:bg-transparent active:bg-transparent hover:text-on-surface data-active:text-primary',
           })}
         >
           <tab.icon className="size-4" />

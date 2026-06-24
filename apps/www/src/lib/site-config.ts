@@ -29,6 +29,7 @@ export const ROUTES = {
   about: { value: 'about', label: 'About', href: '/about' },
   docs: { value: 'docs', label: 'Docs', href: '/docs/introduction' },
   roadmap: { value: 'roadmap', label: 'Roadmap', href: '/roadmap' },
+  changelog: { value: 'changelog', label: 'Changelog', href: '/changelog' },
 } satisfies Record<string, SiteRoute>
 
 // Ordered primary navigation — consumed by the mobile drawer and command menu.
@@ -39,6 +40,7 @@ export const NAV_LINKS: readonly SiteRoute[] = [
   ROUTES.docs,
   ROUTES.about,
   ROUTES.roadmap,
+  ROUTES.changelog,
 ]
 
 // External reference links surfaced in the command menu's Resources group.

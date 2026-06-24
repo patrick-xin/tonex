@@ -20,20 +20,20 @@ export const LightMode: React.FC = () => {
             stopOpacity="0.59"
           />
         </linearGradient>
-        <filter id="waste-glow" x="-15%" y="-15%" width="130%" height="130%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
+        <filter id="waste-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
       <rect x="60" y="65" width="52" height="52" rx="4.5" fill="url(#waste-g1)" />
-      <rect x="88" y="37" width="52" height="52" rx="4.5" fill="url(#waste-g2)" />
+      <rect x="88" y="37" width="52" height="52" rx="4.5" fill="var(--color-surface)" />
       <rect
         x="88"
-        y="65"
-        width="24"
-        height="24"
-        rx="2"
-        fill="url(#waste-g1)"
+        y="37"
+        width="52"
+        height="52"
+        rx="4.5"
+        fill="url(#waste-g2)"
         filter="url(#waste-glow)"
       />
     </svg>

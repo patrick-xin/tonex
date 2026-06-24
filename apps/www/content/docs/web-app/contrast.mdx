@@ -1,0 +1,26 @@
+---
+title: Contrast audit
+description: The in-app WCAG check — how to read its labels and scope.
+---
+
+The contrast audit is the web app's view of the [contrast model](/docs/key-concepts/contrast): a live WCAG check of the theme you're editing. Press <Kbd>A</Kbd> to open it. A flag in the audit is information, not a block — the web app reports contrast but never forces it. To resolve one, raise the contrast level in **Settings** or pin the affected role to a value that passes.
+
+## What it reads
+
+The audit reads the **active mode** only, so check light and dark separately. It's also scoped to the layer you're on — the MD route audits MD pairs, the shadcn route audits shadcn pairs.
+
+## Labels
+
+Each pair is checked against its WCAG threshold and given one of four labels:
+
+- **Pass** — readable, good contrast.
+- **Hard to read** — text is too faint against its background. This is the one to fix.
+- **Faint** — a border, icon, or fill is low-contrast; fine for some uses.
+- **Decorative** — purely visual, no contrast needed, so it's exempt.
+
+## Filtering
+
+Toggle the target level between **AA** and **AAA** to see the theme against either bar. Filter the table by **Text** or **UI** to focus on one kind of pair — text-grade requirements versus non-text ones. See [Thresholds](/docs/key-concepts/contrast#thresholds) for the numbers behind each.
+
+
+

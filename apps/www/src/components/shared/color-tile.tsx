@@ -19,6 +19,96 @@ interface ColorTileProps<T> {
   size?: 'sm' | 'md'
 }
 
+interface ColorTileBodyProps {
+  display: string
+  hex: string
+  overridden: boolean
+  warning?: ContrastWarning
+  size: 'sm' | 'md'
+  align?: 'start' | 'center'
+}
+
+function ColorTileBody({
+  display,
+  hex,
+  overridden,
+  warning,
+  size,
+  align = 'start',
+}: ColorTileBodyProps) {
+  const dark = isDarkSwatch(hex)
+  const textColor = dark ? '#ffffff' : '#000000'
+
+  return (
+    <div
+      className={cx(
+        'h-20 flex flex-col justify-end p-2 shrink-0 rounded-md',
+        align === 'center' && 'items-center text-center',
+        size === 'sm' && 'w-36 sm:w-50',
+      )}
+      style={{ backgroundColor: hex }}
+    >
+      <p
+        className={cx('font-mono leading-tight truncate', size === 'sm' ? 'text-xs' : 'text-sm')}
+        style={{ color: textColor }}
+      >
+        {display}
+      </p>
+      <p
+        className={cx('font-mono', size === 'sm' ? 'text-xs' : 'text-sm')}
+        style={{ color: textColor }}
+      >
+        {hex}
+      </p>
+      {overridden && <div className="absolute top-1 right-1 size-2 rounded-full bg-tertiary" />}
+      {warning !== undefined && !warning.passes && !warning.decorative && (
+        <Tooltip>
+          <TooltipTrigger
+            delay={0}
+            render={
+              <div className="absolute top-1 left-1 flex items-center justify-center size-4 rounded-full bg-error">
+                <WarningIcon className="size-3 text-on-error" weight="fill" />
+              </div>
+            }
+          />
+          <TooltipContent side="top">
+            <ContrastWarningTooltipBody warning={warning} />
+          </TooltipContent>
+        </Tooltip>
+      )}
+    </div>
+  )
+}
+
+export function StaticColorTile({
+  display,
+  hex,
+  overridden,
+  warning,
+  size = 'sm',
+}: ColorTileBodyProps) {
+  return (
+    <div
+      className={cx(
+        'group relative select-none rounded-md transition-all m-1',
+        focusVisiblePrimaryRing,
+        size === 'sm'
+          ? 'outline outline-outline-variant'
+          : 'outline outline-outline-variant w-[calc(50%-0.75rem)] sm:w-60',
+      )}
+    >
+      <ColorTileBody
+        display={display}
+        hex={hex}
+        overridden={overridden}
+        warning={warning}
+        size={size}
+        align="center"
+      />
+    </div>
+  )
+}
+
 export function ColorTile<T>({
   payload,
   popoverHandle,
@@ -28,9 +118,6 @@ export function ColorTile<T>({
   warning,
   size = 'sm',
 }: ColorTileProps<T>) {
-  const dark = isDarkSwatch(hex)
-  const textColor = dark ? '#ffffff' : '#000000'
-
   return (
     <PopoverTrigger
       handle={popoverHandle}
@@ -43,42 +130,13 @@ export function ColorTile<T>({
           : 'outline outline-outline-variant w-[calc(50%-0.75rem)] sm:w-60',
       )}
     >
-      <div
-        className={cx(
-          'h-20 flex flex-col justify-end p-2 shrink-0 rounded-md',
-          size === 'sm' && 'w-36 sm:w-50',
-        )}
-        style={{ backgroundColor: hex }}
-      >
-        <p
-          className={cx('font-mono leading-tight truncate', size === 'sm' ? 'text-xs' : 'text-sm')}
-          style={{ color: textColor }}
-        >
-          {display}
-        </p>
-        <p
-          className={cx('font-mono', size === 'sm' ? 'text-xs' : 'text-sm')}
-          style={{ color: textColor }}
-        >
-          {hex}
-        </p>
-        {overridden && <div className="absolute top-1 right-1 size-2 rounded-full bg-tertiary" />}
-        {warning !== undefined && !warning.passes && !warning.decorative && (
-          <Tooltip>
-            <TooltipTrigger
-              delay={0}
-              render={
-                <div className="absolute top-1 left-1 flex items-center justify-center size-4 rounded-full bg-error">
-                  <WarningIcon className="size-3 text-on-error" weight="fill" />
-                </div>
-              }
-            />
-            <TooltipContent side="top">
-              <ContrastWarningTooltipBody warning={warning} />
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+      <ColorTileBody
+        display={display}
+        hex={hex}
+        overridden={overridden}
+        warning={warning}
+        size={size}
+      />
     </PopoverTrigger>
   )
 }

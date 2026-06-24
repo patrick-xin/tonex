@@ -5,6 +5,7 @@
 export const HELP_SECTIONS = {
   // Key Concepts accordion
   'light-dark-modes': 'concepts',
+  'source-color': 'concepts',
   hct: 'concepts',
   cmf: 'concepts',
   'scheme-variants': 'concepts',

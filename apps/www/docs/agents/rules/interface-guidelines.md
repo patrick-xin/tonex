@@ -25,7 +25,11 @@ Governs the *rendered surface* of every www component: which token, which focus 
   
 ## Typography
 - **Respect default tailwind conventions** No arbitrary values like `leanding-[0.25rem]`, `text-[10px]`, use `leading-1`,`text-xs` instead.
-- **Don't use opacity on text** - `text-on-surface/60` will break accessibility, thus is anti-pattern.
+- Full-opacity role pairs (forward or reversed): always safe.
+- **Never fade foreground text (`text-X/n`)** — contrast drops as opacity falls. Anti-pattern.
+- **Soft badge `text-X bg-X/n` (same base role) is safe** — but `/15` is the only opacity guaranteed AA across every base role in both modes; go higher only with measured proof.
+- **Containers can't be softened:** `text-container bg-container/n` fails at every opacity (fill and faded-fill read identically against the surface). Use the paired `on-container` color at full opacity instead — the role swap, not opacity.
+- **Don't keep `on-<role>` text over a faded fill** (`bg-X/n text-on-X`) — in light mode contrast collapses as the fill fades.
 - `…` not `...`
 - Curly quotes `"` `"` not straight `"`
 - Non-breaking spaces: `10&nbsp;MB`, `⌘&nbsp;K`, brand names

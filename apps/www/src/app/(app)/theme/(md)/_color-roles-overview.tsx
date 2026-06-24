@@ -163,6 +163,7 @@ function SoloTile({ token, hex }: { token: RoleSuffix; hex: string }) {
 
 export function ColorRolesOverview() {
   const showExtended = useUiPrefs((s) => s.showExtended)
+  const brandEnabled = useUiPrefs((s) => s.brandEnabled)
   const theme = useResolvedTokens()
   const mode = useActiveMode()
 
@@ -172,9 +173,22 @@ export function ColorRolesOverview() {
     const value = mdLayer[`--color-${suffix}` as keyof typeof mdLayer]
     return value === undefined ? '#000000' : hexString(value)
   }
+  const brandHex = hexString(theme.shadcn.brand['--brand'] as number)
+  const onBrandHex = hexString(theme.shadcn.brand['--brand-foreground'] as number)
 
   return (
     <div className="space-y-8 mx-auto">
+      {brandEnabled && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            {/* biome-ignore lint/a11y/useHeadingContent: useRender injects children into the h2 at runtime; the static empty <h2 /> is just the tag selector */}
+            <SectionHeading render={<h2 />}>Brand</SectionHeading>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <PairTile bg="brand" fg="on-brand" bgHex={brandHex} fgHex={onBrandHex} />
+          </div>
+        </section>
+      )}
       {GROUPS.map((group) => {
         const items = [...(group.core ?? []), ...(showExtended ? (group.extended ?? []) : [])]
         if (items.length === 0) return null

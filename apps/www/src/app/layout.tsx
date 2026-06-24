@@ -5,13 +5,6 @@ import type { Metadata } from 'next'
 import { Geist, IBM_Plex_Mono, IBM_Plex_Sans, Vidaloka } from 'next/font/google'
 import { Providers } from './_providers'
 
-// why: four named type roles. Chrome (Plex Sans) is the app default UI/body
-// sans — it feeds --font-sans in tonex.css. Mono (Plex Mono) is the universal
-// numerals/code face (--font-mono). Voice (Vidaloka) is the display serif,
-// applied to landing headlines only (see (site)/layout.tsx). Geist stays the
-// shadcn-preview sans — its face loads here so it's available, but it's only
-// *applied* inside the .shadcn scope (globals.css), where the preview should
-// read like real shadcn rather than the tonex chrome.
 const chrome = IBM_Plex_Sans({
   variable: '--font-chrome',
   subsets: ['latin'],
@@ -36,9 +29,9 @@ const geist = Geist({
 })
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-const siteTitle = 'tonex — Pro-grade color tools, made for the web'
+const siteTitle = 'Tonex — The color layer for your design system.'
 const siteDescription =
-  'Pro-grade color tools, made for the web. Real HCT math, per-role pins, and contrast audited across every token pair — ship to Material Design and shadcn from one source.'
+  "The color layer for your design system. Built on perceptual color science. One color becomes a full, role-mapped token set - coherent in any system it's bound into."
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -73,10 +66,6 @@ export const metadata: Metadata = {
 
 // why: <body class="md"> sets the app default layer. The shadcn sub-scope
 // is applied via <div class="shadcn"> inside the preview feature. ADR-0013.
-//
-// suppressHydrationWarning on <html> is required by next-themes — it adds
-// the `class` attribute on mount, which would otherwise trigger a React
-// hydration warning. The mismatch is intentional; the warning is not.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html

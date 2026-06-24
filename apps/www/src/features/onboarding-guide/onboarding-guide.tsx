@@ -164,7 +164,11 @@ export function OnboardingGuide({
 
             {touring && currentStep && (
               <>
-                <Carousel className="w-full" opts={{ loop: false }} setApi={setCarouselApi}>
+                <Carousel
+                  className="w-full"
+                  opts={{ loop: false, startIndex: step - 1 }}
+                  setApi={setCarouselApi}
+                >
                   <CarouselContent>
                     {steps.map((s) => (
                       <CarouselItem key={s.title}>
@@ -230,7 +234,7 @@ export function OnboardingGuide({
                     )}
                     {isLastStep ? (
                       <Button size="sm" onClick={dismiss}>
-                        Finish
+                        Create your first theme
                       </Button>
                     ) : (
                       <Button size="sm" onClick={() => goTo(step + 1)}>
