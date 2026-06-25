@@ -62,7 +62,7 @@ function seedOf(hex: string): Seed {
 export const SHADCN_PRESETS = {
   default: {
     description: 'Balanced, neutral starting point — calm chrome with no strong opinion',
-    seed: seedOf('#6750a4'),
+    seed: seedOf('#a155b8'),
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',

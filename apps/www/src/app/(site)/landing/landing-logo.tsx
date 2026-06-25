@@ -58,12 +58,7 @@ export default function LandingLogo() {
           height={160}
           image="/logo.svg"
           colors={palette.dots}
-          // colors={['#7e66bc', '#70b4fa', '#E6D7FF', '#0047AB']}
-          // Transparent backdrop — the logo glyph composites over whatever's
-          // behind it. NOT "transparent": paper-design's color parser only reads
-          // #/rgb/hsl and falls back to opaque black for any keyword, so the
-          // alpha has to be explicit (8-digit hex). u_colorBack is premultiplied
-          // in-shader, so alpha 0 contributes nothing.
+          // Transparent backdrop
           colorBack="#00000000"
           contour={0.5}
           angle={-100}
