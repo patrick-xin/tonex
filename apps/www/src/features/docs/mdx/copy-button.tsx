@@ -4,7 +4,7 @@ import { type Easing, m as motion, useMotionValue, useTransform, type Variants }
 import * as React from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
-import { ToastArrow, toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/toast'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 
@@ -54,12 +54,9 @@ export function CopyButton({
     copyToClipboard(code)
     toast.anchor(buttonRef.current, {
       customContent: (
-        <>
-          <ToastArrow />
-          <p className="text-xs p-1.5 rounded-sm overlay-outline shadow-md shadow-primary/10 bg-surface-container">
-            Copied
-          </p>
-        </>
+        <p className="text-xs p-1.5 rounded-sm overlay-outline shadow-md shadow-primary/10 bg-surface/10 backdrop-blur-2xl">
+          Copied
+        </p>
       ),
       onClose() {
         setIsCopied(false)
@@ -84,7 +81,7 @@ export function CopyButton({
         ref={buttonRef}
         render={
           <Button
-            className={cn(className)}
+            className={cn('shadow-crisp!', className)}
             disabled={isCopied}
             size="icon-xs"
             variant={variant}
@@ -145,7 +142,10 @@ export function CopyButton({
           </Button>
         }
       />
-      <TooltipContent showArrow={false}>
+      <TooltipContent
+        className="bg-surface/10 backdrop-blur-2xl shadow-md shadow-primary/10"
+        showArrow={false}
+      >
         <p className="text-xs">Copy to clipboard</p>
       </TooltipContent>
     </Tooltip>

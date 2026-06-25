@@ -26,12 +26,11 @@ function RolePill({ children, className, ...props }: ComponentProps<'span'>) {
   return (
     <Tooltip>
       <TooltipTrigger
-        payload="bg-surface-container-low"
         render={
           <span
             className={cx(
               className,
-              'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-secondary-container text-on-secondary-container shadow-md',
+              'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-tertiary-container text-on-tertiary-container shadow-md',
             )}
             {...props}
           >
@@ -39,9 +38,8 @@ function RolePill({ children, className, ...props }: ComponentProps<'span'>) {
           </span>
         }
       />
-
       <TooltipContent variant="inverse">
-        <span className="font-mono">bg-secondary-container text-on-secondary-container</span>
+        <span className="font-mono">bg-tertiary-container text-on-tertiary-container</span>
       </TooltipContent>
     </Tooltip>
   )
@@ -444,7 +442,7 @@ function ProofStrip({ handle }: { handle: PosterTooltipHandle }) {
             handle={handle}
             payload="bg-primary text-on-primary"
             render={
-              <IconChip className="bg-primary text-on-primary">
+              <IconChip className="bg-primary text-on-primary shrink-0">
                 <Check className="size-4" />
               </IconChip>
             }

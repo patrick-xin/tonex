@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { useHexFieldState } from '@/lib/hooks/use-hex-field-state'
 
@@ -11,13 +10,9 @@ interface HexInputFieldProps {
 
 export function HexInputField({ value, onChange }: HexInputFieldProps) {
   const { hexInput, handleChange, inputProps } = useHexFieldState(value, onChange)
-  const inputRef = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    inputRef.current?.focus({ preventScroll: true })
-  }, [])
+
   return (
     <Input
-      ref={inputRef}
       className="font-mono flex-1"
       inputSize="sm"
       type="text"

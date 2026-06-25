@@ -45,7 +45,7 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
       className="w-full max-w-6xl mx-auto px-4"
     >
       <TabsListContent
-        className="mx-auto mb-6 overflow-x-auto max-w-full no-scrollbar shadow-crisp"
+        className="mx-auto mb-6 overflow-x-auto max-w-full no-scrollbar"
         indicatorClassName="bg-secondary-container data-[orientation=horizontal]:h-[calc(100%-12px)]"
       >
         {EXPORT_TABS.map(({ value, label, icon: TabIcon }) => (

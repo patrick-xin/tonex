@@ -21,8 +21,8 @@ First run on a fresh machine needs the browser binary once:
 pnpm --filter @tonex/www exec playwright install chromium
 ```
 
-Locally the config runs `next dev` and **reuses an already-running `pnpm dev`**.
-CI does a prod-like `next build && next start` to exercise the true hydration
+Locally the config runs `next dev -p ${PORT}` and **reuses an already-running `pnpm dev`**.
+CI does a prod-like `next build && next start -p ${PORT}` to exercise the true hydration
 path the bug rode in on.
 
 ## Writing a spec
@@ -116,10 +116,14 @@ way it does, not so it has to re-solve them:
   context starts cookieless. The extended `test` in `fixtures.ts` seeds that cookie
   on the context, so the tour never steals focus mid-spec. (This is the one
   exception to "no storage injection" — it's environment setup, not theme state.)
-- **Editor routes are warmed once.** `next dev` compiles a route on first request;
+- **Editor and site routes are warmed once.** `next dev` compiles a route on first request;
   a cold compile outruns a test timeout. `global-setup.ts` requests `/`, `/theme`,
-  `/theme/shadcn` before any test so the first spec doesn't pay (and flake on) the
-  compile. No-op under CI's prod build.
+  `/theme/shadcn`, `/about` before any test so the first spec doesn't pay (and flake
+  on) the compile. No-op under CI's prod build.
+- **The Next dev indicator is disabled once.** Next 16's local devtools portal sits
+  bottom-right, the same corner as the marketing menu color picker, and can
+  intercept clicks. `global-setup.ts` POSTs to Next's dev-only disable endpoint;
+  in CI's `next start` it is a harmless failed request.
 - **`seedField` targets the field by its accessible name, and visible-filters.**
   The editor mounts the rail twice (desktop aside + `sm:hidden` mobile drawer), so
   the seed input renders twice. It's addressed by its accessible name ("Seed color,
@@ -172,7 +176,7 @@ way it does, not so it has to re-solve them:
 | File | Role |
 |---|---|
 | `../playwright.config.ts` | webServer, baseURL, chromium, CI retries, globalSetup, timeouts |
-| `global-setup.ts` | warms editor routes so a cold `next dev` compile isn't read as flake |
+| `global-setup.ts` | disables local Next dev indicator + warms suite routes so cold `next dev` compile isn't read as flake |
 | `fixtures.ts` | single import surface: `test`/`expect` + reusable seam helpers |
 | `smoke.spec.ts` | proves the harness boots + hydrates (not feature coverage) |
 | `seed-sync.spec.ts` | **Tier-1** — seed stays in sync across navigation + seed-entry surfaces |
