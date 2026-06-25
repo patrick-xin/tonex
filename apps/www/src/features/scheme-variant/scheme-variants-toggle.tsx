@@ -52,7 +52,7 @@ export function SchemeVariantsToggle() {
               <ToggleGroup
                 variant="outline"
                 size="xs"
-                className="justify-start min-w-6 shadow-crisp"
+                className="justify-start min-w-6"
                 value={[variant]}
                 onValueChange={(value) => {
                   if (value.length > 0) setVariant(value[0] as VariantName)

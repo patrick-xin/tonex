@@ -48,20 +48,24 @@ export function Capabilities() {
               className={cn(
                 'border rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 cursor-pointer outline-transparent',
                 isActive
-                  ? 'bg-surface-container border-outline-variant shadow-sm ring-1 ring-tertiary-container'
-                  : 'bg-surface-container-low border-outline-variant/60 hover:border-outline-variant',
+                  ? 'bg-surface-container border-tertiary-container shadow-sm'
+                  : 'bg-surface-container-low border-outline-variant hover:border-outline-variant',
                 focusVisiblePrimaryRing,
               )}
             >
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div
-                    className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-tertiary text-on-tertiary' : 'bg-surface-container-high text-on-surface-variant'}`}
+                    className={cn(
+                      'p-2 rounded-lg transition-colors',
+                      isActive
+                        ? 'bg-tertiary text-on-tertiary'
+                        : 'bg-surface-container-high text-on-surface-variant',
+                    )}
                   >
                     {cap.icon}
                   </div>
                 </div>
-
                 <h3 className="text-xl font-display font-bold text-on-surface text-left">
                   {cap.title}
                 </h3>
@@ -78,7 +82,7 @@ export function Capabilities() {
                 </p>
               </div>
               <div className="pt-4 mt-6 border-t border-outline-variant/60 flex items-center justify-between text-on-surface-variant">
-                <span className="font-mono text-xs tracking-widest font-black uppercase text-tertiary">
+                <span className="font-mono text-xs tracking-widest font-black uppercase">
                   SYSTEM PIECE
                 </span>
                 <span className="font-mono text-xs">{cap.id}</span>

@@ -66,7 +66,7 @@ export function PresetPreviewCard() {
       {({ payload }) => (
         <PreviewCardPortal>
           <PreviewCardPositioner side="left" sideOffset={2} className={positioner()}>
-            <PreviewCardPopup className={popup()}>
+            <PreviewCardPopup className={popup({ className: 'bg-surface' })}>
               <PreviewCardViewport className={viewport()}>
                 {payload ? <PresetCardBody name={payload} /> : null}
               </PreviewCardViewport>

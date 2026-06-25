@@ -38,7 +38,6 @@ export function ColorRolesList() {
           <div className="flex flex-wrap gap-2">{group.roles.map(renderSwatch)}</div>
         </section>
       ))}
-
       <Popover handle={popoverHandle}>
         {({ payload: role }) =>
           role !== undefined ? (
