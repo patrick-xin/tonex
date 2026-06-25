@@ -10,8 +10,8 @@ import { defineConfig, devices } from '@playwright/test'
 // why: PORT is env-overridable (default 3000) so the suite can dodge a port
 // already held by a *sibling git worktree's* dev server — `reuseExistingServer`
 // would otherwise silently reuse it and test the wrong checkout. `PORT=3100 pnpm
-// e2e` runs against this worktree on its own port. The spawned webServer inherits
-// PORT below so dev/start bind to the same one baseURL points at.
+// e2e` runs against this worktree on its own port. The spawned webServer passes
+// the port explicitly so dev/start bind to the same one baseURL points at.
 const PORT = Number(process.env.PORT ?? 3000)
 const BASE_URL = `http://localhost:${PORT}`
 
@@ -26,8 +26,8 @@ const APP_ENV = {
 
 export default defineConfig({
   testDir: './e2e',
-  // why: warm the editor routes before any test so a cold Next-dev compile can't
-  // masquerade as a render-timing flake (see e2e/global-setup.ts).
+  // why: warm suite routes and disable the local Next dev indicator before any
+  // test so dev-only chrome/cold compiles can't masquerade as product flakes.
   globalSetup: './e2e/global-setup.ts',
   // why: generous-but-finite ceilings. Hydration + a first interaction across a
   // navigation can take a few seconds even warm; defaults (30s test / 5s expect)
@@ -59,8 +59,9 @@ export default defineConfig({
     // why: prod-like `next start` in CI to exercise the real hydration path the
     // bug rode in on (CI builds in a prior step, so this only boots); `dev`
     // locally for fast iteration, reusing an already-running `pnpm dev` instead
-    // of double-spawning. cwd defaults to this config's dir (apps/www).
-    command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+    // of double-spawning. Pass `-p` explicitly: Next 16 does not consistently bind
+    // from PORT env alone. cwd defaults to this config's dir (apps/www).
+    command: process.env.CI ? `pnpm start -p ${PORT}` : `pnpm dev -p ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
