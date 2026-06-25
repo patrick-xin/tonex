@@ -1,41 +1,58 @@
-# tonex
+# Tonex
 
-Turn one brand seed color into a complete light + dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities). Stop hand-picking hex.
+Tonex turns one brand color into an authored color system: roles, constraints, light and dark behavior, and WCAG contrast from one seed. It exports to shadcn, DESIGN.md, Material, or your own token setup. The engine uses Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities), but the output does not have to look like Material.
 
-Tonex maps a single seed onto a full set of perceptual color roles, so every surface, foreground, border, and chart series is derived rather than guessed. The same engine runs in three places: a [web editor](https://tonex.dev/), a [CLI](#cli), and an [agent skill](#use-it-with-an-ai-agent).
+Most color tools stop at palette preview: drop in a color, see it on a page. Tonex takes on the hand-work after that. Your seed becomes a role-mapped system where backgrounds, foregrounds, borders, charts, and states are computed for their job and mode. You edit intent instead of hand-picking hex values.
 
-This project is an exercise in [Skills For Real Engineers](https://github.com/mattpocock/skills): most of the code is written by Claude, with architectural decisions recorded in [`docs/adr/`](./docs/adr/). Code is heavily commented with the *why* and ADR pointers, so a cold-start agent has the context it needs.
+That matters even more when agents are building UI. Defaults ship fast: safe neutrals, a purple glow, the same gradient again. Tonex gives the agent a color source with a point of view, so dark mode, elevated surfaces, charts, and the next feature keep using the same system.
 
-## Web app
+You can use the same engine three ways:
 
-The full editor lives at **[tonex.dev](https://tonex.dev/)** — pick a seed, toggle the authored layers, and audit contrast live.
+- A [web editor](https://tonex.dev/) for working by hand.
+- A [CLI](#cli) for the terminal.
+- A [skill](#use-it-with-a-skill) that lets an agent drive the CLI for you.
 
-## CLI
+Read the [full docs](https://tonex.dev/docs/cli/introduction).
+
+## Web editor
+
+The full editor lives at **[tonex.dev](https://tonex.dev/)**. Pick a seed, tune the authored layers, and audit every contrast pair live, including overrides, which are the one place generated contrast can slip. What you preview is what you export.
+
+## Agent-first CLI
 
 ```bash
-npx tonex@latest generate --seed "#6A9CFF" > globals.css
+npx tonex@latest generate --seed "#6750a4"
 ```
 
-One seed in, a role-mapped color system out. The output target can be shadcn CSS, Material JSON, a DESIGN.md color block, or the raw Tonex role set.
+Point an agent at `npx tonex@latest describe` first. It prints every command and flag the CLI exposes, so the agent can build a palette from a plain description without memorized syntax. Run `npx tonex@latest --help` for the same list by hand, or read the [full CLI docs](https://tonex.dev/docs/cli/introduction).
 
-| Command | Use it to |
-| --- | --- |
-| `generate` | Derive a theme from a seed and print it. |
-| `check` | Audit WCAG contrast for a theme or explicit pairs (exits `1` on a failing text pair). |
-| `adjust` | Shift named tokens by relative HCT tone/chroma deltas. |
-| `describe` | Print the machine-readable CLI surface as JSON. |
+### Use it with a skill
 
-Run `npx tonex@latest --help` for usage, or see the [CLI docs](https://tonex.dev/docs/cli/introduction).
-
-## Use it with an AI agent
-
-Install the tonex skill, then just describe the theme you want — the agent drives the `tonex` CLI from one brand color and never hand-picks a hex:
+Install the skill, then describe the theme you want. The agent drives the `tonex` CLI from one brand color and never hand-picks a hex:
 
 ```bash
 npx skills add patrick-xin/tonex
 ```
 
-In **Claude Code** or **Cursor**, install the `tonex` plugin from the marketplace instead — the skill auto-loads from [`skills/tonex/`](./skills/tonex/).
+### Run it manually
+
+```bash
+npx tonex@latest generate --seed "#6A9CFF" --to shadcn --format hex
+```
+
+See the available [commands](https://tonex.dev/docs/cli/commands).
+
+## How this repo is built
+
+Tonex is also an experiment in making a codebase an agent can navigate. It follows [Skills For Real Engineers](https://github.com/mattpocock/skills): Claude writes code; a human owns architecture and visual design. The test is whether an agent dropped into the repo cold can understand it and make changes without a long briefing. Comments explain why a decision exists and cite the ADR behind it instead of restating the code.
+
+The product and the repo are making the same bet: humans choose the feeling and the constraints; agents do more of the labor. Tonex keeps the color decisions shaped enough to survive that handoff.
+
+Architectural decisions live in three places:
+
+- Root — [`docs/adr/`](./docs/adr/)
+- Core — [`packages/core/docs/adr`](./packages/core/docs/adr)
+- Web app — [`apps/www/docs/adr`](./apps/www/docs/adr)
 
 ## Structure
 
@@ -43,7 +60,7 @@ This is a pnpm + turbo monorepo.
 
 - [`packages/core`](./packages/core) (`@tonex/core`) — the engine. Pure color math, grounded in Material Color Utilities.
 - [`packages/mcu`](./packages/mcu) (`@tonex/mcu`) — vendored Material Color Utilities.
-- [`packages/color-utils`](./packages/color-utils) (`@tonex/color-utils`) — the color conversion firewall (culori-backed, CSS Color 4 gamut mapping).
+- [`packages/color-utils`](./packages/color-utils) (`@tonex/color-utils`) — the color conversion firewall.
 - [`packages/core-react`](./packages/core-react) (`@tonex/core-react`) — React bindings over the engine.
 - [`packages/cli`](./packages/cli) (`tonex`) — the terminal surface and agent contract.
 - [`apps/www`](./apps/www) — the Next.js editor and docs site.
@@ -66,4 +83,3 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the reading order, conventions, a
 ## License
 
 [Apache-2.0](./LICENSE).
-

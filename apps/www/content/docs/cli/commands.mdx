@@ -29,7 +29,7 @@ npx tonex generate --seed "#6A9CFF" [options] > globals.css
 
 | Flag | Default | Details |
 | --- | --- | --- |
-| `--variant` | `cmf` | `cmf`, `tonalSpot`, `neutral`, `fidelity`, `content`, `vibrant`, `expressive`, `rainbow`, `fruitSalad`, or `monochrome`. See [Variants](/docs/key-concepts/variants). |
+| `--variant` | `cmf` | `cmf`, `tonalSpot`, `neutral`, `fidelity`, `content`, `vibrant`, `expressive`, `rainbow`, `fruitSalad`, or `monochrome`. |
 | `--second-color` | none | Hex or `oklch(L C H)`. CMF only; reshapes the tertiary palette and error hue. |
 | `--contrast` | `0` | `0` to `1`. MCU palette contrast level — the palette-layer remedy for raising separation. |
 
@@ -37,7 +37,7 @@ npx tonex generate --seed "#6A9CFF" [options] > globals.css
 
 | Flag | Default | Details |
 | --- | --- | --- |
-| `--to` | `shadcn` | `colors`, `shadcn`, `yaml`, or `json`. See [Targets & formats](/docs/cli/targets-formats); for non-native tools, see [Mapping to Other Tools](/docs/cli/other-tools). |
+| `--to` | `shadcn` | `colors`, `shadcn`, `yaml`, or `json`. For other tools, see [Mapping to Other Tools](/docs/cli/other-tools). |
 | `--format` | `oklch` | `oklch` or `hex`. Applies to `colors`, `shadcn`, and `json`; `yaml` is always hex. |
 | `--mode` | `light` | `light` or `dark`. Only `yaml` reads this; `colors`, `shadcn`, and `json` co-emit both modes. |
 | `--extended` | off | Adds extended roles for `colors`, `yaml`, and `json`. No-op for `shadcn`. |
