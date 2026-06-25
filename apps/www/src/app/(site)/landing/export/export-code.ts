@@ -2,122 +2,122 @@ import type { ExportTab } from '@/features/export'
 
 export const EXPORT_CODE: Record<ExportTab, string> = {
   Tailwind: `:root {
-  --primary: oklch(0.4537 0.1307 293.26);
-  --on-primary: oklch(0.9202 0.0461 302.03);
-  --primary-container: oklch(0.4955 0.1305 293.71);
-  --on-primary-container: oklch(0.9803 0.0134 314.76);
-  --secondary: oklch(0.4909 0.0563 297.4);
-  --on-secondary: oklch(0.983 0.0123 317.74);
-  --secondary-container: oklch(0.8841 0.0574 299.71);
-  --on-secondary-container: oklch(0.417 0.0551 296.46);
-  --tertiary: oklch(0.4478 0.0923 295.35);
-  --on-tertiary: oklch(0.9202 0.0461 302.03);
-  --tertiary-container: oklch(0.4906 0.0922 295.5);
-  --on-tertiary-container: oklch(0.9803 0.0134 314.76);
-  --error: oklch(0.5003 0.1278 17.99);
+  --primary: oklch(0.5057 0.1635 317.07);
+  --on-primary: oklch(0.9834 0.01 345.41);
+  --primary-container: oklch(0.5795 0.164 317.85);
+  --on-primary-container: oklch(1 0 0);
+  --secondary: oklch(0.4943 0.0719 320.24);
+  --on-secondary: oklch(0.9834 0.01 345.41);
+  --secondary-container: oklch(0.8877 0.0764 321.28);
+  --on-secondary-container: oklch(0.4204 0.0717 319.03);
+  --tertiary: oklch(0.4984 0.1162 318.23);
+  --on-tertiary: oklch(0.9834 0.01 345.41);
+  --tertiary-container: oklch(0.5734 0.1177 319.18);
+  --on-tertiary-container: oklch(1 0 0);
+  --error: oklch(0.5036 0.1454 18.37);
   --on-error: oklch(0.982 0.0087 26.02);
-  --error-container: oklch(0.7497 0.1411 17.25);
-  --on-error-container: oklch(0.2987 0.1101 18.17);
-  --surface: oklch(0.983 0.0123 317.74);
-  --on-surface: oklch(0.3203 0.0359 298.11);
-  --on-surface-variant: oklch(0.4885 0.0355 297.56);
-  --surface-dim: oklch(0.8912 0.0365 301.4);
-  --surface-bright: oklch(0.983 0.0123 317.74);
+  --error-container: oklch(0.7262 0.1614 17.78);
+  --on-error-container: oklch(0.2686 0.1076 18.47);
+  --surface: oklch(0.9834 0.01 345.41);
+  --on-surface: oklch(0.3237 0.0465 318.79);
+  --on-surface-variant: oklch(0.4904 0.0469 320.91);
+  --surface-dim: oklch(0.8929 0.0504 323.92);
+  --surface-bright: oklch(0.9834 0.01 345.41);
   --surface-container-lowest: oklch(1 0 0);
-  --surface-container-low: oklch(0.9676 0.0199 308.23);
-  --surface-container: oklch(0.9503 0.0295 305.12);
-  --surface-container-high: oklch(0.9328 0.0322 303.47);
-  --surface-container-highest: oklch(0.9167 0.0378 302.46);
-  --outline: oklch(0.5835 0.0356 299.2);
-  --outline-variant: oklch(0.7663 0.0365 301.91);
+  --surface-container-low: oklch(0.9687 0.0251 329.71);
+  --surface-container: oklch(0.9534 0.0401 324.63);
+  --surface-container-high: oklch(0.9346 0.0437 324.75);
+  --surface-container-highest: oklch(0.9203 0.05 323.91);
+  --outline: oklch(0.5861 0.0475 322.42);
+  --outline-variant: oklch(0.7684 0.0481 322.64);
 }
 `,
   CSS: `:root {
   color-scheme: light dark;
-  --color-primary: light-dark(#5b4497, #a890e9);
-  --color-on-primary: light-dark(#eadeff, #270762);
-  --color-primary-container: light-dark(#6750a4, #6750a4);
-  --color-on-primary-container: light-dark(#fcf6ff, #fcf6ff);
-  --color-primary-fixed: light-dark(#6750a4, #6750a4);
-  --color-primary-fixed-dim: light-dark(#5b4497, #5b4497);
+  --color-primary: light-dark(#893fa1, #cf7fe5);
+  --color-on-primary: light-dark(#fff7fb, #3a004d);
+  --color-primary-container: light-dark(#a155b8, #a155b8);
+  --color-on-primary-container: light-dark(#ffffff, #ffffff);
+  --color-primary-fixed: light-dark(#a155b8, #a155b8);
+  --color-primary-fixed-dim: light-dark(#9348aa, #9348aa);
   --color-on-primary-fixed: light-dark(#ffffff, #ffffff);
-  --color-on-primary-fixed-variant: light-dark(#e0d2ff, #e0d2ff);
-  --color-primary-dim: light-dark(#5b4497, #a890e9);
-  --color-secondary: light-dark(#645a7d, #a398be);
-  --color-on-secondary: light-dark(#fdf7ff, #231b3a);
-  --color-secondary-container: light-dark(#ded1fa, #342b4b);
-  --color-on-secondary-container: light-dark(#4f4667, #b6aad2);
-  --color-secondary-fixed: light-dark(#ded1fa, #ded1fa);
-  --color-secondary-fixed-dim: light-dark(#d0c3eb, #d0c3eb);
-  --color-on-secondary-fixed: light-dark(#3c3353, #3c3353);
-  --color-on-secondary-fixed-variant: light-dark(#594f71, #594f71);
-  --color-secondary-dim: light-dark(#645a7d, #a398be);
-  --color-tertiary: light-dark(#594982, #a694d3);
-  --color-on-tertiary: light-dark(#eadeff, #25154c);
-  --color-tertiary-container: light-dark(#65558f, #65558f);
-  --color-on-tertiary-container: light-dark(#fcf6ff, #fcf6ff);
+  --color-on-primary-fixed-variant: light-dark(#fffbff, #fffbff);
+  --color-primary-dim: light-dark(#893fa1, #cf7fe5);
+  --color-secondary: light-dark(#74547b, #b691bd);
+  --color-on-secondary: light-dark(#fff7fb, #301538);
+  --color-secondary-container: light-dark(#f2caf9, #42254a);
+  --color-on-secondary-container: light-dark(#5e4066, #caa4d0);
+  --color-secondary-fixed: light-dark(#f2caf9, #f2caf9);
+  --color-secondary-fixed-dim: light-dark(#e4bcea, #e4bcea);
+  --color-on-secondary-fixed: light-dark(#4a2d52, #4a2d52);
+  --color-on-secondary-fixed-variant: light-dark(#684970, #684970);
+  --color-secondary-dim: light-dark(#74547b, #b691bd);
+  --color-tertiary: light-dark(#7e4b8d, #c289d0);
+  --color-on-tertiary: light-dark(#fff7fb, #380549);
+  --color-tertiary-container: light-dark(#9660a4, #9660a4);
+  --color-on-tertiary-container: light-dark(#ffffff, #ffffff);
 }
 `,
   shadcn: `:root {
-  --background: oklch(0.983 0.0123 317.74);
-  --foreground: oklch(0.3203 0.0359 298.11);
-  --card: oklch(0.9503 0.0295 305.12);
-  --card-foreground: oklch(0.3203 0.0359 298.11);
-  --popover: oklch(0.9503 0.0295 305.12);
-  --popover-foreground: oklch(0.3203 0.0359 298.11);
-  --primary: oklch(0.4537 0.1307 293.26);
-  --primary-foreground: oklch(0.9202 0.0461 302.03);
-  --secondary: oklch(0.8841 0.0574 299.71);
-  --secondary-foreground: oklch(0.417 0.0551 296.46);
-  --muted: oklch(0.8912 0.0365 301.4);
-  --muted-foreground: oklch(0.4885 0.0355 297.56);
-  --accent: oklch(0.9167 0.0378 302.46);
-  --accent-foreground: oklch(0.3203 0.0359 298.11);
-  --destructive: oklch(0.5003 0.1278 17.99);
-  --border: oklch(0.5835 0.0356 299.2);
-  --input: oklch(0.5835 0.0356 299.2);
-  --ring: oklch(0.4537 0.1307 293.26);
-  --sidebar: oklch(0.9676 0.0199 308.23);
-  --sidebar-foreground: oklch(0.4885 0.0355 297.56);
-  --sidebar-primary: oklch(0.4537 0.1307 293.26);
-  --sidebar-primary-foreground: oklch(0.9202 0.0461 302.03);
-  --sidebar-accent: oklch(0.9328 0.0322 303.47);
-  --sidebar-accent-foreground: oklch(0.3203 0.0359 298.11);
-  --sidebar-border: oklch(0.5835 0.0356 299.2);
-  --sidebar-ring: oklch(0.5835 0.0356 299.2);
-  --brand: oklch(0.4955 0.1305 293.71);
-  --brand-foreground: oklch(0.983 0.0123 317.74);
+  --background: oklch(0.9834 0.01 345.41);
+  --foreground: oklch(0.3237 0.0465 318.79);
+  --card: oklch(0.9534 0.0401 324.63);
+  --card-foreground: oklch(0.3237 0.0465 318.79);
+  --popover: oklch(0.9534 0.0401 324.63);
+  --popover-foreground: oklch(0.3237 0.0465 318.79);
+  --primary: oklch(0.5057 0.1635 317.07);
+  --primary-foreground: oklch(0.9834 0.01 345.41);
+  --secondary: oklch(0.8877 0.0764 321.28);
+  --secondary-foreground: oklch(0.4204 0.0717 319.03);
+  --muted: oklch(0.8929 0.0504 323.92);
+  --muted-foreground: oklch(0.4904 0.0469 320.91);
+  --accent: oklch(0.9203 0.05 323.91);
+  --accent-foreground: oklch(0.3237 0.0465 318.79);
+  --destructive: oklch(0.5036 0.1454 18.37);
+  --border: oklch(0.5861 0.0475 322.42);
+  --input: oklch(0.5861 0.0475 322.42);
+  --ring: oklch(0.5057 0.1635 317.07);
+  --sidebar: oklch(0.9687 0.0251 329.71);
+  --sidebar-foreground: oklch(0.4904 0.0469 320.91);
+  --sidebar-primary: oklch(0.5057 0.1635 317.07);
+  --sidebar-primary-foreground: oklch(0.9834 0.01 345.41);
+  --sidebar-accent: oklch(0.9346 0.0437 324.75);
+  --sidebar-accent-foreground: oklch(0.3237 0.0465 318.79);
+  --sidebar-border: oklch(0.5861 0.0475 322.42);
+  --sidebar-ring: oklch(0.5861 0.0475 322.42);
+  --brand: oklch(0.5795 0.164 317.85);
+  --brand-foreground: oklch(1 0 0);
 }`,
   JSON: `"schemes": {
   "light": {
-    "primary": "#5B4497",
-    "onPrimary": "#EADEFF",
-    "primaryContainer": "#6750A4",
-    "onPrimaryContainer": "#FCF6FF",
-    "secondary": "#645A7D",
-    "onSecondary": "#FDF7FF",
-    "secondaryContainer": "#DED1FA",
-    "onSecondaryContainer": "#4F4667",
-    "tertiary": "#594982",
-    "onTertiary": "#EADEFF",
-    "tertiaryContainer": "#65558F",
-    "onTertiaryContainer": "#FCF6FF",
-    "error": "#9F3F47",
+    "primary": "#893FA1",
+    "onPrimary": "#FFF7FB",
+    "primaryContainer": "#A155B8",
+    "onPrimaryContainer": "#FFFFFF",
+    "secondary": "#74547B",
+    "onSecondary": "#FFF7FB",
+    "secondaryContainer": "#F2CAF9",
+    "onSecondaryContainer": "#5E4066",
+    "tertiary": "#7E4B8D",
+    "onTertiary": "#FFF7FB",
+    "tertiaryContainer": "#9660A4",
+    "onTertiaryContainer": "#FFFFFF",
+    "error": "#A73843",
     "onError": "#FFF7F6",
-    "errorContainer": "#FA868D",
-    "onErrorContainer": "#580817",
-    "surface": "#FDF7FF",
-    "onSurface": "#352F43",
-    "onSurfaceVariant": "#625C72",
-    "surfaceDim": "#DFD6F0",
-    "surfaceBright": "#FDF7FF",
+    "errorContainer": "#FB7780",
+    "onErrorContainer": "#4E0010",
+    "surface": "#FFF7FB",
+    "onSurface": "#3E2C43",
+    "onSurfaceVariant": "#6D5871",
+    "surfaceDim": "#EDD1EF",
+    "surfaceBright": "#FFF7FB",
     "surfaceContainerLowest": "#FFFFFF",
-    "surfaceContainerLow": "#F8F1FF",
-    "surfaceContainer": "#F3EAFF",
-    "surfaceContainerHigh": "#EDE4FB",
-    "surfaceContainerHighest": "#E8DEF9",
-    "outline": "#7E778E",
-    "outlineVariant": "#B7AEC7"
+    "surfaceContainerLow": "#FFEFFD",
+    "surfaceContainer": "#FEE7FF",
+    "surfaceContainerHigh": "#F9E0FA",
+    "surfaceContainerHighest": "#F6DAF8",
+    "outline": "#8A738D",
+    "outlineVariant": "#C3AAC6"
         }
 }
 `,
@@ -131,52 +131,52 @@ class MaterialTheme {
   static ColorScheme lightScheme() {
     return const ColorScheme(
       brightness: Brightness.light,
-      primary: Color(0xff5b4497),
-      surfaceTint: Color(0xff5b4497),
-      onPrimary: Color(0xffeadeff),
-      primaryContainer: Color(0xff6750a4),
-      onPrimaryContainer: Color(0xfffcf6ff),
-      secondary: Color(0xff645a7d),
-      onSecondary: Color(0xfffdf7ff),
-      secondaryContainer: Color(0xffded1fa),
-      onSecondaryContainer: Color(0xff4f4667),
-      tertiary: Color(0xff594982),
-      onTertiary: Color(0xffeadeff),
-      tertiaryContainer: Color(0xff65558f),
-      onTertiaryContainer: Color(0xfffcf6ff),
-      error: Color(0xff9f3f47),
+      primary: Color(0xff893fa1),
+      surfaceTint: Color(0xff893fa1),
+      onPrimary: Color(0xfffff7fb),
+      primaryContainer: Color(0xffa155b8),
+      onPrimaryContainer: Color(0xffffffff),
+      secondary: Color(0xff74547b),
+      onSecondary: Color(0xfffff7fb),
+      secondaryContainer: Color(0xfff2caf9),
+      onSecondaryContainer: Color(0xff5e4066),
+      tertiary: Color(0xff7e4b8d),
+      onTertiary: Color(0xfffff7fb),
+      tertiaryContainer: Color(0xff9660a4),
+      onTertiaryContainer: Color(0xffffffff),
+      error: Color(0xffa73843),
       onError: Color(0xfffff7f6),
-      errorContainer: Color(0xfffa868d),
-      onErrorContainer: Color(0xff580817),
-      surface: Color(0xfffdf7ff),
-      onSurface: Color(0xff352f43),
-      onSurfaceVariant: Color(0xff625c72),
-      outline: Color(0xff7e778e),
-      outlineVariant: Color(0xffb7aec7),
+      errorContainer: Color(0xfffb7780),
+      onErrorContainer: Color(0xff4e0010),
+      surface: Color(0xfffff7fb),
+      onSurface: Color(0xff3e2c43),
+      onSurfaceVariant: Color(0xff6d5871),
+      outline: Color(0xff8a738d),
+      outlineVariant: Color(0xffc3aac6),
       shadow: Color(0xff000000),
       scrim: Color(0xff000000),
-      inverseSurface: Color(0xff100b1d),
-      onInverseSurface: Color(0xffa09ba8),
-      inversePrimary: Color(0xffbba2fd),
-      primaryFixed: Color(0xff6750a4),
+      inverseSurface: Color(0xff18081c),
+      onInverseSurface: Color(0xffa798a7),
+      inversePrimary: Color(0xffe694fd),
+      primaryFixed: Color(0xffa155b8),
       onPrimaryFixed: Color(0xffffffff),
-      primaryFixedDim: Color(0xff5b4497),
-      onPrimaryFixedVariant: Color(0xffe0d2ff),
-      secondaryFixed: Color(0xffded1fa),
-      onSecondaryFixed: Color(0xff3c3353),
-      secondaryFixedDim: Color(0xffd0c3eb),
-      onSecondaryFixedVariant: Color(0xff594f71),
-      tertiaryFixed: Color(0xff65558f),
+      primaryFixedDim: Color(0xff9348aa),
+      onPrimaryFixedVariant: Color(0xfffffbff),
+      secondaryFixed: Color(0xfff2caf9),
+      onSecondaryFixed: Color(0xff4a2d52),
+      secondaryFixedDim: Color(0xffe4bcea),
+      onSecondaryFixedVariant: Color(0xff684970),
+      tertiaryFixed: Color(0xff9660a4),
       onTertiaryFixed: Color(0xffffffff),
-      tertiaryFixedDim: Color(0xff594982),
-      onTertiaryFixedVariant: Color(0xffe0d2ff),
-      surfaceDim: Color(0xffdfd6f0),
-      surfaceBright: Color(0xfffdf7ff),
+      tertiaryFixedDim: Color(0xff885497),
+      onTertiaryFixedVariant: Color(0xfffffbff),
+      surfaceDim: Color(0xffedd1ef),
+      surfaceBright: Color(0xfffff7fb),
       surfaceContainerLowest: Color(0xffffffff),
-      surfaceContainerLow: Color(0xfff8f1ff),
-      surfaceContainer: Color(0xfff3eaff),
-      surfaceContainerHigh: Color(0xffede4fb),
-      surfaceContainerHighest: Color(0xffe8def9),
+      surfaceContainerLow: Color(0xffffeffd),
+      surfaceContainer: Color(0xfffee7ff),
+      surfaceContainerHigh: Color(0xfff9e0fa),
+      surfaceContainerHighest: Color(0xfff6daf8),
     );
   }
 
@@ -187,60 +187,60 @@ class MaterialTheme {
   static ColorScheme darkScheme() {
     return const ColorScheme(
       brightness: Brightness.dark,
-      primary: Color(0xffa890e9),
-      surfaceTint: Color(0xffa890e9),
-      onPrimary: Color(0xff270762),
-      primaryContainer: Color(0xff6750a4),
-      onPrimaryContainer: Color(0xfffcf6ff),
-      secondary: Color(0xffa398be),
-      onSecondary: Color(0xff231b3a),
-      secondaryContainer: Color(0xff342b4b),
-      onSecondaryContainer: Color(0xffb6aad2),
-      tertiary: Color(0xffa694d3),
-      onTertiary: Color(0xff25154c),
-      tertiaryContainer: Color(0xff65558f),
-      onTertiaryContainer: Color(0xfffcf6ff),
-      error: Color(0xfffa868d),
-      onError: Color(0xff580817),
-      errorContainer: Color(0xff4c000f),
-      onErrorContainer: Color(0xffef7e84),
-      surface: Color(0xff0f0d16),
-      onSurface: Color(0xffebe1fc),
-      onSurfaceVariant: Color(0xffb0a7c0),
-      outline: Color(0xff797289),
-      outlineVariant: Color(0xff4b455a),
+      primary: Color(0xffcf7fe5),
+      surfaceTint: Color(0xffcf7fe5),
+      onPrimary: Color(0xff3a004d),
+      primaryContainer: Color(0xffa155b8),
+      onPrimaryContainer: Color(0xffffffff),
+      secondary: Color(0xffb691bd),
+      onSecondary: Color(0xff301538),
+      secondaryContainer: Color(0xff42254a),
+      onSecondaryContainer: Color(0xffcaa4d0),
+      tertiary: Color(0xffc289d0),
+      onTertiary: Color(0xff380549),
+      tertiaryContainer: Color(0xff9660a4),
+      onTertiaryContainer: Color(0xffffffff),
+      error: Color(0xfffb7780),
+      onError: Color(0xff4e0010),
+      errorContainer: Color(0xff6d091d),
+      onErrorContainer: Color(0xffff9a9e),
+      surface: Color(0xff140b16),
+      onSurface: Color(0xfff9ddfb),
+      onSurfaceVariant: Color(0xffbca3bf),
+      outline: Color(0xff856e88),
+      outlineVariant: Color(0xff554159),
       shadow: Color(0xff000000),
       scrim: Color(0xff000000),
 }
 `,
   'DESIGN.md': `colors:
-  primary: "#a890e9"
-  on-primary: "#270762"
-  primary-container: "#6750a4"
-  on-primary-container: "#fcf6ff"
-  secondary: "#a398be"
-  on-secondary: "#231b3a"
-  secondary-container: "#342b4b"
-  on-secondary-container: "#b6aad2"
-  tertiary: "#a694d3"
-  on-tertiary: "#25154c"
-  tertiary-container: "#65558f"
-  on-tertiary-container: "#fcf6ff"
-  error: "#fa868d"
-  on-error: "#580817"
-  error-container: "#4c000f"
-  on-error-container: "#ef7e84"
-  surface: "#0f0d16"
-  on-surface: "#ebe1fc"
-  on-surface-variant: "#b0a7c0"
-  surface-dim: "#0f0d16"
-  surface-bright: "#2f293d"
+  primary: "#cf7fe5"
+  on-primary: "#3a004d"
+  primary-container: "#a155b8"
+  on-primary-container: "#ffffff"
+  secondary: "#b691bd"
+  on-secondary: "#301538"
+  secondary-container: "#42254a"
+  on-secondary-container: "#caa4d0"
+  tertiary: "#c289d0"
+  on-tertiary: "#380549"
+  tertiary-container: "#9660a4"
+  on-tertiary-container: "#ffffff"
+  error: "#fb7780"
+  on-error: "#4e0010"
+  error-container: "#6d091d"
+  on-error-container: "#ff9a9e"
+  surface: "#140b16"
+  on-surface: "#f9ddfb"
+  on-surface-variant: "#bca3bf"
+  surface-dim: "#140b16"
+  surface-bright: "#38263c"
   surface-container-lowest: "#000000"
-  surface-container-low: "#15111e"
-  surface-container: "#1b1726"
-  surface-container-high: "#221d2d"
-  surface-container-highest: "#282336"
-  outline: "#797289"
-  outline-variant: "#4b455a"
+  surface-container-low: "#1b0f1d"
+  surface-container: "#221525"
+  surface-container-high: "#291a2d"
+  surface-container-highest: "#311f35"
+  outline: "#856e88"
+  outline-variant: "#554159"
 `,
 }

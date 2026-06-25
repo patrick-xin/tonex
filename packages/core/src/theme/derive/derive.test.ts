@@ -255,9 +255,10 @@ describe('deriveTheme', () => {
       expect(overridden.md.light['--color-primary-container']).not.toBe(
         baseline.md.light['--color-primary-container'],
       )
-      expect(overridden.md.light['--color-on-primary-container']).not.toBe(
-        baseline.md.light['--color-on-primary-container'],
-      )
+      // on-primary-container is a computed contrast foreground: under the CMF
+      // default seed it pins to pure white for the baseline and every override
+      // tested, so it carries no signal here — the three tokens above already
+      // prove the primary family regenerated.
       // siblings stay
       expect(overridden.md.light['--color-secondary']).toBe(baseline.md.light['--color-secondary'])
       expect(overridden.md.light['--color-tertiary']).toBe(baseline.md.light['--color-tertiary'])
@@ -1102,8 +1103,8 @@ describe('deriveTheme', () => {
 
     it('binds --brand to the literal seed (exactHex) in both modes', () => {
       const { shadcn } = deriveTheme(DEFAULT_INPUTS)
-      // DEFAULT_INPUTS.seed.exactHex === '#6750a4'
-      expect(shadcn.brand['--brand']).toBe(argbFromHex('#6750a4'))
+      // DEFAULT_INPUTS.seed.exactHex === '#a155b8'
+      expect(shadcn.brand['--brand']).toBe(argbFromHex('#a155b8'))
     })
 
     it('brand is mode-invariant (one value, no light/dark divergence)', () => {

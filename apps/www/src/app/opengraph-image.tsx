@@ -18,11 +18,18 @@ export default function OpengraphImage() {
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '80px',
-        background: '#0a0a0a',
-        color: '#fafafa',
+        background: '#140b16',
+        color: '#893fa1',
       }}
     >
-      <div style={{ fontSize: 128, fontWeight: 700, letterSpacing: '-0.04em' }}>
+      <div
+        style={{
+          fontFamily: 'system-ui',
+          fontSize: 128,
+          fontWeight: 800,
+          letterSpacing: '-0.04em',
+        }}
+      >
         {SITE_CONFIG.brand}
       </div>
       <div
@@ -30,7 +37,7 @@ export default function OpengraphImage() {
           marginTop: 24,
           fontSize: 44,
           lineHeight: 1.25,
-          color: '#a1a1aa',
+          color: '#f9ddfb',
           maxWidth: 900,
         }}
       >

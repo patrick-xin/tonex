@@ -498,10 +498,10 @@ export interface PortableTheme {
 // why: DEFAULT_INPUTS is referenced by source initial state, the baked
 // globals.css, and the drift-guard test. Changing the seed here means
 // regenerating globals.css and re-baselining the drift-guard. exactHex
-// is set to the project default '#6750a4' so the hex display reads back
+// is set to the project default '#a155b8' so the hex display reads back
 // verbatim even though the HCT axes are the canonical store — same UX
 // contract as a user-pasted hex (ADR-0028).
-const DEFAULT_SEED_HEX = '#6750a4'
+const DEFAULT_SEED_HEX = '#a155b8'
 export const DEFAULT_INPUTS: PortableTheme = {
   version: SCHEMA_VERSION,
   seed: { ...hctFromHex(DEFAULT_SEED_HEX), exactHex: DEFAULT_SEED_HEX },
