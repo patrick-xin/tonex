@@ -15,7 +15,7 @@ const PALETTE: Record<Mode, DotStops> = {
   light: [
     ['primary', 40],
     ['primary', 60],
-    ['secondary', 50],
+    ['tertiary', 50],
     ['secondary', 70],
     ['tertiary', 80],
     ['neutral', 100],
@@ -24,7 +24,7 @@ const PALETTE: Record<Mode, DotStops> = {
   dark: [
     ['primary', 60],
     ['primary', 40],
-    ['secondary', 50],
+    ['tertiary', 50],
     ['secondary', 70],
     ['tertiary', 80],
     ['neutral', 60],
