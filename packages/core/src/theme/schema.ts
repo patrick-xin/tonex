@@ -28,17 +28,17 @@ import { NEUTRAL_PALETTE_NAMES, type NeutralPaletteName } from './surface'
 export { type CustomColorEntry, slugifyCustomColorName, validateCustomColorEntry }
 
 // why: SCHEMA_VERSION pins the persisted PortableTheme shape contract per
-// ADR-0009. v2 — ADR-0028 flips the canonical seed from `seedHex: string`
-// to `seed: { hue, chroma, tone, exactHex? }`. v3 — issue #123 splits
-// `contrastLevel: number` to per-mode `{ light, dark }`, mirroring the
-// surface levels (contrast is a per-build() MCU arg, so the split is
-// structural). Pre-launch breaking change: no forward migration while there
-// are no live users to preserve — persisted older records fail schema parse
-// and reset to DEFAULT_INPUTS on rehydrate (ADR-0009 c.4). Future bumps follow
-// ADR-0009's procedure:
-// increment SCHEMA_VERSION AND add a forward-migration branch in
-// source.ts:migrate when there are live users to preserve.
-export const SCHEMA_VERSION = 3 as const
+// ADR-0009. Reset to 1 as the launch baseline: the pre-launch shape churn
+// (ADR-0028 seed object, issue #123 per-mode contrast) is folded into this
+// baseline rather than carried as v2/v3 history that only reads as confusing
+// provenance to agents and humans at launch. There are no users to preserve,
+// so we do NOT rotate the STORAGE_KEY — the only stale blobs are on dev/tester
+// machines, cleared by hand. (Note the consequence: a dev blob stamped with an
+// old higher version is `stored > current`, so zustand skips migrate and keeps
+// it on rehydrate — hence the manual clear.) Post-launch, every shape change
+// increments SCHEMA_VERSION AND adds a forward-migration branch in
+// source.ts:migrate to preserve live users (ADR-0009's procedure).
+export const SCHEMA_VERSION = 1 as const
 export type SchemaVersion = typeof SCHEMA_VERSION
 
 // why: canonical list of md tokens deriveTheme emits per mode. Used as the
