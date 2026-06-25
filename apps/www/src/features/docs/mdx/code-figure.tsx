@@ -21,8 +21,10 @@ export function CodeFigure({ className, children, ...props }: ComponentProps<'fi
       )}
       {...props}
     >
+      <div className="mdx-code-copy-overlay sticky z-10 flex justify-end pointer-events-none">
+        <CopyButton getText={getText} className="pointer-events-auto" />
+      </div>
       {children}
-      <CopyButton getText={getText} className="absolute top-2 right-2" />
     </figure>
   )
 }

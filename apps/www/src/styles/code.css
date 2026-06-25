@@ -28,6 +28,12 @@ html.dark .shiki span {
     outline: none;
     position: relative;
     font-family: var(--font-mono);
+
+    .mdx-code-copy-overlay {
+      top: calc(var(--spacing) * 2);
+      height: 0;
+      margin-right: calc(var(--spacing) * 2);
+    }
   }
 
   [data-rehype-pretty-code-title] {
@@ -39,6 +45,15 @@ html.dark .shiki span {
     font-size: var(--text-sm);
     font-family: var(--font-mono);
     color: var(--color-on-surface-variant);
+  }
+
+  [data-rehype-pretty-code-figure]:not(:has([data-rehype-pretty-code-title])):has(
+    [data-line]:only-child
+  ) {
+    .mdx-code-copy-overlay {
+      top: calc(var(--spacing) * 2 + 0.5lh + var(--spacing));
+      transform: translateY(calc(-50% - var(--spacing) * 3.5));
+    }
   }
 
   [data-line-numbers] {
