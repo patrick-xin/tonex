@@ -204,7 +204,7 @@ export function ExportFilters({ tab, options, onChange }: ExportFiltersProps) {
           </span>
           <span className="text-xs font-medium text-primary">{open ? 'Hide' : 'Customize'}</span>
         </CollapsibleTrigger>
-        <div className="mb-2 hidden text-sm font-medium uppercase tracking-wide lg:block">
+        <div className="mb-4 hidden text-sm font-medium uppercase tracking-wide lg:block">
           Include in export
         </div>
         <CollapsiblePanel>

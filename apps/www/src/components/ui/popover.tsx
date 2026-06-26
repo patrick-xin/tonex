@@ -54,7 +54,6 @@ function PopoverArrow({ className, ...props }: BasePopover.Arrow.Props) {
       className={cn(
         'data-[side=bottom]:top-[-8px] data-[side=left]:right-[-13px] data-[side=left]:rotate-90 data-[side=right]:left-[-13px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-8px] data-[side=top]:rotate-180',
         'transition-none',
-
         className,
       )}
       data-slot="popover-arrow"
@@ -124,7 +123,7 @@ function PopoverContent({
         sideOffset={sideOffset}
       >
         <BasePopover.Popup
-          className={cn('relative p-3 surface-popup', className)}
+          className={cn('relative p-3 surface-popup bg-surface', className)}
           data-slot="popover-content"
           {...props}
         >

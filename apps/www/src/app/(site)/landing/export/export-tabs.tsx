@@ -3,11 +3,7 @@
 import { FileJsonIcon } from 'lucide-react'
 import type { ComponentType, SVGProps } from 'react'
 import { useState } from 'react'
-import { CssIcon } from '@/components/icons/css'
-import { FlutterIcon } from '@/components/icons/flutter'
-import { MdIcon } from '@/components/icons/md'
-import { ShadcnIcon } from '@/components/icons/shadcn'
-import { TailwindCSSIcon } from '@/components/icons/tailwind'
+import { CssIcon, FlutterIcon, MdIcon, ShadcnIcon, TailwindCSSIcon } from '@/components/icons'
 import { ShimmerBorder } from '@/components/shared/shimmer-border'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
 import type { ExportTab } from '@/features/export'
@@ -42,10 +38,10 @@ export function ExportTabs({ highlighted }: { highlighted: Record<ExportTab, str
     <Tabs
       value={tab}
       onValueChange={(value) => setTab(value as ExportTab)}
-      className="w-full max-w-6xl mx-auto px-4"
+      className="w-full mx-auto"
     >
       <TabsListContent
-        className="mx-auto mb-6 overflow-x-auto max-w-full no-scrollbar"
+        className="mx-auto mb-6 overflow-x-auto max-w-full no-scrollbar shadow-crisp"
         indicatorClassName="bg-secondary-container data-[orientation=horizontal]:h-[calc(100%-12px)]"
       >
         {EXPORT_TABS.map(({ value, label, icon: TabIcon }) => (

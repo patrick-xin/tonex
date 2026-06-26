@@ -7,10 +7,12 @@ export function SectionHeader({
   headingClassName,
   className,
   align = 'center',
+  descriptionClassName,
 }: {
   heading: string
   description?: string
   headingClassName?: string
+  descriptionClassName?: string
   className?: string
   align?: 'center' | 'start'
 }) {
@@ -18,7 +20,7 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        'flex max-w-3xl flex-col gap-4',
+        'flex max-w-3xl flex-col gap-4 sm:gap-6 lg:gap-8',
         start ? 'items-start text-left' : 'mx-auto items-center text-center',
         className,
       )}
@@ -31,7 +33,12 @@ export function SectionHeader({
       >
         {heading}
       </h2>
-      <p className="max-w-xl text-balance text-base text-on-surface-variant sm:text-[1.2rem] mb-12">
+      <p
+        className={cn(
+          'max-w-lg text-base text-on-surface-variant sm:text-[1.2rem] mb-8 sm:mb-12 text-balance',
+          descriptionClassName,
+        )}
+      >
         {description}
       </p>
     </div>

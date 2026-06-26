@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { cn } from 'tailwind-variants'
-import { TonexLogo } from '@/components/icons/logo'
+import { TonexLogo } from '@/components/icons'
 import { focusVisiblePrimaryRing } from '@/components/ui/styles'
 
 export function SiteLogo({ className }: { className?: string }) {

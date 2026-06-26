@@ -1,6 +1,6 @@
 import { BarChart3, Command, Eye, Palette, Save, Settings2, Sparkles, Unlock } from 'lucide-react'
 import type { ComponentType, CSSProperties, SVGProps } from 'react'
-import { TailwindCSSIcon } from '@/components/icons/tailwind'
+import { TailwindCSSIcon } from '@/components/icons'
 import { ShimmerBorder } from '@/components/shared/shimmer-border'
 import { SectionHeader } from '../section-header'
 import { FEATURES, type FeatureId } from './data'
@@ -51,14 +51,15 @@ function FeatureCard({
 
 export function Features() {
   return (
-    <section className="relative mx-auto py-12 sm:py-24 isolate">
-      <div className="mx-auto max-w-6xl px-4">
+    <section className="relative py-12 sm:py-24 isolate px-4 md:px-12 lg:px-16 mx-auto max-w-7xl">
+      <div className="">
         <SectionHeader
           align="start"
           heading="Everything else you'd reach for"
           description="The smaller decisions, already made, the polish is there before you ask for it."
+          descriptionClassName="max-w-2xl"
         />
-        <div className="flex snap-x snap-mandatory gap-4 sm:gap-6 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+        <div className="flex snap-x snap-mandatory gap-4 sm:gap-6 overflow-x-auto no-scrollbar sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <FeatureCard
               key={feature.id}

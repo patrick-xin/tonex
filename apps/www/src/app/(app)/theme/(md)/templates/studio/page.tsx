@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { Capabilities, Hero, Moves, Pitch, Process, Stats } from './_components'
+
+export const metadata: Metadata = {
+  title: 'Studio',
+  description: 'Studio',
+}
 
 export default function StudioPage() {
   return (

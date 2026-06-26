@@ -38,7 +38,7 @@ export function SiteFooter() {
       <ShimmerBorder />
       <div className="mx-auto w-full max-w-7xl px-4 pt-12 sm:px-6 sm:pt-16">
         <div className="grid gap-12 md:grid-cols-2">
-          <SiteLogo className="size-10" />
+          <SiteLogo className="size-6 sm:size-10" />
           <div className="flex flex-col gap-10 sm:flex-row sm:justify-between md:justify-end md:gap-16">
             <nav aria-label="Site">
               <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">

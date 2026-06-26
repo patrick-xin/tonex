@@ -4,7 +4,7 @@ import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { TAILWIND_PALETTE_OKLCH } from '@tonex/core/data'
 import { hexFromOklch } from '@tonex/core/oklch'
 import { useRef, useState } from 'react'
-import { TailwindCSSIcon } from '@/components/icons/tailwind'
+import { TailwindCSSIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,
@@ -137,7 +137,7 @@ export function TwColorPicker({
           </Button>
         }
       />
-      <ComboboxContent side="right" className="max-h-max w-48" matchAnchorWidth={false}>
+      <ComboboxContent side="right" className="max-h-max w-48 bg-surface" matchAnchorWidth={false}>
         <ComboboxInputGroupContent
           autoFocus
           embedded

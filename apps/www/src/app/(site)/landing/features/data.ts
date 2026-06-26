@@ -31,7 +31,7 @@ export const FEATURES: { id: FeatureId; title: string; body: string; accent: str
   {
     id: 'keyboard',
     title: 'Optimize for DX',
-    body: 'Command menu, keyboard shortcuts, light/dark mode toggle, and copy-paste exports keep you in flow — every action a keystroke away, nothing that breaks your rhythm.',
+    body: 'Command menu, keyboard shortcuts and copy-paste exports keep you in flow — every action a keystroke away, nothing that breaks your rhythm.',
     accent: 'var(--color-chart-2)',
   },
   {

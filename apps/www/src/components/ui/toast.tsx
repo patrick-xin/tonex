@@ -57,22 +57,20 @@ const Icons = {
 
 const toastVariants = cva(
   // Custom styles, change the look of the toast
-  'rounded-md overlay-outline shadow-lg transition-all select-none',
+  'rounded-md shadow-sm transition-all select-none',
   {
     defaultVariants: {
       type: 'default',
     },
     variants: {
       type: {
-        default: 'overlay-outline bg-surface-container text-on-surface',
-        inverse: 'bg-inverse-surface text-inverse-on-surface outline-none!',
+        default: 'bg-surface text-on-surface',
+        inverse: 'bg-inverse-surface text-inverse-on-surface',
         error: 'bg-error outline-error text-on-error',
-        info: 'outline-sky-500/40 bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-200',
-        loading: 'overlay-outline bg-surface-container text-on-surface',
-        success:
-          'outline-green-500/40 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-200',
-        warning:
-          'outline-yellow-500/40 bg-yellow-50 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-200',
+        info: 'bg-tnx-info text-on-tnx-info',
+        loading: 'bg-surface text-on-surface',
+        success: 'bg-tnx-success text-on-tnx-success',
+        warning: 'bg-tnx-warning text-on-tnx-warning',
       },
     },
   },
@@ -327,7 +325,7 @@ const AnchoredToast = () => {
                 ) : (
                   <>
                     <ToastArrow />
-                    <ToastContent className="flex flex-col py-2 px-3 gap-2 overlay-outline bg-surface-container outline-0">
+                    <ToastContent className="flex flex-col py-2 px-3 gap-2 bg-surface overlay-outline rounded-md">
                       {toast.title && <ToastTitle>{toast.title}</ToastTitle>}
                       {toast.description && (
                         <ToastDescription>{toast.description}</ToastDescription>

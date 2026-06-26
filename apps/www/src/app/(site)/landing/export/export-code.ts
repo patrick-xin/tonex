@@ -36,9 +36,9 @@ export const EXPORT_CODE: Record<ExportTab, string> = {
   color-scheme: light dark;
   --color-primary: light-dark(#893fa1, #cf7fe5);
   --color-on-primary: light-dark(#fff7fb, #3a004d);
-  --color-primary-container: light-dark(#a155b8, #a155b8);
-  --color-on-primary-container: light-dark(#ffffff, #ffffff);
-  --color-primary-fixed: light-dark(#a155b8, #a155b8);
+  --color-primary-container: light-dark(#ebe1d1, #b8b0a1);
+  --color-on-primary-container: light-dark(#575145, #353025);
+  --color-primary-fixed: light-dark(#ebe1d1, #ebe1d1);
   --color-primary-fixed-dim: light-dark(#9348aa, #9348aa);
   --color-on-primary-fixed: light-dark(#ffffff, #ffffff);
   --color-on-primary-fixed-variant: light-dark(#fffbff, #fffbff);
@@ -92,7 +92,7 @@ export const EXPORT_CODE: Record<ExportTab, string> = {
   "light": {
     "primary": "#893FA1",
     "onPrimary": "#FFF7FB",
-    "primaryContainer": "#A155B8",
+    "primaryContainer": "#EBE1D1",
     "onPrimaryContainer": "#FFFFFF",
     "secondary": "#74547B",
     "onSecondary": "#FFF7FB",
@@ -134,31 +134,31 @@ class MaterialTheme {
       primary: Color(0xff893fa1),
       surfaceTint: Color(0xff893fa1),
       onPrimary: Color(0xfffff7fb),
-      primaryContainer: Color(0xffa155b8),
-      onPrimaryContainer: Color(0xffffffff),
-      secondary: Color(0xff74547b),
-      onSecondary: Color(0xfffff7fb),
-      secondaryContainer: Color(0xfff2caf9),
-      onSecondaryContainer: Color(0xff5e4066),
-      tertiary: Color(0xff7e4b8d),
-      onTertiary: Color(0xfffff7fb),
-      tertiaryContainer: Color(0xff9660a4),
-      onTertiaryContainer: Color(0xffffffff),
-      error: Color(0xffa73843),
+      primaryContainer: Color(0xffebe1d1),
+      onPrimaryContainer: Color(0xff575145),
+      secondary: Color(0xff625f58),
+      onSecondary: Color(0xfffff8f0),
+      secondaryContainer: Color(0xffe8e2da),
+      onSecondaryContainer: Color(0xff55514b),
+      tertiary: Color(0xff635e55),
+      onTertiary: Color(0xfffff8ef),
+      tertiaryContainer: Color(0xffb7b0a5),
+      onTertiaryContainer: Color(0xff343028),
+      error: Color(0xff9e422c),
       onError: Color(0xfffff7f6),
-      errorContainer: Color(0xfffb7780),
-      onErrorContainer: Color(0xff4e0010),
-      surface: Color(0xfffff7fb),
-      onSurface: Color(0xff3e2c43),
-      onSurfaceVariant: Color(0xff6d5871),
-      outline: Color(0xff8a738d),
-      outlineVariant: Color(0xffc3aac6),
+      errorContainer: Color(0xfffe8b70),
+      onErrorContainer: Color(0xff5a1001),
+      surface: Color(0xfffef8f5),
+      onSurface: Color(0xff34322f),
+      onSurfaceVariant: Color(0xff625f5a),
+      outline: Color(0xff7e7a76),
+      outlineVariant: Color(0xffb6b1ac),
       shadow: Color(0xff000000),
       scrim: Color(0xff000000),
-      inverseSurface: Color(0xff18081c),
-      onInverseSurface: Color(0xffa798a7),
-      inversePrimary: Color(0xffe694fd),
-      primaryFixed: Color(0xffa155b8),
+      inverseSurface: Color(0xff0f0e0b),
+      onInverseSurface: Color(0xffa09c99),
+      inversePrimary: Color(0xfffcf3e2),
+      primaryFixed: Color(0xffebe1d1),
       onPrimaryFixed: Color(0xffffffff),
       primaryFixedDim: Color(0xff9348aa),
       onPrimaryFixedVariant: Color(0xfffffbff),
@@ -187,28 +187,28 @@ class MaterialTheme {
   static ColorScheme darkScheme() {
     return const ColorScheme(
       brightness: Brightness.dark,
-      primary: Color(0xffcf7fe5),
-      surfaceTint: Color(0xffcf7fe5),
-      onPrimary: Color(0xff3a004d),
-      primaryContainer: Color(0xffa155b8),
-      onPrimaryContainer: Color(0xffffffff),
-      secondary: Color(0xffb691bd),
-      onSecondary: Color(0xff301538),
-      secondaryContainer: Color(0xff42254a),
-      onSecondaryContainer: Color(0xffcaa4d0),
-      tertiary: Color(0xffc289d0),
-      onTertiary: Color(0xff380549),
-      tertiaryContainer: Color(0xff9660a4),
-      onTertiaryContainer: Color(0xffffffff),
-      error: Color(0xfffb7780),
-      onError: Color(0xff4e0010),
-      errorContainer: Color(0xff6d091d),
-      onErrorContainer: Color(0xffff9a9e),
-      surface: Color(0xff140b16),
-      onSurface: Color(0xfff9ddfb),
-      onSurfaceVariant: Color(0xffbca3bf),
-      outline: Color(0xff856e88),
-      outlineVariant: Color(0xff554159),
+      primary: Color(0xffcec6b6),
+      surfaceTint: Color(0xffcec6b6),
+      onPrimary: Color(0xff454034),
+      primaryContainer: Color(0xffb8b0a1),
+      onPrimaryContainer: Color(0xff353025),
+      secondary: Color(0xffa29d96),
+      onSecondary: Color(0xff22201b),
+      secondaryContainer: Color(0xff33302b),
+      onSecondaryContainer: Color(0xffb5b0a8),
+      tertiary: Color(0xffc5beb2),
+      onTertiary: Color(0xff3e3a32),
+      tertiaryContainer: Color(0xffb7b0a5),
+      onTertiaryContainer: Color(0xff343028),
+      error: Color(0xfffe8b70),
+      onError: Color(0xff5a1001),
+      errorContainer: Color(0xff5c1202),
+      onErrorContainer: Color(0xffff8f74),
+      surface: Color(0xff0f0e0c),
+      onSurface: Color(0xffeae4df),
+      onSurfaceVariant: Color(0xffafaaa5),
+      outline: Color(0xff787570),
+      outlineVariant: Color(0xff4a4744),
       shadow: Color(0xff000000),
       scrim: Color(0xff000000),
 }
@@ -216,7 +216,7 @@ class MaterialTheme {
   'DESIGN.md': `colors:
   primary: "#cf7fe5"
   on-primary: "#3a004d"
-  primary-container: "#a155b8"
+  primary-container: "#b8b0a1"
   on-primary-container: "#ffffff"
   secondary: "#b691bd"
   on-secondary: "#301538"

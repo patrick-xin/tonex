@@ -23,7 +23,8 @@
       "recommended": true,
       "a11y": {
         "useSemanticElements": "warn",
-        "useValidAnchor": "warn"
+        "useValidAnchor": "warn",
+        "noSvgWithoutTitle": "warn"
       }
     }
   },

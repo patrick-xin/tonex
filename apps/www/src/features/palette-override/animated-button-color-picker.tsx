@@ -132,7 +132,7 @@ export function AnimatedButtonColorPicker({
             >
               <PopoverPopup
                 className={cx(
-                  'surface-popup h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) rounded-md transition-[width,height,opacity,scale] duration-[0.35s] ease-spring',
+                  'surface-popup h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) rounded-md transition-[width,height,opacity,scale] duration-[0.35s] ease-spring bg-surface',
                 )}
               >
                 <PopoverArrow className="flex transition-[left] duration-[0.35s] ease-[cubic-bezier(0.22,1,0.36,1)]" />

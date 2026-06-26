@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import {
   SectionBeliefs,
   SectionCapability,
@@ -6,6 +7,11 @@ import {
   SectionStrategy,
   SectionWork,
 } from './_components'
+
+export const metadata: Metadata = {
+  title: 'Editorial',
+  description: 'Editorial',
+}
 
 export default function EditorialPage() {
   return (

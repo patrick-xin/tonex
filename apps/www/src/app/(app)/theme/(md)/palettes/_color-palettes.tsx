@@ -55,7 +55,7 @@ function handleCopy(e: MouseEvent<HTMLButtonElement>, hex: string) {
   })
 }
 
-export function ColorPalettes() {
+export function TonePalettes() {
   const theme = useResolvedTokens()
   const [view, setView] = useState<View>('horizontal')
   const [sort, setSort] = useState<'ascending' | 'descending'>('ascending')
