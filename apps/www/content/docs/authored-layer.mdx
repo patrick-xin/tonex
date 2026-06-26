@@ -31,7 +31,7 @@ Pulls the surfaces toward grey by reducing their color. At 0% they're unchanged 
 
 Rebuilds the surfaces from a neutral you choose — one of the Tailwind neutral palettes such as zinc, slate, or stone — then blends your brand hue back in proportional to the level. At 0% you get the plain neutral; higher levels take on more of your brand. A separate text-accent controls how much of that hue reaches the text, so "clean surfaces, brand-tinted headings" stays reachable.
 
-Surface strength is **per mode** — light and dark each carry their own level — while the algorithm and the chosen palette are shared. See [Light & dark](/docs/web-app/light-dark). In the web app these live in Settings; from the CLI they're `--tint` / `--tint-palette` and `--desaturate` (mutually exclusive).
+Surface strength **and the chosen neutral palette** are **per mode** — light and dark each carry their own level and can draw on a different neutral family (warm stone in light, cool zinc in dark) — while the algorithm itself is shared. See [Light & dark](/docs/web-app/light-dark). In the web app these live in Settings; from the CLI they're `--tint` / `--tint-palette` (with `--tint-palette-light` / `--tint-palette-dark` to split the modes) and `--desaturate` (mutually exclusive).
 
 
 ## Charts
