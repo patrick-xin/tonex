@@ -3,34 +3,34 @@ name: Tonex
 colors:
   brand: "#b8b0a1"
   brand-foreground: "#231f15"
-  primary: "#645e51"
-  on-primary: "#fff7ea"
-  primary-container: "#ebe1d1"
-  on-primary-container: "#575145"
-  secondary: "#625f58"
-  on-secondary: "#fff8f0"
-  secondary-container: "#e8e2da"
-  on-secondary-container: "#55514b"
-  tertiary: "#635e55"
-  on-tertiary: "#fff8ef"
+  primary: "#cec6b6"
+  on-primary: "#454034"
+  primary-container: "#b8b0a1"
+  on-primary-container: "#353025"
+  secondary: "#a29d96"
+  on-secondary: "#22201b"
+  secondary-container: "#33302b"
+  on-secondary-container: "#b5b0a8"
+  tertiary: "#c5beb2"
+  on-tertiary: "#3e3a32"
   tertiary-container: "#b7b0a5"
   on-tertiary-container: "#343028"
-  error: "#9e422c"
-  on-error: "#fff7f6"
-  error-container: "#fe8b70"
-  on-error-container: "#5a1001"
-  surface: "#fef8f5"
-  on-surface: "#34322f"
-  on-surface-variant: "#625f5a"
-  surface-dim: "#ded9d4"
-  surface-bright: "#fef8f5"
-  surface-container-lowest: "#ffffff"
-  surface-container-low: "#f8f3ee"
-  surface-container: "#f2ede8"
-  surface-container-high: "#ede7e2"
-  surface-container-highest: "#e7e2dc"
-  outline: "#7e7a76"
-  outline-variant: "#b6b1ac"
+  error: "#fe8b70"
+  on-error: "#5a1001"
+  error-container: "#5c1202"
+  on-error-container: "#ff8f74"
+  surface: "#0f0e0c"
+  on-surface: "#eae4df"
+  on-surface-variant: "#afaaa5"
+  surface-dim: "#0f0e0c"
+  surface-bright: "#2e2c28"
+  surface-container-lowest: "#000000"
+  surface-container-low: "#141311"
+  surface-container: "#1b1917"
+  surface-container-high: "#211f1d"
+  surface-container-highest: "#272522"
+  outline: "#787570"
+  outline-variant: "#4a4744"
 typography:
   display:
     fontFamily: Vidaloka
@@ -129,7 +129,7 @@ components:
 
 ## Brand & Style
 
-tonex is precise but warm — a science-grade product wearing a calm, editorial
+Tonex is precise but warm — a science-grade product wearing a calm, editorial
 surface. Two personalities share the same bones: the marketing pages are **loud
 and expressive**, headlines set in a single dramatic serif over live, glowing
 backdrops; the app is **calm and dense**, a professional instrument that recedes so
@@ -139,22 +139,24 @@ action.
 
 ## Colors
 
-Every color is re-toned from one seed — the brand greige `#b8b0a1`. Each role keeps
-that hue and shifts only lightness, so the whole UI reads as a single warm, low-chroma
-family and every fill clears its text at AA. The palette is calm on purpose: only the
-primary action carries weight; everything else recedes so the work stays in focus.
+The dark facet of the same system. Every color is re-toned from the one seed — the
+brand greige `#b8b0a1` — so the relationship flips: light taupe accents now sit over
+a near-black, faintly warmed ground. Each role keeps its hue and shifts only
+lightness, every fill clears its text at AA, and the palette stays calm — only the
+primary action carries weight.
 
 - **Primary** — main actions, active states, and focus. The one accent allowed to
   carry weight; secondary and tertiary are quieter siblings for supporting accents.
-- **Surface family** — the neutral spine. Hierarchy comes from stepping through the
-  tonal layers (`surface` → `surface-container` → `…-high` → `…-highest`), not from
-  shadow; `surface-container-lowest` (pure white) is the floating rail.
+- **Surface family** — the neutral spine. Hierarchy comes from stepping up the tonal
+  layers (`surface` → `surface-container` → `…-high` → `…-highest`); shadow pulls
+  back in dark, so outlines carry the separation instead.
 - **On-surface / on-surface-variant** — primary text and lower-emphasis text. Step
   down to a real role to de-emphasize; never fade text with opacity, which breaks
   the gated contrast.
 - **Brand** — the literal seed `#b8b0a1`, kept outside the generated roles for a
-  genuine brand moment (the logo mark, the OG card). `brand-foreground` (`#231f15`)
-  is its AA-safe text. Reach for them only there; everywhere else, a semantic role.
+  genuine brand moment (the logo mark, the OG card); it holds across modes.
+  `brand-foreground` (`#231f15`) is its AA-safe text. Reach for them only there;
+  everywhere else, a semantic role.
 
 ## Typography
 
