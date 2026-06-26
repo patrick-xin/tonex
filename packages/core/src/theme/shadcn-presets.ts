@@ -29,7 +29,7 @@ export interface ShadcnPreset {
   description: string
   variant: VariantName
   surfaceAlgo: SurfaceAlgo
-  surfacePaletteName: NeutralPaletteName
+  surfacePaletteName: { light: NeutralPaletteName; dark: NeutralPaletteName }
   surfaceTintLevel: { light: number; dark: number }
   surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
@@ -66,7 +66,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'zinc',
+    surfacePaletteName: { light: 'zinc', dark: 'zinc' },
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -136,7 +136,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0.25, dark: 0.25 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'mist',
+    surfacePaletteName: { light: 'mist', dark: 'mist' },
     surfaceTintLevel: { light: 0.5, dark: 0.3 },
     surfaceTintTextLevel: { light: 0.8, dark: 0.9 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -206,7 +206,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'mist',
+    surfacePaletteName: { light: 'mist', dark: 'mist' },
     surfaceTintLevel: { light: 0, dark: 0.6 },
     surfaceTintTextLevel: { light: 0.9, dark: 0.8 },
     surfaceDesaturateLevel: { light: 0.3, dark: 0 },
@@ -275,7 +275,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'zinc',
+    surfacePaletteName: { light: 'zinc', dark: 'zinc' },
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0.2, dark: 0 },
@@ -345,7 +345,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0.1, dark: 0.1 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'stone',
+    surfacePaletteName: { light: 'stone', dark: 'stone' },
     surfaceTintLevel: { light: 0.4, dark: 0.3 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -415,7 +415,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0.15, dark: 0.15 },
     variant: 'cmf',
     surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'slate',
+    surfacePaletteName: { light: 'slate', dark: 'slate' },
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0.3, dark: 0.2 },
@@ -485,7 +485,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'taupe',
+    surfacePaletteName: { light: 'taupe', dark: 'taupe' },
     surfaceTintLevel: { light: 0.4, dark: 0.2 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -555,7 +555,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'tonalSpot',
     surfaceAlgo: 'desaturate',
-    surfacePaletteName: 'olive',
+    surfacePaletteName: { light: 'olive', dark: 'olive' },
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0.4, dark: 0.6 },
@@ -625,7 +625,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'mauve',
+    surfacePaletteName: { light: 'mauve', dark: 'mauve' },
     surfaceTintLevel: { light: 0.5, dark: 0.3 },
     surfaceTintTextLevel: { light: 0, dark: 0 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -695,7 +695,7 @@ export const SHADCN_PRESETS = {
     contrastLevel: { light: 0, dark: 0 },
     variant: 'cmf',
     surfaceAlgo: 'tint',
-    surfacePaletteName: 'slate',
+    surfacePaletteName: { light: 'slate', dark: 'slate' },
     surfaceTintLevel: { light: 0, dark: 0 },
     surfaceTintTextLevel: { light: 0.3, dark: 0.4 },
     surfaceDesaturateLevel: { light: 0, dark: 0 },
@@ -808,7 +808,8 @@ export function findActivePreset(theme: PortableTheme): ShadcnPresetName | null 
   ][]) {
     if (theme.variant !== preset.variant) continue
     if (theme.surfaceAlgo !== preset.surfaceAlgo) continue
-    if (theme.surfacePaletteName !== preset.surfacePaletteName) continue
+    if (theme.surfacePaletteName.light !== preset.surfacePaletteName.light) continue
+    if (theme.surfacePaletteName.dark !== preset.surfacePaletteName.dark) continue
     if (theme.surfaceTintLevel.light !== preset.surfaceTintLevel.light) continue
     if (theme.surfaceTintLevel.dark !== preset.surfaceTintLevel.dark) continue
     if (theme.surfaceTintTextLevel.light !== preset.surfaceTintTextLevel.light) continue

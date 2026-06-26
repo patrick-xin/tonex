@@ -430,8 +430,12 @@ export interface PortableTheme {
   // === export (ADR-0017). `surfaceAlgo` selects which (if any) algorithm
   // runs; the level for the selected algorithm controls strength.
   // - surfacePaletteName: which TW neutral palette feeds the tint base.
-  //   Only consumed when surfaceAlgo='tint'. Default 'zinc' preserves the
-  //   pre-slice-7 behavior bytewise (algorithm was hardcoded to zinc).
+  //   Only consumed when surfaceAlgo='tint'. Mode-keyed (#242) so light and
+  //   dark can draw on different neutral families (e.g. warm stone in light,
+  //   cool zinc in dark) — mirrors the level fields, which were per-mode since
+  //   v7 while this stayed a flat scalar. Default {light:'zinc', dark:'zinc'}
+  //   preserves the pre-slice-7 behavior bytewise (algorithm was hardcoded to
+  //   zinc, same family both modes).
   // - surfaceTintLevel: 0=neutral palette base → 1=full primary character.
   //   Mode-keyed since v7 — independent levels per mode.
   // - surfaceTintTextLevel: opt-in brand accent on on-surface/on-surface-
@@ -443,7 +447,7 @@ export interface PortableTheme {
   //   since v7. The level=0 short-circuit in applySurfaceDesaturate keeps
   //   the drift-guard baseline byte-identical when both modes are 0.
   surfaceAlgo: SurfaceAlgo
-  surfacePaletteName: NeutralPaletteName
+  surfacePaletteName: { light: NeutralPaletteName; dark: NeutralPaletteName }
   surfaceTintLevel: { light: number; dark: number }
   surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
@@ -610,6 +614,12 @@ const ShadcnRoleOverridesPerModeSchema = v.record(v.picklist(SHADCN_ROLE_NAMES),
 const ShadcnChartOverridesPerModeSchema = v.record(v.picklist(SHADCN_CHART_TOKEN_NAMES), HexSchema)
 
 const ModeKeyedNumberSchema = v.object({ light: v.number(), dark: v.number() })
+// why: surfacePaletteName is mode-keyed (#242) — each mode picks its own
+// neutral family from the same NEUTRAL_PALETTE_NAMES picklist.
+const ModeKeyedPaletteSchema = v.object({
+  light: v.picklist(NEUTRAL_PALETTE_NAMES),
+  dark: v.picklist(NEUTRAL_PALETTE_NAMES),
+})
 
 // why: contrastLevel is mode-keyed (issue #123) but, unlike the surface
 // levels, each mode is bounded [0, 1] — MCU's spec range is [-1, 1] but the
@@ -644,7 +654,7 @@ export const PortableThemeSchema = v.object({
     dark: ShadcnChartOverridesPerModeSchema,
   }),
   surfaceAlgo: v.picklist(SURFACE_ALGOS),
-  surfacePaletteName: v.picklist(NEUTRAL_PALETTE_NAMES),
+  surfacePaletteName: ModeKeyedPaletteSchema,
   surfaceTintLevel: ModeKeyedNumberSchema,
   surfaceTintTextLevel: ModeKeyedNumberSchema,
   surfaceDesaturateLevel: ModeKeyedNumberSchema,

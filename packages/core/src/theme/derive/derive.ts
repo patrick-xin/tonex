@@ -509,7 +509,7 @@ function applyTreatment(layer: TokenMap, mode: Mode, source: PortableTheme): Tok
     return applySurfaceTint(
       layer,
       source.surfaceTintLevel[mode],
-      source.surfacePaletteName,
+      source.surfacePaletteName[mode],
       source.surfaceTintTextLevel[mode],
     )
   return applySurfaceDesaturate(layer, source.surfaceDesaturateLevel[mode])

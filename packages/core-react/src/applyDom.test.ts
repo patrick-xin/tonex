@@ -424,7 +424,7 @@ describe('applyDom (jsdom integration)', () => {
           ...DEFAULT_INPUTS,
           surfaceAlgo: 'tint',
           surfaceTintLevel: { light: 0.5, dark: 0.5 },
-          surfacePaletteName: 'slate',
+          surfacePaletteName: { light: 'slate', dark: 'slate' },
         },
       },
       {

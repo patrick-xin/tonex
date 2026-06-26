@@ -83,7 +83,7 @@ const NONDEFAULT_INPUTS: PortableTheme = {
     dark: { '--chart-2': '#445566' },
   },
   surfaceAlgo: 'tint',
-  surfacePaletteName: 'slate',
+  surfacePaletteName: { light: 'slate', dark: 'stone' },
   surfaceTintLevel: { light: 0.42, dark: 0.18 },
   surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
   surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
@@ -157,8 +157,8 @@ describe('useSource persistence round-trip', () => {
       }
     }
     s.actions.setSurfaceAlgo(NONDEFAULT_INPUTS.surfaceAlgo)
-    s.actions.setSurfacePaletteName(NONDEFAULT_INPUTS.surfacePaletteName)
     for (const mode of MODES) {
+      s.actions.setSurfacePaletteName(mode, NONDEFAULT_INPUTS.surfacePaletteName[mode])
       s.actions.setSurfaceTintLevel(mode, NONDEFAULT_INPUTS.surfaceTintLevel[mode])
       s.actions.setSurfaceTintTextLevel(mode, NONDEFAULT_INPUTS.surfaceTintTextLevel[mode])
       s.actions.setSurfaceDesaturateLevel(mode, NONDEFAULT_INPUTS.surfaceDesaturateLevel[mode])
@@ -881,7 +881,7 @@ describe('setShadcnPreset recipe symmetry', () => {
     useSource.setState({
       variant: 'monochrome',
       surfaceAlgo: 'tint',
-      surfacePaletteName: 'slate',
+      surfacePaletteName: { light: 'slate', dark: 'stone' },
       surfaceTintLevel: { light: 0.42, dark: 0.18 },
       surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
       surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
@@ -945,7 +945,7 @@ describe('setShadcnBindingPreset', () => {
     useSource.setState({
       variant: 'monochrome',
       surfaceAlgo: 'tint',
-      surfacePaletteName: 'slate',
+      surfacePaletteName: { light: 'slate', dark: 'stone' },
       surfaceTintLevel: { light: 0.42, dark: 0.18 },
       surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
       seed: { ...hctFromHex('#ff00aa'), exactHex: '#ff00aa' },

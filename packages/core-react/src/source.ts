@@ -99,7 +99,10 @@ export interface SourceActions {
   setShadcnRoleOverride(mode: Mode, role: ShadcnRoleName, hex: string | null): void
   setShadcnChartOverride(mode: Mode, token: ShadcnChartTokenName, hex: string | null): void
   setSurfaceAlgo(algo: SurfaceAlgo): void
-  setSurfacePaletteName(name: NeutralPaletteName): void
+  // why: per-mode write (#242) — only the addressed mode's neutral family
+  // moves, mirroring setSurfaceTintLevel's `(mode, value)` shape so light and
+  // dark can draw on different palettes.
+  setSurfacePaletteName(mode: Mode, name: NeutralPaletteName): void
   setSurfaceTintLevel(mode: Mode, level: number): void
   setSurfaceTintTextLevel(mode: Mode, level: number): void
   setSurfaceDesaturateLevel(mode: Mode, level: number): void
@@ -347,7 +350,8 @@ export const useSource = create<SourceState>()(
             return { shadcnChartOverrides: { ...s.shadcnChartOverrides, [mode]: next } }
           }),
         setSurfaceAlgo: (surfaceAlgo) => set({ surfaceAlgo }),
-        setSurfacePaletteName: (surfacePaletteName) => set({ surfacePaletteName }),
+        setSurfacePaletteName: (mode, name) =>
+          set((s) => ({ surfacePaletteName: { ...s.surfacePaletteName, [mode]: name } })),
         // why: per-mode write — only the addressed mode's level moves. Mirrors
         // setMd3TokenOverride's per-mode shape so all per-mode writers in
         // SourceActions take `(mode, value)` first.

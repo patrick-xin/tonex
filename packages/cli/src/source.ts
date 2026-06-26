@@ -122,6 +122,8 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   const desaturateLightArg = flagValue(args, '--desaturate-light')
   const desaturateDarkArg = flagValue(args, '--desaturate-dark')
   const paletteArg = flagValue(args, '--tint-palette')
+  const paletteLightArg = flagValue(args, '--tint-palette-light')
+  const paletteDarkArg = flagValue(args, '--tint-palette-dark')
   const tintTextArg = flagValue(args, '--tint-text')
   const tintTextLightArg = flagValue(args, '--tint-text-light')
   const tintTextDarkArg = flagValue(args, '--tint-text-dark')
@@ -149,16 +151,21 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     )
     return USAGE
   }
-  if (
-    paletteArg !== undefined &&
-    !(NEUTRAL_PALETTE_NAMES as readonly string[]).includes(paletteArg)
-  ) {
-    io.err(
-      `tonex: unknown tint palette "${paletteArg}"\n  one of: ${NEUTRAL_PALETTE_NAMES.join(', ')}\n`,
-    )
-    return USAGE
+  // why: --tint-palette is per-mode (#242), mirroring --tint's base/light/dark
+  // idiom — the base flag fills both modes, the per-mode flags override their
+  // mode. Validate every supplied name loudly (the unknown-flag-value contract)
+  // before resolving, so a typo'd palette is exit 2 even when --tint is absent.
+  const hasPalette =
+    paletteArg !== undefined || paletteLightArg !== undefined || paletteDarkArg !== undefined
+  for (const name of [paletteArg, paletteLightArg, paletteDarkArg]) {
+    if (name !== undefined && !(NEUTRAL_PALETTE_NAMES as readonly string[]).includes(name)) {
+      io.err(
+        `tonex: unknown tint palette "${name}"\n  one of: ${NEUTRAL_PALETTE_NAMES.join(', ')}\n`,
+      )
+      return USAGE
+    }
   }
-  if (paletteArg !== undefined && !hasTint) {
+  if (hasPalette && !hasTint) {
     io.err(`tonex: note — --tint-palette is only consumed when --tint is set\n`)
   }
 
@@ -180,7 +187,16 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
     surface = {
       surfaceAlgo: 'tint',
       surfaceTintLevel: level,
-      ...(paletteArg !== undefined ? { surfacePaletteName: paletteArg as NeutralPaletteName } : {}),
+      ...(hasPalette
+        ? {
+            surfacePaletteName: resolveModePalette(
+              paletteArg as NeutralPaletteName | undefined,
+              paletteLightArg as NeutralPaletteName | undefined,
+              paletteDarkArg as NeutralPaletteName | undefined,
+              DEFAULT_INPUTS.surfacePaletteName.light,
+            ),
+          }
+        : {}),
     }
   } else if (hasDesaturate) {
     const level = resolveModeLevel(
@@ -390,6 +406,23 @@ function resolveModeLevel(
   return {
     light: lightVal ?? baseVal ?? defaultVal,
     dark: darkVal ?? baseVal ?? defaultVal,
+  }
+}
+
+// why: the per-mode resolver for the neutral-family knob (#242). Mirrors
+// resolveModeLevel's base/light/dark/default precedence, but the value is a
+// string enum so there's no "0 means absent" trick — undefined is the only
+// absence sentinel, and membership is already validated at the call site, so
+// this returns the pair directly with no error channel.
+function resolveModePalette(
+  base: NeutralPaletteName | undefined,
+  light: NeutralPaletteName | undefined,
+  dark: NeutralPaletteName | undefined,
+  defaultVal: NeutralPaletteName,
+): { light: NeutralPaletteName; dark: NeutralPaletteName } {
+  return {
+    light: light ?? base ?? defaultVal,
+    dark: dark ?? base ?? defaultVal,
   }
 }
 
