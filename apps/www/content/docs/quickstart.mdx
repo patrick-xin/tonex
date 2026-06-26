@@ -12,13 +12,13 @@ import { PanelsTopLeftIcon, SquareTerminalIcon, BotIcon } from "lucide-react";
 `generate` derives a theme from a seed and prints it. No install, no config, no account — just `npx`:
 
 ```bash
-npx tonex generate --seed "#6A9CFF"
+npx @tonex-dev/cli generate --seed "#6A9CFF"
 ```
 
 The same seed and flags produce the same output every time — no agent, no network call. Change the palette's character without touching the seed by adding knobs:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+npx @tonex-dev/cli generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
 ```
 
 Pick your output with `--to`. See [Commands](/docs/cli/commands) for the full flag list and [Targets & formats](/docs/cli/targets-formats) for every target.
@@ -28,7 +28,7 @@ Pick your output with `--to`. See [Commands](/docs/cli/commands) for the full fl
 The default target. Writes a paste-ready `:root`/`.dark` block — both light and dark modes — straight to your stylesheet:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" > globals.css
+npx @tonex-dev/cli generate --seed "#6A9CFF" > globals.css
 ```
 
 Paste it into a shadcn (Tailwind) project and the theme is live.
@@ -38,7 +38,7 @@ Paste it into a shadcn (Tailwind) project and the theme is live.
 A single-mode [DESIGN.md](https://github.com/google-labs-code/design.md) `colors:` block — the semantic contract an agent maps into any tool that isn't shadcn:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to yaml --mode dark
 ```
 
 ### Material Theme JSON
@@ -46,7 +46,7 @@ npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
 A Material Theme export, with colors encoded as hex:
 
 ```bash
-npx tonex generate --seed "#6A9CFF" --to json --format hex
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to json --format hex
 ```
 
 ## From the web app

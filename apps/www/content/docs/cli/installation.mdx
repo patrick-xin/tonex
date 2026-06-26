@@ -6,7 +6,7 @@ description: Run Tonex with npx, install it globally, or add the agent skill.
 You usually do not need to install Tonex. Run the published package directly with `npx`:
 
 ```bash
-npx tonex@latest generate --seed "#6A9CFF" > globals.css
+npx @tonex-dev/cli@latest generate --seed "#6A9CFF" > globals.css
 ```
 
 Use this form for one-off generation, CI scripts, and agent runs. It always resolves the npm package, runs the command, and exits without adding a project dependency.
@@ -16,10 +16,10 @@ Use this form for one-off generation, CI scripts, and agent runs. It always reso
 If you use Tonex often, install it globally for the shorter command.
 
 ```package-install
-npm i -g tonex
+npm i -g @tonex-dev/cli
 ```
 
-Then run the same commands without `npx tonex@latest`:
+Then run the same commands without `npx @tonex-dev/cli@latest`:
 
 ```bash
 tonex generate --seed "#6A9CFF" > globals.css
@@ -31,16 +31,16 @@ tonex check --seed "#6A9CFF"
 Use `--help` for human-readable usage:
 
 ```bash
-npx tonex@latest --help
+npx @tonex-dev/cli@latest --help
 ```
 
 Use `describe` when an agent or script needs the machine-readable contract:
 
 ```bash
-npx tonex@latest describe
+npx @tonex-dev/cli@latest describe
 ```
 
-If you installed globally, replace `npx tonex@latest` with `tonex`.
+If you installed globally, replace `npx @tonex-dev/cli@latest` with `tonex`.
 
 ## Agent skill
 

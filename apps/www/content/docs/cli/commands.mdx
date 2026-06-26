@@ -6,7 +6,7 @@ description: generate, check, adjust, and describe — the full command surface.
 Tonex is a subcommand CLI:
 
 ```bash
-npx tonex <command> [options]
+npx @tonex-dev/cli <command> [options]
 ```
 
 The commands are `generate`, `check`, `adjust`, and `describe`. Flags use the `--flag value` form, or `--flag=value`, rather than `key=value`. Unknown flags are usage errors. Run `tonex --help` for the same reference in your terminal, or `tonex describe` for it as JSON.
@@ -16,7 +16,7 @@ The commands are `generate`, `check`, `adjust`, and `describe`. Flags use the `-
 Derive a theme from a seed and print it.
 
 ```bash
-npx tonex generate --seed "#6A9CFF" [options] > globals.css
+npx @tonex-dev/cli generate --seed "#6A9CFF" [options] > globals.css
 ```
 
 ### Seed
@@ -69,12 +69,12 @@ These opt-in emissions cover the parts of a theme the engine doesn't derive on i
 | `--chart-palette` | none | `single`, `multi`, or `polychrome`. Picks the chart series and emits it (implies `--with-chart`). |
 
 ```bash
-npx tonex generate --seed "#6A9CFF" > globals.css
-npx tonex generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
-npx tonex generate --seed "#6A9CFF" --with-brand --chart-palette polychrome
-npx tonex generate --seed "#6A9CFF" --to colors
-npx tonex generate --seed "#6A9CFF" --to yaml --mode dark
-npx tonex generate --seed "#6A9CFF" --to json --format hex
+npx @tonex-dev/cli generate --seed "#6A9CFF" > globals.css
+npx @tonex-dev/cli generate --seed "#6A9CFF" --variant expressive --desaturate 0.5
+npx @tonex-dev/cli generate --seed "#6A9CFF" --with-brand --chart-palette polychrome
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to colors
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to yaml --mode dark
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to json --format hex
 ```
 
 Delivered projections carry their own recipe so a later agent can reproduce them. `shadcn` and `yaml` emit a leading command comment; `json` embeds the command in its description. `colors` emits structured recipe metadata because it is usually a transient read target. For the full `--to colors` → map by intent → `check --pairs` workflow, see [Mapping to Other Tools](/docs/cli/other-tools).
@@ -84,11 +84,11 @@ Delivered projections carry their own recipe so a later agent can reproduce them
 Audit WCAG contrast. Exit `0` clears the level; exit `1` means a text pair fails. Add `--json` to any form for machine-readable output, `--aaa` to raise the bar from AA to AAA, and `--large` on ad-hoc pair checks to use large-text thresholds.
 
 ```bash
-npx tonex check --seed "#6A9CFF" [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
-npx tonex check --seed "#6A9CFF" --find-contrast [--variant <name>] [--mode light|dark] [--aaa] [--json]
-npx tonex check "#1a1a1a" "#ffffff" [--aaa] [--large] [--json]
-npx tonex check --pairs '[["#1a1a1a","#ffffff"],["#888","#fff"]]' [--aaa] [--large] [--json]
-npx tonex check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]' [--variant <name>] [--mode light|dark] [--aaa] [--json]
+npx @tonex-dev/cli check --seed "#6A9CFF" [--variant <name>] [--contrast <0..1>] [--mode light|dark] [--aaa] [--json]
+npx @tonex-dev/cli check --seed "#6A9CFF" --find-contrast [--variant <name>] [--mode light|dark] [--aaa] [--json]
+npx @tonex-dev/cli check "#1a1a1a" "#ffffff" [--aaa] [--large] [--json]
+npx @tonex-dev/cli check --pairs '[["#1a1a1a","#ffffff"],["#888","#fff"]]' [--aaa] [--large] [--json]
+npx @tonex-dev/cli check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]' [--variant <name>] [--mode light|dark] [--aaa] [--json]
 ```
 
 Example verdicts:
@@ -119,7 +119,7 @@ Use the `--color-` prefix for token-name checks and adjustments.
 Shift named tokens by a relative HCT delta and print before/after facts plus the gamut-clamped achieved delta. Exit `0` on a clean shift, `2` on a bad token name or malformed `--shifts`. It never gates contrast — run `check` for that.
 
 ```bash
-npx tonex adjust --seed "#6A9CFF" \
+npx @tonex-dev/cli adjust --seed "#6A9CFF" \
   --shifts '[{"mode":"light","token":"--color-surface","dTone":-4,"dChroma":2}]' [--json]
 ```
 
@@ -136,7 +136,7 @@ light --color-surface  oklch(…) → oklch(…)   req t-4 c+2   got t-3.9 c+2.1
 Print the machine-readable surface — every command and flag from the same specs the parser validates against, the contrast verdict policy and thresholds, and the exit-code taxonomy.
 
 ```bash
-npx tonex describe
+npx @tonex-dev/cli describe
 ```
 
 Top-level JSON keys include `tool`, `exitCodes`, `commands`, `contrast`, `variants`, `targets`, and `bindings`.

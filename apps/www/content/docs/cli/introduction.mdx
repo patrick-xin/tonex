@@ -6,7 +6,7 @@ description: Generate, check, and hand off Tonex color systems from the terminal
 The CLI is the terminal surface for Tonex. It runs the same engine as the web app, but in a form that fits scripts, CI, and agents: input a seed, print a deterministic artifact, then verify the pairings that matter.
 
 ```bash
-npx tonex@latest generate --seed "#6A9CFF" > globals.css
+npx @tonex-dev/cli@latest generate --seed "#6A9CFF" > globals.css
 ```
 
 That command gives you a role-mapped color system from one seed. The output target can be shadcn CSS, Material JSON, a DESIGN.md color block, or the raw Tonex role set for an agent to map into another tool.
@@ -41,5 +41,5 @@ That separation matters: a contrast failure means the colors need a remedy; a us
 | `adjust` | Shift named tokens by relative HCT tone/chroma deltas. |
 | `describe` | Print the machine-readable CLI surface. |
 
-Run `npx tonex@latest --help` for human-readable usage, or `npx tonex@latest describe` for the machine-readable contract.
+Run `npx @tonex-dev/cli@latest --help` for human-readable usage, or `npx @tonex-dev/cli@latest describe` for the machine-readable contract.
 

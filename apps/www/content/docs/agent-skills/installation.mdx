@@ -13,7 +13,7 @@ The skill does not replace the CLI. It tells the agent how to call Tonex, when t
 
 ## How the agent runs Tonex
 
-The skill tells the agent to check whether `tonex` is installed globally. If it is, the agent can run `tonex ...`. If not, it should run the published package with `npx tonex@latest ...`.
+The skill tells the agent to check whether `tonex` is installed globally. If it is, the agent can run `tonex ...`. If not, it should run the published package with `npx @tonex-dev/cli@latest ...`.
 
 That keeps examples readable while still working in a fresh environment.
 
@@ -62,4 +62,4 @@ It can also load npm plugins listed in `opencode.json`:
 }
 ```
 
-Tonex does not require an OpenCode plugin to use the CLI. Use the Tonex skill when your agent supports skills; otherwise, tell the agent to run `npx tonex@latest ...` directly.
+Tonex does not require an OpenCode plugin to use the CLI. Use the Tonex skill when your agent supports skills; otherwise, tell the agent to run `npx @tonex-dev/cli@latest ...` directly.

@@ -32,7 +32,7 @@ jobs:
           fi
       # guard: the plugin manifests ride the same version (the skill drives this CLI).
       - run: pnpm plugin:version --check
-      - run: pnpm --filter tonex build
-      - run: pnpm --filter tonex publish --no-git-checks --access public
+      - run: pnpm --filter @tonex-dev/cli build
+      - run: pnpm --filter @tonex-dev/cli publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

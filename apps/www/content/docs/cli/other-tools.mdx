@@ -13,8 +13,8 @@ Tonex exports `shadcn` and `json` natively. For every other tool, use Tonex as t
 | `--to yaml` | The target tool can consume a DESIGN.md `colors:` block, or you want a portable semantic contract. |
 
 ```bash
-npx tonex generate --seed "#6A9CFF" --to colors
-npx tonex generate --seed "#6A9CFF" --to yaml
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to colors
+npx @tonex-dev/cli generate --seed "#6A9CFF" --to yaml
 ```
 
 ## Map by intent
@@ -28,7 +28,7 @@ For example, another tool might call its main action color `brand`, `accent`, or
 After mapping, check the pairs the target UI will actually render:
 
 ```bash
-npx tonex check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]'
+npx @tonex-dev/cli check --seed "#6A9CFF" --pairs '[["--color-on-surface","--color-surface"]]'
 ```
 
 Token-name pairs use the CSS variable form with a `--color-` prefix:

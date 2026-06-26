@@ -21,10 +21,10 @@ The full editor lives at **[tonex.dev](https://tonex.dev/)**. Pick a seed, tune 
 ## Agent-first CLI
 
 ```bash
-npx tonex@latest generate --seed "#6750a4"
+npx @tonex-dev/cli@latest generate --seed "#6750a4"
 ```
 
-Point an agent at `npx tonex@latest describe` first. It prints every command and flag the CLI exposes, so the agent can build a palette from a plain description without memorized syntax. Run `npx tonex@latest --help` for the same list by hand, or read the [full CLI docs](https://tonex.dev/docs/cli/introduction).
+Point an agent at `npx @tonex-dev/cli@latest describe` first. It prints every command and flag the CLI exposes, so the agent can build a palette from a plain description without memorized syntax. Run `npx @tonex-dev/cli@latest --help` for the same list by hand, or read the [full CLI docs](https://tonex.dev/docs/cli/introduction).
 
 ### Use it with a skill
 
@@ -37,7 +37,7 @@ npx skills add patrick-xin/tonex
 ### Run it manually
 
 ```bash
-npx tonex@latest generate --seed "#6A9CFF" --to shadcn --format hex
+npx @tonex-dev/cli@latest generate --seed "#6A9CFF" --to shadcn --format hex
 ```
 
 See the available [commands](https://tonex.dev/docs/cli/commands).
