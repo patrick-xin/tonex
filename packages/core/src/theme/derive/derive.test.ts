@@ -15,11 +15,12 @@ import {
 import { selectSeedHex } from '../seed'
 import { deriveTheme } from './derive'
 
-// why: under DEFAULT seed (~hue 290), SchemeCmf.getErrorHue routes to the
-// final else clause: (secondHue > 12 && secondHue <= 28) ? 32 : 16. Single-
-// source falls into bucket 16; second.hue=20 lands in bucket 32. Constructed
-// via Hct so the fixture is deterministic regardless of hex<->HCT rounding.
-const CMF_SECOND_HEX_BUCKET_SHIFT = hexFromHct({ hue: 20, chroma: 60, tone: 50 })
+// why: under DEFAULT seed (~hue 86), SchemeCmf.getErrorHue routes to the
+// primaryHue <= 152 branch: (secondHue > 24 && secondHue <= 36) ? 20 : 32.
+// Single-source (secondHue=86) falls into bucket 32; second.hue=30 lands in
+// bucket 20 (30 > 24 && 30 <= 36 = true). Constructed via Hct so the fixture
+// is deterministic regardless of hex<->HCT rounding.
+const CMF_SECOND_HEX_BUCKET_SHIFT = hexFromHct({ hue: 30, chroma: 60, tone: 50 })
 
 // why: TokenMap is argb-canonical (ADR-0021). Hex inputs (overrides, locks)
 // land in the layer as their argbFromHex projection — assert against the
@@ -967,8 +968,10 @@ describe('deriveTheme', () => {
       // why: ADR-0027 c.3 — slice 3 promoted multi-hue (hueSpread=80) as the
       // default. Single-hue is the opt-in via chart.hueSpread=0; under that
       // setting, lightness alone encodes the ordered axis and the brand hue
-      // carries across chart-1..N. <3° tolerance covers the gamut-mapping
-      // shift palette.tone() applies at high-chroma corners of sRGB.
+      // carries across chart-1..N. <15° tolerance: low-chroma seeds (like the
+      // current default ~chroma 10) produce inherently unstable HCT hues across
+      // tones — the threshold still catches obviously-wrong palette usage (which
+      // would produce 90°+ drift) while accommodating neutral seeds.
       const { md } = deriveTheme({
         ...DEFAULT_INPUTS,
         chart: { ...DEFAULT_INPUTS.chart, hueSpread: 0 },
@@ -978,10 +981,10 @@ describe('deriveTheme', () => {
       const refLight = lightHues[0] as number
       const refDark = darkHues[0] as number
       for (const h of lightHues) {
-        expect(Math.abs(h - refLight)).toBeLessThan(3)
+        expect(Math.abs(h - refLight)).toBeLessThan(15)
       }
       for (const h of darkHues) {
-        expect(Math.abs(h - refDark)).toBeLessThan(3)
+        expect(Math.abs(h - refDark)).toBeLessThan(15)
       }
     })
 
@@ -1103,8 +1106,8 @@ describe('deriveTheme', () => {
 
     it('binds --brand to the literal seed (exactHex) in both modes', () => {
       const { shadcn } = deriveTheme(DEFAULT_INPUTS)
-      // DEFAULT_INPUTS.seed.exactHex === '#a155b8'
-      expect(shadcn.brand['--brand']).toBe(argbFromHex('#a155b8'))
+      // DEFAULT_INPUTS.seed.exactHex === '#b8b0a1'
+      expect(shadcn.brand['--brand']).toBe(argbFromHex('#b8b0a1'))
     })
 
     it('brand is mode-invariant (one value, no light/dark divergence)', () => {

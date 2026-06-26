@@ -30,10 +30,10 @@ async function highlightExportCode(): Promise<Record<ExportTab, string>> {
 export async function ExportSection() {
   const highlighted = await highlightExportCode()
   return (
-    <section className="relative flex flex-col mx-auto py-12 sm:py-24">
+    <section className="relative flex flex-col mx-auto py-12 sm:py-24 px-4 md:px-12 lg:px-16 max-w-7xl">
       <SectionHeader
         heading="Exports that drop straight into your stack"
-        description="Export in the format your stack already speaks, paste it in, and there's nothing left to re-theme."
+        description="Export in the format your stack already speaks, there's nothing left to re-theme."
       />
       <ExportTabs highlighted={highlighted} />
     </section>

@@ -11,12 +11,12 @@ const arrowVariants = tv({
   variants: {
     variant: {
       popover: {
-        fill: 'fill-surface-container',
+        fill: 'fill-surface',
         borderLight: 'fill-outline-variant dark:fill-none',
         borderDark: 'fill-none dark:fill-outline-variant',
       },
       tooltip: {
-        fill: 'fill-surface-container',
+        fill: 'fill-surface',
         borderLight: 'fill-outline-variant dark:fill-none',
         borderDark: 'fill-none dark:fill-outline-variant',
       },

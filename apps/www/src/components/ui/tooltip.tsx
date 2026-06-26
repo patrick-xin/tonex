@@ -84,7 +84,7 @@ const tooltipVariants = tv({
   ],
   variants: {
     variant: {
-      default: 'bg-surface-container overlay-outline',
+      default: 'bg-surface overlay-outline',
       inverse: 'bg-inverse-surface text-inverse-on-surface',
     },
   },

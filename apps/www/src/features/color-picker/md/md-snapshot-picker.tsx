@@ -6,7 +6,7 @@ import { hexString } from '@tonex/core/oklch'
 import { MD_PALETTE_FAMILY_NAMES, MD_PALETTE_TONE_NAMES } from '@tonex/core/schema'
 import { useResolvedTokens } from '@tonex/core-react'
 import { useRef, useState } from 'react'
-import { MdIcon } from '@/components/icons/md'
+import { MdIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import {
   Combobox,

@@ -9,7 +9,7 @@ export function SeedSection() {
         heading="One color becomes a complete system"
         description="Pick a color, you get back a finished, accessible system. One decision instead of many."
       />
-      <div className="mx-auto flex justify-center -mt-6 mb-6">
+      <div className="mx-auto flex justify-center">
         <SeedTrigger />
       </div>
       <SeedSwatches />

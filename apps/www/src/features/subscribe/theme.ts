@@ -1,16 +1,16 @@
 import type { TailwindConfig } from 'react-email'
 import plugin from 'tailwindcss/plugin'
 
-// MD3 role tokens, generated from #a155b8.
+// MD3 role tokens, generated from #b8b0a1.
 const colors = {
-  primary: '#893fa1',
-  'on-primary': '#fff7fb',
-  surface: '#fff7fb',
+  primary: '#645e51',
+  'on-primary': '#fff7ea',
+  surface: '#fef8f5',
   'surface-container-lowest': '#ffffff',
-  'surface-container': '#fee7ff',
-  'on-surface': '#3e2c43',
-  'on-surface-variant': '#6d5871',
-  'outline-variant': '#c3aac6',
+  'surface-container': '#f2ede8',
+  'on-surface': '#34322f',
+  'on-surface-variant': '#625f5a',
+  'outline-variant': '#b6b1ac',
 } as const
 
 const fontScale = {

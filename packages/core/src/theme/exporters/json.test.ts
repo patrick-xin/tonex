@@ -88,10 +88,10 @@ describe('buildMaterialThemeJson — MTB shape, our tokens (ADR-0029)', () => {
     })
 
     it('reports seed + coreColors.primary as the source seed in uppercase hex', () => {
-      // why: DEFAULT_INPUTS.seed.exactHex is '#a155b8'; the formatter uppercases
+      // why: DEFAULT_INPUTS.seed.exactHex is '#b8b0a1'; the formatter uppercases
       // to MTB convention. coreColors mirrors seed (single key).
-      expect(result.seed).toBe('#A155B8')
-      expect(result.coreColors).toEqual({ primary: '#A155B8' })
+      expect(result.seed).toBe('#B8B0A1')
+      expect(result.coreColors).toEqual({ primary: '#B8B0A1' })
     })
 
     it('emits an empty extendedColors when the source has no custom colors', () => {

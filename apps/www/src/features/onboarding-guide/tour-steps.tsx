@@ -1,17 +1,19 @@
 import type { ReactNode } from 'react'
+import {
+  BindingPreset,
+  CustomColors,
+  Export,
+  LightMode,
+  PaletteOverride,
+  RoleBindings,
+  RoleOverride,
+  SchemeVariants,
+  SourceColor,
+  SurfaceAdjustment,
+} from '@/components/icons'
 import { Kbd } from '@/components/ui/kbd'
 import type { HelpSection } from '@/features/help-dialog/help-sections'
 import type { Layer } from '@/lib/layer-context'
-import { BindingPreset } from '../../components/icons/binding-preset'
-import { CustomColors } from '../../components/icons/custom-colors'
-import { Export } from '../../components/icons/export'
-import { LightMode } from '../../components/icons/light-mode'
-import { PaletteOverride } from '../../components/icons/palette-override'
-import { RoleBindings } from '../../components/icons/role-bindings'
-import { RoleOverride } from '../../components/icons/role-override'
-import { SchemeVariants } from '../../components/icons/scheme-variants'
-import { SourceColor } from '../../components/icons/source-color'
-import { SurfaceAdjustment } from '../../components/icons/surface-adjustment'
 
 // why: a tour step is *authored* against a stable anchor key, not a live ref —
 // the host resolves anchorKey → element at render via the guide registry

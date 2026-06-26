@@ -77,16 +77,11 @@ const buttonStyles = tv({
         'active:bg-primary/12',
         focusVisibleRing,
       ],
-      fab: [
-        'bg-primary-container text-on-primary-container elevation-3 transition-shadow',
-        'hover:elevation-4 hover:bg-[color-mix(in_srgb,var(--color-on-primary-container)_8%,var(--color-primary-container))]',
-        'focus-visible:outline-offset-2 focus-visible:outline-primary-container/50 focus-visible:ring-4 focus-visible:ring-primary-container/12',
-        'active:bg-[color-mix(in_srgb,var(--color-on-primary-container)_12%,var(--color-primary-container))]',
+      unstyled: ['bg-transparent hover:bg-transparent', focusVisibleRing],
+      glow: [
+        'bg-transparent border border-primary/30 dark:border-primary/15 hover:bg-primary/8 shadow-md shadow-primary/10 dark:shadow-sm',
+        focusVisiblePrimaryRing,
       ],
-      unstyled: 'bg-transparent hover:bg-transparent',
-      focusVisibleRing,
-      glow: 'bg-transparent border border-primary/30 dark:border-primary/15 hover:bg-primary/8 shadow-md shadow-primary/10 dark:shadow-sm',
-      focusVisiblePrimaryRing,
     },
   },
   defaultVariants: {

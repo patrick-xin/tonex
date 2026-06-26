@@ -1,6 +1,6 @@
 import { ChevronDownIcon, ExternalLink } from 'lucide-react'
 import { cn } from 'tailwind-variants'
-import { Icons } from '@/components/icons/icons'
+import { Icons } from '@/components/icons'
 import { buttonStyles } from '@/components/ui/button'
 import {
   DropdownMenu,

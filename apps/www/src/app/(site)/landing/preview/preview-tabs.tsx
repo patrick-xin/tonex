@@ -2,8 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import { MdIcon } from '@/components/icons/md'
-import { ShadcnIcon } from '@/components/icons/shadcn'
+import { MdIcon, ShadcnIcon } from '@/components/icons'
 import { DemoLoader } from '@/components/shared/demo-loader'
 import { Tabs, TabsListContent, TabsPanel, TabsTab } from '@/components/ui/tabs'
 

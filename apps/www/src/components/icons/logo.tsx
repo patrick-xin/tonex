@@ -7,9 +7,8 @@ function TonexLogo({ className, ...props }: ComponentProps<'svg'>) {
     <svg
       aria-hidden="true"
       viewBox="0 0 116 138"
-      fill="#a155b8"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('text-current size-full', className)}
+      className={cn('text-current size-full fill-primary', className)}
       {...props}
     >
       <path d="M116 0L90 2L45 82L77 138L101 137L73 81Z M10 27L21 56L0 95L25 96L49 54L33 28Z" />
@@ -27,11 +26,11 @@ function TonexLogoDuo({ className, ...props }: ComponentProps<'svg'>) {
       {...props}
     >
       <path
-        fill="#a155b8"
+        fill="#b8b0a1"
         data-slot="tonex-logo-primary"
         d="M116 0L90 2L45 82L77 138L101 137L73 81Z"
       />
-      <path fill="#7cc964" data-slot="tonex-logo-accent" d="M10 27L21 56L0 95L25 96L49 54L33 28Z" />
+      <path fill="#A1A9B8" data-slot="tonex-logo-accent" d="M10 27L21 56L0 95L25 96L49 54L33 28Z" />
     </svg>
   )
 }

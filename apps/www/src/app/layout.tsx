@@ -37,10 +37,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: siteTitle,
-    template: '%s · tonex',
+    template: '%s · Tonex',
   },
   description: siteDescription,
-  applicationName: 'tonex',
+  applicationName: 'Tonex',
   manifest: '/site.webmanifest',
   icons: {
     icon: [
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'tonex',
+    siteName: 'Tonex',
     title: siteTitle,
     description: siteDescription,
     url: siteUrl,

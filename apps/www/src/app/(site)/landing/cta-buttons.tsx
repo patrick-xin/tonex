@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { m as motion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { cn } from 'tailwind-variants'
-import { ShadcnIcon } from '@/components/icons/shadcn'
+import { ShadcnIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 const item: Variants = {
@@ -30,7 +30,7 @@ export function CtaButtons({ className }: { className?: string }) {
         nativeButton={false}
         render={<Link href="/theme" />}
         size="lg"
-        className="px-8 h-12 text-base shadow-matte"
+        className="px-8 h-12 text-base"
         data-testid="cta-md"
       >
         Try Tonex

@@ -1,9 +1,6 @@
 import { GithubLogoIcon, XLogoIcon } from '@phosphor-icons/react'
 import { BookIcon, Info, LandPlot, ListRestart } from 'lucide-react'
-import { TonexLogo } from '@/components/icons/logo'
-import { MdIcon } from '@/components/icons/md'
-import { ShadcnIcon } from '@/components/icons/shadcn'
-import { TailwindCSSIcon } from '@/components/icons/tailwind'
+import { MdIcon, ShadcnIcon, TailwindCSSIcon, TonexLogo } from '@/components/icons'
 import { NAV_LINKS, RESOURCE_LINKS, SITE_CONFIG } from '@/lib/site-config'
 import type { Item } from './_shortcuts'
 

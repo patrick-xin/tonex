@@ -9,7 +9,7 @@ export const mdNavConfig: NavConfig = {
   tabs: [
     { label: 'Overview', href: '/theme', icon: LayoutDashboard },
     { label: 'Color Roles', href: '/theme/color-roles', icon: Layers },
-    { label: 'Palettes', href: '/theme/palettes', icon: Palette },
+    { label: 'Tone Palettes', href: '/theme/palettes', icon: Palette },
     { label: 'Blocks', href: '/theme/blocks', icon: Cuboid },
     { label: 'Dashboard', href: '/theme/dashboard-preview', icon: LayoutDashboard },
     { label: 'Editorial', href: '/theme/templates/editorial', icon: Barcode },

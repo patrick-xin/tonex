@@ -182,10 +182,7 @@ export function Terminal({
   }, [])
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('mx-auto w-full max-w-4xl px-4 font-mono text-sm', className)}
-    >
+    <div ref={containerRef} className={cn('mx-auto w-full max-w-3xl font-mono text-sm', className)}>
       <div className="overflow-hidden rounded-xl border border-outline-variant/40 border-t-0 shadow-sm">
         {/* Title Bar */}
         <div className="flex gap-2 py-2 px-4 relative">

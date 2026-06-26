@@ -45,7 +45,7 @@ export function Settings({ layer }: { layer: Layer }) {
       </Tooltip>
       <PopoverContent
         align="center"
-        className="w-[min(20rem,calc(100vw-2rem))] flex flex-col gap-2"
+        className="w-[min(20rem,calc(100vw-2rem))] flex flex-col gap-2 bg-surface"
       >
         <SettingsFields layer={layer} onAfterReset={() => settingsPopoverHandle.close()} />
       </PopoverContent>
