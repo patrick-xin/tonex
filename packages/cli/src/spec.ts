@@ -186,7 +186,21 @@ const tintPalette: FlagSpec = {
   values: NEUTRAL_PALETTE_NAMES,
   default: 'zinc',
   description:
-    'neutral palette the tint algo repaints surfaces with (only consumed when --tint is set)',
+    'neutral palette the tint algo repaints surfaces with, both modes (only consumed when --tint is set)',
+}
+const tintPaletteLight: FlagSpec = {
+  name: '--tint-palette-light',
+  type: 'enum',
+  values: NEUTRAL_PALETTE_NAMES,
+  description:
+    'neutral palette for light mode only; overrides --tint-palette for light (only consumed when --tint is set)',
+}
+const tintPaletteDark: FlagSpec = {
+  name: '--tint-palette-dark',
+  type: 'enum',
+  values: NEUTRAL_PALETTE_NAMES,
+  description:
+    'neutral palette for dark mode only; overrides --tint-palette for dark (only consumed when --tint is set)',
 }
 const desaturate: FlagSpec = {
   name: '--desaturate',
@@ -354,6 +368,8 @@ export const GENERATE_FLAGS = [
   tintLight,
   tintDark,
   tintPalette,
+  tintPaletteLight,
+  tintPaletteDark,
   desaturate,
   desaturateLight,
   desaturateDark,
@@ -382,6 +398,8 @@ export const CHECK_FLAGS = [
   tintLight,
   tintDark,
   tintPalette,
+  tintPaletteLight,
+  tintPaletteDark,
   desaturate,
   desaturateLight,
   desaturateDark,
@@ -414,6 +432,8 @@ export const ADJUST_FLAGS = [
   tintLight,
   tintDark,
   tintPalette,
+  tintPaletteLight,
+  tintPaletteDark,
   desaturate,
   desaturateLight,
   desaturateDark,
@@ -441,6 +461,8 @@ export const SERIALIZE_FLAGS = [
   tintLight,
   tintDark,
   tintPalette,
+  tintPaletteLight,
+  tintPaletteDark,
   desaturate,
   desaturateLight,
   desaturateDark,

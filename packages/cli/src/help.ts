@@ -72,7 +72,9 @@ commands:
                core + extended (50). Reach for it only when core doesn't cover the
                target's slots. colors/yaml/json honor it; shadcn is unaffected.
   --tint / --desaturate  surface-treatment strength 0..1 (mutually exclusive).
-  --tint-palette  neutral palette the tint algo repaints surfaces with (default zinc).
+  --tint-palette  neutral palette the tint algo repaints surfaces with, both modes
+               (default zinc). --tint-palette-light / --tint-palette-dark override
+               one mode so light and dark can use different families.
                one of: slate, gray, zinc, neutral, stone, taupe, mauve, mist, olive.
   --custom     JSON array of {name, hex, blend?, shadcnSource?} colors added on top
                of the seed palette — each emits a harmonized 4-role md group + a

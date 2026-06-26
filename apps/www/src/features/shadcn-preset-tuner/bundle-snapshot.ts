@@ -15,7 +15,7 @@ import type { VariantName } from '@tonex/core/variants'
 export interface PresetBundle {
   variant: VariantName
   surfaceAlgo: SurfaceAlgo
-  surfacePaletteName: NeutralPaletteName
+  surfacePaletteName: { light: NeutralPaletteName; dark: NeutralPaletteName }
   surfaceTintLevel: { light: number; dark: number }
   surfaceTintTextLevel: { light: number; dark: number }
   surfaceDesaturateLevel: { light: number; dark: number }
@@ -25,7 +25,7 @@ export interface PresetBundle {
 export interface BundleDiff {
   variantChanged: boolean
   surfaceAlgoChanged: boolean
-  surfacePaletteNameChanged: boolean
+  surfacePaletteName: { light: boolean; dark: boolean }
   surfaceTintLevel: { light: boolean; dark: boolean }
   surfaceTintTextLevel: { light: boolean; dark: boolean }
   surfaceDesaturateLevel: { light: boolean; dark: boolean }
@@ -37,7 +37,7 @@ export function snapshotBundle(source: PortableTheme): PresetBundle {
   return {
     variant: source.variant,
     surfaceAlgo: source.surfaceAlgo,
-    surfacePaletteName: source.surfacePaletteName,
+    surfacePaletteName: { ...source.surfacePaletteName },
     surfaceTintLevel: { ...source.surfaceTintLevel },
     surfaceTintTextLevel: { ...source.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...source.surfaceDesaturateLevel },
@@ -76,7 +76,8 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
   )
   const variantChanged = bundle.variant !== baseline.variant
   const surfaceAlgoChanged = bundle.surfaceAlgo !== baseline.surfaceAlgo
-  const surfacePaletteNameChanged = bundle.surfacePaletteName !== baseline.surfacePaletteName
+  const paletteLight = bundle.surfacePaletteName.light !== baseline.surfacePaletteName.light
+  const paletteDark = bundle.surfacePaletteName.dark !== baseline.surfacePaletteName.dark
   const tintLight = bundle.surfaceTintLevel.light !== baseline.surfaceTintLevel.light
   const tintDark = bundle.surfaceTintLevel.dark !== baseline.surfaceTintLevel.dark
   const textTintLight = bundle.surfaceTintTextLevel.light !== baseline.surfaceTintTextLevel.light
@@ -87,7 +88,8 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
   const totalChanges =
     (variantChanged ? 1 : 0) +
     (surfaceAlgoChanged ? 1 : 0) +
-    (surfacePaletteNameChanged ? 1 : 0) +
+    (paletteLight ? 1 : 0) +
+    (paletteDark ? 1 : 0) +
     (tintLight ? 1 : 0) +
     (tintDark ? 1 : 0) +
     (textTintLight ? 1 : 0) +
@@ -100,7 +102,7 @@ export function diffBundle(bundle: PresetBundle, baseline: PresetBundle): Bundle
   return {
     variantChanged,
     surfaceAlgoChanged,
-    surfacePaletteNameChanged,
+    surfacePaletteName: { light: paletteLight, dark: paletteDark },
     surfaceTintLevel: { light: tintLight, dark: tintDark },
     surfaceTintTextLevel: { light: textTintLight, dark: textTintDark },
     surfaceDesaturateLevel: { light: desatLight, dark: desatDark },

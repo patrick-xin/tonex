@@ -71,7 +71,16 @@ function recipeCommand(source: PortableTheme, target: Target, args: ParsedArgs):
       if (tl.light > 0) parts.push(`--tint-light ${tl.light}`)
       if (tl.dark > 0) parts.push(`--tint-dark ${tl.dark}`)
     }
-    parts.push(`--tint-palette ${source.surfacePaletteName}`)
+    // why: surfacePaletteName is per-mode (#242) — emit the symmetric base flag
+    // when both modes share a family, else the per-mode pair so an asymmetric
+    // theme round-trips faithfully (mirrors the --tint level emission above).
+    const pal = source.surfacePaletteName
+    if (pal.light === pal.dark) {
+      parts.push(`--tint-palette ${pal.light}`)
+    } else {
+      parts.push(`--tint-palette-light ${pal.light}`)
+      parts.push(`--tint-palette-dark ${pal.dark}`)
+    }
     // why: --tint-text is consumed by deriveTheme only under the tint algo, and the
     // resolver rejects it without --tint, so emit it INSIDE this branch — a desaturate
     // theme can never produce a `--desaturate … --tint-text` recipe that would re-error.

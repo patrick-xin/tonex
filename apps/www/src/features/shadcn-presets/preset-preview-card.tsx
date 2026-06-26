@@ -33,6 +33,11 @@ const humanizeChip = (s: string) => s.replace(/([a-z])([A-Z])/g, '$1 $2').toLowe
 function PresetCardBody({ name }: { name: ShadcnPresetName }) {
   const recipe = SHADCN_PRESETS[name]
   const { swatches } = usePresetPreview(name)
+  // why: surfacePaletteName is per-mode (#242) — collapse to one chip when both
+  // modes share a family, show `light/dark` when they diverge (mirrors the
+  // formatContrast convention so the chip stays honest about both modes).
+  const { light, dark } = recipe.surfacePaletteName
+  const paletteChip = light === dark ? light : `${light}/${dark}`
   return (
     <div className="flex w-72 gap-3 p-4">
       <div className="flex flex-col overflow-hidden rounded-sm justify-between">
@@ -44,7 +49,7 @@ function PresetCardBody({ name }: { name: ShadcnPresetName }) {
         <div className="font-medium text-sm capitalize text-on-surface">{name}</div>
         <p className="text-xs leading-snug text-on-surface-variant">{recipe.description}</p>
         <div className="mt-0.5 flex flex-wrap gap-1">
-          {[recipe.variant, recipe.surfaceAlgo, recipe.surfacePaletteName].map((chip) => (
+          {[recipe.variant, recipe.surfaceAlgo, paletteChip].map((chip) => (
             <span
               key={chip}
               className="rounded bg-surface-container-low px-1.5 py-0.5 text-xs text-on-surface-variant"

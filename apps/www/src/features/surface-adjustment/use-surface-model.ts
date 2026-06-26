@@ -16,6 +16,8 @@ export function useSurfaceModel() {
   const setText = useSource((s) => s.actions.setSurfaceTintTextLevel)
   const desat = useSource((s) => s.surfaceDesaturateLevel)
   const setDesat = useSource((s) => s.actions.setSurfaceDesaturateLevel)
+  const palette = useSource((s) => s.surfacePaletteName)
+  const setPalette = useSource((s) => s.actions.setSurfacePaletteName)
 
   // why: pre-mount mode is null. Resolve to light for the value but disable the
   // sliders until mode lands, so the folded panel keeps a stable height across
@@ -35,5 +37,9 @@ export function useSurfaceModel() {
     setText,
     desatLevel: desat[resolvedMode],
     setDesat,
+    // why: the neutral family is per-mode (#242) like the levels above — read
+    // the resolved mode's family, write it back through the mode-keyed setter.
+    paletteName: palette[resolvedMode],
+    setPalette,
   }
 }

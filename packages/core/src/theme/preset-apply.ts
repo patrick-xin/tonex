@@ -45,7 +45,7 @@ export function resolvePresetApply(
   const patch: Partial<PortableTheme> = {
     variant: preset.variant,
     surfaceAlgo: preset.surfaceAlgo,
-    surfacePaletteName: preset.surfacePaletteName,
+    surfacePaletteName: { ...preset.surfacePaletteName },
     surfaceTintLevel: { ...preset.surfaceTintLevel },
     surfaceTintTextLevel: { ...preset.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...preset.surfaceDesaturateLevel },

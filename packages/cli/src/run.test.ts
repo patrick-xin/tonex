@@ -268,6 +268,33 @@ describe('tonex generate', () => {
     ).toBe(USAGE)
   })
 
+  // why: #242 — the neutral family is per-mode. --tint-palette-light/dark address one
+  // mode each; the recipe round-trips as the per-mode pair (not the base flag) so an
+  // asymmetric theme re-derives faithfully. A typo'd per-mode palette is still exit 2.
+  it('--tint-palette-light/dark drive light and dark to different neutral families', () => {
+    const out = capture([
+      'generate',
+      '--seed',
+      SEED,
+      '--to',
+      'shadcn',
+      '--tint',
+      '0',
+      '--tint-palette-light',
+      'stone',
+      '--tint-palette-dark',
+      'slate',
+    ])
+    expect(out.code).toBe(OK)
+    // emits the per-mode pair, never the symmetric base flag, when modes diverge
+    expect(out.out).toContain('--tint-palette-light stone')
+    expect(out.out).toContain('--tint-palette-dark slate')
+    expect(out.out).not.toMatch(/--tint-palette (?!-)/)
+    expect(
+      capture(['generate', '--seed', SEED, '--tint', '0', '--tint-palette-dark', 'neon']).code,
+    ).toBe(USAGE)
+  })
+
   it('--format picks the shadcn color encoding (oklch default; hex on request); a bad format is exit 2', () => {
     expect(capture(['generate', '--seed', SEED]).out).toContain('oklch(') // default
     const hex = capture(['generate', '--seed', SEED, '--format', 'hex'])

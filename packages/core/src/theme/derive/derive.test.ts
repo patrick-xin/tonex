@@ -812,6 +812,28 @@ describe('deriveTheme', () => {
       expect(splitA.md.dark['--color-surface']).toBe(splitB.md.dark['--color-surface'])
     })
 
+    it('per-mode palette — light and dark draw on different neutral families (#242)', () => {
+      // why: load-bearing assertion that surfacePaletteName is mode-indexed.
+      // Before #242 the family was a flat scalar fed into both modes, so a
+      // light/dark split was unreachable. At tint level 0 the surface IS the
+      // palette base shade, so the family fully determines it — changing dark's
+      // family must move dark's surface while leaving light (still slate) fixed.
+      const ref = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: { light: 0, dark: 0 },
+        surfacePaletteName: { light: 'slate', dark: 'slate' },
+      })
+      const split = deriveTheme({
+        ...DEFAULT_INPUTS,
+        surfaceAlgo: 'tint',
+        surfaceTintLevel: { light: 0, dark: 0 },
+        surfacePaletteName: { light: 'slate', dark: 'stone' },
+      })
+      expect(split.md.light['--color-surface']).toBe(ref.md.light['--color-surface'])
+      expect(split.md.dark['--color-surface']).not.toBe(ref.md.dark['--color-surface'])
+    })
+
     it('per-mode levels — desaturate diverges across modes independently', () => {
       // why: baseline pins both modes to level=0 — the `default` preset ships
       // with light=0.3, so DEFAULT_INPUTS alone wouldn't be a neutral reference

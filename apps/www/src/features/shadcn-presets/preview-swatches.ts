@@ -35,7 +35,7 @@ function presetSource(name: ShadcnPresetName, override?: PresetSource): Portable
     contrastLevel: override?.contrastLevel ?? { ...p.contrastLevel },
     variant: p.variant,
     surfaceAlgo: p.surfaceAlgo,
-    surfacePaletteName: p.surfacePaletteName,
+    surfacePaletteName: { ...p.surfacePaletteName },
     surfaceTintLevel: { ...p.surfaceTintLevel },
     surfaceTintTextLevel: { ...p.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...p.surfaceDesaturateLevel },

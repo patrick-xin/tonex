@@ -24,7 +24,9 @@ export function formatPresetEntry(
   lines.push(`    contrastLevel: { light: ${contrastLevel.light}, dark: ${contrastLevel.dark} },`)
   lines.push(`    variant: '${bundle.variant}',`)
   lines.push(`    surfaceAlgo: '${bundle.surfaceAlgo}',`)
-  lines.push(`    surfacePaletteName: '${bundle.surfacePaletteName}',`)
+  lines.push(
+    `    surfacePaletteName: { light: '${bundle.surfacePaletteName.light}', dark: '${bundle.surfacePaletteName.dark}' },`,
+  )
   lines.push(
     `    surfaceTintLevel: { light: ${bundle.surfaceTintLevel.light}, dark: ${bundle.surfaceTintLevel.dark} },`,
   )

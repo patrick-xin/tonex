@@ -54,7 +54,8 @@ npx tonex generate --seed "#6A9CFF" [options] > globals.css
 | Flag | Default | Details |
 | --- | --- | --- |
 | `--tint` | none | `0` to `1`; `0` is max neutral. Exclusive with `--desaturate`. |
-| `--tint-palette` | `zinc` | `slate`, `gray`, `zinc`, `neutral`, `stone`, `taupe`, `mauve`, `mist`, or `olive`. Used when `--tint` is set. |
+| `--tint-palette` | `zinc` | `slate`, `gray`, `zinc`, `neutral`, `stone`, `taupe`, `mauve`, `mist`, or `olive`. Sets both modes. Used when `--tint` is set. |
+| `--tint-palette-light` / `--tint-palette-dark` | falls back to `--tint-palette` | same values; override one mode each so light and dark can use different neutral families. |
 | `--desaturate` | none | `0` to `1`; `0` is a no-op. Exclusive with `--tint`. |
 
 ### Authored layers

@@ -77,9 +77,12 @@ export function SurfaceTint() {
       <label className="flex gap-3 items-center">
         <span className="text-sm w-16">palette</span>
         <select
-          value={surfacePaletteName}
+          value={surfacePaletteName[resolvedMode]}
           onChange={(e) =>
-            setSurfacePaletteName(e.target.value as (typeof NEUTRAL_PALETTE_NAMES)[number])
+            setSurfacePaletteName(
+              resolvedMode,
+              e.target.value as (typeof NEUTRAL_PALETTE_NAMES)[number],
+            )
           }
           disabled={paletteDisabled}
           className="text-sm border rounded px-2 py-1 disabled:opacity-40"

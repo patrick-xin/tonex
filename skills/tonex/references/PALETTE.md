@@ -90,6 +90,8 @@ So `--tint 0` and `--desaturate 0` do **opposite** things — they are not one k
 
 `--tint-palette` picks the neutral identity (default `zinc`), only consumed when `--tint` is set. The values are the Tailwind v4 neutrals (`slate`, `gray`, `zinc`, `neutral`, `stone`) plus four project-extended ones (`taupe`, `mauve`, `mist`, `olive`); `describe` carries the full enum. You can't see the result, so don't pick by adjective — the choice only matters near `--tint 0`, where the output is the pure chosen palette at each token's MCU tone. At level 1 the surfaces converge toward the primary's hue regardless of palette.
 
+The palette is per-mode: `--tint-palette` sets both modes at once, and `--tint-palette-light` / `--tint-palette-dark` override one mode each (each falls back to `--tint-palette`, then to the default). Reach for the split only when light and dark genuinely want different neutral families — a warm `stone` in light, a cool `zinc` in dark. The level knobs (`--tint`, `--tint-text`) are already independent per mode, so the palette completes the set.
+
 **The knobs barely move contrast.** Both pin each token's *tone* and change only hue/chroma, so WCAG ratios mostly track the same luminance relationship across the `0→1` range. A surface knob won't break a comfortably-passing theme. Re-gate anyway (the recipe changed, and `check` is one command): a light-mode accent-on-`surface` pair already sitting at the AA edge can still wobble by a fraction.
 
 ## Reading oklch values

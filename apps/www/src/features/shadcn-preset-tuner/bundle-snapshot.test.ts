@@ -25,7 +25,7 @@ function cloneBundle(b: PresetBundle): PresetBundle {
   return {
     variant: b.variant,
     surfaceAlgo: b.surfaceAlgo,
-    surfacePaletteName: b.surfacePaletteName,
+    surfacePaletteName: { ...b.surfacePaletteName },
     surfaceTintLevel: { ...b.surfaceTintLevel },
     surfaceTintTextLevel: { ...b.surfaceTintTextLevel },
     surfaceDesaturateLevel: { ...b.surfaceDesaturateLevel },
@@ -41,7 +41,7 @@ describe('snapshotBundle', () => {
     const bundle = snapshotBundle(DEFAULT_INPUTS)
     expect(bundle.variant).toBe(DEFAULT_INPUTS.variant)
     expect(bundle.surfaceAlgo).toBe(DEFAULT_INPUTS.surfaceAlgo)
-    expect(bundle.surfacePaletteName).toBe(DEFAULT_INPUTS.surfacePaletteName)
+    expect(bundle.surfacePaletteName).toEqual(DEFAULT_INPUTS.surfacePaletteName)
   })
 
   it('deep-copies surface level objects — mutation does not leak into the source', () => {
@@ -108,7 +108,7 @@ describe('diffBundle', () => {
     expect(diff.totalChanges).toBe(0)
     expect(diff.variantChanged).toBe(false)
     expect(diff.surfaceAlgoChanged).toBe(false)
-    expect(diff.surfacePaletteNameChanged).toBe(false)
+    expect(diff.surfacePaletteName).toEqual({ light: false, dark: false })
     expect(diff.bindings.light).toEqual([])
     expect(diff.bindings.dark).toEqual([])
   })

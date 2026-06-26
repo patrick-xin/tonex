@@ -163,7 +163,11 @@ function DiffSummary({ diff, seed, contrast }: DiffSummaryProps) {
     },
     { label: 'variant', changed: diff.variantChanged },
     { label: 'surfaceAlgo', changed: diff.surfaceAlgoChanged },
-    { label: 'surfacePaletteName', changed: diff.surfacePaletteNameChanged },
+    {
+      label: 'surfacePaletteName',
+      changed: diff.surfacePaletteName.light || diff.surfacePaletteName.dark,
+      detail: changedModes(diff.surfacePaletteName),
+    },
     {
       label: 'surfaceTintLevel',
       changed: diff.surfaceTintLevel.light || diff.surfaceTintLevel.dark,
@@ -252,7 +256,8 @@ function useApplyPreset() {
     actions.setContrastLevel('dark', preset.contrastLevel.dark)
     actions.setVariant(preset.variant)
     actions.setSurfaceAlgo(preset.surfaceAlgo)
-    actions.setSurfacePaletteName(preset.surfacePaletteName)
+    actions.setSurfacePaletteName('light', preset.surfacePaletteName.light)
+    actions.setSurfacePaletteName('dark', preset.surfacePaletteName.dark)
     actions.setSurfaceTintLevel('light', preset.surfaceTintLevel.light)
     actions.setSurfaceTintLevel('dark', preset.surfaceTintLevel.dark)
     actions.setSurfaceTintTextLevel('light', preset.surfaceTintTextLevel.light)

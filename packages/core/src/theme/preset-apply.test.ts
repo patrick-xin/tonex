@@ -243,7 +243,7 @@ describe('resolvePresetApply — recipe fields always overwrite', () => {
     const drifted = themeWith({
       variant: 'monochrome',
       surfaceAlgo: 'tint',
-      surfacePaletteName: 'slate',
+      surfacePaletteName: { light: 'slate', dark: 'stone' },
       surfaceTintLevel: { light: 0.42, dark: 0.18 },
       surfaceTintTextLevel: { light: 0.55, dark: 0.27 },
       surfaceDesaturateLevel: { light: 0.73, dark: 0.31 },
@@ -251,7 +251,7 @@ describe('resolvePresetApply — recipe fields always overwrite', () => {
     const patch = resolvePresetApply(drifted, preset)
     expect(patch.variant).toBe(preset.variant)
     expect(patch.surfaceAlgo).toBe(preset.surfaceAlgo)
-    expect(patch.surfacePaletteName).toBe(preset.surfacePaletteName)
+    expect(patch.surfacePaletteName).toEqual(preset.surfacePaletteName)
     expect(patch.surfaceTintLevel).toEqual(preset.surfaceTintLevel)
     expect(patch.surfaceTintTextLevel).toEqual(preset.surfaceTintTextLevel)
     expect(patch.surfaceDesaturateLevel).toEqual(preset.surfaceDesaturateLevel)
