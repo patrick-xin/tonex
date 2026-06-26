@@ -1,6 +1,8 @@
 ---
 name: sweep
 description: Periodic maintenance sweep of the two stores that rot silently between sessions — machine-local agent memory and the ADR set. Use when the user asks to run a maintenance sweep, drain or clean up agent memory, audit ADRs, or on the recurring ~2-week / N-slice cadence.
+metadata:
+  internal: true
 ---
 
 # Maintenance sweep

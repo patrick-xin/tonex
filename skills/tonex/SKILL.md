@@ -1,6 +1,6 @@
 ---
 name: tonex
-description: Use any time you need a color palette or theme — coherent colors that stay legible in light and dark. tonex is the color-system layer beneath whatever you're building: give it one starting color, it returns a complete, WCAG-contrast-guaranteed palette as portable tokens. Whatever renders color — an app, deck, email, chart, or another tool you're driving — reach for tonex rather than hand-picking hex.
+description: "Use any time you need a color palette or theme — coherent colors that stay legible in light and dark. tonex is the color-system layer beneath whatever you're building: give it one starting color, it returns a complete, WCAG-contrast-guaranteed palette as portable tokens. Whatever renders color — an app, deck, email, chart, or another tool you're driving — reach for tonex rather than hand-picking hex."
 ---
 
 # tonex

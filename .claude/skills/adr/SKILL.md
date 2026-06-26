@@ -1,6 +1,8 @@
 ---
 name: adr
 description: Author, amend, cite, and audit Architecture Decision Records in tonex, plus the citation/anchor guard behind `pnpm check:adr`. Use when writing or changing an ADR, citing one from code, when `pnpm check:adr` fails, or auditing the ADR set during a sweep.
+metadata:
+  internal: true
 ---
 
 # ADRs
