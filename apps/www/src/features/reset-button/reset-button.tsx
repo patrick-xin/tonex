@@ -30,6 +30,22 @@ export function ResetButton({
   children = 'Reset to defaults',
   onConfirm,
 }: ResetButtonProps) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant={variant} size={size} />}>
+        {children}
+      </AlertDialogTrigger>
+      <ResetDialogContent onConfirm={onConfirm} />
+    </AlertDialog>
+  )
+}
+
+// The confirm window itself, shared by the button-triggered reset (inside the
+// Settings popover/drawer) and the `R` hotkey's handle-driven dialog. Render it
+// inside an <AlertDialog> — either trigger-anchored (ResetButton) or
+// handle-driven (ResetHotkey). The dialog body and the reset action live here
+// once so the two entry points can't drift.
+export function ResetDialogContent({ onConfirm }: { onConfirm?: () => void }) {
   const reset = useSource((s) => s.actions.reset)
   // why: "Reset to defaults" clears every customization, so the binding rail's
   // tracked baseline (option 1.5) resets to the default routing too — otherwise a
@@ -38,32 +54,27 @@ export function ResetButton({
   // regardless; this keeps the subsequent drift correct as well.
   const resetBaseline = useBindingBaseline((s) => s.actions.reset)
   return (
-    <AlertDialog>
-      <AlertDialogTrigger render={<Button variant={variant} size={size} />}>
-        {children}
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This restores every source field to its default value. Your current customizations will
-            be cleared.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
-          <AlertDialogClose
-            onClick={() => {
-              reset()
-              resetBaseline()
-              onConfirm?.()
-            }}
-            render={<Button variant="primary" />}
-          >
-            Reset
-          </AlertDialogClose>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This restores every source field to its default value. Your current customizations will be
+          cleared.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
+        <AlertDialogClose
+          onClick={() => {
+            reset()
+            resetBaseline()
+            onConfirm?.()
+          }}
+          render={<Button variant="primary" />}
+        >
+          Reset
+        </AlertDialogClose>
+      </AlertDialogFooter>
+    </AlertDialogContent>
   )
 }

@@ -15,6 +15,7 @@ import {
 import { matchSorter } from 'match-sorter'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
+import { AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -190,6 +191,19 @@ export function SiteCommandMenu({ pageShortcuts }: { pageShortcuts: NavTab[] }) 
                             >
                               {content}
                             </DialogTrigger>
+                          )
+                        }
+
+                        if (item.alertDialogHandle) {
+                          return (
+                            <AlertDialogTrigger
+                              nativeButton={false}
+                              key={item.value}
+                              handle={item.alertDialogHandle}
+                              render={<CommandItem value={item} onClick={() => setIsOpen(false)} />}
+                            >
+                              {content}
+                            </AlertDialogTrigger>
                           )
                         }
 

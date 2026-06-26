@@ -3,7 +3,7 @@
 import { DownloadIcon } from '@phosphor-icons/react'
 import { useHotkey } from '@tanstack/react-hotkeys'
 import type { ExportOptions, Mode } from '@tonex/core'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from 'tailwind-variants'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,7 @@ import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from '@/components/
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useActiveMode } from '@/features/theme-mode'
 import { exportDialogHandle } from '@/lib/handles'
+import { getHighlighter } from '@/lib/highlight'
 import { useUiPrefs } from '@/lib/stores/ui-prefs'
 import { ExportContentDisplay } from './export-content-display'
 import { ExportControls } from './export-controls'
@@ -84,6 +85,21 @@ export const ExportButton = ({
     requireReset: true,
     meta: { name: 'Export', description: 'Press E to open export' },
   })
+
+  // why: build Shiki's grammar registry while the browser is idle, before the
+  // dialog ever opens, so the first highlight resolves within a tick instead of
+  // after the lazy lang-import — shortening the unstyled fallback window. The
+  // highlighter promise is memoised at module scope, so this is a one-time warm
+  // and every later open reuses the same instance.
+  useEffect(() => {
+    const warm = () => void getHighlighter()
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(warm)
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(warm, 0)
+    return () => clearTimeout(id)
+  }, [])
 
   // why: single-tab routes (shadcn — we only support Tailwind v4) skip the
   // tab chrome and render the panel directly. The tab strip is meaningful
