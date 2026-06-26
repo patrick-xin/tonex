@@ -1,3 +1,4 @@
+import { createAlertDialogHandle } from '@/components/ui/alert-dialog'
 import { createDialogHandle } from '@/components/ui/dialog'
 import { createDrawerHandle } from '@/components/ui/drawer'
 import { createPopoverHandle } from '@/components/ui/popover'
@@ -5,6 +6,10 @@ import type { HelpSection } from '@/features/help-dialog/help-sections'
 
 export const exportDialogHandle = createDialogHandle<null>()
 export const checkContrastDialogHandle = createDialogHandle<null>()
+// Drives the reset confirm window opened by the `R` hotkey. The ResetButton's
+// own AlertDialog only mounts while the Settings popover/drawer hosting it is
+// open, so the hotkey opens a separate always-mounted copy through this handle.
+export const resetDialogHandle = createAlertDialogHandle<null>()
 // Payload = the help section to deep-link to. Plain opens (H hotkey, command
 // menu, mobile tour fallback) use open(null) — a trigger id, not a payload — and
 // land at the top with each accordion's defaults; openWithPayload(section)

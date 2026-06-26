@@ -57,7 +57,10 @@ export function ExportContentDisplay({ content, lang }: ExportContentDisplayProp
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki markup of export content the app itself generated from the user's seed
         <div className="text-xs" dangerouslySetInnerHTML={{ __html: highlighted }} />
       ) : (
-        <pre className="font-mono p-4 text-xs text-on-surface-variant whitespace-pre">
+        // Match Shiki's `.shiki` box (code.css: padding 1.2rem) exactly so the
+        // async highlight swap is invisible — otherwise the 1rem→1.2rem padding
+        // jump reflows the block the instant highlighting resolves.
+        <pre className="font-mono p-[1.2rem] text-xs text-on-surface-variant whitespace-pre">
           {content}
         </pre>
       )}

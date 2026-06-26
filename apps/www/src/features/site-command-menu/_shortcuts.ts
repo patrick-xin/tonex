@@ -1,10 +1,22 @@
-import type { Dialog as BaseDialog, Popover as BasePopover } from '@base-ui/react'
-import { CircleQuestionMarkIcon, Contrast, CopyIcon, Download, Settings } from 'lucide-react'
+import type {
+  AlertDialog as BaseAlertDialog,
+  Dialog as BaseDialog,
+  Popover as BasePopover,
+} from '@base-ui/react'
+import {
+  CircleQuestionMarkIcon,
+  Contrast,
+  CopyIcon,
+  Download,
+  RotateCcwIcon,
+  Settings,
+} from 'lucide-react'
 import type { HelpSection } from '@/features/help-dialog/help-sections'
 import {
   checkContrastDialogHandle,
   exportDialogHandle,
   helpDialogHandle,
+  resetDialogHandle,
   settingsPopoverHandle,
 } from '@/lib/handles'
 
@@ -21,6 +33,9 @@ export interface Item {
   // assignable.
   handle?: BaseDialog.Handle<null> | BaseDialog.Handle<HelpSection>
   popoverHandle?: BasePopover.Handle<null>
+  // Reset rides an AlertDialog (a distinct Base UI primitive from `handle`'s
+  // Dialog), so it gets its own field + AlertDialogTrigger branch in the menu.
+  alertDialogHandle?: BaseAlertDialog.Handle<null>
 }
 
 export interface Group {
@@ -56,6 +71,13 @@ export const BASE_SHORTCUTS: Item[] = [
     shortcut: 'S',
     value: 'settings',
     popoverHandle: settingsPopoverHandle,
+  },
+  {
+    icon: RotateCcwIcon,
+    label: 'Reset to defaults',
+    shortcut: 'R',
+    value: 'reset',
+    alertDialogHandle: resetDialogHandle,
   },
   {
     icon: CircleQuestionMarkIcon,

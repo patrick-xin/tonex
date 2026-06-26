@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { settingsPopoverHandle } from '@/lib/handles'
 import type { Layer } from '@/lib/layer-context'
+import { ResetHotkey } from './reset-hotkey'
 import { SettingsFields } from './settings-fields'
 import { toggleSettingsPopover } from './toggle-popover'
 
@@ -24,31 +25,36 @@ export function Settings({ layer }: { layer: Layer }) {
   useEffect(() => () => settingsPopoverHandle.close(), [])
 
   return (
-    <Popover handle={settingsPopoverHandle}>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <PopoverTrigger
-              id="settings"
-              render={<Button variant="secondary" size="icon-sm" aria-label="Settings" />}
-            >
-              <GearSixIcon />
-            </PopoverTrigger>
-          }
-        />
-        <TooltipContent>
-          <div className="flex items-center gap-1">
-            Settings
-            <Kbd>S</Kbd>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-      <PopoverContent
-        align="center"
-        className="w-[min(20rem,calc(100vw-2rem))] flex flex-col gap-2 bg-surface"
-      >
-        <SettingsFields layer={layer} onAfterReset={() => settingsPopoverHandle.close()} />
-      </PopoverContent>
-    </Popover>
+    <>
+      {/* The `R` reset hotkey + its always-mounted confirm window ride here so the
+          binding survives NavTabs remounts, the same lifetime as the `S` hotkey. */}
+      <ResetHotkey />
+      <Popover handle={settingsPopoverHandle}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <PopoverTrigger
+                id="settings"
+                render={<Button variant="secondary" size="icon-sm" aria-label="Settings" />}
+              >
+                <GearSixIcon />
+              </PopoverTrigger>
+            }
+          />
+          <TooltipContent>
+            <div className="flex items-center gap-1">
+              Settings
+              <Kbd>S</Kbd>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent
+          align="center"
+          className="w-[min(20rem,calc(100vw-2rem))] flex flex-col gap-2 bg-surface"
+        >
+          <SettingsFields layer={layer} onAfterReset={() => settingsPopoverHandle.close()} />
+        </PopoverContent>
+      </Popover>
+    </>
   )
 }

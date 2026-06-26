@@ -1,1 +1,1 @@
-export { ResetButton } from './reset-button'
+export { ResetButton, ResetDialogContent } from './reset-button'
