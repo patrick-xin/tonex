@@ -1,3 +1,7 @@
+<a href="https://tonex.dev/">
+  <img alt="Tonex" src="https://github.com/patrick-xin/tonex/blob/master/gh-image.png?raw=true">
+</a>
+
 # Tonex
 
 Tonex turns one brand color into an authored color system: roles, constraints, light and dark behavior, and WCAG contrast from one seed. It exports to shadcn, DESIGN.md, Material, or your own token setup. The engine uses Google's [Material Color Utilities](https://github.com/material-foundation/material-color-utilities), but the output does not have to look like Material.
