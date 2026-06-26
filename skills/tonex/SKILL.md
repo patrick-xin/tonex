@@ -9,7 +9,7 @@ Builds a complete color system from source colors using Google's Material Color 
 
 Tonex provides a safety net; you're still the painter. It derives roles, but it does not decide every binding — how those roles land on the target's slots. For common targets (shadcn, design.md, Material JSON), binding is pre-baked as a `--to` convenience. For anything else, map roles→slots yourself and verify each asserted pairing with `check --pairs`.
 
-Before running Tonex, choose the command prefix once: if `command -v tonex` succeeds, use `tonex ...`; otherwise use `npx tonex@latest ...`. Examples below use the short `tonex ...` form.
+Before running Tonex, choose the command prefix once: if `command -v tonex` succeeds, use `tonex ...`; otherwise use `npx @tonex-dev/cli@latest ...`. Examples below use the short `tonex ...` form.
 
 `tonex describe` is the live contract. If these docs disagree with the CLI about flags, variants, thresholds, or exit codes, trust `tonex describe`.
 

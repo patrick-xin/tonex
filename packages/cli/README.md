@@ -10,9 +10,11 @@ real contrast check. Stop hand-picking hex.
 ## Install
 
 ```bash
-npm i -g tonex
+npm i -g @tonex-dev/cli
+# the global command is `tonex`:
+tonex describe
 # or run without installing:
-npx tonex describe
+npx @tonex-dev/cli describe
 ```
 
 ## Commands

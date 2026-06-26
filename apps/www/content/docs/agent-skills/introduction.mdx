@@ -47,7 +47,7 @@ A good agent flow looks like this:
     Use Tonex to generate a light-mode hex palette from the brand seed. Email clients need conservative color output, so prefer `--format hex`.
 
     ```bash
-    npx tonex@latest generate --seed "#7a517b" --to colors --format hex
+    npx @tonex-dev/cli@latest generate --seed "#7a517b" --to colors --format hex
     ```
   </Step>
   <Step title="Build the template">
@@ -57,7 +57,7 @@ A good agent flow looks like this:
     Verify the pairs the email actually uses: `on-primary` on `primary` for the button, `on-surface` on `surface` for body copy, `on-surface-variant` on `surface` for muted footer text, and `primary` on `surface` for links.
 
     ```bash
-    npx tonex@latest check --seed "#7a517b" --mode light \
+    npx @tonex-dev/cli@latest check --seed "#7a517b" --mode light \
       --pairs '[["on-surface","surface"],["on-surface-variant","surface"],["on-primary","primary"],["primary","surface"]]'
     ```
   </Step>
