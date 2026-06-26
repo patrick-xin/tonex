@@ -48,7 +48,7 @@ export function AnimatedCollapsible({
           <Button
             variant={variant}
             className={cn(
-              'w-full justify-between px-2! group leading-snug font-semibold',
+              'w-full justify-between px-2! group leading-snug font-semibold shadow-none!',
               className,
             )}
           >

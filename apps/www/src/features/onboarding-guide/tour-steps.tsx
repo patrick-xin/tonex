@@ -46,7 +46,7 @@ export type GuideStep = {
 export const TOUR_WELCOME = {
   title: 'Welcome to Tonex',
   description:
-    "Start with one color and the system builds a complete, accessible theme around it. From there it's yours to shape: change any color and the rest stays coherent. This tour walks you through it minutes.",
+    "Start with one color and the system builds a complete, accessible theme around it. From there it's yours to shape: change any color and the rest stays coherent. This tour walks you through it in minutes.",
 } satisfies { title: string; description: ReactNode }
 
 export const TOUR_STEPS: GuideStep[] = [
@@ -169,8 +169,13 @@ export const TOUR_STEPS: GuideStep[] = [
     key: 'export',
     layers: ['md', 'shadcn'],
     title: 'Export',
-    description:
-      'What you see is what you paste — core tokens always export, and switches add the tonal palette, charts, or contrast variants.',
+    description: (
+      <>
+        What you see is what you get — core tokens always export, and switches add the tonal
+        palette, charts, or contrast variants. Keyboard shortcut: <Kbd>D</Kbd>
+      </>
+    ),
+
     anchorKey: 'export',
     side: 'bottom',
     popoverTitle: 'Copy or export your theme',
