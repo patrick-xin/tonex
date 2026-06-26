@@ -2,7 +2,7 @@
   "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
   "name": "tonex",
   "displayName": "tonex",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Turn a brand seed color into a complete light+dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's Material Color Utilities. Stop hand-picking hex.",
   "author": {
     "name": "Patrick Xin"
@@ -29,6 +29,12 @@
     "oklch",
     "light-dark"
   ],
-  "tags": ["color", "theme", "design", "accessibility", "design-system"],
+  "tags": [
+    "color",
+    "theme",
+    "design",
+    "accessibility",
+    "design-system"
+  ],
   "skills": "./skills/"
 }

@@ -1,7 +1,7 @@
 {
   "name": "tonex",
   "description": "Turn a brand seed color into a complete light+dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's Material Color Utilities. Stop hand-picking hex.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
     "name": "Patrick Xin",
     "url": "https://github.com/patrick-xin"

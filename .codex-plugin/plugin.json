@@ -1,6 +1,6 @@
 {
   "name": "tonex",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Turn a brand seed color into a complete light+dark theme with guaranteed WCAG contrast — shadcn, design.md, Material, or JSON — via Google's Material Color Utilities. Stop hand-picking hex.",
   "author": {
     "name": "Patrick Xin",
@@ -32,7 +32,10 @@
     "longDescription": "Turn one brand seed hex into a complete light+dark color system with WCAG contrast guaranteed across both modes, built on Google's Material Color Utilities. Generate paste-ready tokens for shadcn/Tailwind, design.md, Material Theme JSON, or a canonical colors.json, and gate every text pair with `tonex check`. The skill drives the `tonex` CLI so the agent never hand-picks a hex.",
     "developerName": "Patrick Xin",
     "category": "Design",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://github.com/patrick-xin/tonex",
     "logo": "./assets/logo.png",
     "composerIcon": "./assets/logo.png",
