@@ -4,17 +4,25 @@
 
 `--to colors` prints the full role set. Map each role onto a target slot by *intent*, then prove every pairing with `check --pairs`. Names are a default, not a contract — bind the generated `secondary` as your primary or `tertiary` as an accent freely; the guarantee follows the pairing you check, not the name you keep. The roster is **core (28) by default**; widen with `--extended` only when the target has slots core lacks — see [PALETTE.md](../PALETTE.md#the-role-set---to-colors).
 
-## The method — treat the target as a slot manifest
+## The method — surface every usage, then bind
 
-Find the target's color surface — a config object, a token file, a theme block, a set of CSS variables — and treat it as a list of `{ slot, intent, paired-against }`. Then, for each slot:
+Start from the target's **actual color usage**, not its named slots. A slot manifest misses the literals buried in shadows, borders, gradients, and overlays — the values most likely to clash or fail. Five steps:
 
-1. **Generate the roles.** `generate … --to colors` prints the full role set in both modes. The roster and knobs are in [PALETTE.md](../PALETTE.md); widen with `--extended` only when the target has slots core lacks (see [PALETTE.md](../PALETTE.md#the-role-set---to-colors)).
-2. **Pick the token by intent.** MD3 tokens *are* the intent layer — a primary action fill is `primary`, its text `on-primary`, a card surface `surface-container`. The token's value already carries the tone tonex guaranteed against its paired surface, so don't re-pick lightness; read the value and bind it.
-3. **Verify every pairing.** A foreign target fuses what MD3 splits: one `--ink` slot can be text *and* border *and* icon over several backgrounds, so its value has to satisfy the **union** of contrast constraints across every background it touches. Gate token-name pairs with the seed recipe, for example `check --seed '#3b82f6' --pairs '[["on-surface","surface"],["primary","surface"]]'`. Exit `1` enumerates the failing pairs, so raise `--contrast` or pick a higher-contrast token for that slot and re-check ([CONTRAST.md](../CONTRAST.md)).
+**1 — Surface all color usage.** Grep the whole artifact — templates, component CSS, inline styles — not just a `:root`/token block. Inventory every literal (`#hex`, `rgb/rgba/hsl`, named colors, gradient stops): where it appears and how it's used (solid fill, text, border, alpha overlay, shadow, gradient). This inventory, not the named slots, is what you bind; every entry must end up sourced from the recipe, none left hand-written.
 
-Map a fused slot to the token that satisfies its *strictest* use — that cardinality mismatch (MD3 splits, dumb targets fuse) is the lossy part of any binding. Before mapping, know what *kind* of tone each role is: accents are fills, containers are backgrounds, inverse flips polarity. The three role classes and where each binds safely are in [PATTERNS.md](../PATTERNS.md#which-role-binds-safely-where-the-three-classes).
+**2 — Generate and read values.** `generate … --to colors` prints the full role set, both modes ([PALETTE.md](../PALETTE.md); `--extended` only for slots core lacks). Each value's tone is already gated against its paired surface — bind the value, don't re-pick lightness.
 
-The token names you feed `check --pairs` and `adjust` come from one emitted layer — see [Token naming across surfaces](#token-naming-across-surfaces) below.
+**3 — Build the binding map.** Map each usage to a role by **intent**, not name: action fill → `primary`, its text → `on-primary`, card → `surface-container`, muted text → `on-surface-variant`. A foreign slot that fuses what MD3 splits (one `--ink` = text + border + icon over several backgrounds) takes the token satisfying the **union** of its constraints — its strictest use. Role classes (accents are fills, containers backgrounds, inverse flips polarity) are in [PATTERNS.md](../PATTERNS.md#which-role-binds-safely-where-the-three-classes). The map is inert — it records decisions, changes nothing.
+
+**4 — Alias the tokens.** *Invariant: every slot takes its mapped role's value; nothing stays hand-written.* Wiring depends on target capability:
+- **Reference-capable** (CSS custom properties, DTCG aliases, token refs): point the foreign name at the token — `--ink: var(--on-surface)`. Live, self-documenting.
+- **Literal-only** (inline hex, value-only JSON, SVG fills, email): resolve the role to a concrete value and write it in. No live link — the recipe metadata is the only record, so recording it is mandatory.
+
+An overlay is a token + an alpha over a known background, never a hand-picked `rgba`: reference-capable → `color-mix(in srgb, var(--token) N%, transparent)`; literal-only → composite the token at that alpha yourself. Decorative overlays (shadows, washes) are contrast-exempt but still must be token-derived; a load-bearing overlay (carries text or a 3:1 boundary) is checked as its **composited effective color**, not the bare token.
+
+**5 — Build and gate.** Emit the artifact last, after the map is complete, so no un-mapped literal slips through. Gate the final recipe with `check`, and every asserted foreign pairing with `check --pairs` (e.g. `check --seed '#3b82f6' --pairs '[["on-surface","surface"],["primary","surface"]]'`; exit `1` enumerates failing pairs — raise `--contrast` or re-pair, then re-check). Embed the exact `generate` command in the artifact's metadata.
+
+The names you feed `check --pairs` and `adjust` come from one emitted layer — see [Token naming across surfaces](#token-naming-across-surfaces).
 
 ## Token naming across surfaces
 
@@ -32,7 +40,9 @@ Drive `check --pairs` with names from the emitted layer you're mapping. Drive `a
 - **One namespace per `--pairs` call.** Keep every pair within one layer — all bare MD roles **or** all `--`-shadcn slots, never mixed.
 - The internal `--color-*` id is **not** an input — tonex rejects it and points you at the bare role name.
 
-## Worked example — a target with no built-in (React Email)
+## Worked example — a literal-only target (React Email)
+
+The **literal-only** branch of step 4: no `var()`, no `color-mix` — resolve roles to concrete hex and write them in, recipe lives in metadata. (A reference-capable target instead aliases foreign names onto the tokens and composites overlays with `color-mix`.)
 
 React Email styles emails with a `<Tailwind>` component; its color surface is `theme.extend.colors`, consumed as utility classes (`bg-surface`, `text-on-surface`). The ~7-slot manifest:
 
