@@ -44,14 +44,14 @@ const variant: FlagSpec = {
 }
 // why: cmf's second source color (core's cmfSecondSourceHex). CMF is the only MCU
 // variant that reads a second source — it rebuilds the TERTIARY palette from this
-// color's hue+chroma and shifts the ERROR hue, leaving primary/secondary untouched.
+// color's hue+chroma, leaving primary/secondary untouched.
 // Same color firewall as --seed (hex or oklch). A usage error on any non-cmf variant
 // (it would be a silent no-op there); gated by core's cmfSecondSourceDisabledReason.
 const secondColor: FlagSpec = {
   name: '--second-color',
   type: 'color',
   description:
-    'cmf only: a second source color (hex or oklch) that reshapes the tertiary palette + error hue; not the MD3 secondary role',
+    'cmf only: a second source color (hex or oklch) that reshapes the tertiary palette; not the MD3 secondary role',
 }
 const to: FlagSpec = {
   name: '--to',

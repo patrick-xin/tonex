@@ -50,6 +50,7 @@ If there's no seed to find, don't guess silently. Ask about the product, audienc
 - shadcn / Tailwind v4: [references/integrations/SHADCN.md](references/integrations/SHADCN.md)
 - design.md: [references/integrations/DESIGN-MD.md](references/integrations/DESIGN-MD.md)
 - Material Theme Builder JSON: [references/integrations/JSON.md](references/integrations/JSON.md)
+- creative surfaces (decks, marketing, social): [references/integrations/CREATIVE.md](references/integrations/CREATIVE.md)
 - any other target: [references/integrations/CUSTOM-TARGET.md](references/integrations/CUSTOM-TARGET.md)
 
 ### 4. Gate contrast
@@ -109,3 +110,4 @@ Add `--json` to `check` and `adjust` for machine-readable output.
 - [references/integrations/SHADCN.md](references/integrations/SHADCN.md) — shadcn / Tailwind v4 projection.
 - [references/integrations/DESIGN-MD.md](references/integrations/DESIGN-MD.md) — DESIGN.md `colors:` block (`--to yaml`).
 - [references/integrations/JSON.md](references/integrations/JSON.md) — Material Theme Builder JSON.
+- [references/integrations/CREATIVE.md](references/integrations/CREATIVE.md) — For creative works, decks, marketing/landing pages, social, etc..

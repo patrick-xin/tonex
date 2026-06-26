@@ -57,7 +57,7 @@ export function parseSource(args: ParsedArgs, io: Io): PortableTheme | number {
   const variant = (variantArg ?? DEFAULT_VARIANT) as VariantName
 
   // why: --second-color surfaces core's cmfSecondSourceHex — the second source the
-  // CMF scheme reads to rebuild the tertiary palette + shift the error hue. Same
+  // CMF scheme reads to rebuild the tertiary palette. Same
   // color firewall as --seed (hex or oklch → projected sRGB). Gated by core's
   // cmfSecondSourceDisabledReason (single source of the "cmf only" rule, surfaced
   // not reimplemented): a value on a non-cmf variant would be a silent no-op, so we

@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/popover'
 import type { HelpSection } from '@/features/help-dialog/help-sections'
 import { helpDialogHandle } from '@/lib/handles'
+import { focusVisiblePrimaryRing } from '../../components/ui/styles'
 
 export function OnboardingGuide({
   open,
@@ -123,7 +124,7 @@ export function OnboardingGuide({
                 side={currentStep.side ?? 'bottom'}
                 sideOffset={10 + HOLE_PADDING}
               >
-                <PopoverPopup className="surface-popup px-3 py-1.5 text-sm font-medium">
+                <PopoverPopup className="surface-popup px-3 py-1.5 text-sm font-medium bg-surface">
                   <PopoverArrow />
                   {currentStep.popoverTitle ?? currentStep.title}
                 </PopoverPopup>
@@ -195,6 +196,7 @@ export function OnboardingGuide({
                           active
                             ? 'w-6 bg-primary'
                             : 'w-2 bg-surface-container-highest hover:bg-on-surface-variant',
+                          focusVisiblePrimaryRing,
                         )}
                       />
                     )
