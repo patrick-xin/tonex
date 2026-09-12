@@ -1,0 +1,7 @@
+{
+  "label": "Night",
+  "seed": "#7aa2f7",
+  "secondColor": "#9ece6a",
+  "custom": [{ "name": "orange", "hex": "#ff9e64" }],
+  "chartPalette": "polychrome"
+}
