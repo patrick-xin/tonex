@@ -1,0 +1,7 @@
+{
+  "label": "Emerald",
+  "seed": "#10b981",
+  "secondColor": "#e0af68",
+  "custom": [{ "name": "orange", "hex": "#ff9e64" }],
+  "chartPalette": "polychrome"
+}

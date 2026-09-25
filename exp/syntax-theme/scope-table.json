@@ -1,0 +1,31 @@
+{
+  "$comment": "Static scope table: TextMate scopes → slot names. The ONLY file that knows about scopes. Never contains a hex — colors live in mappings/*.json, values come from the tonex CLI. Adding language coverage happens here and nowhere else.",
+  "slots": {
+    "comment": { "scopes": ["comment", "punctuation.definition.comment"], "fontStyle": "italic" },
+    "keyword": { "scopes": ["keyword", "storage"] },
+    "operator": { "scopes": ["keyword.operator"] },
+    "attribute": { "scopes": ["entity.other.attribute-name", "meta.attribute"] },
+    "function": { "scopes": ["entity.name.function", "meta.function-call", "meta.method-call", "support.function", "entity.name.variable.function"] },
+    "type": { "scopes": ["entity.name.type", "entity.name.class", "support.type", "support.class", "entity.other.inherited-class", "entity.name.namespace"] },
+    "string": { "scopes": ["string", "string.regexp", "punctuation.definition.string"] },
+    "escape": { "scopes": ["constant.character.escape"] },
+    "number": { "scopes": ["constant.numeric", "constant.language", "constant.other.symbol"] },
+    "parameter": { "scopes": ["variable.parameter"], "fontStyle": "italic" },
+    "property": { "scopes": ["variable.other.property", "variable.other.object.property", "support.variable.property", "variable.other.member", "support.type.property-name"] },
+    "tag": { "scopes": ["entity.name.tag", "meta.tag", "punctuation.definition.tag", "variable.language"] },
+    "punctuation": { "scopes": ["punctuation"] },
+    "invalid": { "scopes": ["invalid"], "fontStyle": "underline" },
+    "markup.heading": { "scopes": ["markup.heading"], "fontStyle": "bold" },
+    "markup.bold": { "scopes": ["markup.bold"], "fontStyle": "bold" },
+    "markup.italic": { "scopes": ["markup.italic"], "fontStyle": "italic" },
+    "markup.raw": { "scopes": ["markup.inline.raw", "markup.fenced_code"] },
+    "markup.list": { "scopes": ["markup.list"] },
+    "markup.link": { "scopes": ["markup.underline.link", "string.other.link", "constant.other.reference.link"] },
+    "markup.quote": { "scopes": ["markup.quote"], "fontStyle": "italic" },
+    "markup.inserted": { "scopes": ["markup.inserted"] },
+    "markup.deleted": { "scopes": ["markup.deleted"] },
+    "markup.changed": { "scopes": ["markup.changed"] },
+    "css.class-selector": { "scopes": ["entity.other.attribute-name.class.css", "entity.other.attribute-name.id.css"] },
+    "css.property-value": { "scopes": ["support.constant.property-value"] }
+  }
+}
