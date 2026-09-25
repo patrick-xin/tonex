@@ -276,10 +276,10 @@ const StackedToast = ({
                               variant: 'ghost',
                             }),
                             'absolute top-1 right-1 size-6',
-                            toastType === 'error' && 'hover:bg-red-500/20!',
-                            toastType === 'success' && 'hover:bg-green-500/20!',
-                            toastType === 'warning' && 'hover:bg-yellow-500/20!',
-                            toastType === 'info' && 'hover:bg-blue-500/20!',
+                            toastType === 'error' && 'hover:bg-error-container/20!',
+                            toastType === 'success' && 'hover:bg-tnx-success/20!',
+                            toastType === 'warning' && 'hover:bg-tnx-warning/20!',
+                            toastType === 'info' && 'hover:bg-tnx-info/20!',
                           )}
                         >
                           <X className="size-4" />

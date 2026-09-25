@@ -41,7 +41,7 @@ export function SiteFooter() {
           <SiteLogo className="size-6 sm:size-10" />
           <div className="flex flex-col gap-10 sm:flex-row sm:justify-between md:justify-end md:gap-16">
             <nav aria-label="Site">
-              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant">
                 {SITE_CONFIG.brand}
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
@@ -54,7 +54,7 @@ export function SiteFooter() {
               </ul>
             </nav>
             <nav aria-label="Site">
-              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant/70">
+              <div className="mb-3 text-sm font-medium uppercase tracking-wider text-on-surface-variant">
                 Resources
               </div>
               <ul className="flex flex-wrap sm:flex-col gap-x-6 gap-y-3">
